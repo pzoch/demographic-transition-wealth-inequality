@@ -30,15 +30,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
     real(dp), dimension(-bigJ:bigT), intent(out) :: V_20_years_old
     real(dp), dimension(bigj, bigT), intent(out) :: c_j, l_j
-    
-    ! partial equilibrum stohastic vs deterministic model 
-    ! this is probably not needed for anything
-    !real(dp), dimension(bigj) ::  u_init_old_higher_lambda, u_init_old_const_lambda
-    !real(dp), dimension(bigT) ::  u_higher_lambda, u_const_lambda, x_c_higher_lambda, c_higher_lambda_tot, disc_higher_lambda
-    !real(dp), dimension(bigj, bigT) :: u_j_higher_lambda, mult_partial, x_j_higher_lambda, x_c_j_higher_lambda, sum_eq_higher_lambda
-    !real(dp) ::  LS_higher_lambda, S_C_higher_lambda, unif_higher_lambda 
-    !real(dp), dimension(bigJ, bigT) :: c_j_higher_lambda, l_j_higher_lambda, sv_j_higher_lambda, sv_pom_j_higher_lambda
-    
+
     
     real(dp), dimension(bigJ, bigT) :: b1_j, b2_j, pillarI_j, pillarII_j, pillarI_old_j, pillarII_old_j, contributionI_j, contributionII_j
     real(dp),	dimension(bigJ,-bigJ:bigT)	:: life_exp ! -bigJ:bigT is needed for implicit tax when we want to perwfome DC- DC with changing mortality
@@ -58,18 +50,18 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
         do i = 1,bigT,1
-		    omega(:,i)  = omega_ss
-            pi(:,i)     = pi_ss_old
-            pi_weight(:,i)     = pi_weight_ss_old
-            Nn_(:,i)    = N_ss_old
-            gam_t(i)    = gam_ss_old
-            jbar_t(i)   = jbar_ss_old
-            tL(i)       = tauL_ss_old
-            lambda_t(i) = lambda_ss_old
-            tK(i)       = tauK_ss_old
-            alpha       = alpha_ss_old
-            debt_constr_t(i) = debt_constr_ss_old
-            g_share(i)      = g_share_ss
+		    omega(:,i)          = omega_ss
+            pi(:,i)             = pi_ss_old
+            pi_weight(:,i)      = pi_weight_ss_old
+            Nn_(:,i)            = N_ss_old
+            gam_t(i)            = gam_ss_old
+            jbar_t(i)           = jbar_ss_old
+            tL(i)               = tauL_ss_old
+            lambda_t(i)         = lambda_ss_old
+            tK(i)               = tauK_ss_old
+            alpha               = alpha_ss_old
+            debt_constr_t(i)    = debt_constr_ss_old
+            g_share(i)          = g_share_ss
 	    enddo
         gam_cum(1) = gam_t(1)
         do i=2,bigT,1

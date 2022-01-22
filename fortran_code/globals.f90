@@ -24,6 +24,8 @@ IMPLICIT NONE
     
     character(128) :: cwd, cwd_r, cwd_w
     
+    
+    integer :: switch_load_experiment_details               ! 0 - do not load details of experiment (set it manually), 1 - load a file "experiment_details.txt" that sets all switches
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
     
     integer :: switch_run_1, switch_run_2, switch_run_t     ! 0 = don't run the first/second steady state/transition path; 1 = run the first/second steady state/transition path

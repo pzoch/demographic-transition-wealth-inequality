@@ -20,7 +20,7 @@ call chdir(cwd_r)
     
     
 ! switches related to income processes
-
+    switch_load_experiment_details = 1 
     switch_sigma2_epsilon_t    =  0        ! transition path;  0 = sigma2_epsilon is constant; 1 = sigma2_epsilon is cohort specific; 2 = sigma2_epsilon is time specific
     switch_initial_dispersion   = 0        ! 0 = everybody is born the same; 1 = initial productivity is drawn from some distribution
   
@@ -48,427 +48,80 @@ call chdir(cwd_r)
        switch_persistent_delta  = 0
        switch_epsilon_corr      = 1
        switch_change_gy         = 1
+     
        
-    select case (experiment_no)  
-    case(0)
-        experiment = 'all_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-    case(1)
-        experiment = 'dem_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0    
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
+     if (switch_load_experiment_details == 1) then
+     OPEN (unit=3, FILE = "experiment_details.txt")
+     
+        ! first some details of experiment     
+        read(3,*) experiment
+        read(3,*) switch_mortality             
+        read(3,*) switch_unstable_dem_ss       
+        read(3,*) switch_go_to_lower_gamma   
+        read(3,*) switch_change_tauL
+        read(3,*) switch_change_lambda            
+        read(3,*) switch_change_tauK           
+        read(3,*) switch_steady_demo   
+        read(3,*) switch_change_sl        
+        read(3,*) switch_change_debt      
+        read(3,*) switch_residual_t 
+        read(3,*) switch_residual_1 
+        
+        
+        ! second, some debug switches/options
+        read(3,*) switch_labor_choice
+        read(3,*) switch_cohort_ps             
+        read(3,*) switch_see_ret       
+        read(3,*) switch_g_const   
+        read(3,*) switch_fix_labor
+        read(3,*) switch_tauK_gross            
+        read(3,*) switch_unequal_bequest           
+        read(3,*) switch_reduce_pension   
+        read(3,*) switch_increase_ret_age        
+        read(3,*) switch_persistent_delta      
+        read(3,*) switch_epsilon_corr    
+        read(3,*) switch_change_gy             
+        read(3,*) switch_return_risk    
+        read(3,*) switch_income_risk    
+        read(3,*) switch_discount_risk             
+        read(3,*) switch_return_risk
+        
+        read(3,*) switch_starting_year
+        read(3,*) switch_ss_write
+        read(3,*) switch_run_1
+        read(3,*) switch_run_2
+        read(3,*) switch_run_t
+        read(3,*) switch_param_1
+        read(3,*) switch_param_2
 
-    case(2)
-        experiment = 'txL_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1       
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-
-     case(3)
-        experiment = 'tfp_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0 
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-
-     case(4)  ! this one has subjective mortality
-         
-        experiment = 'lon_'
-        switch_mortality         = 5      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-
-      case(5) ! this works fine
-        experiment = 'pop_'
-        switch_mortality         = 5      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0  
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-
-       case(6)
-        experiment = 'txK_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0   
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-
-       case(7)
-        experiment = 'shk_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0   
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-
-      case(-1)
-        experiment = 'non_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = -1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0 
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-
-       case(-2)
-        experiment = 'ndm_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = -1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1 
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(-3)
-        experiment = 'dbg_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(-4)
-        experiment = 'bqD_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_unequal_bequest   = 1 
-        case(-5)
-        experiment = 'bqA_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1    
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_unequal_bequest   = 0 
-
-        case(-6)
-        experiment = 'ziF_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0    
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-        switch_unequal_bequest   = 1 
-        switch_labor_choice      = 0 
-        switch_fix_labor         = 0.33
-
-        case(-7)
-        experiment = 'bqF_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 0         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0    
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-        switch_unequal_bequest   = 0 
-        switch_labor_choice      = 0 
-        switch_fix_labor         = 0.33
-     case(10)
-        experiment = 'and_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(11)
-        experiment = 'nnd_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0      
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 0
-        switch_change_sl         = 1
-        case(12)
-        experiment = 'nxx_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 0      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-        case(13)
-        experiment = 'nox_'
-        switch_mortality         = 6      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(14)
-        experiment = 'nlg_'
-        switch_mortality         = 5      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(15)
-        experiment = 'nld_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = -1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        case(16)
-        experiment = 'nbr_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-        case(17)
-        experiment = 'nin_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 0
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-        case(18)
-        experiment = 'nde_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 0
-        switch_return_risk       = 1
-        case(19)
-        experiment = 'nra_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 0
-       case(20)
-        experiment = 'not_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 0
-        switch_discount_risk     = 0
-        switch_return_risk       = 0
-        case(21)
-        experiment = 'de1_'
-        switch_mortality         = 5      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-        case(22)
-        experiment = 'de2_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-                case(23)
-        experiment = 'de3_'
-        switch_mortality         = 6      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-                        case(24)
-        experiment = 'de4_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 0
-        switch_change_lambda     = 0      
-        switch_change_tauK       = 0
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-                                case(25)
-        experiment = 'de5_'
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 0
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
-                                        case(26)
-        experiment = 'de6_'
-        switch_mortality         = 7      
-        switch_unstable_dem_ss   = -1         
-        switch_go_to_lower_gamma = 1         
-        switch_change_tauL       = 1
-        switch_change_lambda     = 1      
-        switch_change_tauK       = 1
-        switch_steady_demo       = 1
-        switch_sigma2_epsilon_t  = 1
-        switch_change_debt       = 1
-        switch_change_sl         = 1
-        switch_income_risk       = 1
-        switch_discount_risk     = 1
-        switch_return_risk       = 1
+        
+        
+    CLOSE(3) 
+    
+     else ! loads some preset experiments based on expriment_no
+      select case (experiment_no)  
+            case(0)
+            experiment = 'all_'
+            switch_mortality         = 1      
+            switch_unstable_dem_ss   = 1        
+            switch_go_to_lower_gamma = 1         
+            switch_change_tauL       = 1
+            switch_change_lambda     = 1      
+            switch_change_tauK       = 1
+            switch_steady_demo       = 1
+            switch_sigma2_epsilon_t  = 1
+            switch_change_debt       = 1
+            switch_change_sl         = 1
+            switch_income_risk       = 1
+            switch_discount_risk     = 1
+            switch_return_risk       = 1
       end select
+         
+         
+     endif
+     
+     
+   
     
  ! switches related to transition experiments 
     

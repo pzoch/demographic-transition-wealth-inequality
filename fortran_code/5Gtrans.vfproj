@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" OptimizeReferences="optReferences" EnableCOMDATFolding="optFolding"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<Filter Name="numeric">
+		<File RelativePath=".\AR_discrete.f90"/>
+		<File RelativePath=".\assertions.f90"/>
+		<File RelativePath=".\clock.f90"/>
+		<File RelativePath=".\errwarn.f90"/>
+		<File RelativePath=".\gaussian_int.f90"/>
+		<File RelativePath=".\geompack3.f90"/>
+		<File RelativePath=".\linint.f90"/>
+		<File RelativePath=".\matrixtools.f90"/>
+		<File RelativePath=".\minimization.f90"/>
+		<File RelativePath=".\normalProb.f90"/>
+		<File RelativePath=".\polynomial.f90"/>
+		<File RelativePath=".\rootfinding.f90"/>
+		<File RelativePath=".\simplex.f90"/>
+		<File RelativePath=".\splines.f90"/></Filter>
+		<Filter Name="OLG">
+		<Filter Name="closures">
+		<File RelativePath=".\closure_ss.f90"/>
+		<File RelativePath=".\closures.f90"/></Filter>
+		<Filter Name="consumers_problem">
+		<File RelativePath=".\denominator_ss.f90"/>
+		<File RelativePath=".\denominator_trans.f90"/>
+		<File RelativePath=".\lti_ss.f90"/>
+		<File RelativePath=".\lti_trans.f90"/>
+		<File RelativePath=".\pfi.f90"/>
+		<File RelativePath=".\pfi_agregation.f90"/>
+		<File RelativePath=".\pfi_distribution.f90"/>
+		<File RelativePath=".\pfi_household_problem.f90"/>
+		<File RelativePath=".\pfi_print.f90"/></Filter>
+		<Filter Name="globals_and_params">
+		<File RelativePath=".\data.f90"/>
+		<File RelativePath=".\globals.f90"/>
+		<File RelativePath=".\Initial_values_DB.f90"/>
+		<File RelativePath=".\parameters_CD.f90"/>
+		<File RelativePath=".\set_globals.f90"/>
+		<File RelativePath=".\shocks_parameters.f90"/></Filter>
+		<Filter Name="implicit_tax_and_bequest">
+		<File RelativePath=".\bequest.f90"/>
+		<File RelativePath=".\implicit_tax_ss.f90"/>
+		<File RelativePath=".\implicit_tax_trans.f90"/></Filter>
+		<Filter Name="pension_system">
+		<File RelativePath=".\pension_system.f90"/>
+		<File RelativePath=".\pension_system_ss.f90"/></Filter>
+		<Filter Name="print">
+		<File RelativePath=".\Print_DB.f90"/>
+		<File RelativePath=".\print_iter.f90"/>
+		<File RelativePath=".\Print_steady_DB.f90"/></Filter>
+		<File RelativePath=".\main.f90"/>
+		<File RelativePath=".\main_base_transition.f90"/>
+		<File RelativePath=".\steady_wzrost.f90"/>
+		<File RelativePath=".\transition.f90"/>
+		<File RelativePath=".\transition_iterations.f90"/></Filter></Filter></Files>
+	<Globals/></VisualStudioProject>
