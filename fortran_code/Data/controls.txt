@@ -1,0 +1,25 @@
+//
+0 // switch_trans /1 - run transition path / 2 run only two steady states (SS) 
+1 // print_style_ss /1 - calibration print , 2 - normal (old) print
+1 // constant_alphas_switch /1 - alphas on path are constant, 0 - alphas are read from file in data/vector_input folder
+1 // CE_reallocation_cost_switch/ 1 - CE_min_diff (near zero for 1yo, super high for others) and constant across cohort and time, same as SS , 2 - CE_min_diff constant in time but variable in cohort (also varies in SS) ,read from file, 3 - CE_min_diff variable in time and cohort (TODO)
+1 // is_free_flow
+1 // is_mortality /0 - no mortality, 1 - mortality
+1 // is_productivity_shock /0 - all people have the same productivity,1 - different human productivity
+1 // is_bequest_equal /1 - bequest equal within sectors (for specific age cohort) / 0 - bequest different for different sectors
+1 // is_pension /1- pension are calculated /0 - pensions are zero 
+1 // switch_update_bequest / 1- bequest is updated using update_bequest / 0 - bequest not updated
+3 // switch_reall / 1 - wages determine reallocation, 2 - value functions, 3 - consumption equivalents
+3 // switch_reall_trans / same as above but on path
+1 // same_reallocation / 1 - use same criterion for reallocation on path and ss (wage, V or CE) / 0 - use different cryteria 
+0 // switch_monot_share / 1-enable / 0-disable one directional flow of people in reallocation
+1 // guess_path_from_first_ss / 1- guess the path values using first SS outcomes /0- use second SS outcomes
+0 // guess_n_from_1ss / 1- guess the path N shares from 1 ss /0 - guess from second SS
+1 // overwrite_1yo / 1 - overwrite 1 cohort's N shares in a few last periods with values from second SS / 0- disable
+0 // closure_switch pick closure [not working yet]
+2 // pc_change_start_trans / start and end period for changing linearly pcBarServ_trans on path
+50 // pc_change_end_trans /start and end period for changing linearly pcBarServ_trans on path
+0 // (debugging switches) exit_early_ss / 1 - exit after "exit_at_ss" iterations, usefull when printing
+5 // (debugging switches) exit_at_ss / number of iteations at after which we want to exit
+0 // (debugging switches, path) exit_early_trans  / 1 - exit after "exit_at_trans" iterations, usefull when printing
+9 // (debugging switches, path) exit_at_trans  / number of iteations at after which we want to exit
