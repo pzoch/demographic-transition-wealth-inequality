@@ -9,12 +9,14 @@ real*8 :: av, wage, wage_non_tax, foc(3), optimal_choice(2)
 real*8 :: dist, c_help, l_help
 
 
+
+
 do ia = 0, n_a, 1 
     do i_aime=0, n_aime,1
         do ip=1, n_sp, 1
             do ir =1, n_sr,1
                 do id = 1, n_sd,1
-                    c_ss(bigj, ia, i_aime, ip, ir, id) = max(((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(bigJ) + bequest_ss_j_vfi(bigJ)- upsilon_ss_vf)/tc_ss_vfi, 1d-10)
+                    c_ss(bigj, ia, i_aime, ip, ir, id) = max(((1d0+(1d0-tk_ss)*n_sr_value_ret(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(bigJ) + bequest_ss_j_vfi(bigJ)- upsilon_ss_vf)/tc_ss_vfi, 1d-10)
                     l_ss(bigj, ia, i_aime, ip, ir, id) = 0d0
                     lab_income_ss(bigj, ia, i_aime, ip, ir, id) =0d0
                     lab_income_pretax_ss(bigj, ia, i_aime, ip, ir, id) =0d0
@@ -38,18 +40,18 @@ do ia=0, n_a, 1
                         do id_d= 1, n_sd, 1
                             do ip_p = 1, n_sp,1
                                 if(theta == 1_dp)then
-                                    EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)    
+                                    EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value_ret(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)/c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)    
                                 else
-                                    EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)**(phi -theta*phi -1)
+                                    EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value_ret(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)*c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)**(phi -theta*phi -1)
                                 endif 
-                                EV_ss(bigj, ia, i_aime, ip, ir, id)  = EV_ss(bigj, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*V_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)
+                                EV_ss(bigj, ia, i_aime, ip, ir, id)  = EV_ss(bigj, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)*V_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)
                             enddo
                         enddo
                     enddo
                     if(theta == 1)then
-                        RHS_ss(bigj, ia, i_aime, ip, ir, id) = 1d0/((delta+n_sd_value(id))*pi_ss_vfi_cond(bigJ)*EV_prim)
+                        RHS_ss(bigj, ia, i_aime, ip, ir, id) = 1d0/((delta+n_sd_value_ret(id))*pi_ss_vfi_cond(bigJ)*EV_prim)
                     else
-                        RHS_ss(bigj, ia, i_aime, ip, ir, id) = (delta+n_sd_value(id))*pi_ss_vfi_cond(bigJ)*EV_prim
+                        RHS_ss(bigj, ia, i_aime, ip, ir, id) = (delta+n_sd_value_ret(id))*pi_ss_vfi_cond(bigJ)*EV_prim
                         EV_ss(bigj, ia, i_aime, ip, ir, id)  = ((1d0-theta)*EV_ss(bigj, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta)) 
                     endif
                     
@@ -65,7 +67,7 @@ do j = bigJ-1, 1, -1
             if(i < jbar_ss_vf)then
                 poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ((1 - tL_ss)*(w_pom_ss_vfi(i)*omega_ss(j)*n_sp_value(1))**(1-lambda) + omega_ss(j)*n_sp_value(1)*w_pom_ss_implicit_vfi(i) + bequest_ss_j_vfi(i) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j) 
             else
-                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + (aime_replacement_rate(n_aime)*b_ss_j_vfi(i)             + bequest_ss_j_vfi(i) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j)              
+                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + (aime_replacement_rate(n_aime)*b_ss_j_vfi(i)             + bequest_ss_j_vfi(i) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value_ret(1)+r_ss_vfi)/gam_ss_vfi)**(i-j)              
             endif         
         enddo   
     do ia=0, n_a, 1
@@ -81,15 +83,18 @@ do j = bigJ-1, 1, -1
                                 lab_income_ss(j, ia, i_aime, ip, ir, id) =lab_income
                                 lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j) +  omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
                                 lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) =lab_income_pretax
+                                sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
+                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)- bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
                             else
                                 l_ss(j,ia, i_aime, ip, ir, id) = 0d0
                                 lab_income = 0d0
                                 lab_income_ss(j, ia, i_aime, ip, ir, id) = lab_income
                                 lab_income_pretax = 0d0
                                 lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax
+                                sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
+                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)- bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value_ret(ir)+r_ss_vfi)/gam_ss_vfi)
                             endif
-                            sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
-                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)- bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
+                          
                         else 
                             if(j>=jbar_ss_vf) then ! retired thus labor choice is trivial 
                                     l_ss(j, ia, i_aime, ip, ir, id) = 0d0
@@ -102,6 +107,9 @@ do j = bigJ-1, 1, -1
                                     else
                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id)**(1d0/(phi -theta*phi -1)),1d-15)
                                     endif
+                                    sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
+                                                                  - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
+                                                                  - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value_ret(ir)+r_ss_vfi)/gam_ss_vfi )  
                             else
                                     wage            = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)
                                     wage_non_tax    = omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)    
@@ -126,12 +134,12 @@ do j = bigJ-1, 1, -1
                                     lab_income_ss(j, ia, i_aime, ip, ir, id) = lab_income
                                     lab_income_pretax = wage*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                                     lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax
-                                    
+                                    sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
+                                                                  - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
+                                                                  - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )          
                                     
                             endif   
-                            sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
-                                                                  - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
-                                                                  - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )                
+                                 
                         endif
                     enddo
                 enddo
@@ -213,25 +221,47 @@ do j = bigJ-1, 1, -1
                                                 +(1d0-dist)*l_ss(j, ia, iaimer, ip_p, ir_r, id_d)
                                                 
                                         if(theta == 1_dp)then
+                                        if(j>=jbar_ss_vf) then    
+                                            
+                                            EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value_ret(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)*1/c_help
+                                        else
                                             EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*1/c_help
+
+                                            endif
                                         else
                                             if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
                                             else
-                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
+                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value_ret(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)&
                                                           *c_help**(phi -theta*phi -1)
                                             endif
-                                        endif                                  
+                                        endif       
+                                        
+                                        if(j>=jbar_ss_vf) then 
+                                        EV_ss(j, ia, i_aime, ip, ir, id)  = EV_ss(j, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)&
+                                                                           *V_ss(j, ia, i_aime, ip_p, ir_r, id_d)
+                                        else
                                         EV_ss(j, ia, i_aime, ip, ir, id)  = EV_ss(j, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                            *V_ss(j, ia, i_aime, ip_p, ir_r, id_d)
+                                        endif
+                                        
                                     enddo
                                 enddo
                             enddo
                         if(theta==1_dp)then
-                            RHS_ss(j, ia, i_aime, ip, ir, id)=1d0/((delta+n_sd_value(id)) *pi_ss_vfi_cond(j)*EV_prim)  
+                            if(j>=jbar_ss_vf) then 
+                                RHS_ss(j, ia, i_aime, ip, ir, id)=1d0/((delta+n_sd_value_ret(id)) *pi_ss_vfi_cond(j)*EV_prim)  
+                            else
+                                RHS_ss(j, ia, i_aime, ip, ir, id)=1d0/((delta+n_sd_value(id)) *pi_ss_vfi_cond(j)*EV_prim)   
+                            endif
                         else
-                            RHS_ss(j, ia, i_aime, ip, ir, id)= (delta+n_sd_value(id)) *pi_ss_vfi_cond(j)*EV_prim
+                            if(j>=jbar_ss_vf) then 
+                                RHS_ss(j, ia, i_aime, ip, ir, id)= (delta+n_sd_value_ret(id)) *pi_ss_vfi_cond(j)*EV_prim
+                            else
+                                RHS_ss(j, ia, i_aime, ip, ir, id)= (delta+n_sd_value(id)) *pi_ss_vfi_cond(j)*EV_prim
+                            endif
+                            
                         endif 
                     
                         if (theta == 1) then 

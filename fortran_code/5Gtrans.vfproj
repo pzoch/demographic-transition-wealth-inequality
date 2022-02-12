@@ -96,7 +96,7 @@
 		<File RelativePath=".\print_iter.f90"/>
 		<File RelativePath=".\Print_steady_DB.f90"/></Filter>
 		<File RelativePath=".\main.f90"/>
-		<File RelativePath=".\main_base_transition.f90"/>
+		<File RelativePath=".\partial_eqm_calc.f90"/>
 		<File RelativePath=".\steady_wzrost.f90"/>
 		<File RelativePath=".\transition.f90"/>
 		<File RelativePath=".\transition_iterations.f90"/></Filter></Filter></Files>

@@ -50,7 +50,7 @@ call chdir(cwd_r)
        switch_change_gy         = 1
      
        
-     if (switch_load_experiment_details == 1) then
+
      OPEN (unit=3, FILE = "experiment_details.txt")
      
         ! first some details of experiment     
@@ -94,31 +94,11 @@ call chdir(cwd_r)
         read(3,*) switch_param_1
         read(3,*) switch_param_2
 
-        
+        read(3,*) switch_partial_eq
         
     CLOSE(3) 
     
-     else ! loads some preset experiments based on expriment_no
-      select case (experiment_no)  
-            case(0)
-            experiment = 'all_'
-            switch_mortality         = 1      
-            switch_unstable_dem_ss   = 1        
-            switch_go_to_lower_gamma = 1         
-            switch_change_tauL       = 1
-            switch_change_lambda     = 1      
-            switch_change_tauK       = 1
-            switch_steady_demo       = 1
-            switch_sigma2_epsilon_t  = 1
-            switch_change_debt       = 1
-            switch_change_sl         = 1
-            switch_income_risk       = 1
-            switch_discount_risk     = 1
-            switch_return_risk       = 1
-      end select
-         
-         
-     endif
+    
      
      
    
@@ -126,49 +106,8 @@ call chdir(cwd_r)
  ! switches related to transition experiments 
     
 
-
-    
-    switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960
-    switch_reform = 0           ! 0 = base transition, 1 = main LSRA (baseline + reform + welfare change)
-    
-    
-    
-    switch_partial_eq_cal = 0   ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
-    switch_elas = 0 !0 - non elasticity calculation, 1 - elasticity using OPD, 2 - semileasticity using OPD 
-
-    switch_ss_write = 1        ! 0 - do not save big csv files with steady state, 1 save
-
-    switch_run_1 = 1            ! 0 = don't run old steady state; 1 = run old steady state
-    switch_run_2 = 0            ! 0 = don't run new steady state; 1 = run new steady state
-    switch_run_t = 0            ! 0 = don't run transition; 1 = run transition
-    
-    switch_type_1 = 0           ! initial ss: 0 = DB; 1 = DC 
-    switch_type_2 = 0           ! final   ss: 0 = DB; 1 = DC
-    switch_pension = abs(switch_type_1 - switch_type_2)         ! 0 = all are in new pension scheme in transitionFF; 1 = old cohorts remain in the old system in transitionFF
-
-! note: transition path is run only if the second steady state is run
-    switch_param_1 = 0          ! 0 = with old parameters; 1 = with new parameters  
-    switch_param_2 = 1          ! 0 = with old parameters; 1 = with new parameters  
-
-! note: parameters on the transition path are determined by the parameters on the second steady state     
-    switch_vf      = 1         ! 0 = analitical solution, 1 endogenous grid
-
-
-    !
-   if (bigJ == 4) then ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age. ex switch  = 45 means jbar = 45 
-        switch_fix_retirement_age = 3 
-    elseif (bigJ == 16) then
         switch_fix_retirement_age = 10         
-    elseif (bigJ == 20) then
-        switch_fix_retirement_age = 11 
-    elseif  (bigJ == 80)  then
-        switch_fix_retirement_age = 0 ! thus we are going to use data projection 
-    elseif  (bigJ == 2)  then
-        switch_fix_retirement_age = 2 
-     endif
-if (switch_increase_ret_age == 1 ) then 
-    switch_fix_retirement_age = 0
-endif
+        switch_vf                 = 1
   
 !!!!!!!!!!!!!!!!!!!
     err_tol = 1e-7 !! 0.05_dp !! 

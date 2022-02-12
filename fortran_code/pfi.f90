@@ -482,7 +482,7 @@ implicit none
       l0  = l_guess
       del = 1d-8
 
-      if ((switch_partial_eq == 0) .and.  (switch_fix_labor == 0d0) ) then 
+      if  (switch_fix_labor == 0d0) then 
           do i= 1, maxit
             taxinc = w_tax*l0
             nontaxinc = w_non_tax*l0

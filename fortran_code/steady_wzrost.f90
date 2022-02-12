@@ -14,7 +14,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss,  w_bar_ss, l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss,  w_bar_ss, l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j,bequest_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
@@ -35,7 +35,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
                 nom1, denom1, nom2, denom2
      real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, b_pom_ss_j, w_pom_ss_j, s_pom_ss_j
-     real(dp) :: avg_wl, mult_ss
+     real(dp) :: avg_wl, mult_ss, displs
 
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
@@ -78,12 +78,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         pi_ip_init = pi_ip_init_ss_new
         g_share_ss = g_share_ss_2
     endif
-!OPEN (unit=121, FILE = version//experiment//closure//"test_k_NEW.txt")
- 
-! force it to treat it as a 2nd steady state - for test purposes    
-!switch_run_1 = 0
+
     
-!normalized structure of population such as N_ss_j(1) = 1 (number of 20 years old)  --- MAYBE THIS IS THE KEY???
+!normalized structure of population such as N_ss_j(1) = 1 (number of 20 years old) 
 if (switch_run_1 == 0) then 
     n_ss_j(1) = 1.0_dp 
     do j = 2, bigj
@@ -186,8 +183,7 @@ do iter = 1,n_iter_ss,1
 
 
 ! no interest is added when switch_unequal_bequest == 1
-if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also weird! need to check!!!! 
-
+if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  
         if (switch_unequal_bequest==0) then
             do j = 2,bigJ,1
                 bequest_left_ss_j(j-1) = (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1))/gam_ss
@@ -401,6 +397,7 @@ endif
                 enddo
             enddo 
 
+   displs = c_ss(1, 1, 1, 1, 1, 3)
     
 end subroutine steady
 
