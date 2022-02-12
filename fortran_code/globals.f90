@@ -135,7 +135,7 @@ IMPLICIT NONE
     real*8 :: zeta_p, a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ),  sigma_nu_p, n_sp_initial, sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, &
                pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp), &
-                pi_id_ret(n_sd,n_sd), n_sd_value_red(n_sd), pi_ir_ret(n_sr,n_sr), n_sr_value_ret(n_sr)
+                pi_id_ret(n_sd,n_sd), n_sd_value_ret(n_sd), pi_ir_ret(n_sr,n_sr), n_sr_value_ret(n_sr), pi_id_hold(n_sd,n_sd), n_sd_value_hold(n_sd), pi_ir_hold(n_sr,n_sr), n_sr_value_hold(n_sr)
     real*8 :: aime_cap, aime_cap_ge
     
  ! cohort/time specific shock grids

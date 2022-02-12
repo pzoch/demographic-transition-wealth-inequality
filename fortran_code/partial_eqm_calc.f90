@@ -75,6 +75,16 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     
     
     !  here we rebuild shock grids 
+
+        pi_id = pi_id_hold
+        n_sd_value = n_sd_value_hold
+        pi_ir = pi_ir_hold
+        n_sr_value = n_sr_value_hold
+        pi_id_ret = pi_id_hold
+        n_sd_value_ret = n_sd_value_hold
+        pi_ir_ret = pi_ir_hold
+        n_sr_value_ret = n_sr_value_hold
+    
     
     if (switch_discount_risk==0) then
     n_sd_value(:) = 0.0d0
@@ -83,6 +93,21 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     if (switch_return_risk==0) then
     n_sr_value(:) = 0.0d0
     endif
+    
+    if (switch_no_ret_delta_risk==1) then
+    n_sd_value_ret(:) = 0.0d0
+    elseif (switch_no_ret_delta_risk==2) then
+        pi_id_ret(:,:) = 0.0d0
+        do  s = 1, n_sd, 1
+            pi_id_ret(s,s) = 1.0d0     
+        enddo
+    endif
+    
+    
+    if (switch_no_ret_return_risk==1) then
+    n_sr_value_ret(:) = 0.0d0
+    endif
+        
 
 
 life_exp = 0

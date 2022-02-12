@@ -79,6 +79,20 @@ allocate(l_trans, labor_tax_trans, c_trans, RHS_trans, prob_trans, lab_income_tr
         endif ! run_1
         write(*,*) V_ss_j_vfi(1)
         
+        
+        pi_id_hold = pi_id
+        n_sd_value_hold = n_sd_value
+        pi_ir_hold = pi_ir
+        n_sr_value_hold = n_sr_value
+        
+        pi_id = pi_id_hold
+        n_sd_value = n_sd_value_hold
+        pi_ir = pi_ir_hold
+        n_sr_value = n_sr_value_hold
+        pi_id_ret = pi_id_hold
+        n_sd_value_ret = n_sd_value_hold
+        pi_ir_ret = pi_ir_hold
+        n_sr_value_ret = n_sr_value_hold
         ! PE exercise number 1
         ! set discount risk to 0 in all periods
             switch_discount_risk        = 0
@@ -96,14 +110,21 @@ allocate(l_trans, labor_tax_trans, c_trans, RHS_trans, prob_trans, lab_income_tr
             call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_2, w_ss_j_1, s_pe_j_2, c_pe_j_2,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
         
         ! PE exercise number 3
-        ! ni discount risk after retirement (everyone has 0 shock)
+        ! no discount risk after retirement (everyone has 0 shock)
             switch_discount_risk        = 1
             switch_return_risk          = 1
             switch_no_ret_delta_risk    = 1
             switch_no_ret_return_risk   = 0
-            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_2, w_ss_j_1, s_pe_j_2, c_pe_j_2,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_3, w_ss_j_1, s_pe_j_3, c_pe_j_3,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
             
-            
+        ! PE exercise number 4
+        ! no discount risk after retirement (everyone has jbar shock)
+            switch_discount_risk        = 1
+            switch_return_risk          = 1
+            switch_no_ret_delta_risk    = 2
+            switch_no_ret_return_risk   = 0
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_4, w_ss_j_1, s_pe_j_4, c_pe_j_4,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
+                        
     endif
       
         
