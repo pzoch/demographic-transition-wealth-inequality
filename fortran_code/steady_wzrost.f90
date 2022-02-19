@@ -20,8 +20,8 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
-    real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
-	real(dp), dimension(bigj) :: denominator_j, subsidy_ss_j, N_ss_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old
+    real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j, lab_income_ss_j, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_ss_j_var, lab_income_ss_j_var   
+	real(dp), dimension(bigj) :: denominator_j, subsidy_ss_j, N_ss_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old 
     real*8, dimension(0:n_a) :: prob_ss_marg
     real(dp), intent(in)  :: rho	
     integer, intent(in)   :: param_ss

@@ -99,6 +99,9 @@
                                     do ip_p = 1, n_sp,1
                                         do ir_r=1, n_sr, 1
                                             do id_d =1, n_sd, 1
+                                                
+                                                if (j <jbar_ss_vf-1) then
+                                                
                                                 prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) &
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*dist       *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id)
                                                 prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) &
@@ -107,7 +110,18 @@
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*dist       *(1d0-dist_aime) *prob_ss(j-1, ia, i_aime, ip, ir, id)
                                                 prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) &
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*(1d0-dist)  *(1d0-dist_aime)*prob_ss(j-1, ia, i_aime, ip, ir, id) 
-                                            enddo
+                                                else
+                                                prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) &
+                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*dist       *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id)
+                                                prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) &
+                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*(1d0-dist) *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id) 
+                                                prob_ss(j, ial, iaimer, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimer, ip_p, ir_r, id_d) &
+                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*dist       *(1d0-dist_aime) *prob_ss(j-1, ia, i_aime, ip, ir, id)
+                                                prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) &
+                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*(1d0-dist)  *(1d0-dist_aime)*prob_ss(j-1, ia, i_aime, ip, ir, id) 
+     
+                                                endif
+                                                enddo
                                         enddo
                                     enddo
                                 enddo

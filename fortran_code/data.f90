@@ -587,6 +587,10 @@ CLOSE(3)
 CLOSE(4)
 CLOSE(9)
 
+
+
+
+
 open(unit = 1, file= "population.csv")
 
     do i = 1,bigT,1

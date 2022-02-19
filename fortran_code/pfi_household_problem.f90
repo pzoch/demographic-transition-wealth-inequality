@@ -221,15 +221,16 @@ do j = bigJ-1, 1, -1
                                                 +(1d0-dist)*l_ss(j, ia, iaimer, ip_p, ir_r, id_d)
                                                 
                                         if(theta == 1_dp)then
-                                        if(j>=jbar_ss_vf) then    
+                                        if(j>=jbar_ss_vf-1) then    
                                             
                                             EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value_ret(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)*1/c_help
+                                        
                                         else
                                             EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*1/c_help
 
                                             endif
                                         else
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf-1)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
                                             else
@@ -238,7 +239,7 @@ do j = bigJ-1, 1, -1
                                             endif
                                         endif       
                                         
-                                        if(j>=jbar_ss_vf) then 
+                                        if(j>=jbar_ss_vf-1) then 
                                         EV_ss(j, ia, i_aime, ip, ir, id)  = EV_ss(j, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id,id_d)&
                                                                            *V_ss(j, ia, i_aime, ip_p, ir_r, id_d)
                                         else

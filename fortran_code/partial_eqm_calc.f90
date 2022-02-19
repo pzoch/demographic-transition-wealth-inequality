@@ -11,7 +11,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, r_bar_ss,  w_bar_ss, upsilon_ss, b_ss_j, l_ss_j, w_ss_j, s_ss_j, c_ss_j, t1_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, bequest_ss_j)
+subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, r_bar_ss,  w_bar_ss, upsilon_ss, b_ss_j, l_ss_j, w_ss_j, s_ss_j, c_ss_j, asset_ss_j, lab_income_ss_j, t1_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, bequest_ss_j,l_ss_j_var, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_income_ss_j_var, gini_weight_ss )
     real(dp), intent(in) :: r_bar_ss, w_bar_ss, upsilon_ss ! prices
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
@@ -21,7 +21,10 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest			
     real(dp) ::  jbar_ss, gam_ss, N_ss, nu_ss, t1_ss, r_ss
-    real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j
+    real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, asset_ss_j, lab_income_ss_j, l_ss_j_var, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_income_ss_j_var  
+    real(dp), dimension(bigj,n_a), intent(out) :: gini_weight_ss
+    
+
     ! pension system 
      real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j, b_ss_j
@@ -88,10 +91,12 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     
     if (switch_discount_risk==0) then
     n_sd_value(:) = 0.0d0
+    n_sd_value_ret(:) = 0.0d0
     endif
     
     if (switch_return_risk==0) then
     n_sr_value(:) = 0.0d0
+    n_sr_value_ret(:) = 0.0d0
     endif
     
     if (switch_no_ret_delta_risk==1) then
@@ -106,6 +111,22 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     
     if (switch_no_ret_return_risk==1) then
     n_sr_value_ret(:) = 0.0d0
+    endif
+    
+    if (switch_longevity_pe==2) then
+    pi_ss = pi_ss_new
+    endif
+    
+    if (switch_popweight_pe==2) then
+    pi_weight_ss = pi_weight_ss_new
+    endif
+    
+    if (switch_taxes_pe==2) then
+        t1_ss = t1_ss_new
+        t2_ss = t2_ss_new
+        tL_ss   = tauL_ss_new
+        tK_ss   = tauK_ss_new
+        lambda= lambda_ss_new
     endif
         
 
@@ -158,6 +179,12 @@ enddo
         call agent_vf()
         c_ss_j = c_ss_j_vfi
         l_ss_j = l_ss_j_vfi
+        asset_ss_j = asset_pom_ss_j
+        l_ss_j_var = l_ss_j_var_vfi
+        c_ss_j_var = c_ss_j_var_vfi
+        s_pom_ss_j_var = s_pom_ss_j_var_vfi
+        asset_ss_j_var = asset_ss_j_var_vfi
+        lab_income_ss_j_var =lab_income_ss_j_var_vfi
         s_pom_ss_j(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
         if ((switch_type == 1) .and. (switch_see_ret == 1)) then 
             do j = 1,bigj,1  
@@ -172,7 +199,7 @@ enddo
         endif
         avg_ef_l_suply =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-
+        gini_weight_ss  = gini_weight_sv
 
 
 

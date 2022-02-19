@@ -18,7 +18,13 @@
         s_pom_ss_j_vfi(:) = 0d0
         lab_ss_j_vfi(:) = 0d0
         asset_pom_ss_j(:) = 0d0
+        lab_income_ss_j(:) = 0d0
         l_ss_pen_j(:) = 0d0
+        lab_income_ss_j_var_vfi(:) = 0d0
+        c_ss_j_var_vfi(:) = 0d0
+        asset_ss_j_var_vfi(:) = 0d0
+        s_pom_ss_j_var_vfi(:) = 0d0
+        l_ss_j_var_vfi(:) = 0d0
         w_sum(0) = 0d0
         ERHS_ss = 0d0
         top_ten(:) = 0d0 
@@ -113,7 +119,7 @@
                                     endif
                             
                                     c_ss_j_vfi(j) = c_ss_j_vfi(j) + c_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
-                            
+                                
                                     if(ip<6)then
                                         l_ss_pen_j(j) = l_ss_pen_j(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/p_1_5(j)
                                     endif 
@@ -127,6 +133,7 @@
                                     lw_ss_j_vfi(j) = lw_ss_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip, ir, id) 
                                     s_pom_ss_j_vfi(j) = s_pom_ss_j_vfi(j) + svplus_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
                                     asset_pom_ss_j(j) = asset_pom_ss_j(j) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id) 
+                                    lab_income_ss_j(j) = lab_income_ss_j(j) + lab_income_ss(j, ia, i_aime, ip, ir, id)
                                     !if (prob_ss(j, ia, i_aime, ip, ir, id) > 1d-10) then 
                                         V_ss_j_vfi(j)  =  V_ss_j_vfi(j) + V_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
                                    ! endif
@@ -145,6 +152,28 @@
                     ia_last = ia
                 enddo
             enddo
+            
+            
+            ! calculate variances
+            do j = 1, bigJ
+                do ia=0, n_a, 1
+                    do i_aime=0, n_aime,1
+                        do ip=1, n_sp,1
+                            do ir = 1, n_sr,1
+                                do id =1, n_sd,1
+                                
+                                   c_ss_j_var_vfi(j)            =  prob_ss(j, ia, i_aime, ip,ir, id) * (c_ss(j, ia, i_aime, ip, ir, id) - c_ss_j_vfi(j)) ** 2 + c_ss_j_var_vfi(j)  
+                                   asset_ss_j_var_vfi(j)        =  prob_ss(j, ia, i_aime, ip,ir, id) * (sv(ia)  - asset_pom_ss_j(j)) ** 2 + asset_ss_j_var_vfi(j)
+                                   s_pom_ss_j_var_vfi(j)        =  prob_ss(j, ia, i_aime, ip,ir, id) * (svplus_ss(j, ia, i_aime, ip, ir, id)       - s_pom_ss_j_vfi(j)) ** 2 + s_pom_ss_j_var_vfi(j)
+                                   l_ss_j_var_vfi(j)            =  prob_ss(j, ia, i_aime, ip,ir, id) * (l_ss(j, ia, i_aime, ip, ir, id)  -l_ss_j_vfi(j) ) ** 2 +  l_ss_j_var_vfi(j)
+                                   lab_income_ss_j_var_vfi(j)   =  prob_ss(j, ia, i_aime, ip,ir, id) * (lab_income_ss(j, ia, i_aime, ip, ir, id)  -lab_income_ss_j(j) ) ** 2 + lab_income_ss_j_var_vfi(j)
+                                enddo
+                            enddo
+                        enddo
+                    enddo
+                enddo
+            enddo
+            
             
             do i_aime = 0, n_aime   
                 sum_b_weight_ss = sum_b_weight_ss + aime_replacement_rate(i_aime)*sum(prob_ss(jbar_ss_vf, :, i_aime, :, :, :))

@@ -93,38 +93,149 @@ allocate(l_trans, labor_tax_trans, c_trans, RHS_trans, prob_trans, lab_income_tr
         n_sd_value_ret = n_sd_value_hold
         pi_ir_ret = pi_ir_hold
         n_sr_value_ret = n_sr_value_hold
+        
+        
+        allocate(l_pe_j(bigJ, 8))
+        allocate(s_pe_j(bigJ, 8))
+        allocate(c_pe_j(bigJ, 8))
+        allocate(asset_pe_j(bigJ, 8))
+        allocate(lab_income_pe_j(bigJ, 8))
+        allocate(gini_weight_pe(bigJ,n_a, 8))
+        allocate(l_pe_j_var(bigJ, 8))
+        allocate(s_pe_j_var(bigJ, 8))
+        allocate(c_pe_j_var(bigJ, 8))
+        allocate(asset_pe_j_var(bigJ, 8))
+        allocate(lab_income_pe_j_var(bigJ, 8))
+
+        
+        i = 1
+        
+        write (*,*) 'PE exercise number 1'  
+        
         ! PE exercise number 1
         ! set discount risk to 0 in all periods
             switch_discount_risk        = 0
             switch_return_risk          = 1
             switch_no_ret_delta_risk    = 0
             switch_no_ret_return_risk   = 0
-            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_1, w_ss_j_1, s_pe_j_1, c_pe_j_1,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i) )
         
+        write (*,*) 'PE exercise number 2'    
+        i = 2
         ! PE exercise number 2
         ! set return risk to 0 in all periods
             switch_discount_risk        = 1
             switch_return_risk          = 0
             switch_no_ret_delta_risk    = 0
             switch_no_ret_return_risk   = 0
-            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_2, w_ss_j_1, s_pe_j_2, c_pe_j_2,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
-        
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )       
+        write (*,*) 'PE exercise number 3' 
+        i = 3
         ! PE exercise number 3
         ! no discount risk after retirement (everyone has 0 shock)
             switch_discount_risk        = 1
             switch_return_risk          = 1
             switch_no_ret_delta_risk    = 1
             switch_no_ret_return_risk   = 0
-            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_3, w_ss_j_1, s_pe_j_3, c_pe_j_3,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
-            
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1           
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )        
+        write (*,*) 'PE exercise number 4'     
+        i = 4
         ! PE exercise number 4
         ! no discount risk after retirement (everyone has jbar shock)
             switch_discount_risk        = 1
             switch_return_risk          = 1
             switch_no_ret_delta_risk    = 2
             switch_no_ret_return_risk   = 0
-            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j_4, w_ss_j_1, s_pe_j_4, c_pe_j_4,  t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1)
-                        
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )        
+        write (*,*) 'PE exercise number 5'      
+        i = 5
+        ! PE exercise number 5
+        ! no return risk after retirement (everyone has jbar shock)
+            switch_discount_risk        = 1
+            switch_return_risk          = 1
+            switch_no_ret_delta_risk    = 0
+            switch_no_ret_return_risk   = 1
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )        
+        write (*,*) 'PE exercise number 6'       
+        i = 6
+        ! PE exercise number 6
+        ! baseline
+            switch_discount_risk        = 1
+            switch_return_risk          = 1
+            switch_no_ret_delta_risk    = 0
+            switch_no_ret_return_risk   = 0
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )        
+         write (*,*) 'PE exercise number 7' 
+        i = 7
+ 
+        ! PE exercise number 6
+        ! longevity as in the 2nd ss
+            switch_discount_risk        = 1
+            switch_return_risk          = 1
+            switch_no_ret_delta_risk    = 0
+            switch_no_ret_return_risk   = 0
+            switch_longevity_pe         = 2
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 1
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_pe(:,:, i)  )         
+        write (*,*) 'PE exercise number 8'  
+        i = 8
+
+        ! PE exercise number 8
+        ! taxes as in the 2nd ss
+            switch_discount_risk        = 1
+            switch_return_risk          = 1
+            switch_no_ret_delta_risk    = 0
+            switch_no_ret_return_risk   = 0
+            switch_longevity_pe         = 1
+            switch_popweight_pe         = 1
+            switch_taxes_pe             = 2
+            
+            call partial_eqm_solve(switch_residual_1, switch_tauK_gross, switch_unequal_bequest, switch_param_1, switch_type_1, rho_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, b_ss_j_1, l_pe_j(:,i), w_ss_j_1, s_pe_j(:,i), c_pe_j(:,i), asset_pe_j(:,i),  lab_income_pe_j(:,i), t1_ss_1, b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1,bequest_ss_j_1,l_pe_j_var(:,i), s_pe_j_var(:,i), c_pe_j_var(:,i), asset_pe_j_var(:,i), lab_income_pe_j_var(:,i), gini_weight_sv(:,:, i)  )            
+            
+            ! allocate
+     
+      ! save output 
+            open(unit = 108, FILE = version//"partial_eqm_results.csv")
+        write(108, '(A)') "exercise;age;c;l;s;a;labinc;c_var;l_var;s_var;a_var;labinc_var;"
+            do i = 1, 8, 1
+                 do j = 1, bigJ, 1
+                 write(108, '(I5,A,I5,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') &
+                                i, ";", & !exercise number
+                                j , ";",  & !age
+                                c_pe_j(j,i), ";", & !consumption
+                                l_pe_j(j,i), ";", & !hours
+                                s_pe_j(j,i), ";", & !saving
+                                asset_pe_j(j,i), ";", & !assets
+                                lab_income_pe_j(j,i), ";", & !assets
+                                c_pe_j_var(j,i), ";", & !assets
+                                l_pe_j_var(j,i), ";", & !assets
+                                s_pe_j_var(j,i), ";", & !assets
+                                asset_pe_j_var(j,i), ";", & !assets
+                                lab_income_pe_j_var(j,i) !labor income
+            
+                enddo
+            enddo
+            
+            
     endif
       
         

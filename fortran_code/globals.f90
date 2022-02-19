@@ -71,7 +71,11 @@ IMPLICIT NONE
     integer :: switch_return_risk
     integer :: switch_no_ret_delta_risk                    ! 0 = risk as usual,  1 = no risk after retirement (set to unconditional mean), 2 = no risk after retirement (set to the last realization for delta)
     integer :: switch_no_ret_return_risk                   ! 0 = risk as usual, 1 = no risk after retirement (set to unconditional mean)
-    
+    integer :: switch_longevity_pe                        ! 1 = as in the first ss, 2 = as in the second ss
+    integer :: switch_popweight_pe                        ! 1 = as in the first ss, 2 = as in the second ss
+    integer :: switch_taxes_pe                            ! 1 = as in the first ss, 2 = as in the second ss
+
+
     
     
     real*8  :: switch_fix_labor                            ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
@@ -99,12 +103,19 @@ IMPLICIT NONE
     real(dp), dimension(bigJ) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2, bequest_ss_j_2
     
     ! for PE exercises
-    real(dp), dimension(bigJ) :: l_pe_j_1, w_pe_j_1, s_pe_j_1, c_pe_j_1, b_pe_j_1, l_pe_pen_j_1, bequest_pe_j_1
-    real(dp), dimension(bigJ) :: l_pe_j_2, w_pe_j_2, s_pe_j_2, c_pe_j_2, b_pe_j_2, l_pe_pen_j_2, bequest_pe_j_2
-    real(dp), dimension(bigJ) :: l_pe_j_3, w_pe_j_3, s_pe_j_3, c_pe_j_3, b_pe_j_3, l_pe_pen_j_3, bequest_pe_j_3
-    real(dp), dimension(bigJ) :: l_pe_j_4, w_pe_j_4, s_pe_j_4, c_pe_j_4, b_pe_j_4, l_pe_pen_j_4, bequest_pe_j_4
-    real(dp), dimension(bigJ) :: l_pe_j_5, w_pe_j_5, s_pe_j_5, c_pe_j_5, b_pe_j_5, l_pe_pen_j_5, bequest_pe_j_5
-    real(dp), dimension(bigJ) :: l_pe_j_6, w_pe_j_6, s_pe_j_6, c_pe_j_6, b_pe_j_6, l_pe_pen_j_6, bequest_pe_j_6
+    real*8, dimension(:,:), allocatable ::  l_pe_j, w_pe_j, s_pe_j, c_pe_j, b_pe_j, l_pe_pen_j, asset_pe_j, lab_income_pe_j, l_pe_j_var, w_pe_j_var, s_pe_j_var, c_pe_j_var, b_pe_j_var, l_pe_pen_j_var, asset_pe_j_var, lab_income_pe_j_var
+    real*8, dimension(:,:,:), allocatable ::  gini_weight_pe
+    real(dp), dimension(bigJ) :: l_pe_j_1, w_pe_j_1, s_pe_j_1, c_pe_j_1, b_pe_j_1, l_pe_pen_j_1, asset_pe_j_1, bequest_pe_j_1
+    real(dp), dimension(bigJ) :: l_pe_j_2, w_pe_j_2, s_pe_j_2, c_pe_j_2, b_pe_j_2, l_pe_pen_j_2, asset_pe_j_2, bequest_pe_j_2
+    real(dp), dimension(bigJ) :: l_pe_j_3, w_pe_j_3, s_pe_j_3, c_pe_j_3, b_pe_j_3, l_pe_pen_j_3, asset_pe_j_3, bequest_pe_j_3
+    real(dp), dimension(bigJ) :: l_pe_j_4, w_pe_j_4, s_pe_j_4, c_pe_j_4, b_pe_j_4, l_pe_pen_j_4, asset_pe_j_4, bequest_pe_j_4
+    real(dp), dimension(bigJ) :: l_pe_j_5, w_pe_j_5, s_pe_j_5, c_pe_j_5, b_pe_j_5, l_pe_pen_j_5, asset_pe_j_5, bequest_pe_j_5
+    real(dp), dimension(bigJ) :: l_pe_j_6, w_pe_j_6, s_pe_j_6, c_pe_j_6, b_pe_j_6, l_pe_pen_j_6, asset_pe_j_6,  bequest_pe_j_6
+    real(dp), dimension(bigJ) :: l_pe_j_7, w_pe_j_7, s_pe_j_7, c_pe_j_7, b_pe_j_7, l_pe_pen_j_7, asset_pe_j_7,  bequest_pe_j_7
+    real(dp), dimension(bigJ) :: l_pe_j_8, w_pe_j_8, s_pe_j_8, c_pe_j_8, b_pe_j_8, l_pe_pen_j_8, asset_pe_j_8,  bequest_pe_j_8
+    real(dp), dimension(bigJ) :: l_pe_j_9, w_pe_j_9, s_pe_j_9, c_pe_j_9, b_pe_j_9, l_pe_pen_j_9, asset_pe_j_9,  bequest_pe_j_9
+    real(dp), dimension(bigJ) :: l_pe_j_10, w_pe_j_10, s_pe_j_10, c_pe_j_10, b_pe_j_10, l_pe_pen_j_10, asset_pe_j_10,  bequest_pe_j_10
+    
     
     ! parameters
     real(dp) :: alpha, beta, delta, depr, theta, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
