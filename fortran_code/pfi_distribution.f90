@@ -25,25 +25,36 @@
                     p_initial(ind) = 1d0/ind**(zipf)/const !zipf law p.d.f. 
                     ia_initial(ind) = 1d0/(2d0**(n_beq-ind+1))* bequest_ss_vfi/(p_initial(ind)*N_ss_j_vfi(1)) ! 1d0/(2d0**(n_beq-ind+1)) - number of people in one sub-cohort,  bequest_ss_vfi - sum of bequest, 
                     !(p_initial(ind)*edu_rate*N_ss_j_vfi(1)) -  part of bequest which agent from ind- subcohort inherit  
+                    !p_initial(ind) = 0.0d0
+                    !ia_initial(ind) = 0.0d0
                 enddo
                     ia_initial(2) = 1d0/(2d0**(n_beq-2))* bequest_ss_vfi/(p_initial(2)*N_ss_j_vfi(1))
                     ia_initial(1) = 0d0
+                    
+                    const = sum(ia_initial)
+                    const = sum(ia_initial * p_initial)
+                    const = sum(p_initial)
                 do ind=1,n_beq,1
                     call linear_int(ia_initial(ind), ial, iar, dist, sv, n_a, a_grow)
                     ial = min(ial, n_a)
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
 
+                    
                     prob_ss(1, ial, 0, :, :, :)  = prob_ss(1, ial, 0, :, :, :)  + p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
                     prob_ss(1, iar, 0, :,  :, :) = prob_ss(1, iar, 0, :, :, :) +  p_initial(ind)*(1d0 - dist)
+                    
+                    
                 enddo
                   ! need to amend it to get initial dispersion
+                const = 0.0d0
                  do ia = 0, n_a, 1
                     do i_aime = 0, n_aime, 1
                         do ip = 1 , n_sp, 1
                             do ir=1, n_sr, 1
                                 do id=1,n_sd,1 
                                 prob_ss(1, ia, i_aime, ip, ir, id) = prob_ss(1, ia, i_aime, ip, ir, id) * pi_ip_init(ip) * pi_id_init(id) * pi_ir_init(ir)
+                                const = const + prob_ss(1, ia, i_aime, ip, ir, id)
                                 enddo
                             enddo
                         enddo
@@ -64,7 +75,7 @@
             
             prob_ss(1, ial, 0, :, :, :) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
             prob_ss(1, iar, 0, :,  :, :) = 1d0 - dist
-            endif
+            
             
               do ia = 0, n_a, 1
                     do i_aime = 0, n_aime, 1
@@ -80,7 +91,7 @@
 
     
                         
-            
+            endif
             ! successively compute distribution over ages
             do j = 2, bigJ  
             ! iterate over yesterdays gridpoints
@@ -99,9 +110,6 @@
                                     do ip_p = 1, n_sp,1
                                         do ir_r=1, n_sr, 1
                                             do id_d =1, n_sd, 1
-                                                
-                                                if (j <jbar_ss_vf-1) then
-                                                
                                                 prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) &
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*dist       *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id)
                                                 prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) &
@@ -110,18 +118,7 @@
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*dist       *(1d0-dist_aime) *prob_ss(j-1, ia, i_aime, ip, ir, id)
                                                 prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) &
                                                                                             + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id, id_d)*(1d0-dist)  *(1d0-dist_aime)*prob_ss(j-1, ia, i_aime, ip, ir, id) 
-                                                else
-                                                prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimel, ip_p, ir_r, id_d) &
-                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*dist       *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id)
-                                                prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimel, ip_p, ir_r, id_d) &
-                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*(1d0-dist) *dist_aime       *prob_ss(j-1, ia, i_aime, ip, ir, id) 
-                                                prob_ss(j, ial, iaimer, ip_p, ir_r, id_d) = prob_ss(j, ial, iaimer, ip_p, ir_r, id_d) &
-                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*dist       *(1d0-dist_aime) *prob_ss(j-1, ia, i_aime, ip, ir, id)
-                                                prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) = prob_ss(j, iar, iaimer, ip_p, ir_r, id_d) &
-                                                                                            + pi_ip(ip, ip_p)*pi_ir_ret(ir, ir_r)*pi_id_ret(id, id_d)*(1d0-dist)  *(1d0-dist_aime)*prob_ss(j-1, ia, i_aime, ip, ir, id) 
-     
-                                                endif
-                                                enddo
+                                            enddo
                                         enddo
                                     enddo
                                 enddo
@@ -161,6 +158,17 @@
             if ((switch_unequal_bequest==1)) then
                 !ia_initial(2) = bequest_ss_vfi / 
                 !ia_initial(1) = 0d0
+                
+                
+                
+                !!!
+                
+                
+                
+                
+                
+                
+                
                 do ind=1,n_beq,1 !normalizing constant
                     const = const + 1/ind**(zipf)
                 enddo
@@ -178,8 +186,8 @@
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
 
-                    prob_trans(1, ial, 0, n_sp_initial, n_sr_initial, n_sd_initial, i)  = prob_trans(1, ial, 0, n_sp_initial, n_sr_initial, n_sd_initial,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
-                    prob_trans(1, iar, 0, n_sp_initial,  n_sr_initial, n_sd_initial, i) = prob_trans(1, iar, 0, n_sp_initial,  n_sr_initial, n_sd_initial,i) + p_initial(ind)*(1d0 - dist)
+                    prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, n_sp_initial, n_sr_initial, n_sd_initial,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
+                    prob_trans(1, iar, 0, :, :, :, i) = prob_trans(1, iar, 0, n_sp_initial,  n_sr_initial, n_sd_initial,i) + p_initial(ind)*(1d0 - dist)
                 enddo
                 
                    do ia = 0, n_a, 1
@@ -204,7 +212,7 @@
                     dist = min(dist, 1d0)
             prob_trans(1, ial, 0, :, :, :, i) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
             prob_trans(1, iar, 0, :, :, :, i) = 1d0 - dist
-            endif
+            
             
               do ia = 0, n_a, 1
                     do i_aime = 0, n_aime, 1
@@ -218,7 +226,7 @@
                     enddo
               enddo
               
-
+           endif     
             
             ! successively compute distribution over ages
             do j = 2, bigJ

@@ -51,7 +51,8 @@
     OPEN (unit=74,  FILE = version//experiment//closure//"bequest_trans.txt")
     OPEN (unit=75,  FILE = version//experiment//closure//"r_trans.txt")
     OPEN (unit=76,  FILE = version//experiment//closure//"sum_b_weight_trans.txt")
-    
+    OPEN (unit=77,  FILE = version//experiment//closure//"zet_trans.txt")
+    OPEN (unit=78,  FILE = version//experiment//closure//"gdp_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -98,6 +99,8 @@
         write(75,  '(F20.10)') r(i)  
         
          write(76,  '(F20.10)') sum_b_weight_trans(i)
+         write(77,  '(F20.10)') zet(i) 
+         write(78,  '(F20.10)') zet(i) * bigY(i)
 
     enddo
     
@@ -165,7 +168,9 @@
     CLOSE(74)
     CLOSE(75)
      CLOSE(76)
-! pension system colosure
+     CLOSE(77)
+     CLOSE(78)
+! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")
     OPEN (unit=3, FILE = version//experiment//closure//"upsilon.txt")
@@ -333,7 +338,7 @@ write(107, '(A)') "prob;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
 close(107)
 
 open(unit = 108, FILE = version//experiment//closure//"mass_trans.csv")
-write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
+write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
             do ia = 0, n_a, 1
@@ -341,12 +346,15 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;year;age;asset;aime;inc_
                     do ip = 1, n_sp, 1
                         do ir = 1, n_sr, 1
                             do id = 1, n_sd, 1
-                            write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+                            write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
                             prob_trans(j, ia, i_aime, ip, ir, id,i)*N_t_j_vfi(j,i)/sum(N_t_j_vfi(:,i)), ";", & ! mass
                             c_trans(j, ia, i_aime, ip, ir, id,i), ";", & !consumption
                             l_trans(j, ia, i_aime, ip, ir, id,i), ";", & !hours
                             lab_income_trans(j, ia, i_aime, ip, ir, id,i), ";", & !lab income
                             lab_income_pretax_trans(j, ia, i_aime, ip, ir, id,i), ";", & !lab income
+                            tot_income_pretax_trans(j, ia, i_aime, ip, ir, id,i), ";", & !pretax income
+                            sv(ia) + bequest_j_trans(j, ia, i_aime, ip, ir, id,i), ";", & !sav
+                            svplus_trans(j, ia, i_aime, ip, ir, id,i), ";", & !sav
                             i, ";", & !year
                             j , ";",  & !age
                             ia , ";",  & !asset

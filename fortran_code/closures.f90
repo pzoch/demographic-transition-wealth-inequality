@@ -74,6 +74,47 @@ select case (switch_residual)
             enddo
         endif
         
+        
+        
+          case(6)
+          if (switch_tauK_gross == 0) then
+    !       case 6 - g is residual
+            debt_share(1) = debt(1)/y(1)
+            if (switch_ref_run_now == 0) then 
+                upsilon = upsilon_r_ss_1*y*bigl/N_t
+            endif
+            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
+
+            do i = 2,bigT,1
+                debt_share(i) = debt(i)/y(i)
+                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
+                
+                        g(i) =   tc(i)*consumption_gross_new(i) - ( subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
+                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
+                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i))
+                
+                        g_share(i) = g(i)/y(i)
+            enddo
+            else
+                !       case 6 - g is residual
+            debt_share(1) = debt(1)/y(1)
+            if (switch_ref_run_now == 0) then 
+                upsilon = upsilon_r_ss_1*y*bigl/N_t
+            endif
+            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
+
+            do i = 2,bigT,1
+                debt_share(i) = debt(i)/y(i)
+                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
+                         g(i) = tc(i) * consumption_gross_new(i)  - (subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
+                         - tk(i)*(r_bar(i)+depr)*k(i) &
+                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/ bigl(i))
+                         
+                         
+                         g_share(i) = g(i)/y(i)
+            enddo
+        endif
+        
 
         
 end select

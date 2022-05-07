@@ -106,11 +106,20 @@ include 'implicit_tax_trans.f90'
                 w_pom_trans_implicit_vfi(:,i) = (t1_contrib(:,i)*tau1_s_t(:,i) + t2(:,i)*tau2_s_t(:,i))*w_bar(i)
             enddo
             
+            w_bar_vfi = w_bar
+            
             if (switch_tauK_gross == 0) then
                 r_vfi = (1 - tk)*r_bar  
             else
                 r_vfi = (1 - tk)*(r_bar+depr) - depr 
             endif
+            
+            if (switch_tauK_gross == 0) then
+                r_vfi_pretax = r_bar  
+            else
+                r_vfi_pretax = r_bar 
+            endif
+            
             
             tc_vfi = tc + 1.0_dp
             gam_vfi = gam_t

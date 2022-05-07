@@ -8,12 +8,12 @@
         sigma_nu_r = 0.008d0 ** 2.0d0
         
         zeta_d = 0.994d0
-        sigma_nu_d = 0.0035d0 ** 2.0d0
+        sigma_nu_d = 0.0035d0 ** 2.0d0 
         sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
         zeta_d = zeta_d**zbar 
          
         a_l    = 0.0d0   !dla bigJ = 80, a_l = -2d0, inaczej -8d0
-        a_u    = 50d0   !dla bigJ = 80, a_u = 10d0, inaczej 30d0
+        a_u    = 60d0   !dla bigJ = 80, a_u = 10d0, inaczej 30d0
         a_grow = 0.04d0 !dla bigJ = 80, a_grow = 0.05d0, inaczej 0.04d0        
         aime_l    = 0d0
     
@@ -36,7 +36,7 @@ endif
 
 
         
-! temportary
+! temporary
 
         do ir = 1 , n_sr, 1
                 pi_ir_init(ir) = 1.0d0 / n_sr
@@ -216,11 +216,9 @@ endif
         pi_id_init(s) = prob_norm_d(s)
         pi_id(s,s) = 1.0d0     
     enddo
-    endif
+endif
     
- ! create some extra objects needed for partial equilibrium
-  pi_id_ret      = pi_id;
-  n_sd_value_ret = n_sd_value;
+
     
 if (n_sr >1) then 
      call normal_discrete_1(n_sr_value, prob_norm, 0d0, sigma_nu_r)
@@ -238,8 +236,7 @@ if (n_sr >1) then
     !enddo
 endif   
 
-  pi_ir_ret      = pi_ir;
-  n_sr_value_ret = n_sr_value;
+
 !! to do model is deterministic (evry state is the same) but we use vfi to solve it 
 !n_sp_value = 1d0
 !n_sr_value = 0d0

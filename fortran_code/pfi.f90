@@ -40,26 +40,25 @@ integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
 
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_trans,  aime_plus_trans, l_trans, c_trans, labor_tax_trans, &
-                                                  RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans
+                                                  RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
 
-real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi, w_pom_trans_implicit_vfi, &
+real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi,  w_pom_trans_implicit_vfi, &
                                  check_euler_trans, V_j_vfi_const_lambda, V_j_vfi_higher_lambda, V_j_vfi,&
                                  pi_trans_vfi_cond,  b_j_vfi, b_pom_j_dif,  N_t_j_vfi, &
                                  c_j_vfi,  s_pom_j_vfi, l_j_vfi, labor_tax_j_vfi, lw_j_vfi, lw_lambda_j_vfi
 
-real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, LabIncAVG_vfi, bequest_vfi
+real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, LabIncAVG_vfi, bequest_vfi, r_vfi_pretax, w_bar_vfi
 integer :: jbar_t_vfi(bigT)
 
 !steady state variables
-real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_income_ss, lab_income_pretax_ss, sv_tempo, labor_tax, prob_ss, &
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, prob_ss, &
  gini_weight_consumption,  aime_plus_ss, aime_tempo
 
-real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, lab_income_ss_j, l_ss_pen_j,   b_ss_j_vfi, &
+real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, l_ss_pen_j, b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, &
-                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high, & 
-                             l_ss_j_var_vfi, s_pom_ss_j_var_vfi, c_ss_j_var_vfi, asset_ss_j_var_vfi, lab_income_ss_j_var_vfi  
+                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high 
 
-real*8 ::   r_ss_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi 
+real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi
 real*8 ::   gini_weight_sv(bigJ, 0:n_a)
 integer ::  jbar_ss_vf
 
@@ -245,6 +244,9 @@ contains
                 l_trans(:, :, :, :, :, :, 1) = l_ss  
                 lab_income_trans(:, :, :, :, :, :, 1) = lab_income_ss
                 lab_income_pretax_trans(:, :, :, :, :, :, 1) = lab_income_pretax_ss
+                tot_income_trans(:, :, :, :, :, :, 1) = tot_income_ss
+                tot_income_pretax_trans(:, :, :, :, :, :, 1) = tot_income_pretax_ss
+                
                 labor_tax_trans(:, :, :, :, :, :, 1) = labor_tax
                 prob_trans(:, :, :, :, :, :, 1) = prob_ss
                 svplus_trans(:, :, :, :, :, :, 1) = svplus_ss
@@ -483,7 +485,7 @@ implicit none
       l0  = l_guess
       del = 1d-8
 
-      if  (switch_fix_labor == 0d0) then 
+      if ((switch_partial_eq == 0) .and.  (switch_fix_labor == 0d0) ) then 
           do i= 1, maxit
             taxinc = w_tax*l0
             nontaxinc = w_non_tax*l0

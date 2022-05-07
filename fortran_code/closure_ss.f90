@@ -50,20 +50,19 @@ select case (switch_residual)
     case(6)
         if (switch_tauK_gross == 0) then
             
-            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*r_bar_ss*sum_priv_sv_ss/(gam_ss*nu_ss) + &
-                        sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  + upsilon_ss*sum(N_ss_j)/bigl_ss !+ tL_ss*sum_b_ss
-            deficit_ss = debt_ss / (gam_ss * nu_ss - 1 - r_bar_ss) ! deficit is BI from Lyx
-            g_ss = debt_ss + Tax_ss - subsidy_ss - (1 + r_bar_ss)*debt_ss/(gam_ss*nu_ss)
+        deficit_ss =   (debt_ss * (1 - (1 + r_bar_ss) / (gam_ss * nu_ss)))    
+            g_ss   =  tc_ss * consumption_ss_gross - (subsidy_ss - deficit_ss - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))) 
             g_per_capita_ss = g_ss*bigl_ss/N_ss       
-            g_share_ss_2 = g_ss/y_ss
-            g_share = g_share_ss_2
+            g_share_ss = g_ss/y_ss 
+
         else
-            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) + &
-                        sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  + upsilon_ss*sum(N_ss_j)/bigl_ss !+ tL_ss*sum_b_ss
-            deficit_ss = ((nu_ss*gam_ss - 1)/(gam_ss*nu_ss))*debt_ss ! deficit is BI from Lyx
-            g_ss = debt_ss + Tax_ss - subsidy_ss - (r_ss)*debt_ss/(gam_ss*nu_ss)
+
+            deficit_ss =   (debt_ss * (1 - (r_ss) / (gam_ss * nu_ss)))       
+
+            
+            g_ss =    tc_ss * consumption_ss_gross - (subsidy_ss  - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))
             g_per_capita_ss = g_ss*bigl_ss/N_ss       
-            g_share_ss_2 = g_ss/y_ss
-            g_share = g_share_ss_2
+            g_share_ss = g_ss/y_ss 
+
         endif
     end select

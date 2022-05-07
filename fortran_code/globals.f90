@@ -6,7 +6,7 @@ MODULE global_vars
 IMPLICIT NONE
    save
     integer, parameter ::  n_iter_ss =  50
-    integer, parameter ::  n_iter_t = 30
+    integer, parameter ::  n_iter_t = 50
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
     integer, parameter :: n_p = 100, n_debt  = 60, forward = 1 ! id does not work :( 
@@ -24,11 +24,7 @@ IMPLICIT NONE
     
     character(128) :: cwd, cwd_r, cwd_w
     
-    
-    integer :: switch_load_experiment_details               ! 0 - do not load details of experiment (set it manually), 1 - load a file "experiment_details.txt" that sets all switches
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
-    integer :: switch_partial_eq                            ! 0 - general eqm., 1 - partial eq
-    integer :: switch_load_for_partial                      ! 0 - do not load prices etc for partial from a file, 1 - load from a file
     
     integer :: switch_run_1, switch_run_2, switch_run_t     ! 0 = don't run the first/second steady state/transition path; 1 = run the first/second steady state/transition path
     integer :: switch_param_1, switch_param_2               ! 0 = with old parameters; 1 = with new parameters (pi,gam,N,jbar) 
@@ -51,9 +47,9 @@ IMPLICIT NONE
     integer :: switch_change_tauK                          ! 0 = const,  1 = empirical - warning: how will it interact with various closures?    
     integer :: switch_tauK_gross                           ! 0 = tax on net capital income,  1 = tax on gross capital income  
     integer :: switch_unequal_bequest
-    integer :: switch_change_debt                          ! 0 = const,  1 = empirical 
-    integer :: switch_change_sl                            ! 0 = const,  1 = empirical                  
-    integer :: switch_change_gy                            ! 0 = const,  1 = empirical      
+    integer :: switch_change_debt
+    integer :: switch_change_sl
+    integer :: switch_change_gy
     
     integer :: switch_print
     integer :: switch_vf
@@ -62,24 +58,18 @@ IMPLICIT NONE
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
     integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
     integer :: switch_reform                               ! 0 = base transition, 1 = main LSRA (baseline + reform + welfare change)
-    integer :: switch_cohort_ps                            ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
+    integer :: switch_partial_eq_cal                       ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
+    integer :: switch_cohort_ps                             ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
     integer :: switch_pension                              ! 0 = all are in new pension scheme in transitionFF; 1 = old cohorts remain in the old system in transitionFF
     integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
-    integer :: switch_persistent_delta                     ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
+    integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
     integer :: switch_income_risk
     integer :: switch_discount_risk
     integer :: switch_return_risk
-    integer :: switch_no_ret_delta_risk                    ! 0 = risk as usual,  1 = no risk after retirement (set to unconditional mean), 2 = no risk after retirement (set to the last realization for delta)
-    integer :: switch_no_ret_return_risk                   ! 0 = risk as usual, 1 = no risk after retirement (set to unconditional mean)
-    integer :: switch_longevity_pe                        ! 1 = as in the first ss, 2 = as in the second ss
-    integer :: switch_popweight_pe                        ! 1 = as in the first ss, 2 = as in the second ss
-    integer :: switch_taxes_pe                            ! 1 = as in the first ss, 2 = as in the second ss
-
-
-    
-    
-    real*8  :: switch_fix_labor                            ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
-    integer :: switch_g_const                              ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
+    integer :: switch_keep_fixed                      
+    real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
+    integer :: switch_partial_eq                           ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
+    integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
                                                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
@@ -87,7 +77,7 @@ IMPLICIT NONE
     integer :: switch_increase_ret_age
 
 
-    ! variables to be loaded
+    ! Deklaracja zmiennych wczytywanych
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(n_p)  :: gam
     real(dp), dimension(n_p)  :: tauL
@@ -96,28 +86,13 @@ IMPLICIT NONE
     !real(dp), dimension(n_p)  :: lambda - name conflict
 
     real(dp) :: debt_constr
-    ! steady state variables
+! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
     real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
     real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
-    real(dp), dimension(bigJ) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1, bequest_ss_j_1
-    real(dp), dimension(bigJ) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2, bequest_ss_j_2
+    real(dp), dimension(bigJ) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
+    real(dp), dimension(bigJ) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
     
-    ! for PE exercises
-    real*8, dimension(:,:), allocatable ::  l_pe_j, w_pe_j, s_pe_j, c_pe_j, b_pe_j, l_pe_pen_j, asset_pe_j, lab_income_pe_j, l_pe_j_var, w_pe_j_var, s_pe_j_var, c_pe_j_var, b_pe_j_var, l_pe_pen_j_var, asset_pe_j_var, lab_income_pe_j_var
-    real*8, dimension(:,:,:), allocatable ::  gini_weight_pe
-    real(dp), dimension(bigJ) :: l_pe_j_1, w_pe_j_1, s_pe_j_1, c_pe_j_1, b_pe_j_1, l_pe_pen_j_1, asset_pe_j_1, bequest_pe_j_1
-    real(dp), dimension(bigJ) :: l_pe_j_2, w_pe_j_2, s_pe_j_2, c_pe_j_2, b_pe_j_2, l_pe_pen_j_2, asset_pe_j_2, bequest_pe_j_2
-    real(dp), dimension(bigJ) :: l_pe_j_3, w_pe_j_3, s_pe_j_3, c_pe_j_3, b_pe_j_3, l_pe_pen_j_3, asset_pe_j_3, bequest_pe_j_3
-    real(dp), dimension(bigJ) :: l_pe_j_4, w_pe_j_4, s_pe_j_4, c_pe_j_4, b_pe_j_4, l_pe_pen_j_4, asset_pe_j_4, bequest_pe_j_4
-    real(dp), dimension(bigJ) :: l_pe_j_5, w_pe_j_5, s_pe_j_5, c_pe_j_5, b_pe_j_5, l_pe_pen_j_5, asset_pe_j_5, bequest_pe_j_5
-    real(dp), dimension(bigJ) :: l_pe_j_6, w_pe_j_6, s_pe_j_6, c_pe_j_6, b_pe_j_6, l_pe_pen_j_6, asset_pe_j_6,  bequest_pe_j_6
-    real(dp), dimension(bigJ) :: l_pe_j_7, w_pe_j_7, s_pe_j_7, c_pe_j_7, b_pe_j_7, l_pe_pen_j_7, asset_pe_j_7,  bequest_pe_j_7
-    real(dp), dimension(bigJ) :: l_pe_j_8, w_pe_j_8, s_pe_j_8, c_pe_j_8, b_pe_j_8, l_pe_pen_j_8, asset_pe_j_8,  bequest_pe_j_8
-    real(dp), dimension(bigJ) :: l_pe_j_9, w_pe_j_9, s_pe_j_9, c_pe_j_9, b_pe_j_9, l_pe_pen_j_9, asset_pe_j_9,  bequest_pe_j_9
-    real(dp), dimension(bigJ) :: l_pe_j_10, w_pe_j_10, s_pe_j_10, c_pe_j_10, b_pe_j_10, l_pe_pen_j_10, asset_pe_j_10,  bequest_pe_j_10
-    
-    
-    ! parameters
+! Parametry
     real(dp) :: alpha, beta, delta, depr, theta, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
@@ -141,12 +116,11 @@ IMPLICIT NONE
 
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 110, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 3    , n_beq = 2
-    real*8, parameter  ::  zipf = 1.5d0        
+    integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1    , n_beq = 5
+    real*8, parameter  ::  zipf = 2.5d0        
     real*8 :: zeta_p, a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ),  sigma_nu_p, n_sp_initial, sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, &
-               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp), &
-                pi_id_ret(n_sd,n_sd), n_sd_value_ret(n_sd), pi_ir_ret(n_sr,n_sr), n_sr_value_ret(n_sr), pi_id_hold(n_sd,n_sd), n_sd_value_hold(n_sd), pi_ir_hold(n_sr,n_sr), n_sr_value_hold(n_sr)
+               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp)
     real*8 :: aime_cap, aime_cap_ge
     
  ! cohort/time specific shock grids

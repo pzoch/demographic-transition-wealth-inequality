@@ -10,8 +10,8 @@ use pfi_trans
 IMPLICIT NONE
 
 CONTAINS
-
-subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, r_bar_ss,  w_bar_ss, upsilon_ss, b_ss_j, l_ss_j, w_ss_j, s_ss_j, c_ss_j, asset_ss_j, lab_income_ss_j, t1_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, bequest_ss_j,l_ss_j_var, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_income_ss_j_var, gini_weight_ss )
+ 
+subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, r_bar_ss,  w_bar_ss, upsilon_ss, b_ss_j, l_ss_j, w_ss_j, s_ss_j, c_ss_j, asset_ss_j, lab_income_ss_j, t1_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, bequest_ss_j,l_ss_j_var, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_income_ss_j_var, weight_ss )
     real(dp), intent(in) :: r_bar_ss, w_bar_ss, upsilon_ss ! prices
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
@@ -22,7 +22,7 @@ subroutine partial_eqm_solve(switch_residual, switch_tauK_gross, switch_unequal_
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest			
     real(dp) ::  jbar_ss, gam_ss, N_ss, nu_ss, t1_ss, r_ss
     real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, asset_ss_j, lab_income_ss_j, l_ss_j_var, s_pom_ss_j_var, c_ss_j_var, asset_ss_j_var, lab_income_ss_j_var  
-    real(dp), dimension(bigj,n_a), intent(out) :: gini_weight_ss
+    real(dp), dimension(bigj,0:n_a), intent(out) :: weight_ss
     
 
     ! pension system 
@@ -184,6 +184,7 @@ enddo
         c_ss_j_var = c_ss_j_var_vfi
         s_pom_ss_j_var = s_pom_ss_j_var_vfi
         asset_ss_j_var = asset_ss_j_var_vfi
+        lab_income_ss_j = lab_income_ss_j
         lab_income_ss_j_var =lab_income_ss_j_var_vfi
         s_pom_ss_j(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
         if ((switch_type == 1) .and. (switch_see_ret == 1)) then 
@@ -199,10 +200,12 @@ enddo
         endif
         avg_ef_l_suply =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        gini_weight_ss  = gini_weight_sv
+        weight_ss   = weight_sv
 
 
 
 end subroutine partial_eqm_solve
 
-END MODULE partial_eqm_calc
+    END MODULE partial_eqm_calc
+    
+    

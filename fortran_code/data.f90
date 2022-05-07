@@ -10,10 +10,12 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d, pi_weight_d, Nn_d, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn_d, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! dp zliczenia populacji USA
       real(dp), dimension(bigT)::  N_temp_vec ! dp zliczenia populacji USA
+      real(dp), dimension(bigT)::  a_d ! temp labor augmenting
+      
       real(dp), dimension(bigJ), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
       real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d, pi_d, pi_weight_d
@@ -72,7 +74,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_ok.txt")    
+     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j)
       end do
@@ -143,7 +145,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(8)
 
     
-    sigma2_epsilon_t = sigma2_epsilon_t *(1-zeta_p**zbar)/(1-zeta_p)
+    sigma2_epsilon_t = 2 *  sigma2_epsilon_t *(1-zeta_p**zbar)/(1-zeta_p) ! increased
     
 
  
@@ -178,7 +180,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)
             
      elseif (switch_change_tauK == 0.AND. switch_starting_year == 3) then
-        last_data_tauK = 9
+        last_data_tauK = 5
         do i = 1, last_data_tauK, 1
             read(7,*) tauK_d(i)
         enddo
@@ -211,7 +213,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL)
             
      elseif (switch_change_tauL == 0 .AND. switch_starting_year == 3) then
-         last_data_tauL = 9
+         last_data_tauL = 5
          do i = 1, last_data_tauL, 1
             read(5,*) tauL_d(i)
         enddo
@@ -254,7 +256,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
     elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 3) then   
         read(5,*) alpha_d(1)
-        tauL_d(2:) = alpha_d(1)
+        alpha_d(2:) = alpha_d(1)
     endif
     
     
@@ -319,7 +321,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
             
      elseif (switch_change_lambda == 0 .AND. switch_starting_year == 3 ) then
-        last_data_lambda = 9
+        last_data_lambda = 5
         do i = 1, last_data_lambda+1, 1
             read(6,*) lambda_d(i)
         enddo
@@ -344,10 +346,13 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
         
     elseif (switch_starting_year == 3) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+        Open(unit = 4, FILE = "_data_gamma_smooth_1935.txt") 
         
     endif
      
+    
+    
     if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
@@ -367,16 +372,31 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
         
     close(4)
+    ! need to convert it to labor augmenting 
+    
+    zet_d(1) = 1
+    do i = 2,bigT,1
+        zet_d(i) = zet_d(i-1)*gam_d(i)    
+    enddo
+    
+    a_d(1) = 1
+    do i = 2,bigT,1
+        a_d(i) = zet_d(i) **  ( 1/(1-alpha_d(i)))    
+    enddo
+    
+    gam_d(1) = gam_d(1) ** (1/(1-alpha_d(1)))  
+     do i = 2,bigT,1
+        gam_d(i) =  a_d(i) /  a_d(i-1)
+    enddo
+    
+    zet_d = a_d
     
     gam_cum_d(1) = gam_d(1)
     do i = 2,bigT,1
         gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
     enddo
 
-   zet_d(1) = 1
-    do i = 2,bigT,1
-        zet_d(i) = zet_d(i-1)*gam_d(i)    
-    enddo
+
 
 ! -------------------------------- N & PI -------------------------------
     bigJT = bigJ*bigT
@@ -488,7 +508,7 @@ if (switch_mortality == 0) then
             Nn_d(j,i) = Nn_d(j-1,max(i-1,1))
         enddo
     enddo
-    
+      pi_weight_d = pi_d  
     
 elseif (switch_mortality == 3) then 
     do i = 2, bigT,1
@@ -497,7 +517,7 @@ elseif (switch_mortality == 3) then
             Nn_d(j,i) = pi_d(j,i-1)/pi_d(j-1,max(i-2,1))*Nn_d(j-1,i-1)
         enddo    
     enddo
-    
+      pi_weight_d = pi_d  
     
     
 elseif (switch_mortality == 4) then 
@@ -513,22 +533,25 @@ elseif (switch_mortality == 4) then
             Nn_d(j,i) = pi_d(j,max(i-1,1))/pi_d(j-1,max(i-2,1))*Nn_d(j-1,max(i-1,1))
         enddo    
     enddo
- 
-  elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
+     
+     
+elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
+   pi_weight_d = pi_d
     do i = 2, bigT,1
         do j = 2, bigJ, 1   
             pi_d(j,i) = pi_d(j,1)
         enddo    
     enddo
-    
 
   
-   elseif (switch_mortality == 5.AND. switch_starting_year ==3) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
+elseif (switch_mortality == 5.AND. switch_starting_year ==3) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
+    pi_weight_d = pi_d
     do i = 6, bigT,1
         do j = 2, bigJ, 1   
             pi_d(j,i) = pi_d(j,5)
         enddo    
     enddo  
+    
     
    elseif (switch_mortality == 6.AND. switch_starting_year ==3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
    
@@ -587,16 +610,41 @@ CLOSE(3)
 CLOSE(4)
 CLOSE(9)
 
-
-
-
-
 open(unit = 1, file= "population.csv")
 
     do i = 1,bigT,1
         write(1, '(1x, F, 16(",", F))') (Nn_d(j,i), j = 1,bigJ)
     enddo
 close(1)
+
+
+
+
+if (switch_keep_fixed == 1) then
+    gy_factor_d(2:) = gy_factor_d(1)
+    sigma2_epsilon_t(2:) = sigma2_epsilon_t(1)  
+    tauK_d(2:) = tauK_d(1)
+    tauL_d(2:) = tauL_d(1)
+    alpha_d(2:) = alpha_d(1)
+    debt_constr_d(2:) = debt_constr_d(1)
+    lambda_d(2:) = lambda_d(1)
+    gam_d(2:) = gam_d(1)
+    
+    do i = 2, bigT,1
+        pi_d(1,i) = pi_d(1,1)
+        Nn_d(1,i) = Nn_d(1,1)
+        do j = 2, bigJ, 1   
+            pi_d(j,i) = pi_d(j,1)
+            Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
+            
+        enddo
+    enddo
+
+    
+    pi_weight_d = pi_d
+    nu_ss_old = 1.0d0
+    nu_ss_new = 1.0d0
+    endif
 end subroutine read_data
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
