@@ -14,7 +14,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss,  w_bar_ss, l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
@@ -27,7 +27,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest			
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, w_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
-    real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
+    real(dp), dimension(bigj), intent(out) :: l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L
     ! pension system 
      real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
@@ -145,9 +145,9 @@ do iter = 1,n_iter_ss,1
     include 'denominator_ss.f90'      
               
     r_bar_ss = zbar*alpha*k_ss**(alpha - 1) - depr
-    w_bar_ss = zbar*(1 - alpha)*k_ss**alpha
-    y_ss =zbar* k_ss**(alpha)
-    
+    y_ss     = zbar* k_ss**(alpha)
+    w_bar_ss_L = zbar*(1 - alpha)*k_ss**alpha
+    w_bar_ss_H = zbar*(1 - alpha)*k_ss**alpha
     if (r_bar_ss < 0) then
         r_bar_ss = 0
     endif
@@ -156,9 +156,11 @@ do iter = 1,n_iter_ss,1
         r_ss = 1 + (1 - tk_ss)*r_bar_ss  
         else
         r_ss = 1 + (1 - tk_ss)*(r_bar_ss + depr) - depr
-    endif
+        endif
     
-    w_ss_j = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss
+    w_ss_j_L = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss_L
+    w_ss_j_H = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss_H
+
     
     ! g due to closure consruction is expresse as G/bigL
     if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
@@ -217,7 +219,7 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
 else
         if (switch_unequal_bequest==0) then
             do j = 2,bigJ,1
-                bequest_left_ss_j(j-1) = (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j(j-1))/gam_ss
+            bequest_left_ss_j(j-1) = (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j(j-1))/gam_ss
             enddo
             bequest_left_ss_j(bigJ) = (pi_weight_ss(bigJ))*(r_ss*s_ss_j(bigJ))/gam_ss
             bequest_ss = sum(bequest_left_ss_j(1:bigJ))
@@ -244,27 +246,25 @@ else
 endif        
 
     include 'implicit_tax_ss.f90'
-    if (switch_vf == 0) then
-        sum_b_weight_ss = 1d0
-        include 'lti_ss.f90'
-        l_ss_pen_j = l_ss_j
-        labor_tax_ss_j_vfi(1:bigJ) = tl_ss*(1 - t1_ss-t2_ss)*w_bar_ss*l_ss_j(:)
-    elseif (switch_vf > 0) then
-        w_pom_ss_vfi = (1.0_dp - t1_ss - t2_ss)*w_bar_ss 
-        w_pom_ss_implicit_vfi = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss
+
+        w_pom_ss_vfi_L = (1.0_dp - t1_ss - t2_ss)*w_bar_ss_L 
+        w_pom_ss_implicit_vfi_L = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss_L
+        
+        w_pom_ss_vfi_H = (1.0_dp - t1_ss - t2_ss)*w_bar_ss_H 
+        w_pom_ss_implicit_vfi_H = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss_H
         
         if (switch_tauK_gross == 0) then
             r_ss_vfi = (1d0 - tk_ss)*r_bar_ss  
             else
             r_ss_vfi = (1d0 - tk_ss)*(r_bar_ss+depr) - depr
-        endif
+            endif
+            
         if (switch_tauK_gross == 0) then
             r_ss_pretax_vfi = r_bar_ss  
             else
             r_ss_pretax_vfi = r_bar_ss
             endif  
             
-        w_bar_ss_vfi = w_bar_ss    
         bequest_ss_vfi =  bequest_ss
         tc_ss_vfi = 1_dp + tc_ss
         gam_ss_vfi = gam_ss
@@ -277,35 +277,50 @@ endif
         upsilon_dif_ss = upsilon_ss - upsilon_old_ss
         N_ss_j_vfi =  N_ss_j
         iter_com = iter
+        
+        ! calling each type separately
+        
+        ! L - type now
+        w_bar_ss_vfi_L = w_bar_ss
         call agent_vf()
-        c_ss_j = c_ss_j_vfi
-        l_ss_j = l_ss_j_vfi
-        s_pom_ss_j(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
-        if ((switch_type == 1) .and. (switch_see_ret == 1)) then 
-            do j = 1,bigj,1  
-                if (j == 1) then
-                    s_ss_j(j) = (w_pom_ss_vfi(j))*l_ss_j(j) - labor_tax_ss_j_vfi(j) - c_ss_j(j)*(1+tc_ss)  - upsilon_ss + bequest_ss_j(j)
-                else
-                    s_ss_j(j) = r_ss*s_ss_j(j-1)/gam_ss + (w_pom_ss_vfi(j))*l_ss_j(j) - labor_tax_ss_j_vfi(j) + b_ss_j(j) - c_ss_j(j)*(1d0+tc_ss)  - upsilon_ss + bequest_ss_j(j)
-                endif
-            enddo
-        else
-           s_ss_j(:) =  s_pom_ss_j
-        endif
-        avg_ef_l_suply =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        LabIncAVG_ss_vfi =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-    endif
+        c_ss_j_L = c_ss_j_vfi
+        l_ss_j_L = l_ss_j_vfi
+        s_pom_ss_j_L(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
+        s_ss_j_L(:) =  s_pom_ss_j_L
+        avg_ef_l_supply_L  =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
+        LabIncAVG_ss_vfi_L =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_L(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
+        
+        
+        ! H - type now
+        call agent_vf()
+        w_bar_ss_vfi_H = w_bar_ss
+        c_ss_j_H = c_ss_j_vfi
+        l_ss_j_H = l_ss_j_vfi
+        s_pom_ss_j_H(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
+        s_ss_j_H(:) =  s_pom_ss_j_H
+        avg_ef_l_supply_H =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
+        LabIncAVG_ss_vfi_H =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_H(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
+        
+
+        ! aggregation
+        
+        bigl_ss = sum(N_ss_j * (H_share_ss * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_L(1:jbar_ss-1)))        
+        average_l_ss =  sum(N_ss_j * (H_share_ss * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))    
+        average_w_ss =  sum(N_ss_j * (H_share_ss * w_ss_j_H * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))
+        consumption_ss_gross_j  = H_share_ss * c_ss_j_H + (1 - H_share_ss) * c_ss_j_L
+        consumption_ss_gross  = sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
+        savings_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L 
+        savings_ss = sum(N_ss_j*savings_ss_j(1:bigJ))/bigl_ss
+        
+        avg_ef_l_supply  =  H_share_ss * avg_ef_l_supply_H + (1-H_share_ss) *  avg_ef_l_supply_L
+        LabIncAVG_ss_vfi =  H_share_ss * LabIncAVG_ss_vfi_H + (1-H_share_ss) *  LabIncAVG_ss_vfi_L
+    
     
 
-    bigl_ss = sum(N_ss_j*l_ss_j(1:jbar_ss-1))        
-    average_l_ss =  sum(N_ss_j*l_ss_j(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))    
-    average_w_ss =  sum(N_ss_j*w_ss_j*l_ss_j(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
 
-    consumption_ss_gross_j  = c_ss_j
-    consumption_ss_gross  = sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
 
-    savings_ss_j = s_ss_j + pillarII_ss_j
-    savings_ss = sum(N_ss_j*savings_ss_j(1:bigJ))/bigl_ss !to samo co sum_priv_sv_ss w FF
+    
+
    
    
     
@@ -316,7 +331,7 @@ endif
     err_ss = abs(k_ss_new - k_ss)
     k_ss = up_ss*k_ss + (1 - up_ss)*k_ss_new
     
-    if (switch_vf > 0) then
+    
         if (mod(iter,1) == 0) then
             !print*, iter, 'err_ss:', err_ss, 'feas_ss:', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss)
             print*, iter, 'err_ss:', err_ss, 'feas_ss:', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss)
@@ -325,7 +340,7 @@ endif
         if (err_ss < err_ss_tol ) then
             exit
         endif
-    endif 
+
     
 enddo 
 !close (121)
