@@ -148,6 +148,7 @@
             
             do i_aime = 0, n_aime   
                 sum_b_weight_ss = sum_b_weight_ss + aime_replacement_rate(i_aime)*sum(prob_ss(jbar_ss_vf, :, i_aime, :, :, :))
+                !!! this has to be correct
             enddo
 
             do j = 1,bigJ-1,1

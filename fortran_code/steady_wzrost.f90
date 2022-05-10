@@ -272,7 +272,7 @@ else
     
 endif        
 
-    include 'implicit_tax_ss.f90'
+
 
         w_pom_ss_vfi_L = (1.0_dp - t1_ss - t2_ss)*w_bar_ss_L 
         w_pom_ss_implicit_vfi_L = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss_L
@@ -292,66 +292,109 @@ endif
             r_ss_pretax_vfi = r_bar_ss
             endif  
             
-        bequest_ss_vfi =  bequest_ss
         tc_ss_vfi = 1_dp + tc_ss
         gam_ss_vfi = gam_ss
         pi_ss_vfi = pi_ss
-        b_ss_j_vfi = b_pom_ss_j
-        bequest_ss_j_vfi =  bequest_ss_j
-        bequest_ss_j_vfi_dif = bequest_ss_j - bequest_ss_j_old
         jbar_ss_vf = ceiling(jbar_ss)
-        upsilon_ss_vf = upsilon_ss
-        upsilon_dif_ss = upsilon_ss - upsilon_old_ss
         N_ss_j_vfi =  N_ss_j
         iter_com = iter
         
         ! calling each type separately
         
-        ! L - type now
+        !!!!! L - type now
+        
+    
+
         w_bar_ss_vfi_L = w_bar_ss
+        w_pom_ss_vfi = w_pom_ss_vfi_L
+        w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_L
+        w_bar_ss_vfi = w_bar_ss_L    
+        bequest_ss_vfi =  bequest_ss_L
+        b_pom_ss_j_L = b_ss_j_L
+        w_pom_ss_j_L = w_ss_j_L
+        b_ss_j_vfi = b_pom_ss_j_L
+        bequest_ss_j_vfi_L =  bequest_ss_j_L
+        bequest_ss_j_vfi_dif_L = bequest_ss_j_L - bequest_ss_j_old_L
+
+      
         call agent_vf()
+        prob_ss_L = prob_ss
         c_ss_j_L = c_ss_j_vfi
         l_ss_j_L = l_ss_j_vfi
         s_pom_ss_j_L(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
         s_ss_j_L(:) =  s_pom_ss_j_L
         avg_ef_l_supply_L  =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi_L =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_L(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
+        sum_b_weight_ss_L = sum_b_weight_ss
         
-        
-        ! H - type now
-        call agent_vf()
+        !!!!! H - type now
         w_bar_ss_vfi_H = w_bar_ss
+        w_pom_ss_vfi = w_pom_ss_vfi_H
+        w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_H
+        w_bar_ss_vfi = w_bar_ss_H    
+        bequest_ss_vfi =  bequest_ss_H
+        b_pom_ss_j_H = b_ss_j_H
+        w_pom_ss_j_H = w_ss_j_H
+        b_ss_j_vfi = b_pom_ss_j_H
+        bequest_ss_j_vfi_H =  bequest_ss_j_H
+        bequest_ss_j_vfi_dif_H = bequest_ss_j_H - bequest_ss_j_old_H
+        
+        
+        call agent_vf()
+        prob_ss_H = prob_ss
         c_ss_j_H = c_ss_j_vfi
         l_ss_j_H = l_ss_j_vfi
         s_pom_ss_j_H(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
         s_ss_j_H(:) =  s_pom_ss_j_H
         avg_ef_l_supply_H =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi_H =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_H(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        
+        sum_b_weight_ss_H = sum_b_weight_ss_H
 
         ! aggregation
         
-        bigl_ss = sum(N_ss_j * (H_share_ss * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_L(1:jbar_ss-1)))        
-        average_l_ss =  sum(N_ss_j * (H_share_ss * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))    
-        average_w_ss =  sum(N_ss_j * (H_share_ss * w_ss_j_H * l_ss_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))
+        bigl_ss = sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))        
+        average_l_ss =  sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))    
+        average_w_ss =  sum(N_ss_j * (H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_j_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))
         consumption_ss_gross_j  = H_share_ss * c_ss_j_H + (1 - H_share_ss) * c_ss_j_L
         consumption_ss_gross  = sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
         savings_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L 
         savings_ss = sum(N_ss_j*savings_ss_j(1:bigJ))/bigl_ss
         
-        avg_ef_l_supply  =  H_share_ss * avg_ef_l_supply_H + (1-H_share_ss) *  avg_ef_l_supply_L
+        avg_ef_l_supply  =  H_share_ss * avg_ef_l_supply_H  + (1-H_share_ss) *  avg_ef_l_supply_L
         LabIncAVG_ss_vfi =  H_share_ss * LabIncAVG_ss_vfi_H + (1-H_share_ss) *  LabIncAVG_ss_vfi_L
-    
+        avg_wl = sum((H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_j_L(1:jbar_ss-1)))/(real(jbar_ss-1))
     
 
+        ! calculate pensions again
+            b2_ss_j_H = 0  
+            b1_ss_j_H(1:jbar_ss-1) = 0
 
+            b2_ss_j_L = 0  
+            b1_ss_j_L(1:jbar_ss-1) = 0
+
+            b1_ss_j_L(jbar_ss) = rho*avg_wl !w_ss_j(jbar_ss-1)*l_ss_j(jbar_ss-1) 
+            b1_ss_j_H(jbar_ss) = rho*avg_wl !w_ss_j(jbar_ss-1)*l_ss_j(jbar_ss-1) 
+            
+            do j = jbar_ss+1,bigJ,1
+            b1_ss_j_H(j) = valor_mult_ss*b1_ss_j_H(j-1)
+            b1_ss_j_L(j) = valor_mult_ss*b1_ss_j_L(j-1)
+            enddo
+    
+            b_ss_j_H = b_scale_factor_ss*b1_ss_j_H 
+            b_ss_j_L = b_scale_factor_ss*b1_ss_j_L 
+            
+            sum_b_ss = sum_b_weight_ss*sum((H_share_ss*b_ss_j_H+(1-H_share_ss)*b_ss_j_L)*N_ss_j(1:bigJ))/bigl_ss
+
+            
+            subsidy_ss_j = sum_b_weight_ss*b_ss_j - t1_ss*w_bar_ss*l_ss_j       
+            subsidy_ss = sum(N_ss_j*subsidy_ss_j(1:bigJ))/bigl_ss
 
     
 
    
    
     
-    include 'pension_system_ss.f90'
+            include 'pension_system_ss.f90'
     include 'closure_ss.f90'
          
     k_ss_new = (savings_ss - debt_ss)/(gam_ss*nu_ss)
