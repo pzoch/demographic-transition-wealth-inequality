@@ -192,54 +192,81 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
 
         if (switch_unequal_bequest==0) then
             do j = 2,bigJ,1
-                bequest_left_ss_j(j-1) = (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1))/gam_ss
+                bequest_left_ss_j_H(j-1) = H_share_ss      * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j_H(j-1))/gam_ss
+                bequest_left_ss_j_L(j-1) =(1 - H_share_ss) * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j_L(j-1))/gam_ss
             enddo
-            bequest_left_ss_j(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j(bigJ))/gam_ss
-            bequest_ss = sum(bequest_left_ss_j(1:bigJ))
+            bequest_left_ss_j_H(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_H(bigJ))/gam_ss
+            bequest_left_ss_j_L(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_L(bigJ))/gam_ss
+            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
+            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
         
-            bequest_ss_j_old = bequest_ss_j
-            bequest_ss_j(1) = 0d0
+            bequest_ss_j_old_H = bequest_ss_j_H
+            bequest_ss_j_old_L = bequest_ss_j_L
+            
+            bequest_ss_j_H(1) = 0d0
+            bequest_ss_j_L(1) = 0d0
     
             do j = 2,bigJ,1
-                bequest_ss_j(j) = up_ss*bequest_ss_j_old(j) + (1 - up_ss)*bequest_left_ss_j(j-1)/N_ss_j(j)   
+                bequest_ss_j_H(j) = up_ss*bequest_ss_j_old_H(j) + (1 - up_ss)*bequest_left_ss_j_H(j-1)/(H_share_ss*N_ss_j(j))  
+                bequest_ss_j_L(j) = up_ss*bequest_ss_j_old_L(j) + (1 - up_ss)*bequest_left_ss_j_L(j-1)/((1-H_share_ss)*N_ss_j(j)) 
             enddo  
     
         elseif (switch_unequal_bequest==1) then
-             bequest_ss_j(1) = 0d0
+             bequest_ss_j_H(1) = 0d0
+             bequest_ss_j_L(1) = 0d0
             do j = 2,bigJ,1
-                bequest_ss_j(j) = 0d0
-                bequest_left_ss_j(j-1) =  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j(j-1) 
+                bequest_ss_j_H(j) = 0d0
+                bequest_ss_j_L(j) = 0d0
+                bequest_left_ss_j_H(j-1) = H_share_ss *  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j_H(j-1) 
+                bequest_left_ss_j_L(j-1) = (1 - H_share_ss) * (N_ss_j(j-1) - N_ss_j(j))*s_ss_j_L(j-1) 
             enddo
-            bequest_left_ss_j(bigJ) = (N_ss_j(bigJ))*s_ss_j(bigJ) 
-            bequest_ss = sum(bequest_left_ss_j(1:bigJ))
-            
+            bequest_left_ss_j_H(bigJ) = (N_ss_j(bigJ))*s_ss_j_H(bigJ) 
+            bequest_left_ss_j_L(bigJ) = (N_ss_j(bigJ))*s_ss_j_L(bigJ) 
+            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
+            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
 
         endif
     
 else
         if (switch_unequal_bequest==0) then
             do j = 2,bigJ,1
-            bequest_left_ss_j(j-1) = (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j(j-1))/gam_ss
+            bequest_left_ss_j_H(j-1) = H_share_ss * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j_H(j-1))/gam_ss
+            bequest_left_ss_j_L(j-1) = (1 - H_share_ss) * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j_L(j-1))/gam_ss
             enddo
-            bequest_left_ss_j(bigJ) = (pi_weight_ss(bigJ))*(r_ss*s_ss_j(bigJ))/gam_ss
-            bequest_ss = sum(bequest_left_ss_j(1:bigJ))
-        
-            bequest_ss_j_old = bequest_ss_j
-            bequest_ss_j(1) = 0d0
-    
+            bequest_left_ss_j_H(bigJ) = H_share_ss *  (pi_weight_ss(bigJ))*(r_ss*s_ss_j_H(bigJ))/gam_ss
+            bequest_left_ss_j_L(bigJ) = (1 - H_share_ss) * (pi_weight_ss(bigJ))*(r_ss*s_ss_j_L(bigJ))/gam_ss
+            
+            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
+            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
+            
+            bequest_ss_j_old_H = bequest_ss_j_H
+            bequest_ss_j_old_L = bequest_ss_j_L
+            
+            bequest_ss_j_H(1) = 0d0
+            bequest_ss_j_L(1) = 0d0
+            
             do j = 2,bigJ,1
-                bequest_ss_j(j) = up_ss*bequest_ss_j_old(j) + (1 - up_ss)*bequest_left_ss_j(j-1)/pi_weight_ss(j) 
+                bequest_ss_j_H(j) = up_ss*bequest_ss_j_old_H(j) + (1 - up_ss)*bequest_left_ss_j_H(j-1)/(H_share_ss * pi_weight_ss(j)) 
+                bequest_ss_j_L(j) = up_ss*bequest_ss_j_old_L(j) + (1 - up_ss)*bequest_left_ss_j_L(j-1)/((1-H_share_ss) * pi_weight_ss(j)) 
             enddo  
 
         elseif (switch_unequal_bequest==1) then
-            bequest_ss_j(1) = 0d0
+            bequest_ss_j_H(1) = 0d0
+            bequest_ss_j_L(1) = 0d0
+            
             do j = 2,bigJ,1
-                bequest_ss_j(j) = 0d0
-                bequest_left_ss_j(j-1) = (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j(j-1) / nu_ss**(j-1)
+                bequest_ss_j_H(j) = 0d0
+                bequest_left_ss_j_H(j-1) = H_share_ss *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j_H(j-1) / nu_ss**(j-1)
+                
+                bequest_ss_j_L(j) = 0d0
+                bequest_left_ss_j_L(j-1) = (1- H_share_ss) *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j_L(j-1) / nu_ss**(j-1)
             enddo
-            bequest_left_ss_j(bigj) = pi_weight_ss(bigJ)*s_ss_j(bigj) * nu_ss**(-bigj-1)
-            bequest_ss = sum(bequest_left_ss_j(1:bigJ))
-
+            
+            
+            bequest_left_ss_j_H(bigj) =H_share_ss * pi_weight_ss(bigJ)*s_ss_j_H(bigj) * nu_ss**(-bigj-1)
+            bequest_left_ss_j_L(bigj) =(1- H_share_ss) *  pi_weight_ss(bigJ)*s_ss_j_L(bigj) * nu_ss**(-bigj-1)
+            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
+            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
 
     endif
     
