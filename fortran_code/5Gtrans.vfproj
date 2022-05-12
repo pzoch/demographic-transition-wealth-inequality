@@ -68,7 +68,6 @@
 		<File RelativePath=".\closure_ss.f90"/>
 		<File RelativePath=".\closures.f90"/></Filter>
 		<Filter Name="consumers_problem">
-		<File RelativePath=".\denominator_ss.f90"/>
 		<File RelativePath=".\denominator_trans.f90"/>
 		<File RelativePath=".\lti_ss.f90"/>
 		<File RelativePath=".\lti_trans.f90"/>
@@ -86,11 +85,9 @@
 		<File RelativePath=".\shocks_parameters.f90"/></Filter>
 		<Filter Name="implicit_tax_and_bequest">
 		<File RelativePath=".\bequest.f90"/>
-		<File RelativePath=".\implicit_tax_ss.f90"/>
 		<File RelativePath=".\implicit_tax_trans.f90"/></Filter>
 		<Filter Name="pension_system">
-		<File RelativePath=".\pension_system.f90"/>
-		<File RelativePath=".\pension_system_ss.f90"/></Filter>
+		<File RelativePath=".\pension_system.f90"/></Filter>
 		<Filter Name="print">
 		<File RelativePath=".\Print_DB.f90"/>
 		<File RelativePath=".\print_iter.f90"/>
