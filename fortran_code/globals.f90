@@ -87,11 +87,14 @@ IMPLICIT NONE
 
     real(dp) :: debt_constr
 ! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
-    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
-    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
+    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1, w_bar_ss_L_1, w_bar_ss_H_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
+    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2, w_bar_ss_L_2, w_bar_ss_H_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
     real(dp), dimension(bigJ) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
     real(dp), dimension(bigJ) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
-    
+    real(dp), dimension(bigJ) :: l_ss_j_L_1, w_ss_j_L_1, s_ss_j_L_1, c_ss_j_L_1, b_ss_j_L_1, l_ss_pen_j_L_1
+    real(dp), dimension(bigJ) :: l_ss_j_L_2, w_ss_j_L_2, s_ss_j_L_2, c_ss_j_L_2, b_ss_j_L_2, l_ss_pen_j_L_2
+    real(dp), dimension(bigJ) :: l_ss_j_H_1, w_ss_j_H_1, s_ss_j_H_1, c_ss_j_H_1, b_ss_j_H_1, l_ss_pen_j_H_1
+    real(dp), dimension(bigJ) :: l_ss_j_H_2, w_ss_j_H_2, s_ss_j_H_2, c_ss_j_H_2, b_ss_j_H_2, l_ss_pen_j_H_2
 ! Parametry
     real(dp) :: alpha, beta, delta, depr, theta, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
     real(dp) :: H_share_ss, g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
@@ -130,8 +133,8 @@ IMPLICIT NONE
     real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp) ! holder to make this code compatibile with older subroutines
     
  ! pension system 
-    real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_suply, priv_share, t1_ss_contrib
-    real*8, dimension(bigJ) ::  b1_ss_j_1, b2_ss_j_1, pillar1_ss_j_1, pillar2_ss_j_1, b1_ss_j_2, b2_ss_j_2, pillar1_ss_j_2, pillar2_ss_j_2
+    real*8 :: sum_b_weight_ss, sum_b_weight_ss_H, sum_b_weight_ss_L, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, avg_ef_l_supply_L, avg_ef_l_supply_H, priv_share, t1_ss_contrib
+    real*8, dimension(bigJ) ::  b1_ss_j_1, b2_ss_j_1, b1_ss_j_1_L, b2_ss_j_1_L, b1_ss_j_1_H, b2_ss_j_1_H, pillar1_ss_j_1, pillar2_ss_j_1, b1_ss_j_2, b2_ss_j_2,  b1_ss_j_2_L, b2_ss_j_2_L, b1_ss_j_2_H, b2_ss_j_2_H,  pillar1_ss_j_2, pillar2_ss_j_2
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT)
     real*8, dimension(bigT) :: avg_ef_l_suply_trans, sum_b1_help
 

@@ -14,11 +14,12 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss_L, w_bar_ss_H, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss, w_bar_ss_L, w_bar_ss_H,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H,  pillarI_ss_j, pillarII_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
-                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss
+                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, bequest_ss_L, bequest_ss_H
+        
     
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
@@ -28,11 +29,11 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real*8, dimension(0:n_a) :: prob_ss_marg
     real(dp), intent(in)  :: rho	
     integer, intent(in)   :: param_ss
-    integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest			
+    integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, w_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss, w_bar_ss_H, w_bar_ss_L
-    real(dp), dimension(bigj), intent(out) :: l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L
+    real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H
     ! pension system 
-     real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j, pillarI_ss_j, pillarII_ss_j, &
+     real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j,b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H, pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
     
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
@@ -45,6 +46,8 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      real*8, dimension(bigJ) :: V_ss_j_vfi_H, c_ss_j_vfi_H, s_pom_ss_j_vfi_H, l_ss_j_vfi_H, lab_ss_j_vfi_H, l_ss_pen_j_H, b_ss_j_vfi_H, &
                            bequest_ss_j_vfi_H, bequest_ss_j_vfi_dif_H, pi_ss_vfi_H, pi_ss_vfi_cond_H, &
                            labor_tax_ss_j_vfi_H, lw_ss_j_vfi_H, lw_lambda_ss_j_vfi_H, w_pom_ss_vfi_H, w_pom_ss_implicit_vfi_H, lab_high_H 
+     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: prob_ss_L, prob_ss_H
+ 
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
 
@@ -120,9 +123,9 @@ enddo
 write(*,*) "ret/work force  ", sum(N_ss_j(jbar_ss:))/sum(N_ss_j(:jbar_ss-1))
 
 b_scale_factor_ss = 1d0
-avg_ef_l_suply = 0.33 ! what is this thing? is it needed? 
- 
- 
+avg_ef_l_supply = 0.33 
+avg_ef_l_supply_L = 0.33  
+avg_ef_l_supply_H = 0.33 
 
 
 valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss 
@@ -204,8 +207,8 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
             enddo
             bequest_left_ss_j_H(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_H(bigJ))/gam_ss
             bequest_left_ss_j_L(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_L(bigJ))/gam_ss
-            bequest_ss_j_H = sum(bequest_left_ss_j_H(1:bigJ))
-            bequest_ss_j_L = sum(bequest_left_ss_j_L(1:bigJ))
+            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
+            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
         
             bequest_ss_j_old_H = bequest_ss_j_H
             bequest_ss_j_old_L = bequest_ss_j_L
@@ -312,52 +315,57 @@ endif
         
     
 
-        w_bar_ss_vfi_L = w_bar_ss
+        w_bar_ss_vfi = w_bar_ss_L
         w_pom_ss_vfi = w_pom_ss_vfi_L
         w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_L
         w_bar_ss_vfi = w_bar_ss_L    
         bequest_ss_vfi =  bequest_ss_L
-        b_pom_ss_j_L = b_ss_j_L
-        w_pom_ss_j_L = w_ss_j_L
-        b_ss_j_vfi = b_pom_ss_j_L
-        bequest_ss_j_vfi_L =  bequest_ss_j_L
-        bequest_ss_j_vfi_dif_L = bequest_ss_j_L - bequest_ss_j_old_L
+        b_pom_ss_j = b_ss_j_L
+        w_pom_ss_j = w_ss_j_L
+        b_ss_j_vfi = b_pom_ss_j
+        bequest_ss_j_vfi =  bequest_ss_j_L
+        bequest_ss_j_vfi_dif = bequest_ss_j_L - bequest_ss_j_old_L
 
       
         call agent_vf()
         prob_ss_L = prob_ss
         c_ss_j_L = c_ss_j_vfi
         l_ss_j_L = l_ss_j_vfi
-        s_pom_ss_j_L(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
-        s_ss_j_L(:) =  s_pom_ss_j_L
+        s_pom_ss_j_vfi_L(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
+        s_ss_j_L(:) =  s_pom_ss_j_vfi_L
         avg_ef_l_supply_L  =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi_L =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_L(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         sum_b_weight_ss_L = sum_b_weight_ss
         
         !!!!! H - type now
-        w_bar_ss_vfi_H = w_bar_ss
+        w_bar_ss_vfi = w_bar_ss_H
         w_pom_ss_vfi = w_pom_ss_vfi_H
         w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_H
         w_bar_ss_vfi = w_bar_ss_H    
         bequest_ss_vfi =  bequest_ss_H
-        b_pom_ss_j_H = b_ss_j_H
-        w_pom_ss_j_H = w_ss_j_H
-        b_ss_j_vfi = b_pom_ss_j_H
-        bequest_ss_j_vfi_H =  bequest_ss_j_H
-        bequest_ss_j_vfi_dif_H = bequest_ss_j_H - bequest_ss_j_old_H
+        b_pom_ss_j = b_ss_j_H
+        w_pom_ss_j = w_ss_j_H
+        b_ss_j_vfi = b_pom_ss_j
+        bequest_ss_j_vfi=  bequest_ss_j_H
+        bequest_ss_j_vfi_dif = bequest_ss_j_H - bequest_ss_j_old_H
         
         
         call agent_vf()
         prob_ss_H = prob_ss
         c_ss_j_H = c_ss_j_vfi
         l_ss_j_H = l_ss_j_vfi
-        s_pom_ss_j_H(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
-        s_ss_j_H(:) =  s_pom_ss_j_H
+        s_pom_ss_j_vfi_H(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
+        s_ss_j_H(:) =  s_pom_ss_j_vfi_H
         avg_ef_l_supply_H =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         LabIncAVG_ss_vfi_H =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_H(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
         sum_b_weight_ss_H = sum_b_weight_ss
 
         ! aggregation
+        l_ss_j = H_share_ss * l_ss_j_H + (1 - H_share_ss) * l_ss_j_L
+        w_ss_j = H_share_ss * w_ss_j_H + (1 - H_share_ss) * w_ss_j_L
+        s_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L
+        c_ss_j = H_share_ss * c_ss_j_H + (1 - H_share_ss) * c_ss_j_L
+        b_ss_j = H_share_ss * b_ss_j_H + (1 - H_share_ss) * b_ss_j_L
         
         bigl_ss = sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))        
         average_l_ss =  sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))    
@@ -366,7 +374,7 @@ endif
         consumption_ss_gross  = sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
         savings_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L 
         savings_ss = sum(N_ss_j*savings_ss_j(1:bigJ))/bigl_ss
-        
+        prob_ss = H_share_ss * prob_ss_H + (1 - H_share_ss) * prob_ss_L
         avg_ef_l_supply  =  H_share_ss * avg_ef_l_supply_H  + (1-H_share_ss) *  avg_ef_l_supply_L
         LabIncAVG_ss_vfi =  H_share_ss * LabIncAVG_ss_vfi_H + (1-H_share_ss) *  LabIncAVG_ss_vfi_L
         avg_wl = sum((H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_j_L(1:jbar_ss-1)))/(real(jbar_ss-1))
@@ -387,8 +395,8 @@ endif
             b1_ss_j_L(j) = valor_mult_ss*b1_ss_j_L(j-1)
             enddo
     
-            b_ss_j_H = b_scale_factor_ss*b1_ss_j_H 
-            b_ss_j_L = b_scale_factor_ss*b1_ss_j_L 
+            b_ss_j_H = b_scale_factor_ss * b1_ss_j_H 
+            b_ss_j_L = b_scale_factor_ss * b1_ss_j_L 
             
             sum_b_weight_ss =  H_share_ss * sum_b_weight_ss_H  + (1-H_share_ss) *  sum_b_weight_ss_L
             sum_b_ss = sum((sum_b_weight_ss_H*H_share_ss*b_ss_j_H+(1-H_share_ss)*b_ss_j_L)*N_ss_j(1:bigJ))/bigl_ss

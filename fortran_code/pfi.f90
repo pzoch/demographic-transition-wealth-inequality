@@ -58,7 +58,7 @@ real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, l
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, &
                            labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high 
 
-real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi
+real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, LabIncAVG_ss_vfi_L, LabIncAVG_ss_vfi_H, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi
 real*8 ::   gini_weight_sv(bigJ, 0:n_a)
 integer ::  jbar_ss_vf
 
@@ -239,7 +239,7 @@ contains
             if (switch_run_1 == 1) then 
                 V_j_vfi(:,1) = 0d0 ! to d0
                 
-                avg_ef_l_suply_trans(1) = avg_ef_l_suply
+                avg_ef_l_suply_trans(1) = avg_ef_l_supply
                 c_trans(:, :, :, :, :, :, 1) = c_ss
                 l_trans(:, :, :, :, :, :, 1) = l_ss  
                 lab_income_trans(:, :, :, :, :, :, 1) = lab_income_ss
@@ -282,7 +282,7 @@ contains
                     s_pom_j_vfi(:,i) = s_pom_ss_j_vfi
                     V_j_vfi(:,i) = V_ss_j_vfi
                     gini_weight_trans(:,:, i) = gini_weight_sv
-                    avg_ef_l_suply_trans(i) = avg_ef_l_suply
+                    avg_ef_l_suply_trans(i) = avg_ef_l_supply
                     LabIncAVG_vfi(i) = LabIncAVG_ss_vfi
                 enddo
             endif

@@ -201,7 +201,7 @@ do j = bigJ-1, 1, -1
                             lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)  = lab_income_pretax
                             tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
-                            aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/avg_ef_l_suply, aime_cap ))/float(j)
+                            aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/avg_ef_l_supply, aime_cap ))/float(j)
 
                         endif
                         pi_com = pi_ss_vfi_cond(j)
