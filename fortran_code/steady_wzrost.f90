@@ -14,7 +14,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss, w_bar_ss_L, w_bar_ss_H,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H,  pillarI_ss_j, pillarII_ss_j)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss, w_bar_ss_L, w_bar_ss_H,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H,  pillarI_ss_j, pillarII_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
@@ -33,7 +33,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, w_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss, w_bar_ss_H, w_bar_ss_L
     real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H
     ! pension system 
-     real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j,b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H, pillarI_ss_j, pillarII_ss_j, &
+     real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H, pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
     
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &

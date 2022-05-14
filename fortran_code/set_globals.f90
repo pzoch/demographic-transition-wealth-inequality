@@ -298,6 +298,20 @@ subroutine clear_globals
     s_ss_j_1 = 0
     c_ss_j_1 = 0
     b_ss_j_1 = 0
+
+    w_bar_ss_L_1 = 0
+    l_ss_j_L_1 = 0
+    w_ss_j_L_1 = 0
+    s_ss_j_L_1 = 0
+    c_ss_j_L_1 = 0
+    b_ss_j_L_1 = 0
+    
+    w_bar_ss_H_1 = 0
+    l_ss_j_H_1 = 0
+    w_ss_j_H_1 = 0
+    s_ss_j_H_1 = 0
+    c_ss_j_H_1 = 0
+    b_ss_j_H_1 = 0
    
     k_ss_2 = 0
     r_ss_2 = 0
@@ -309,6 +323,20 @@ subroutine clear_globals
     c_ss_j_2 = 0
     b_ss_j_2 = 0
 
+    w_bar_ss_L_2 = 0
+    l_ss_j_L_2 = 0
+    w_ss_j_L_2 = 0
+    s_ss_j_L_2 = 0
+    c_ss_j_L_2 = 0
+    b_ss_j_L_2 = 0
+    
+    w_bar_ss_H_2 = 0
+    l_ss_j_H_2 = 0
+    w_ss_j_H_2 = 0
+    s_ss_j_H_2 = 0
+    c_ss_j_H_2 = 0
+    b_ss_j_H_2 = 0
+    
     c_db = 0
     l_db = 0
     tax_c_db = 0
