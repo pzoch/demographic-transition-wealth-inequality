@@ -34,11 +34,11 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
     real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
     ! pension system 
-     real(dp), dimension(bigj,bigM) :: b1_ss_j, b2_ss_j
-    real(dp), dimension(bigj) :: pillarI_ss_j, pillarII_ss_j, &
+     real(dp), dimension(bigj,bigM) :: b1_ss_j, b2_ss_j, w_pom_ss_implicit
+     real(dp), dimension(bigj) :: pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
-    
-    
+     real(dp), dimension(bigM) :: w_pom_ss
+     
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
                 nom1, denom1, nom2, denom2
      real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, b_pom_ss_j, w_pom_ss_j, s_pom_ss_j
@@ -46,7 +46,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, l_ss_pen_j, b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
                            labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
-     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss
+     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
 
@@ -165,9 +165,10 @@ do iter = 1,n_iter_ss,1
         else
         r_ss = 1 + (1 - tk_ss)*(r_bar_ss + depr) - depr
         endif
+      
+
     do m = 1,bigM,1
         w_ss_j(:,m) = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss(m)
-        w_pom_ss_j(:,m) = (1 - t1_ss-t2_ss)**w_bar_ss(m)
     enddo
     
     ! g due to closure consruction is expresse as G/bigL
@@ -286,52 +287,61 @@ endif
         jbar_ss_vf = ceiling(jbar_ss)
         N_ss_j_vfi =  N_ss_j
         iter_com = iter
+        w_pom_ss=  (1.0_dp - t1_ss - t2_ss)*w_bar_ss 
         
+        do m = 1,bigM, 1
+            w_pom_ss_implicit(:,m) =  (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss(m)
+        enddo
         ! calling each type separately
-    
-        do m = 1,bigM,1
-        w_bar_ss_vfi = w_bar_ss(m)
-        w_pom_ss_vfi = w_pom_j_ss(:,m)
-        w_pom_ss_implicit_vfi = w_pom_ss_implicit(m)
-        w_bar_ss_vfi = w_bar_ss(m) 
-        bequest_ss_vfi =  bequest_ss(m)
-        w_pom_ss_j(:) = w_ss_j(:,m)
-        b_ss_j_vfi = b_ss_j(:,m)
-        
-        bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
-        bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
-      
-        call agent_vf()
-        prob_ss_big(:,m) = prob_ss
-        c_ss_j(:,m) = c_ss_j_vfi
-        l_ss_j(:,m) = l_ss_j_vfi
-        s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
-        avg_ef_l_supply(m) = sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
-        LabIncAVG_ss(m) = sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
 
+        do m = 1,bigM,1
+            w_bar_ss_vfi = w_bar_ss(m)
+            w_pom_ss_vfi = w_pom_ss(m)
+            w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
+            bequest_ss_vfi =  bequest_ss(m)
+            w_pom_ss_j(:) = w_ss_j(:,m)
+            b_ss_j_vfi = b_ss_j(:,m)
+        
+            bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
+            bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
+      
+            call agent_vf()
+            prob_ss_big(:, :, :, :, :, :,m) = prob_ss
+            c_ss_j(:,m) = c_ss_j_vfi
+            l_ss_j(:,m) = l_ss_j_vfi
+            s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
+        
         
         enddo
         
 
         ! aggregation
-
+        bigl_ss         = 0d0
+        average_l_ss    = 0d0
+        average_w_ss    = 0d0
+        consumption_ss_gross = 0d0
+        avg_ef_l_supply     = 0d0
+        LabIncAVG_ss_vfi    = 0d0
+        avg_wl              = 0d0
+        bigl_ss             = 0d0
+        do m = 1,bigM,1
         
-        bigl_ss = sum(sum(N_ss_j * (bigM_share_ss * l_ss_j(1:jbar_ss-1,:))))
-        
-        average_l_ss =  sum(sum(N_ss_j * (bigM_share_ss *          l_ss_j(1:jbar_ss-1,:))))/sum(N_ss_j(1:jbar_ss-1))    
-        average_w_ss =  sum(sum(N_ss_j * (bigM_share_ss * w_ss_j * l_ss_j(1:jbar_ss-1,:))))/sum(N_ss_j(1:jbar_ss-1))
-        consumption_ss_gross_j  = c_ss_j
-        consumption_ss_gross    = sum(sum(bigM_share_ss * consumption_ss_gross_j*N_ss_j(1:bigJ)))/bigl_ss
-        
-        savings_ss_j = s_ss_j
-        savings_ss = sum(sum(bigM_share_ss*N_ss_j*savings_ss_j(1:bigJ,:)))/bigl_ss
-        
-
-        avg_ef_l_supply  =  sum(bigM_share_ss * avg_ef_l_supply)
-        LabIncAVG_ss_vfi =  sum(bigM_share_ss * LabIncAVG_ss_vfi)
-        avg_wl = sum(sum((H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1))))/(real(jbar_ss-1))
+            
+            bigl_ss = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  *l_ss_j(1:jbar_ss-1,m))
+            average_l_ss = average_l_ss + bigM_share_ss(m) * sum(N_ss_j  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_w_ss = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            consumption_ss_gross_j  = consumption_ss_gross_j +  bigM_share_ss(m) * c_ss_j(:,m)
+            savings_ss_j = savings_ss_j +  bigM_share_ss(m) * s_ss_j(:,m)
+            
+            avg_ef_l_supply  =  avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)))
+            avg_wl = avg_wl + bigM_share_ss(m) * sum( w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
     
-
+        enddo
+            consumption_ss_gross    =   sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
+            savings_ss              =   sum(savings_ss_j*N_ss_j(1:bigJ))/bigl_ss
+            LabIncAVG_ss_vfi        =   sum(bigM_share_ss * LabIncAVG_ss)
+            
+            
         ! calculate pensions again
             b2_ss_j = 0  
             b1_ss_j(1:jbar_ss-1,:) = 0
