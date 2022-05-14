@@ -134,16 +134,22 @@ IMPLICIT NONE
     
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
-    real*8, dimension(bigJ) ::   pillar1_ss_j_1, pillar2_ss_j_1, b1_ss_j_2, b2_ss_j_2, pillar1_ss_j_2, pillar2_ss_j_2
+    real*8 :: sum_b_weight_ss_vfi
+    real*8, dimension(bigJ) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT)
     real*8, dimension(bigT) :: avg_ef_l_suply_trans, sum_b1_help
 
 
 ! implicit tax
-    real(dp), dimension(bigj) :: tau1_ss_1, tau1_a_ss_1, tau2_ss_1, b_pom_ss_j_1, &
+    real(dp), dimension(bigJ) :: tau1_ss_1, tau1_a_ss_1, tau2_ss_1, &
                                  w_pom_ss_j_1, s_pom_ss_j_1, tau1_ss_2, tau1_a_ss_2, &
-                                 tau2_ss_2, b_pom_ss_j_2, w_pom_ss_j_2, s_pom_ss_j_2, &
-                                 transfer_pfi, bequest_left_ss_j_1, bequest_left_ss_j_2
+                                 tau2_ss_2, w_pom_ss_j_2, s_pom_ss_j_2, &
+                                 transfer_pfi
+     real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2
+    
+                                 
+    
+    real(dp), dimension(bigJ, bigM) :: b1_ss_j_1, b2_ss_j_1, b1_ss_j_2, b2_ss_j_2
     real(dp) :: ret1_help, ret2_help, savings_ss_pom, pom2
     
  ! progression

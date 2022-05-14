@@ -22,10 +22,10 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     
     real(dp), dimension(bigM) :: bequest_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
-    real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j, N_ss_j, consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
+    real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
     
     
-	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old
+	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
     real*8, dimension(0:n_a) :: prob_ss_marg
     real(dp), intent(in)  :: rho	
     integer, intent(in)   :: param_ss
@@ -41,9 +41,11 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
                 nom1, denom1, nom2, denom2
-     real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, b_pom_ss_j, w_pom_ss_j, s_pom_ss_j
+     real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, w_pom_ss_j, s_pom_ss_j
      real(dp) :: avg_wl, mult_ss
-     real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, l_ss_pen_j, b_ss_j_vfi, &
+     
+     real(dp), dimension(bigj,bigM) :: l_ss_pen_j
+     real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
                            labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
      real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big
@@ -293,8 +295,9 @@ endif
             w_pom_ss_implicit(:,m) =  (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss(m)
         enddo
         ! calling each type separately
-
+        sum_b_weight_ss = 0.0d0
         do m = 1,bigM,1
+            
             w_bar_ss_vfi = w_bar_ss(m)
             w_pom_ss_vfi = w_pom_ss(m)
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
@@ -310,11 +313,13 @@ endif
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
-        
+            sum_b_weight_ss = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
         
         enddo
         
-
+        
+        consumption_ss_gross_j = c_ss_j
+        savings_ss_j           = s_ss_j
         ! aggregation
         bigl_ss         = 0d0
         average_l_ss    = 0d0
@@ -330,15 +335,19 @@ endif
             bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
             average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
-            consumption_ss_gross_j  = consumption_ss_gross_j +  bigM_share_ss(m) * c_ss_j(:,m)
-            savings_ss_j            = savings_ss_j +  bigM_share_ss(m) * s_ss_j(:,m)
+            consumption_ss_gross    = consumption_ss_gross + bigM_share_ss(m) * sum(N_ss_j  * consumption_ss_gross_j(:,m))
+            
+            
+            savings_ss              = savings_ss +  bigM_share_ss(m) * sum(N_ss_j  * savings_ss_j(:,m))
+            
+            
             LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1)) 
             avg_ef_l_supply         = avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
-            consumption_ss_gross    =   sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
-            savings_ss              =   sum(savings_ss_j*N_ss_j(1:bigJ))/bigl_ss
+            consumption_ss_gross    =   consumption_ss_gross/bigl_ss
+            savings_ss              =   savings_ss/bigl_ss
             
             
         ! calculate pensions again
@@ -353,16 +362,17 @@ endif
     
             b_ss_j = b_scale_factor_ss * b1_ss_j 
             
-            ! this is a bit weird, check it
-            sum_b_weight_ss =  sum(bigM_share_ss * sum_b_weight_ss)
-            
             sum_b_ss = 0.0d0
-            do m = 1:bigM,1
-            sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*bigM_share_ss*b_ss_j))/bigl_ss
-            end
+            do m = 1,bigM,1
+                sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*bigM_share_ss(m)*b_ss_j(:,m))/bigl_ss
+            enddo
             
-            subsidy_ss_j = sum_b_weight_ss*b_ss_j - t1_ss*w_bar_ss*l_ss_j
-            subsidy_ss = sum(sum(N_ss_j*bigM_share_ss*subsidy_ss_j(1:bigJ,:)))/bigl_ss
+            subsidy_ss = 0.0d0
+            do m = 1,bigM,1 
+                subsidy_ss = subsidy_ss + bigM_share_ss(m)*sum(N_ss_j*(sum_b_weight_ss*b_ss_j(:,m) - t1_ss*w_bar_ss(m)*l_ss_j(:,m)))/bigl_ss
+            enddo
+           
+
 
     
 
@@ -390,16 +400,16 @@ endif
 enddo 
 !close (121)
 
-    do j = 1,bigJ,1
-        if (j == 1) then
-            income_ss_j(j) = (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j) - upsilon_ss + bequest_ss_j(j)
-        else
-            income_ss_j(j) = r_ss*s_ss_j(j-1)/gam_ss + (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j)  - upsilon_ss + bequest_ss_j(j)
-        endif
-    enddo
-
-    income_ss = sum(N_ss_j*income_ss_j(1:bigJ))/bigl_ss
-    savings_ss_rate_j = s_ss_j/income_ss_j
+    !do j = 1,bigJ,1
+    !    if (j == 1) then
+    !        income_ss_j(j) = (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j) - upsilon_ss + bequest_ss_j(j)
+    !    else
+    !        income_ss_j(j) = r_ss*s_ss_j(j-1)/gam_ss + (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j)  - upsilon_ss + bequest_ss_j(j)
+    !    endif
+    !enddo
+    !
+    !income_ss = sum(N_ss_j*income_ss_j(1:bigJ))/bigl_ss
+    !savings_ss_rate_j = s_ss_j/income_ss_j
     
     if (switch_run_1 == 1) then    
         l_ss_pen_j_1 = l_ss_pen_j
@@ -416,7 +426,6 @@ if (switch_run_1 == 1) then
     s_pom_ss_j_1 = s_pom_ss_j
     tau1_ss_1 = tau1_ss
     tau2_ss_1 = tau2_ss
-    b_pom_ss_j_1 = b_pom_ss_j
     w_pom_ss_j_1 = w_pom_ss_j
     bequest_left_ss_j_1 = bequest_left_ss_j
     labor_tax_j_vfi_ss_1 = labor_tax_ss_j_vfi
@@ -426,7 +435,6 @@ else
     s_pom_ss_j_2 = s_pom_ss_j
     tau1_ss_2 = tau1_ss
     tau2_ss_2 = tau2_ss
-    b_pom_ss_j_2 = b_pom_ss_j
     w_pom_ss_j_2 = w_pom_ss_j
     bequest_left_ss_j_2 = bequest_left_ss_j
     labor_tax_j_vfi_ss_2 = labor_tax_ss_j_vfi
@@ -446,30 +454,30 @@ endif
     enddo
 
     
-    include 'utility_ss.f90' 
+    !include 'utility_ss.f90' 
 
-    replacement_ss = sum_b_weight_ss*b_ss_j_vfi(jbar_ss)/((1 - t1_ss - t2_ss)*w_bar_ss*l_ss_pen_j(jbar_ss-1))   
+    !replacement_ss = sum_b_weight_ss*b_ss_j_vfi(jbar_ss)/((1 - t1_ss - t2_ss)*w_bar_ss*l_ss_pen_j(jbar_ss-1))   
     if (switch_print == 1) then
         include 'Print_steady_db.f90'
     endif
     
     k_ss_o = k_ss
     
-    ! calculate marginal
-     prob_ss_marg = 0d0
-            do ia = 0, n_a, 1
-                 do j = 1, bigJ  
-                     do i_aime = 0, n_aime, 1
-                          do ip = 1 , n_sp, 1
-                            do ir=1, n_sr, 1
-                                do id=1,n_sd,1 
-                                prob_ss_marg(ia) = prob_ss_marg(ia) + prob_ss(j, ia, i_aime, ip, ir, id)* N_ss_j(j)/N_ss
-                                enddo
-                            enddo
-                        enddo
-                    enddo
-                enddo
-            enddo 
+    !! calculate marginal
+    ! prob_ss_marg = 0d0
+    !        do ia = 0, n_a, 1
+    !             do j = 1, bigJ  
+    !                 do i_aime = 0, n_aime, 1
+    !                      do ip = 1 , n_sp, 1
+    !                        do ir=1, n_sr, 1
+    !                            do id=1,n_sd,1 
+    !                            prob_ss_marg(ia) = prob_ss_marg(ia) + prob_ss(j, ia, i_aime, ip, ir, id)* N_ss_j(j)/N_ss
+    !                            enddo
+    !                        enddo
+    !                    enddo
+    !                enddo
+    !            enddo
+    !        enddo 
 
     
 

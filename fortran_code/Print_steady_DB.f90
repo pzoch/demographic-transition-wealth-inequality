@@ -82,8 +82,8 @@
         write(*,'(A30,F10.7,A)') ' capital labour ratio = ', k_ss/bigl_ss
         write(*,'(A30,F10.7,A)') ' labour share = ', w_bar_ss/y_ss
         write(*,'(A30,F10.7,A)') ' capital share = ', ((r_bar_ss + depr)*k_ss/y_ss)
-        write(*,'(A30,F10.7,A)') ' l_ss_pen_j(jbar-1) = ', l_ss_pen_j(jbar_ss-1)
-        write(*,'(A30,F10.7,A)') ' l_ss_j(jbar-1) = ', l_ss_j(jbar_ss-1)
+        !write(*,'(A30,F10.7,A)') ' l_ss_pen_j(jbar-1) = ', l_ss_pen_j(jbar_ss-1)
+        !write(*,'(A30,F10.7,A)') ' l_ss_j(jbar-1) = ', l_ss_j(jbar_ss-1)
         write(*,*) ' u_ss = ', V_ss_j_vfi(1)
         write(*,*) ' mult = ', mult_ss
         write(*,*)
@@ -142,9 +142,9 @@
     write(666, '(A)') ""
     write(666, '(A)') "Lifecycle"
     write(666, '(A)') "yr;c;l;s;V;disc"
-    do j = 1, bigJ
-        write(666, '(I2,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') j, ";", c_ss_j(j), ";", l_ss_j(j), ";", s_ss_j(j), ";", V_ss_j_vfi(j), ";", beta*delta**(j-1)*(pi_ss(j)/pi_ss(1))
-    enddo
+    !do j = 1, bigJ
+    !    write(666, '(I2,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') j, ";", c_ss_j(j), ";", l_ss_j(j), ";", s_ss_j(j), ";", V_ss_j_vfi(j), ";", beta*delta**(j-1)*(pi_ss(j)/pi_ss(1))
+    !enddo
 CLOSE(666)
 
     
