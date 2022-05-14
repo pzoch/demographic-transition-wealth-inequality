@@ -195,7 +195,6 @@ endif
     
 
     g_share_ss = 0.28d0 ! 0.17d0 !0.17_dp
-
     
     
     superstar_factor_1 = 6.5d0
@@ -205,7 +204,11 @@ endif
     theta = 2.0_dp!2.0_dp
    
     up_t = 0.7d0
-
+    
+    ! population shares of types
+    bigM_share_ss = 1.0d0 / bigM
+    ! productivity multiplier
+    type_multiplier = 1.0d0
 
     include 'parameters_CD.f90'
     
@@ -299,19 +302,6 @@ subroutine clear_globals
     c_ss_j_1 = 0
     b_ss_j_1 = 0
 
-    w_bar_ss_L_1 = 0
-    l_ss_j_L_1 = 0
-    w_ss_j_L_1 = 0
-    s_ss_j_L_1 = 0
-    c_ss_j_L_1 = 0
-    b_ss_j_L_1 = 0
-    
-    w_bar_ss_H_1 = 0
-    l_ss_j_H_1 = 0
-    w_ss_j_H_1 = 0
-    s_ss_j_H_1 = 0
-    c_ss_j_H_1 = 0
-    b_ss_j_H_1 = 0
    
     k_ss_2 = 0
     r_ss_2 = 0
@@ -323,19 +313,7 @@ subroutine clear_globals
     c_ss_j_2 = 0
     b_ss_j_2 = 0
 
-    w_bar_ss_L_2 = 0
-    l_ss_j_L_2 = 0
-    w_ss_j_L_2 = 0
-    s_ss_j_L_2 = 0
-    c_ss_j_L_2 = 0
-    b_ss_j_L_2 = 0
-    
-    w_bar_ss_H_2 = 0
-    l_ss_j_H_2 = 0
-    w_ss_j_H_2 = 0
-    s_ss_j_H_2 = 0
-    c_ss_j_H_2 = 0
-    b_ss_j_H_2 = 0
+   
     
     c_db = 0
     l_db = 0

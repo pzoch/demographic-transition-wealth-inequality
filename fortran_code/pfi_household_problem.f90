@@ -8,6 +8,17 @@ real*8 :: available, EV_prim, c_opt, w_opt, c_ss_endo(0:n_a), l_ss_endo(0:n_a), 
 real*8 :: av, wage, wage_non_tax, foc(3), optimal_choice(2)
 real*8 :: dist, c_help, l_help
 
+!initialization to get rid of anything from before
+                    c_ss = 0d0
+                    lab_income_ss =0d0
+                    lab_income_pretax_ss =0d0
+                    tot_income_ss = 0d0
+                    tot_income_pretax_ss = 0d0
+                    labor_tax = 0d0
+                    svplus_ss=0d0
+                    aime_plus_ss = 0d0
+                    V_ss = 0d0
+
 
 do ia = 0, n_a, 1 
     do i_aime=0, n_aime,1

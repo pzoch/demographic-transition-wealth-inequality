@@ -14,40 +14,39 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss, w_bar_ss_L, w_bar_ss_H,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H,  pillarI_ss_j, pillarII_ss_j)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
-                savings_ss, average_l_ss, average_w_ss, upsilon_ss, bequest_ss, income_ss, &
-                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, bequest_ss_L, bequest_ss_H
-        
+                savings_ss, average_l_ss, average_w_ss, upsilon_ss, income_ss, &
+                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss
     
+    real(dp), dimension(bigM) :: bequest_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
-    real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j,  consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
+    real(dp), dimension(bigj) :: savings_ss_j, lti_ss_j, N_ss_j, consumption_ss_gross_j, u_ss_j, income_ss_j, savings_ss_rate_j
     
     
-	real(dp), dimension(bigj) :: denominator_j, subsidy_ss_j, N_ss_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, bequest_left_ss_j_H, bequest_ss_j_H, bequest_ss_j_old_H, bequest_left_ss_j_L, bequest_ss_j_L, bequest_ss_j_old_L
+	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old
     real*8, dimension(0:n_a) :: prob_ss_marg
     real(dp), intent(in)  :: rho	
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
-    real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, w_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss, w_bar_ss_H, w_bar_ss_L
-    real(dp), dimension(bigj), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, l_ss_j_L, w_ss_j_L, s_ss_j_L, c_ss_j_L, b_ss_j_L, l_ss_j_H, w_ss_j_H, s_ss_j_H, c_ss_j_H, b_ss_j_H
+    real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
+    real(dp), dimension(bigM), intent(out)  :: w_bar_ss
+    real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
     ! pension system 
-     real(dp), dimension(bigj) :: b1_ss_j, b2_ss_j, b1_ss_j_L, b2_ss_j_L, b1_ss_j_H, b2_ss_j_H, pillarI_ss_j, pillarII_ss_j, &
+     real(dp), dimension(bigj,bigM) :: b1_ss_j, b2_ss_j
+    real(dp), dimension(bigj) :: pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
+    
     
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
                 nom1, denom1, nom2, denom2
      real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, b_pom_ss_j, w_pom_ss_j, s_pom_ss_j
      real(dp) :: avg_wl, mult_ss
-     real*8, dimension(bigJ) :: V_ss_j_vfi_L, c_ss_j_vfi_L, s_pom_ss_j_vfi_L, l_ss_j_vfi_L, lab_ss_j_vfi_L, l_ss_pen_j_L, b_ss_j_vfi_L, &
-                           bequest_ss_j_vfi_L, bequest_ss_j_vfi_dif_L, pi_ss_vfi_L, pi_ss_vfi_cond_L, &
-                           labor_tax_ss_j_vfi_L, lw_ss_j_vfi_L, lw_lambda_ss_j_vfi_L, w_pom_ss_vfi_L, w_pom_ss_implicit_vfi_L, lab_high_L 
-     real*8, dimension(bigJ) :: V_ss_j_vfi_H, c_ss_j_vfi_H, s_pom_ss_j_vfi_H, l_ss_j_vfi_H, lab_ss_j_vfi_H, l_ss_pen_j_H, b_ss_j_vfi_H, &
-                           bequest_ss_j_vfi_H, bequest_ss_j_vfi_dif_H, pi_ss_vfi_H, pi_ss_vfi_cond_H, &
-                           labor_tax_ss_j_vfi_H, lw_ss_j_vfi_H, lw_lambda_ss_j_vfi_H, w_pom_ss_vfi_H, w_pom_ss_implicit_vfi_H, lab_high_H 
-     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: prob_ss_L, prob_ss_H
- 
+     real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, l_ss_pen_j, b_ss_j_vfi, &
+                           bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
+                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
+     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
 
@@ -124,8 +123,7 @@ write(*,*) "ret/work force  ", sum(N_ss_j(jbar_ss:))/sum(N_ss_j(:jbar_ss-1))
 
 b_scale_factor_ss = 1d0
 avg_ef_l_supply = 0.33 
-avg_ef_l_supply_L = 0.33  
-avg_ef_l_supply_H = 0.33 
+
 
 
 valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss 
@@ -136,8 +134,8 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
     
     r_bar_ss = (1 + 0.03_dp)**(zbar) - 1 !(1 + 0.078_dp)**(zbar) - 1
     k_ss = ((r_bar_ss + depr)/(alpha*zbar))**(1/(alpha - 1))
-    w_bar_ss = zbar*(1 - alpha)*k_ss**alpha
-    LabIncAVG_ss_vfi = 0.33*w_bar_ss 
+    w_bar_ss(:) = zbar*(1 - alpha)*k_ss**alpha * type_multiplier
+    LabIncAVG_ss_vfi = sum(0.33*w_bar_ss*bigM_share_ss)
     ! upsilon gess residual closure ( we need only upsil, other parameters are given in set globals)
     select case (switch_residual)
     case(0)
@@ -156,8 +154,8 @@ do iter = 1,n_iter_ss,1
     
     r_bar_ss = zbar*alpha*k_ss**(alpha - 1) - depr
     y_ss     = zbar* k_ss**(alpha)
-    w_bar_ss_L = zbar*(1 - alpha)*k_ss**alpha
-    w_bar_ss_H = zbar*(1 - alpha)*k_ss**alpha
+    w_bar_ss(:) = zbar*(1 - alpha)*k_ss**alpha * type_multiplier
+    
     if (r_bar_ss < 0) then
         r_bar_ss = 0
     endif
@@ -167,10 +165,10 @@ do iter = 1,n_iter_ss,1
         else
         r_ss = 1 + (1 - tk_ss)*(r_bar_ss + depr) - depr
         endif
-    
-    w_ss_j_L = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss_L
-    w_ss_j_H = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss_H
-
+    do m = 1,bigM,1
+        w_ss_j(:,m) = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss(m)
+        w_pom_ss_j(:,m) = (1 - t1_ss-t2_ss)**w_bar_ss(m)
+    enddo
     
     ! g due to closure consruction is expresse as G/bigL
     if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
@@ -201,94 +199,74 @@ do iter = 1,n_iter_ss,1
 if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also weird! need to check!!!! 
 
         if (switch_unequal_bequest==0) then
-            do j = 2,bigJ,1
-                bequest_left_ss_j_H(j-1) = H_share_ss      * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j_H(j-1))/gam_ss
-                bequest_left_ss_j_L(j-1) =(1 - H_share_ss) * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j_L(j-1))/gam_ss
-            enddo
-            bequest_left_ss_j_H(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_H(bigJ))/gam_ss
-            bequest_left_ss_j_L(bigJ) = (N_ss_j(bigJ))*(r_ss*s_ss_j_L(bigJ))/gam_ss
-            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
-            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
+            do m = 1,bigM,1
+                do j = 2,bigJ,1
+                    bequest_left_ss_j(j-1,m) = bigM_share_ss(m) * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
+                enddo
+                
+            bequest_left_ss_j(bigJ,m) = (N_ss_j(bigJ))*(r_ss*s_ss_j(bigJ,m))/gam_ss
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
         
-            bequest_ss_j_old_H = bequest_ss_j_H
-            bequest_ss_j_old_L = bequest_ss_j_L
-            
-            bequest_ss_j_H(1) = 0d0
-            bequest_ss_j_L(1) = 0d0
+            bequest_ss_j_old(:,m) = bequest_ss_j(:,m)
+            bequest_ss_j(1,m) = 0d0
     
             do j = 2,bigJ,1
-                bequest_ss_j_H(j) = up_ss*bequest_ss_j_old_H(j) + (1 - up_ss)*bequest_left_ss_j_H(j-1)/(H_share_ss*N_ss_j(j))  
-                bequest_ss_j_L(j) = up_ss*bequest_ss_j_old_L(j) + (1 - up_ss)*bequest_left_ss_j_L(j-1)/((1-H_share_ss)*N_ss_j(j)) 
-            enddo  
+                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(bigM_share_ss(m)*N_ss_j(j))  
+            enddo 
+            enddo
     
         elseif (switch_unequal_bequest==1) then
-             bequest_ss_j_H(1) = 0d0
-             bequest_ss_j_L(1) = 0d0
+            do m = 1,bigM,1
+             bequest_ss_j(1,m) = 0d0
             do j = 2,bigJ,1
-                bequest_ss_j_H(j) = 0d0
-                bequest_ss_j_L(j) = 0d0
-                bequest_left_ss_j_H(j-1) = H_share_ss *  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j_H(j-1) 
-                bequest_left_ss_j_L(j-1) = (1 - H_share_ss) * (N_ss_j(j-1) - N_ss_j(j))*s_ss_j_L(j-1) 
+                bequest_ss_j(j,m) = 0d0
+                bequest_left_ss_j(j-1,m) = bigM_share_ss(m) *  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j(j-1,m) 
             enddo
-            bequest_left_ss_j_H(bigJ) = (N_ss_j(bigJ))*s_ss_j_H(bigJ) 
-            bequest_left_ss_j_L(bigJ) = (N_ss_j(bigJ))*s_ss_j_L(bigJ) 
-            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
-            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
+            bequest_left_ss_j(bigJ,m) = (N_ss_j(bigJ))*s_ss_j(bigJ,m) 
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
+            enddo
 
         endif
     
 else
         if (switch_unequal_bequest==0) then
+            do m = 1,bigM,1
             do j = 2,bigJ,1
-            bequest_left_ss_j_H(j-1) = H_share_ss * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j_H(j-1))/gam_ss
-            bequest_left_ss_j_L(j-1) = (1 - H_share_ss) * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j_L(j-1))/gam_ss
+            bequest_left_ss_j(j-1,m) = bigM_share_ss(m) * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
             enddo
-            bequest_left_ss_j_H(bigJ) = H_share_ss *  (pi_weight_ss(bigJ))*(r_ss*s_ss_j_H(bigJ))/gam_ss
-            bequest_left_ss_j_L(bigJ) = (1 - H_share_ss) * (pi_weight_ss(bigJ))*(r_ss*s_ss_j_L(bigJ))/gam_ss
+            bequest_left_ss_j(bigJ,m) = bigM_share_ss(m) *  (pi_weight_ss(bigJ))*(r_ss*s_ss_j(bigJ,m))/gam_ss
+
             
-            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
-            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
+            bequest_ss(m)= sum(bequest_left_ss_j(1:bigJ,m))
             
-            bequest_ss_j_old_H = bequest_ss_j_H
-            bequest_ss_j_old_L = bequest_ss_j_L
-            
-            bequest_ss_j_H(1) = 0d0
-            bequest_ss_j_L(1) = 0d0
+            bequest_ss_j_old(:,m) = bequest_ss_j(:,m)
+            bequest_ss_j(1,m) = 0d0
             
             do j = 2,bigJ,1
-                bequest_ss_j_H(j) = up_ss*bequest_ss_j_old_H(j) + (1 - up_ss)*bequest_left_ss_j_H(j-1)/(H_share_ss * pi_weight_ss(j)) 
-                bequest_ss_j_L(j) = up_ss*bequest_ss_j_old_L(j) + (1 - up_ss)*bequest_left_ss_j_L(j-1)/((1-H_share_ss) * pi_weight_ss(j)) 
+                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(bigM_share_ss(m) * pi_weight_ss(j))  
             enddo  
-
+            enddo
         elseif (switch_unequal_bequest==1) then
-            bequest_ss_j_H(1) = 0d0
-            bequest_ss_j_L(1) = 0d0
+            do m = 1,bigM,1
+            bequest_ss_j(1,m) = 0d0
             
             do j = 2,bigJ,1
-                bequest_ss_j_H(j) = 0d0
-                bequest_left_ss_j_H(j-1) = H_share_ss *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j_H(j-1) / nu_ss**(j-1)
-                
-                bequest_ss_j_L(j) = 0d0
-                bequest_left_ss_j_L(j-1) = (1- H_share_ss) *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j_L(j-1) / nu_ss**(j-1)
+                bequest_ss_j(j,m) = 0d0
+                bequest_left_ss_j(j-1,m) = bigM_share_ss(m) *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j(j-1,m) / nu_ss**(j-1)
             enddo
             
             
-            bequest_left_ss_j_H(bigj) =H_share_ss * pi_weight_ss(bigJ)*s_ss_j_H(bigj) * nu_ss**(-bigj-1)
-            bequest_left_ss_j_L(bigj) =(1- H_share_ss) *  pi_weight_ss(bigJ)*s_ss_j_L(bigj) * nu_ss**(-bigj-1)
-            bequest_ss_H = sum(bequest_left_ss_j_H(1:bigJ))
-            bequest_ss_L = sum(bequest_left_ss_j_L(1:bigJ))
+            bequest_left_ss_j(bigj,m) = bigM_share_ss(m) *  pi_weight_ss(bigJ) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
 
-    endif
+            enddo
+        endif
     
 endif        
 
 
 
-        w_pom_ss_vfi_L = (1.0_dp - t1_ss - t2_ss)*w_bar_ss_L 
-        w_pom_ss_implicit_vfi_L = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss_L
-        
-        w_pom_ss_vfi_H = (1.0_dp - t1_ss - t2_ss)*w_bar_ss_H 
-        w_pom_ss_implicit_vfi_H = (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss_H
+
         
         if (switch_tauK_gross == 0) then
             r_ss_vfi = (1d0 - tk_ss)*r_bar_ss  
@@ -310,100 +288,68 @@ endif
         iter_com = iter
         
         ! calling each type separately
-        
-        !!!!! L - type now
-        
     
-
-        w_bar_ss_vfi = w_bar_ss_L
-        w_pom_ss_vfi = w_pom_ss_vfi_L
-        w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_L
-        w_bar_ss_vfi = w_bar_ss_L    
-        bequest_ss_vfi =  bequest_ss_L
-        b_pom_ss_j = b_ss_j_L
-        w_pom_ss_j = w_ss_j_L
-        b_ss_j_vfi = b_pom_ss_j
-        bequest_ss_j_vfi =  bequest_ss_j_L
-        bequest_ss_j_vfi_dif = bequest_ss_j_L - bequest_ss_j_old_L
-
+        do m = 1,bigM,1
+        w_bar_ss_vfi = w_bar_ss(m)
+        w_pom_ss_vfi = w_pom_j_ss(:,m)
+        w_pom_ss_implicit_vfi = w_pom_ss_implicit(m)
+        w_bar_ss_vfi = w_bar_ss(m) 
+        bequest_ss_vfi =  bequest_ss(m)
+        w_pom_ss_j(:) = w_ss_j(:,m)
+        b_ss_j_vfi = b_ss_j(:,m)
+        
+        bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
+        bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
       
         call agent_vf()
-        prob_ss_L = prob_ss
-        c_ss_j_L = c_ss_j_vfi
-        l_ss_j_L = l_ss_j_vfi
-        s_pom_ss_j_vfi_L(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
-        s_ss_j_L(:) =  s_pom_ss_j_vfi_L
-        avg_ef_l_supply_L  =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        LabIncAVG_ss_vfi_L =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_L(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        sum_b_weight_ss_L = sum_b_weight_ss
+        prob_ss_big(:,m) = prob_ss
+        c_ss_j(:,m) = c_ss_j_vfi
+        l_ss_j(:,m) = l_ss_j_vfi
+        s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
+        avg_ef_l_supply(m) = sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+        LabIncAVG_ss(m) = sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+
         
-        !!!!! H - type now
-        w_bar_ss_vfi = w_bar_ss_H
-        w_pom_ss_vfi = w_pom_ss_vfi_H
-        w_pom_ss_implicit_vfi = w_pom_ss_implicit_vfi_H
-        w_bar_ss_vfi = w_bar_ss_H    
-        bequest_ss_vfi =  bequest_ss_H
-        b_pom_ss_j = b_ss_j_H
-        w_pom_ss_j = w_ss_j_H
-        b_ss_j_vfi = b_pom_ss_j
-        bequest_ss_j_vfi=  bequest_ss_j_H
-        bequest_ss_j_vfi_dif = bequest_ss_j_H - bequest_ss_j_old_H
+        enddo
         
-        
-        call agent_vf()
-        prob_ss_H = prob_ss
-        c_ss_j_H = c_ss_j_vfi
-        l_ss_j_H = l_ss_j_vfi
-        s_pom_ss_j_vfi_H(1:bigJ-1) = s_pom_ss_j_vfi(1:bigJ-1) 
-        s_ss_j_H(:) =  s_pom_ss_j_vfi_H
-        avg_ef_l_supply_H =   sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        LabIncAVG_ss_vfi_H =  sum(N_ss_j(1:jbar_ss-1)*l_ss_j_vfi(1:jbar_ss-1)*w_pom_ss_vfi_H(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
-        sum_b_weight_ss_H = sum_b_weight_ss
 
         ! aggregation
-        l_ss_j = H_share_ss * l_ss_j_H + (1 - H_share_ss) * l_ss_j_L
-        w_ss_j = H_share_ss * w_ss_j_H + (1 - H_share_ss) * w_ss_j_L
-        s_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L
-        c_ss_j = H_share_ss * c_ss_j_H + (1 - H_share_ss) * c_ss_j_L
-        b_ss_j = H_share_ss * b_ss_j_H + (1 - H_share_ss) * b_ss_j_L
+
         
-        bigl_ss = sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))        
-        average_l_ss =  sum(N_ss_j * (H_share_ss * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * l_ss_j_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))    
-        average_w_ss =  sum(N_ss_j * (H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_j_L(1:jbar_ss-1)))/sum(N_ss_j(1:jbar_ss-1))
-        consumption_ss_gross_j  = H_share_ss * c_ss_j_H + (1 - H_share_ss) * c_ss_j_L
-        consumption_ss_gross  = sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
-        savings_ss_j = H_share_ss * s_ss_j_H + (1 - H_share_ss) * s_ss_j_L 
-        savings_ss = sum(N_ss_j*savings_ss_j(1:bigJ))/bigl_ss
-        prob_ss = H_share_ss * prob_ss_H + (1 - H_share_ss) * prob_ss_L
-        avg_ef_l_supply  =  H_share_ss * avg_ef_l_supply_H  + (1-H_share_ss) *  avg_ef_l_supply_L
-        LabIncAVG_ss_vfi =  H_share_ss * LabIncAVG_ss_vfi_H + (1-H_share_ss) *  LabIncAVG_ss_vfi_L
-        avg_wl = sum((H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1) + (1 - H_share_ss) * w_ss_j_L * l_ss_j_L(1:jbar_ss-1)))/(real(jbar_ss-1))
+        bigl_ss = sum(sum(N_ss_j * (bigM_share_ss * l_ss_j(1:jbar_ss-1,:))))
+        
+        average_l_ss =  sum(sum(N_ss_j * (bigM_share_ss *          l_ss_j(1:jbar_ss-1,:))))/sum(N_ss_j(1:jbar_ss-1))    
+        average_w_ss =  sum(sum(N_ss_j * (bigM_share_ss * w_ss_j * l_ss_j(1:jbar_ss-1,:))))/sum(N_ss_j(1:jbar_ss-1))
+        consumption_ss_gross_j  = c_ss_j
+        consumption_ss_gross    = sum(sum(bigM_share_ss * consumption_ss_gross_j*N_ss_j(1:bigJ)))/bigl_ss
+        
+        savings_ss_j = s_ss_j
+        savings_ss = sum(sum(bigM_share_ss*N_ss_j*savings_ss_j(1:bigJ,:)))/bigl_ss
+        
+
+        avg_ef_l_supply  =  sum(bigM_share_ss * avg_ef_l_supply)
+        LabIncAVG_ss_vfi =  sum(bigM_share_ss * LabIncAVG_ss_vfi)
+        avg_wl = sum(sum((H_share_ss * w_ss_j_H * l_ss_j_H(1:jbar_ss-1))))/(real(jbar_ss-1))
     
 
         ! calculate pensions again
-            b2_ss_j_H = 0  
-            b1_ss_j_H(1:jbar_ss-1) = 0
+            b2_ss_j = 0  
+            b1_ss_j(1:jbar_ss-1,:) = 0
 
-            b2_ss_j_L = 0  
-            b1_ss_j_L(1:jbar_ss-1) = 0
-
-            b1_ss_j_L(jbar_ss) = rho*avg_wl !w_ss_j(jbar_ss-1)*l_ss_j(jbar_ss-1) 
-            b1_ss_j_H(jbar_ss) = rho*avg_wl !w_ss_j(jbar_ss-1)*l_ss_j(jbar_ss-1) 
+            b1_ss_j(jbar_ss,:) = rho*avg_wl !w_ss_j(jbar_ss-1)*l_ss_j(jbar_ss-1) 
             
             do j = jbar_ss+1,bigJ,1
-            b1_ss_j_H(j) = valor_mult_ss*b1_ss_j_H(j-1)
-            b1_ss_j_L(j) = valor_mult_ss*b1_ss_j_L(j-1)
+            b1_ss_j(j,:) = valor_mult_ss*b1_ss_j(j-1,:)
             enddo
     
-            b_ss_j_H = b_scale_factor_ss * b1_ss_j_H 
-            b_ss_j_L = b_scale_factor_ss * b1_ss_j_L 
+            b_ss_j = b_scale_factor_ss * b1_ss_j 
             
-            sum_b_weight_ss =  H_share_ss * sum_b_weight_ss_H  + (1-H_share_ss) *  sum_b_weight_ss_L
-            sum_b_ss = sum((sum_b_weight_ss_H*H_share_ss*b_ss_j_H+(1-H_share_ss)*b_ss_j_L)*N_ss_j(1:bigJ))/bigl_ss
+            sum_b_weight_ss =  sum(bigM_share_ss * sum_b_weight_ss)
+            sum_b_ss = sum(sum(sum_b_weight_ss*bigM_share_ss*b_ss_j))/bigl_ss
 
             
-            subsidy_ss_j = H_share_ss * (sum_b_weight_ss_H*b_ss_j_H - t1_ss*w_bar_ss_H*l_ss_j_H)   + (1 - H_share_ss) * (sum_b_weight_ss_L*b_ss_j_L- t1_ss*w_bar_ss_L*l_ss_j_L)
-            subsidy_ss = sum(N_ss_j*subsidy_ss_j(1:bigJ))/bigl_ss
+            subsidy_ss_j = sum_b_weight_ss*b_ss_j - t1_ss*w_bar_ss*l_ss_j
+            subsidy_ss = sum(sum(N_ss_j*bigM_share_ss*subsidy_ss_j(1:bigJ,:)))/bigl_ss
 
     
 

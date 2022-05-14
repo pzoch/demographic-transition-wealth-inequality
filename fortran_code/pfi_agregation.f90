@@ -18,14 +18,14 @@
         s_pom_ss_j_vfi(:) = 0d0
         lab_ss_j_vfi(:) = 0d0
         asset_pom_ss_j(:) = 0d0
-        l_ss_pen_j(:) = 0d0
+        l_ss_pen_j_vfi(:) = 0d0
         w_sum(0) = 0d0
         ERHS_ss = 0d0
         top_ten(:) = 0d0 
         top_ten_coh(:) =0d0
         top_100 =0d0
         savings_top_100 = 0d0
-        lab_high = 0d0
+        lab_high_ss_j_vfi(:)= 0d0
         gini_weight_sv = 0d0
         gini_weight_consumption = 0d0
         sum_b_weight_ss = 0d0
@@ -115,10 +115,10 @@
                                     c_ss_j_vfi(j) = c_ss_j_vfi(j) + c_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                             
                                     if(ip<6)then
-                                        l_ss_pen_j(j) = l_ss_pen_j(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/p_1_5(j)
+                                        l_ss_pen_j_vfi(j) = l_ss_pen_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/p_1_5(j)
                                     endif 
                                     if(ip>=6)then
-                                        lab_high(j) = lab_high(j) + l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/(1d0-p_1_5(j))
+                                        lab_high_ss_j_vfi(j) = lab_high_ss_j_vfi(j) + l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/(1d0-p_1_5(j))
                                     endif
                                     l_ss_j_vfi(j) = l_ss_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     lab_ss_j_vfi(j) = lab_ss_j_vfi(j) + l_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id) 
@@ -193,7 +193,7 @@
         labor_tax_j_vfi(:,i) = 0d0
         lw_lambda_j_vfi(:,i) = 0d0
         lw_j_vfi(:,i) = 0d0
-        l_pen_j(:,i) = 0d0
+        l_pen_j_vfi(:,i) = 0d0
         s_pom_j_vfi(:,i) = 0d0
         lab_j_vfi(:,i) = 0d0
         asset_trans(:,i) = 0d0
@@ -255,7 +255,7 @@
                                 !    savings_top_ten_trans(t,i) = savings_top_ten_trans(t,i) + sv(ia)*prob_trans(j, ia, i_aime, ip,ir, id,i)*N_t_j_vfi(j,i)
                                 !endif                                                   
                                 if(ip<6)then
-                                    l_pen_j(j,i) = l_pen_j(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)/p_1_5_trans(j,i)
+                                    l_pen_j_vfi(j,i) = l_pen_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)/p_1_5_trans(j,i)
                                 endif
                                 if ((prob_trans(j, ia, i_aime, ip, ir, id,i)>1d-10) .and. (j<bigJ)) then
                                     sum_help = 0.0d0

@@ -62,24 +62,25 @@ sigma2_epsilon_ss_new = sigma2_epsilon_t(bigT)
 ! implement correction of epsilons
     if (switch_epsilon_corr == 1) then
         epsilon_correction_t = - (sigma2_epsilon_t/(1.0d0 - zeta_p ** 2d0)) / 2.0d0
+
     else
          epsilon_correction_t = 0.0d0
     endif
     
     epsilon_correction_ss_old = epsilon_correction_t(1)
     epsilon_correction_ss_new = epsilon_correction_t(bigT)
-
     
 if (n_sp>5) then 
     
         do t = 1, bigT, 1
             call discretize_AR(zeta_p, epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_value_trans(1:n_sp-2,t), pi_ip_trans(1:n_sp-2,1:n_sp-2,t))
-
+          
                 !pi_ip_init_trans(n_sp_initial,t) = 1.0d0
         enddo
         
         n_sp_value_trans = exp(n_sp_value_trans)  
 
+        
         ! get steady state shock realizations and transition matrices
         call discretize_AR(zeta_p, epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_value_ss_old(1:n_sp-2), pi_ip_ss_old(1:n_sp-2,1:n_sp-2))
         call discretize_AR(zeta_p, epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_value_ss_new(1:n_sp-2), pi_ip_ss_new(1:n_sp-2,1:n_sp-2))
@@ -89,10 +90,12 @@ if (n_sp>5) then
 
         n_sp_value = exp(n_sp_value)  
 
+        
         pi_i_6 = 5e-3
         pi_6_6 = 0.975d0
         pi_6_7 = 0.008d0
         pi_7_7 = 0.4d0
+        
         n_sp_value_trans(n_sp-1,:) = superstar_factor_1*n_sp_value_trans(n_sp-2,:)
         n_sp_value_trans(n_sp,:) = superstar_factor_2*n_sp_value_trans(n_sp-1,:)
         n_sp_value_ss_old(n_sp-1) = superstar_factor_1*n_sp_value_ss_old(n_sp-2)
@@ -101,6 +104,8 @@ if (n_sp>5) then
         n_sp_value_ss_new(n_sp) = superstar_factor_2*n_sp_value_ss_new(n_sp-1)
     
 
+        
+        
         
         
         pi_ip_trans = (1d0-pi_i_6)*pi_ip_trans

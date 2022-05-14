@@ -21,15 +21,15 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, bequest, income, nu, nu_pop
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, bigY, w_bar, N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_
-    real(dp), dimension(bigj, bigT) :: savings_j, b_j,  b_pom_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j
-	real(dp), dimension(bigj, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j, N_t_j, bigl_j, bigl_j_aux, l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
+    real(dp), dimension(bigj, bigM, bigT) :: savings_j, b_j,  b_pom_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j
+	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j, N_t_j, bigl_j, bigl_j_aux, l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
 
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
     integer, intent(in) :: param
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
     real(dp), dimension(-bigJ:bigT), intent(out) :: V_20_years_old
-    real(dp), dimension(bigj, bigT), intent(out) :: c_j, l_j
+    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j
     
     ! partial equilibrum stohastic vs deterministic model 
     ! this is probably not needed for anything
@@ -40,7 +40,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     !real(dp), dimension(bigJ, bigT) :: c_j_higher_lambda, l_j_higher_lambda, sv_j_higher_lambda, sv_pom_j_higher_lambda
     
     
-    real(dp), dimension(bigJ, bigT) :: b1_j, b2_j, pillarI_j, pillarII_j, pillarI_old_j, pillarII_old_j, contributionI_j, contributionII_j
+    real(dp), dimension(bigJ,bigM, bigT) :: b1_j, b2_j, pillarI_j, pillarII_j, pillarI_old_j, pillarII_old_j, contributionI_j, contributionII_j
     real(dp),	dimension(bigJ,-bigJ:bigT)	:: life_exp ! -bigJ:bigT is needed for implicit tax when we want to perwfome DC- DC with changing mortality
     real(dp), dimension(bigT) :: b_scale_factor, pillarI, pillarII, contributionI, contributionII
     real(dp) :: accountI, accountII, sv_help, nom1, denom1, nom2, denom2
