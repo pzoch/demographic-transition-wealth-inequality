@@ -332,14 +332,13 @@ endif
             average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross_j  = consumption_ss_gross_j +  bigM_share_ss(m) * c_ss_j(:,m)
             savings_ss_j            = savings_ss_j +  bigM_share_ss(m) * s_ss_j(:,m)
-            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1)) 
             avg_ef_l_supply         = avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
             consumption_ss_gross    =   sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
             savings_ss              =   sum(savings_ss_j*N_ss_j(1:bigJ))/bigl_ss
-            LabIncAVG_ss_vfi        =   sum(bigM_share_ss * LabIncAVG_ss)
             
             
         ! calculate pensions again
@@ -354,11 +353,13 @@ endif
     
             b_ss_j = b_scale_factor_ss * b1_ss_j 
             
+            ! this is a bit weird, check it
             sum_b_weight_ss =  sum(bigM_share_ss * sum_b_weight_ss)
             
-            
-            sum_b_ss = sum(sum(sum_b_weight_ss*bigM_share_ss*b_ss_j))/bigl_ss
-
+            sum_b_ss = 0.0d0
+            do m = 1:bigM,1
+            sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*bigM_share_ss*b_ss_j))/bigl_ss
+            end
             
             subsidy_ss_j = sum_b_weight_ss*b_ss_j - t1_ss*w_bar_ss*l_ss_j
             subsidy_ss = sum(sum(N_ss_j*bigM_share_ss*subsidy_ss_j(1:bigJ,:)))/bigl_ss
