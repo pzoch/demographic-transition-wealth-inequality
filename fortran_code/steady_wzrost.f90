@@ -301,7 +301,7 @@ endif
             bequest_ss_vfi =  bequest_ss(m)
             w_pom_ss_j(:) = w_ss_j(:,m)
             b_ss_j_vfi = b_ss_j(:,m)
-        
+
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
             bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
       
@@ -324,18 +324,18 @@ endif
         LabIncAVG_ss_vfi    = 0d0
         avg_wl              = 0d0
         bigl_ss             = 0d0
-        do m = 1,bigM,1
         
+        do m = 1,bigM,1
             
-            bigl_ss = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  *l_ss_j(1:jbar_ss-1,m))
-            average_l_ss = average_l_ss + bigM_share_ss(m) * sum(N_ss_j  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            average_w_ss = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
+            average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross_j  = consumption_ss_gross_j +  bigM_share_ss(m) * c_ss_j(:,m)
-            savings_ss_j = savings_ss_j +  bigM_share_ss(m) * s_ss_j(:,m)
+            savings_ss_j            = savings_ss_j +  bigM_share_ss(m) * s_ss_j(:,m)
+            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            avg_ef_l_supply         = avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
-            avg_ef_l_supply  =  avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)))
-            avg_wl = avg_wl + bigM_share_ss(m) * sum( w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
-    
         enddo
             consumption_ss_gross    =   sum(consumption_ss_gross_j*N_ss_j(1:bigJ))/bigl_ss
             savings_ss              =   sum(savings_ss_j*N_ss_j(1:bigJ))/bigl_ss
@@ -355,6 +355,8 @@ endif
             b_ss_j = b_scale_factor_ss * b1_ss_j 
             
             sum_b_weight_ss =  sum(bigM_share_ss * sum_b_weight_ss)
+            
+            
             sum_b_ss = sum(sum(sum_b_weight_ss*bigM_share_ss*b_ss_j))/bigl_ss
 
             
