@@ -21,8 +21,9 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, bequest, income, nu, nu_pop
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, bigY, w_bar, N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_
+    real(dp), dimension(bigj, bigT) :: N_t_j
     real(dp), dimension(bigj, bigM, bigT) :: savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j
-	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j, N_t_j, bigl_j, bigl_j_aux, l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
+	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j, bigl_j, bigl_j_aux, l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
 
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
@@ -48,7 +49,8 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     real(dp) :: avg_wl(bigT)
     
-    real(dp),	dimension(bigJ,-bigJ:bigT)	:: tau1_s_t, tau1_a_s_t, tau2_s_t, tau1_s_t_old, tau1_a_s_t_old, tau2_s_t_old, w_pom_j
+    real(dp),	dimension(bigJ,-bigJ:bigT)	:: tau1_s_t, tau1_a_s_t, tau2_s_t, tau1_s_t_old, tau1_a_s_t_old, tau2_s_t_old
+    real(dp),	dimension(bigJ, bigM, -bigJ:bigT)	:: w_pom_j
     integer :: is, ii, si
 
 
@@ -137,9 +139,15 @@ include 'Initial_values_db.f90'
     N_t_j = Nn_
     N_t = sum(N_t_j, dim=1)
 
-    bigl_j = N_t_j*l_j
-    bigl_j_aux = N_t_j*l_j
-
+    bigl_j = 0.0d0
+    bigl_j_aux = 0.0d0
+    
+    do m = 1,bigM,1
+        
+        bigl_j = bigl_j + bigM_share_ss(m) * N_t_j*l_j(:,m,:)
+        bigl_j_aux = bigl_j_aux + bigM_share_ss(m) * N_t_j*l_j(:,m,:)
+    enddo
+    
     bigl = sum(bigl_j, dim=1)
     bigl_aux = sum(bigl_j_aux, dim=1)
     
@@ -153,8 +161,8 @@ include 'Initial_values_db.f90'
     enddo 
 
 
-    r_bar = zbar*alpha_t*k**(alpha - 1) - depr
-    w_bar = zbar*(1 - alpha)*k**alpha_t
+    r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr
+    w_bar = zbar*(1 - alpha_t)*k**alpha_t * type_multiplier
     y = zbar*k**(alpha_t)
     
     bigK = k * bigl
@@ -169,19 +177,32 @@ include 'Initial_values_db.f90'
     
     lambda_trans = lambda_t
     debt_constr_trans = debt_constr_t
+    
     !lambda_trans(1) = lambda_ss_old
     !do i = 2,bigT,1
     !    lambda_trans(i) = lambda_new
     !enddo
         
     savings_j = sv_j
-    savings = sum(N_t_j*savings_j, dim=1)/bigl
+    
+    savings = 0.0d0
+    do m = 1,bigM,1
+        savings = savings + bigM_share_ss(m) * sum(N_t_j*savings_j(:,m,:), dim=1)/bigl
+    enddo    
+    
+    wl_bar = 0.0d0
+    do m = 1,bigM,1
+        wl_bar = wl_bar +  bigM_share_ss(m) * sum( N_t_j*l_j(:,m,:)*w_bar(m,:), dim=1)   
+    enddo
     
     valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(1)
     valor_mult(2) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(2)
+    
+    
     do i = 3,bigT,1
-        valor_mult(i) = (1 + valor_share*(gam_t(i-1)*(w_bar(i-1)*bigl(i-1))/(w_bar(i-2)*bigl(i-2))-1))/gam_t(i)
+        valor_mult(i) = (1 + valor_share*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
     enddo
+    
     if (switch_tauK_gross == 0) then
         r = 1 + (1 - tk)*r_bar  
         else
@@ -192,14 +213,18 @@ include 'Initial_values_db.f90'
 
 include 'bequest.f90'
 
-    consumption = sum(N_t_j*c_j, dim=1)/bigl    
+consumption = 0.0d0
+do m=1,bigM,1
+    consumption = consumption + bigM_share_ss(m) * sum(N_t_j*c_j(:,m,:), dim=1)/bigl       
+enddo
+
     consumption_gross = consumption!/(1+tc)
     consumption_gross_new = consumption_gross
 do i = 1, n_p, 1
-    labor_tax_j_vfi(:,i) = labor_tax_j_vfi_ss_1
+    labor_tax_j_vfi(:,:,i) = labor_tax_j_vfi_ss_1
 enddo
 do i = n_p +1, bigT, 1
-    labor_tax_j_vfi(:,i) = labor_tax_j_vfi_ss_2
+    labor_tax_j_vfi(:,:,i) = labor_tax_j_vfi_ss_2
 enddo
 avg_aime_replacement_rate = 0.33d0
 !LabIncAVG_vfi = 0.33d0*w_bar

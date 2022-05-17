@@ -142,10 +142,11 @@ IMPLICIT NONE
 
 ! implicit tax
     real(dp), dimension(bigJ) :: tau1_ss_1, tau1_a_ss_1, tau2_ss_1, &
-                                 w_pom_ss_j_1, s_pom_ss_j_1, tau1_ss_2, tau1_a_ss_2, &
-                                 tau2_ss_2, w_pom_ss_j_2, s_pom_ss_j_2, &
+                                 tau1_ss_2, tau1_a_ss_2, &
+                                 tau2_ss_2,&
                                  transfer_pfi
-     real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2
+    
+     real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2, s_pom_ss_j_1, s_pom_ss_j_2, w_pom_ss_j_1, w_pom_ss_j_2
     
                                  
     

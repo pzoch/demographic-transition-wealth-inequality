@@ -68,7 +68,6 @@
 		<File RelativePath=".\closure_ss.f90"/>
 		<File RelativePath=".\closures.f90"/></Filter>
 		<Filter Name="consumers_problem">
-		<File RelativePath=".\denominator_trans.f90"/>
 		<File RelativePath=".\pfi.f90"/>
 		<File RelativePath=".\pfi_agregation.f90"/>
 		<File RelativePath=".\pfi_distribution.f90"/>
