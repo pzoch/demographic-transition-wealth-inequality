@@ -34,6 +34,6 @@
     endif ! run_2
     
     !if (switch_run_2 == 1 .AND. switch_run_t == 1) then
-    !   call transition_path_DB(switch_residual_t, switch_tauK_gross, switch_unequal_bequest,switch_param_2, l_db, c_db, s_db, tax_c_db, r_db,  V_20_years_old_db, g_per_capita_db)
+    !   call transition_path_DB(switch_residual_t, switch_tauK_gross, switch_unequal_bequest,switch_param_2, l_db, c_db, s_db, tax_c_db, r_db, g_per_capita_db)
     !endif
     

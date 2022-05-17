@@ -82,7 +82,7 @@
         write(24, '(F20.10)') g(i)/y(i)
         write(25, '(F20.10)') (1d0 + r_bar(i))**(1d0/real(zbar)) - 1d0
         write(26, '(F20.10)') tc(i)*consumption_gross(i)/y(i)
-        write(27, '(F20.10)') sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i)
+        !write(27, '(F20.10)') sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i)
         write(28, '(F20.10)') tk(i)*r_bar(i)*sum_priv_sv(i)/(nu(i)*gam_t(i))/y(i) !! this is calculated in a wrong way!!! 
         write(30,  '(F20.16)') t1(2,i)
         write(64,  '(F20.10)') gam_t(i) 
@@ -94,8 +94,8 @@
         write(70,  '(F20.10)') life_exp(1,i)
         write(71,  '(F20.10)') nu(i)
         write(72,  '(F20.10)') sum(N_t_j(jbar_t_vfi(i):bigJ,i))/bigl(i)
-        write(73,  '(F20.10)') w_bar(i)
-        write(74,  '(F20.10)') bequest(i)
+        !write(73,  '(F20.10)') w_bar(i)
+        !write(74,  '(F20.10)') bequest(i)
         write(75,  '(F20.10)') r(i)  
         
          write(76,  '(F20.10)') sum_b_weight_trans(i)
@@ -106,25 +106,25 @@
     
     
 
-    do j = 1,bigJ,1
-        do i = 1,bigT-1,1
-            write(22, '(F20.10)', advance='no') u_j(j,i)
-            write(22, '(A)', advance='no')";"
-            write(60, '(F20.10)', advance='no') l_j(j,i)
-            write(60, '(A)', advance='no')";"
-            write(61, '(F20.10)', advance='no') c_j(j,i)
-            write(61, '(A)', advance='no')";"
-            write(62, '(F20.10)', advance='no') b_j(j,i)
-            write(62, '(A)', advance='no')";"
-            write(63, '(F20.10)', advance='no') sv_j(j,i)
-            write(63, '(A)', advance='no')";"
-        enddo
-        write(22, '(F20.10)') u_j(j,bigT)
-        write(60, '(F20.10)') l_j(j,bigT)
-        write(61, '(F20.10)') c_j(j,bigT)
-        write(62, '(F20.10)') b_j(j,bigT)
-        write(63, '(F20.10)') sv_j(j,bigT)
-    enddo
+    !do j = 1,bigJ,1
+    !    do i = 1,bigT-1,1
+    !        write(22, '(F20.10)', advance='no') u_j(j,i)
+    !        write(22, '(A)', advance='no')";"
+    !        write(60, '(F20.10)', advance='no') l_j(j,i)
+    !        write(60, '(A)', advance='no')";"
+    !        write(61, '(F20.10)', advance='no') c_j(j,i)
+    !        write(61, '(A)', advance='no')";"
+    !        write(62, '(F20.10)', advance='no') b_j(j,i)
+    !        write(62, '(A)', advance='no')";"
+    !        write(63, '(F20.10)', advance='no') sv_j(j,i)
+    !        write(63, '(A)', advance='no')";"
+    !    enddo
+    !    write(22, '(F20.10)') u_j(j,bigT)
+    !    write(60, '(F20.10)') l_j(j,bigT)
+    !    write(61, '(F20.10)') c_j(j,bigT)
+    !    write(62, '(F20.10)') b_j(j,bigT)
+    !    write(63, '(F20.10)') sv_j(j,bigT)
+    !enddo
 
     CLOSE(1)
     CLOSE(2)
@@ -200,36 +200,36 @@
         
 
     
-open(unit = 104, file= version//experiment//closure//"tax_decomp.csv")
-write(104, '(A)') "TL;TC;TK;upsilon;tcontrib;subsidy;g;debt"
-do i = 1, n_p
-    write(104, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') &
-                sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i), ";", & ! tl
-                tc(i)*consumption_gross_new(i)/y(i), ";", & ! tc
-                tk(i)*r_bar(i)*sum_priv_sv(max(i-1,1))/(nu(i)*gam_t(i))/y(i) , ";",  & ! tk
-                upsilon(i)/(bigl(i)/N_t(i))/y(i) , ";", & !upsilon
-                sum(N_t_j(:,i)*w_bar(i)*t1(:,i)*l_j(:,i), dim=1)/bigl(i) , ";", & !t1constrib
-                subsidy(i)/y(i) , ";", & ! subsdy
-                g(i)/y(i) , ";", & ! g 
-                ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)! debt
-enddo   
-close(104) 
+!open(unit = 104, file= version//experiment//closure//"tax_decomp.csv")
+!write(104, '(A)') "TL;TC;TK;upsilon;tcontrib;subsidy;g;debt"
+!do i = 1, n_p
+!    write(104, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') &
+!                sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i), ";", & ! tl
+!                tc(i)*consumption_gross_new(i)/y(i), ";", & ! tc
+!                tk(i)*r_bar(i)*sum_priv_sv(max(i-1,1))/(nu(i)*gam_t(i))/y(i) , ";",  & ! tk
+!                upsilon(i)/(bigl(i)/N_t(i))/y(i) , ";", & !upsilon
+!                sum(N_t_j(:,i)*w_bar(i)*t1(:,i)*l_j(:,i), dim=1)/bigl(i) , ";", & !t1constrib
+!                subsidy(i)/y(i) , ";", & ! subsdy
+!                g(i)/y(i) , ";", & ! g 
+!                ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)! debt
+!enddo   
+!close(104) 
 ! temporary printing     
-OPEN (unit=202,  FILE = version//experiment//closure//"Value_function_20_years_old_trans.txt")
-    do j = -bigJ,bigT, 1
-        write(202,  '(F20.10)') V_20_years_old(j)
-    enddo
-CLOSE(202)
+!OPEN (unit=202,  FILE = version//experiment//closure//"Value_function_20_years_old_trans.txt")
+!    do j = -bigJ,bigT, 1
+!        write(202,  '(F20.10)') V_20_years_old(j)
+!    enddo
+!CLOSE(202)
     
-open(unit = 104, file= version//experiment//closure//"Value_function_trans.csv")
-do j = 1, bigJ,1  
-    do i = 1,bigT,1
-        write(104, '(F20.10)', advance='no') V_j_vfi(j, i)
-        write(104, '(A)', advance='no') ";"
-    enddo
-    write(104, '(F20.10)') V_j_vfi(j, bigT)
-enddo      
-close(104)
+!open(unit = 104, file= version//experiment//closure//"Value_function_trans.csv")
+!do j = 1, bigJ,1  
+!    do i = 1,bigT,1
+!        write(104, '(F20.10)', advance='no') V_j_vfi(j, i)
+!        write(104, '(A)', advance='no') ";"
+!    enddo
+!    write(104, '(F20.10)') V_j_vfi(j, bigT)
+!enddo      
+!close(104)
 
 OPEN (unit=202,  FILE = version//experiment//closure//"g_per_capita_trans.txt")
 do i = 1,bigT, 1
@@ -270,15 +270,15 @@ do t = 1, 10,1
 enddo      
 close(104) 
      
-open(unit = 104, file= version//experiment//closure//"l_pen_j.csv")
-do j = 1, bigJ,1  
-    do i = 1,bigT,1
-        write(104, '(F20.10)', advance='no') l_pen_j(j, i)
-        write(104, '(A)', advance='no') ";"
-    enddo
-    write(104, '(F20.10)')l_pen_j(j, bigT)
-enddo      
-close(104)
+!open(unit = 104, file= version//experiment//closure//"l_pen_j.csv")
+!do j = 1, bigJ,1  
+!    do i = 1,bigT,1
+!        write(104, '(F20.10)', advance='no') l_pen_j(j, i)
+!        write(104, '(A)', advance='no') ";"
+!    enddo
+!    write(104, '(F20.10)')l_pen_j(j, bigT)
+!enddo      
+!close(104)
  
 
 OPEN (unit=1, FILE = version//experiment//closure//"gini_weight_trans.txt")

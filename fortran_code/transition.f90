@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, s_j, tax_c, r_f, V_20_years_old, g_per_capita)
+subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, s_j, tax_c, r_f, g_per_capita)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom
@@ -23,14 +23,14 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigM,bigT) :: bequest
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK,wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
-    real(dp), dimension(bigj, bigM, bigT) :: savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
+    real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
 	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
     real(dp), dimension(bigM, bigT) :: w_bar
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
     integer, intent(in) :: param
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
-    real(dp), dimension(-bigJ:bigT), intent(out) :: V_20_years_old
+
     
     
     real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, s_j
@@ -45,7 +45,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     
     real(dp), dimension(bigJ, bigM, bigT) :: b1_j, b2_j
-    real(dp), dimension(bigJ,bigT) ::pillarI_j, pillarII_j, pillarI_old_j, pillarII_old_j, contributionI_j, contributionII_j
+    real(dp), dimension(bigJ,bigM,bigT) ::pillarI_j, pillarII_j, pillarI_old_j, pillarII_old_j, contributionI_j, contributionII_j
     real(dp), dimension(bigJ,-bigJ:bigT)  :: life_exp ! -bigJ:bigT is needed for implicit tax when we want to perwfome DC- DC with changing mortality
     real(dp), dimension(bigT) :: b_scale_factor, pillarI, pillarII, contributionI, contributionII
     real(dp) :: accountI, accountII, sv_help, nom1, denom1, nom2, denom2
@@ -239,33 +239,33 @@ avg_aime_replacement_rate = 0.33d0
 
 !!!!!!!!!!!!!!!!! iterations end
 
-    do i = 2,bigT,1
-        do j = 1,bigJ,1
-            if (j == 1) then
-                income_j(j,i) = w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
-            else
-                income_j(j,i) = r(i)*sv_j(j-1,i-1)/gam_t(i) + w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
-            endif
-        enddo
-        savings_rate_j(:,i) = sv_j(:,i)/income_j(:,i)
-    enddo
-    
-    income = sum(N_t_j*income_j, dim=1)/bigl
-    tax_c = tc
+    !do i = 2,bigT,1
+    !    do j = 1,bigJ,1
+    !        if (j == 1) then
+    !            income_j(j,i) = w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
+    !        else
+    !            income_j(j,i) = r(i)*sv_j(j-1,i-1)/gam_t(i) + w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
+    !        endif
+    !    enddo
+    !    savings_rate_j(:,i) = sv_j(:,i)/income_j(:,i)
+    !enddo
+    !
+    !income = sum(N_t_j*income_j, dim=1)/bigl
+tax_c = tc
 
- include 'utility_trans.f90' 
+ !include 'utility_trans.f90' 
 
 
 ! which budget constrain doeas not hold 
 ! budget constrain 
-do j = 1, bigJ, 1
-    if (j == 1) then
-         write(*,*) (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
-    else
-         write(*,*) r(2)*sv_j(j-1,1)/gam_t(2) +  sum_b_weight_trans(2)*b_j(j,2) + (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
-    endif 
-enddo 
- 
+!do j = 1, bigJ, 1
+!    if (j == 1) then
+!         write(*,*) (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
+!    else
+!         write(*,*) r(2)*sv_j(j-1,1)/gam_t(2) +  sum_b_weight_trans(2)*b_j(j,2) + (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
+!    endif 
+!enddo 
+! 
      prob_trans_marg = 0d0
      do i = 1,bigT,1
             do ia = 0, n_a, 1

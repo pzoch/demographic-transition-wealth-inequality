@@ -13,8 +13,8 @@
     b1_j(:,:,1) = b1_ss_j_1
     b2_j(:,:,1) = b2_ss_j_1
     
-    pillarI_j(:,1) =  pillar1_ss_j_1
-    pillarII_j(:,1) =  pillar2_ss_j_1
+    pillarI_j(:,:,1) =  pillar1_ss_j_1
+    pillarII_j(:,:,1) =  pillar2_ss_j_1
     bequest_left_j(:,:,1) = bequest_left_ss_j_1
     
 ! from the new steady state
@@ -28,8 +28,8 @@ do i = 3, bigT, 1 ! n_p+2,bigT,1
     b1_j(:,:,i) = b1_ss_j_2
     b2_j(:,:,i) = b2_ss_j_2
     
-    pillarI_j(:,i) =  pillar1_ss_j_2
-    pillarII_j(:,i) =  pillar2_ss_j_2
+    pillarI_j(:,:,i) =  pillar1_ss_j_2
+    pillarII_j(:,:,i) =  pillar2_ss_j_2
     bequest_left_j(:,:,i) = bequest_left_ss_j_2
 enddo
     
@@ -44,8 +44,8 @@ do i = 2,2, 1 !n_p+1,1
     l_pen_j(:,:,i) =  l_ss_pen_j_1
     b1_j(jbar_t(i):bigJ,:,i) = b1_ss_j_1(jbar_t(i):bigJ,:)
     b2_j(jbar_t(i):bigJ,:,i) = b2_ss_j_1(jbar_t(i):bigJ,:)
-    pillarI_j(:,i) =  pillar1_ss_j_1
-    pillarII_j(:,i) =  pillar2_ss_j_1
+    pillarI_j(:,:,i) =  pillar1_ss_j_1
+    pillarII_j(:,:,i) =  pillar2_ss_j_1
     bequest_left_j(:,:,i) = bequest_left_ss_j_2
     enddo      
     
@@ -57,12 +57,12 @@ b_scale_factor(2:) = 1d0 !b_scale_factor_new
 
 if (switch_type_1 == 0) then
     b2_j(:,:,1) = 0
-    pillarI_j(:,1) =  0
-    pillarII_j(:,1) =  0
+    pillarI_j(:,:,1) =  0
+    pillarII_j(:,:,1) =  0
 else
     b2_j(:,:,1) = b2_ss_j_1
-    pillarI_j(:,1) =  pillar1_ss_j_1
-    pillarII_j(:,1) =  pillar2_ss_j_1
+    pillarI_j(:,:,1) =  pillar1_ss_j_1
+    pillarII_j(:,:,1) =  pillar2_ss_j_1
 endif
     
     do i = -bigJ, n_p +1 ,1

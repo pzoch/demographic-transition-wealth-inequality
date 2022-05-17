@@ -142,7 +142,7 @@ include 'closures.f90'
             c_j(:,m,:) = c_j_vfi
             l_j(:,m,:) = l_j_vfi
             s_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
-            
+            w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
 
@@ -157,7 +157,7 @@ include 'closures.f90'
             
             do m = 1,bigM,1
             avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
-            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i)*(w_pom_trans(m,i)))/sum(N_t_j(1:jbar_t(i)-1,i))   
+            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i)*(w_pom_trans(:,m,i)))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
             
         enddo
@@ -191,11 +191,10 @@ include 'closures.f90'
         average_l(i) = average_l(i) +  bigM_share_ss(m) * sum(N_t_j(1:jbar_t(i)-1,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         average_w(i) = average_w(i) +  bigM_share_ss(m) * sum(N_t_j(1:jbar_t(i)-1,i)*w_j(1:jbar_t(i)-1,m,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         enddo
-        
+    enddo    
 
     consumption_gross_j = c_j     
-    
-     consumption_gross = 0.0d0 
+    consumption_gross = 0.0d0 
     do m=1,bigM,1
         consumption_gross = consumption_gross + bigM_share_ss(m) * sum(N_t_j*consumption_gross_j(:,m,:), dim=1)/bigl       
     enddo
@@ -228,11 +227,11 @@ include 'closures.f90'
             exit ! iterations end
         endif
     endif
-    replacement(1) = sum_b_weight_trans(1)*b_j(jbar_t(1),1)/(w_bar(i)*l_pen_j(jbar_t(1)-1,1)) 
+    !replacement(1) = sum_b_weight_trans(1)*b_j(jbar_t(1),1)/(w_bar(i)*l_pen_j(jbar_t(1)-1,1)) 
     !replacement(1) = b_j(jbar_t(1),1)/(w_j(jbar_t(1)-1,1)*l_pen_j(jbar_t(1)-1, 1))    
-    do i = 2,bigT,1
-            !replacement(i) = b_j(jbar_t(i),i)/(w_j(jbar_t(i)-1,i-1)*l_pen_j(jbar_t(i)-1, i-1)) 
-            replacement(i) = sum_b_weight_trans(i)*b_j(jbar_t(i),i)/(w_bar(i)*l_pen_j(jbar_t(i)-1, i-1)) 
-    enddo
+    !do i = 2,bigT,1
+     !       !replacement(i) = b_j(jbar_t(i),i)/(w_j(jbar_t(i)-1,i-1)*l_pen_j(jbar_t(i)-1, i-1)) 
+     !       replacement(i) = sum_b_weight_trans(i)*b_j(jbar_t(i),i)/(w_bar(i)*l_pen_j(jbar_t(i)-1, i-1)) 
+    !enddo
     
 enddo
