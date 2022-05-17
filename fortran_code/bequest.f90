@@ -4,19 +4,23 @@
 !          changed   in routine:  bequest 
 ! DO     : called in transition and REV subroutine to update bequest
 ! RETURN : updated bequest for next iteration on transition path 
+    
 if (switch_unequal_bequest==0) then       
     do m = 1,bigM,1
-    do i = 1,bigT,1
+        do i = 1,bigT,1
         
-        do j = 2,jbar_t(i),1
-             bequest_left_j(j-1,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*r(i)*sv_j(j-1,m,max(i-1,1))/(gam_t(i))   
-        enddo
-        do j = jbar_t(i)+1,bigJ,1
-            bequest_left_j(j-1,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*(r(i)*sv_j(j-1,m,max(i-1,1)))/(gam_t(i))
-        enddo
+            do j = 2,jbar_t(i),1
+                 bequest_left_j(j-1,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*r(i)*sv_j(j-1,m,max(i-1,1))/(gam_t(i))   
+            enddo
+            do j = jbar_t(i)+1,bigJ,1
+                bequest_left_j(j-1,m,max(i-1,1)) =  bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*(r(i)*sv_j(j-1,m,max(i-1,1)))/(gam_t(i))
+            enddo
+            
         bequest_left_j(bigJ,m,max(i-1,1)) = bigM_share_ss(m) *  (N_t_j(bigJ,max(i-1,1)))*(r(i)*sv_j(bigJ,m,max(i-1,1)))/(gam_t(i))    
-    enddo
-    bequest(m) = sum(bequest_left_j(1:bigJ,m,:), dim=1)
+        enddo
+        
+        
+    bequest(m,:) = sum(bequest_left_j(1:bigJ,m,:), dim=1)
     enddo
                  
     do m = 1,bigM,1

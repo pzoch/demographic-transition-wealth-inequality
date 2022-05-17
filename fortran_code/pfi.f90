@@ -239,7 +239,7 @@ contains
             if (switch_run_1 == 1) then 
                 V_j_vfi(:,1) = 0d0 ! to d0
                 
-                avg_ef_l_suply_trans(1) = avg_ef_l_supply
+                avg_ef_l_supply_trans(1) = avg_ef_l_supply
                 c_trans(:, :, :, :, :, :, 1) = c_ss
                 l_trans(:, :, :, :, :, :, 1) = l_ss  
                 lab_income_trans(:, :, :, :, :, :, 1) = lab_income_ss
@@ -282,7 +282,7 @@ contains
                     s_pom_j_vfi(:,i) = s_pom_ss_j_vfi
                     V_j_vfi(:,i) = V_ss_j_vfi
                     gini_weight_trans(:,:, i) = gini_weight_sv
-                    avg_ef_l_suply_trans(i) = avg_ef_l_supply
+                    avg_ef_l_supply_trans(i) = avg_ef_l_supply
                     LabIncAVG_vfi(i) = LabIncAVG_ss_vfi
                 enddo
             endif

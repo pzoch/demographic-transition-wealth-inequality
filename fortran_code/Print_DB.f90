@@ -82,7 +82,7 @@
         write(24, '(F20.10)') g(i)/y(i)
         write(25, '(F20.10)') (1d0 + r_bar(i))**(1d0/real(zbar)) - 1d0
         write(26, '(F20.10)') tc(i)*consumption_gross(i)/y(i)
-        write(27, '(F20.10)') sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i)/y(i)
+        write(27, '(F20.10)') sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i)
         write(28, '(F20.10)') tk(i)*r_bar(i)*sum_priv_sv(i)/(nu(i)*gam_t(i))/y(i) !! this is calculated in a wrong way!!! 
         write(30,  '(F20.16)') t1(2,i)
         write(64,  '(F20.10)') gam_t(i) 
@@ -204,7 +204,7 @@ open(unit = 104, file= version//experiment//closure//"tax_decomp.csv")
 write(104, '(A)') "TL;TC;TK;upsilon;tcontrib;subsidy;g;debt"
 do i = 1, n_p
     write(104, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') &
-                sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i)/y(i), ";", & ! tl
+                sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i), ";", & ! tl
                 tc(i)*consumption_gross_new(i)/y(i), ";", & ! tc
                 tk(i)*r_bar(i)*sum_priv_sv(max(i-1,1))/(nu(i)*gam_t(i))/y(i) , ";",  & ! tk
                 upsilon(i)/(bigl(i)/N_t(i))/y(i) , ";", & !upsilon

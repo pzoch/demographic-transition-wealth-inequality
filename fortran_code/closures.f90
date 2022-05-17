@@ -6,15 +6,23 @@
 ! DO     : update tax rate during iteration on transition path
 ! RETURN : updated tax rate 
 
+    ! calculate labor tax revenue
+    labor_tax_revenue = 0.0d0
+    do m = 1,bigM,1
+       labor_tax_revenue = labor_tax_revenue +  bigM_share_ss(m) *  sum(N_t_j(1:bigJ,:)*labor_tax_j(1:bigJ,m,:),dim = 1)
+    enddo
+    
+    
+    
 select case (switch_residual)
     case(0)
         if (switch_tauK_gross == 0) then
             debt_share(1) = debt(1)/y(1)
             Tax(1) = tc(1)*consumption_gross_new(1) + tk(1)*r_bar(1)*sum_priv_sv(1)/(nu(1)*gam_t(1)) &
-                    + sum(N_t_j(1:bigJ,1)*labor_tax_j_vfi(1:bigJ,1))/bigl(1) !+ tL(1)*sum_b(1)  
+                    + labor_tax_revenue(1)/bigl(1) !+ tL(1)*sum_b(1)  
             do i = 2,bigT,1
                 Tax(i) = tc(i)*consumption_gross_new(i) + tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                        + sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i) !+ tL(i)*sum_b(i)  
+                        + labor_tax_revenue(i)/bigl(i) !+ tL(i)*sum_b(i)  
             enddo 
             deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
             upsilon(1) = (g(1) + subsidy(1) + (1 + r_bar(1))*debt(1)/(nu(1)*gam_t(1)) - Tax(1) - debt(1))*bigl(1)/N_t(1)
@@ -26,10 +34,10 @@ select case (switch_residual)
         else
               debt_share(1) = debt(1)/y(1)
             Tax(1) = tc(1)*consumption_gross_new(1) + tk(1)*(r_bar(1)+depr)*k(1) &
-                    + sum(N_t_j(1:bigJ,1)*labor_tax_j_vfi(1:bigJ,1))/bigl(1) !+ tL(1)*sum_b(1)  
+                    + labor_tax_revenue(1)/bigl(1) !+ tL(1)*sum_b(1)  
             do i = 2,bigT,1
                 Tax(i) = tc(i)*consumption_gross_new(i) + tk(i)*(r_bar(i)+depr)*k(i) &
-                        + sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i) !+ tL(i)*sum_b(i)  
+                        +labor_tax_revenue(i)/bigl(i) !+ tL(i)*sum_b(i)  
             enddo 
             deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
             upsilon(1) = (g(1) + subsidy(1) + (r(1))*debt(1)/(nu(1)*gam_t(1)) - Tax(1) - debt(1))*bigl(1)/N_t(1)
@@ -55,7 +63,7 @@ select case (switch_residual)
                 deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
                 tc(i) =  (g(i) + subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
                          - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i))/consumption_gross_new(i) 
+                         - labor_tax_revenue(i)/bigl(i))/consumption_gross_new(i) 
             enddo
         else
                 !       case 1 - tC is residual
@@ -70,7 +78,7 @@ select case (switch_residual)
                 deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
                 tc(i) =  (g(i) + subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
                          - tk(i)*(r_bar(i)+depr)*k(i) &
-                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i))/consumption_gross_new(i) 
+                         - labor_tax_revenue(i)/bigl(i))/consumption_gross_new(i) 
             enddo
         endif
         
@@ -91,7 +99,7 @@ select case (switch_residual)
                 
                         g(i) =   tc(i)*consumption_gross_new(i) - ( subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
                          - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/bigl(i))
+                         -labor_tax_revenue(i)/bigl(i))
                 
                         g_share(i) = g(i)/y(i)
             enddo
@@ -108,7 +116,7 @@ select case (switch_residual)
                 deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
                          g(i) = tc(i) * consumption_gross_new(i)  - (subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
                          - tk(i)*(r_bar(i)+depr)*k(i) &
-                         - sum(N_t_j(1:bigJ,i)*labor_tax_j_vfi(1:bigJ,i))/ bigl(i))
+                         - labor_tax_revenue(i)/ bigl(i))
                          
                          
                          g_share(i) = g(i)/y(i)

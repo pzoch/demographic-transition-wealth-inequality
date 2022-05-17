@@ -1,10 +1,11 @@
     valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1)  - 1))/gam_t(1)
     valor_mult(2) = (1 + valor_share*(gam_t(1)*nu(1)  - 1))/gam_t(2)
-    
+    wl_bar = 0.0d0
+    do i = 1,bigT,1
     do m = 1,bigM,1
-        wl_bar = wl_bar +  bigM_share_ss(m) * sum( N_t_j*l_j(:,m,:)*w_bar(m,:), dim=1)   
+        wl_bar(i) = wl_bar(i) +  bigM_share_ss(m) * sum( N_t_j(:,i) *l_j(:,m,i)*w_bar(m,i), dim=1)   
     enddo
-    
+    enddo
     do i = 3,bigT,1
         valor_mult(i) = (1 + valor_share*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
     enddo 
@@ -13,7 +14,7 @@
     rI(1) = gam_t(1)*nu(1) - 1 
     rI(2) = gam_t(1)*nu(1) - 1
     do i = 3,n_p+1,1
-        rI(i) = gam_t(i-1)*(wl_bar(i-1))/(wl_barl(i-2))-1 !*(N_t(i-1)/N_t(i-2))-1 !(gam_t(i-1)*w_bar(i-1)*bigl(i-1)*N_t(i-1))/(w_bar(i-2)*bigl(i-2)*N_t(i-2))-1
+        rI(i) = gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1 !*(N_t(i-1)/N_t(i-2))-1 !(gam_t(i-1)*w_bar(i-1)*bigl(i-1)*N_t(i-1))/(w_bar(i-2)*bigl(i-2)*N_t(i-2))-1
     enddo
     rI(n_p+2:bigT) = nu(n_p+1)*gam_t(n_p+2) - 1
     
@@ -31,51 +32,62 @@
     
     !!!!!!!!!!!!!!!!! DB pension system !!!!!!!!!!!!!!!!!
     ! indivdual pension benefits 
- 
+    do m = 1,bigM,1
     do i = 2,bigT,1
-        b1_j(1:jbar_t(i)-1,:,i) = 0
-        b2_j(1:jbar_t(i)-1,:,i) = 0
+        b1_j(1:jbar_t(i)-1,m,i) = 0
+        b2_j(1:jbar_t(i)-1,m,i) = 0
             do j = jbar_t(i),bigJ,1
                 if (j == jbar_t(i)) then
                     if (jbar_t(i) == jbar_t(i-1)+1) then
-                        b1_j(j,:,i) = valor_mult(i)*b1_j(j-1,:,i-1)
-                        b2_j(j,:,i) = 0
+                        b1_j(j,m,i) = valor_mult(i)*b1_j(j-1,m,i-1)
+                        b2_j(j,m,i) = 0
                     else
                         if( i< bigJ) then 
-                            b1_j(j,:,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
+                            b1_j(j,m,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
                         else 
-                            b1_j(j,:,i) = rho_2*avg_wl(i) 
+                            b1_j(j,m,i) = rho_2*avg_wl(i) 
                         endif
-                        b2_j(j,:,i) = 0
+                        b2_j(j,m,i) = 0
                     endif
-                    else if (b1_j(j-1,:,i-1) == 0) then
+                    
+                    
+                    else if (b1_j(j-1,m,i-1) == 0) then
                         if( i< bigJ) then 
-                            b1_j(j,:,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
+                            b1_j(j,m,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
                         else 
-                            b1_j(j,:,i) = rho_2*avg_wl(i) 
+                            b1_j(j,m,i) = rho_2*avg_wl(i) 
                         endif
-                        b2_j(j,:,i) = 0                                                
+                        b2_j(j,m,i) = 0                                                
                     else
-                        b1_j(j,:,i) = valor_mult(i)*b1_j(j-1,:,i-1)
-                        b2_j(j,:,i) = 0
+                        b1_j(j,m,i) = valor_mult(i)*b1_j(j-1,m,i-1)
+                        b2_j(j,m,i) = 0
                 endif        
             enddo 
-        b_j(:,:,i) = b_scale_factor(i)*b1_j(:,:,i)    
+        b_j(:,m,i) = b_scale_factor(i)*b1_j(:,m,i)    
         do j = 1, bigJ, 1
-            subsidy_j(j,i) = sum_b_weight_trans(min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,i) - t1(j,i)*w_bar(i)* l_j(j,i)   
+            subsidy_j(j,m,i) = sum_b_weight_trans(min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,m,i) - t1(j,i)*w_bar(m,i)* l_j(j,m,i)   
         enddo
-        contribution_j(:,i) = t1(:,i)*w_bar(i)*l_j(:,i)
+        contribution_j(:,m,i) = t1(:,i)*w_bar(m,i)*l_j(:,m,i)
     enddo 
     
-    subsidy_j(:,1) = (sum_b_weight_trans(1)*b_j(:,1) - t1(:,1))*w_bar(1)*l_j(:,1)   
-    contribution_j(:,1) = t1(:,1)*w_bar(1)*l_j(:,1)
- 
-     ! macro agg    
-	subsidy = sum(N_t_j*subsidy_j, dim=1)/bigl   
-    contribution = sum(N_t_j*contribution_j, dim=1)/bigl 
+    subsidy_j(:,m,1) = (sum_b_weight_trans(1)*b_j(:,m,1) - t1(:,1))*w_bar(m,1)*l_j(:,m,1)   
+    contribution_j(:,m,1) = t1(:,1)*w_bar(m,1)*l_j(:,m,1)
+    enddo
+     ! macro agg   
+    subsidy = 0.0d0
+    contribution = 0.0d0
+    do m = 1,bigM,1
+    
+	subsidy = subsidy + bigM_share_ss(m) * sum(N_t_j*subsidy_j(:,m,:), dim=1)/bigl   
+    contribution = contribution +  bigM_share_ss(m) * sum(N_t_j*contribution_j(:,m,:), dim=1)/bigl 
+    enddo
+    
     do i = 1, bigT, 1
     sum_b(i) = 0d0
+    do m = 1, bigM, 1
         do j = jbar_t(i), bigJ, 1
-            sum_b(i) = sum_b(i) + sum_b_weight_trans(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,i)*N_t_j(j,i)/bigl(i)
+            sum_b(i) = sum_b(i) +  bigM_share_ss(m) *  sum_b_weight_trans(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,m,i)*N_t_j(j,i)/bigl(i)
         enddo
+    enddo
+    
     enddo  

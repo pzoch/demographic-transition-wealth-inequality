@@ -41,10 +41,11 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      
      real(dp) ::  accountI_ss, accountII_ss, pillarI_ss, pillarII_ss, rI_ss, b_scale_factor_ss, t2_ss, &
                 nom1, denom1, nom2, denom2
-     real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss, w_pom_ss_j, s_pom_ss_j
+     real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss
+     real(dp), dimension(bigj,bigM) :: w_pom_ss_j, s_pom_ss_j
      real(dp) :: avg_wl, mult_ss
      
-     real(dp), dimension(bigj,bigM) :: l_ss_pen_j
+     real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j
      real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
                            labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
@@ -302,7 +303,7 @@ endif
             w_pom_ss_vfi = w_pom_ss(m)
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
             bequest_ss_vfi =  bequest_ss(m)
-            w_pom_ss_j(:) = w_ss_j(:,m)
+            w_pom_ss_j(:,m) = w_ss_j(:,m)
             b_ss_j_vfi = b_ss_j(:,m)
 
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
@@ -314,6 +315,7 @@ endif
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
             sum_b_weight_ss = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
+            labor_tax_ss_j(:,m) = labor_tax_ss_j_vfi(:)
         
         enddo
         
@@ -428,7 +430,7 @@ if (switch_run_1 == 1) then
     tau2_ss_1 = tau2_ss
     w_pom_ss_j_1 = w_pom_ss_j
     bequest_left_ss_j_1 = bequest_left_ss_j
-    labor_tax_j_vfi_ss_1 = labor_tax_ss_j_vfi
+    labor_tax_j_ss_1 = labor_tax_ss_j
     g_share_ss = g_ss/y_ss
     g_share(1) = g_share_ss
 else
@@ -437,7 +439,7 @@ else
     tau2_ss_2 = tau2_ss
     w_pom_ss_j_2 = w_pom_ss_j
     bequest_left_ss_j_2 = bequest_left_ss_j
-    labor_tax_j_vfi_ss_2 = labor_tax_ss_j_vfi
+    labor_tax_j_ss_2 = labor_tax_ss_j
     
     tc_new = tc_ss
     tk_new = tk_ss

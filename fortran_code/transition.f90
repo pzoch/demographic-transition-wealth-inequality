@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, tax_c, r_f, V_20_years_old, g_per_capita)
+subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, s_j, tax_c, r_f, V_20_years_old, g_per_capita)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom
@@ -19,18 +19,21 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigj+n_p) :: u_all
     real(dp), dimension(bigj) ::  u_init_old
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
-    real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, bequest, income, nu, nu_pop
-	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, bigY, w_bar, N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_
-    real(dp), dimension(bigj, bigT) :: N_t_j
-    real(dp), dimension(bigj, bigM, bigT) :: savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j
-	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j, bigl_j, bigl_j_aux, l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
+    real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
+    real(dp), dimension(bigM,bigT) :: bequest
+	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK,wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_
+    real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
+    real(dp), dimension(bigj, bigM, bigT) :: savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
+	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
-
+    real(dp), dimension(bigM, bigT) :: w_bar
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
     integer, intent(in) :: param
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
     real(dp), dimension(-bigJ:bigT), intent(out) :: V_20_years_old
-    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j
+    
+    
+    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, s_j
     
     ! partial equilibrum stohastic vs deterministic model 
     ! this is probably not needed for anything
@@ -162,7 +165,9 @@ include 'Initial_values_db.f90'
 
 
     r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr
-    w_bar = zbar*(1 - alpha_t)*k**alpha_t * type_multiplier
+    do m = 1,bigM
+        w_bar(m,:) = zbar*(1 - alpha_t)*k**alpha_t * type_multiplier(m)
+    enddo
     y = zbar*k**(alpha_t)
     
     bigK = k * bigl
@@ -187,14 +192,15 @@ include 'Initial_values_db.f90'
     
     savings = 0.0d0
     do m = 1,bigM,1
-        savings = savings + bigM_share_ss(m) * sum(N_t_j*savings_j(:,m,:), dim=1)/bigl
+        savings = savings + bigM_share_ss(m) * sum(N_t_j *savings_j(:,m,:), dim=1)/bigl
     enddo    
     
     wl_bar = 0.0d0
-    do m = 1,bigM,1
-        wl_bar = wl_bar +  bigM_share_ss(m) * sum( N_t_j*l_j(:,m,:)*w_bar(m,:), dim=1)   
+    do i = 1,bigT,1
+        do m = 1,bigM,1
+           wl_bar(i) = wl_bar(i) +  bigM_share_ss(m) * sum( N_t_j(:,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
+        enddo
     enddo
-    
     valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(1)
     valor_mult(2) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(2)
     
@@ -221,10 +227,10 @@ enddo
     consumption_gross = consumption!/(1+tc)
     consumption_gross_new = consumption_gross
 do i = 1, n_p, 1
-    labor_tax_j_vfi(:,:,i) = labor_tax_j_vfi_ss_1
+    labor_tax_j(:,:,i) = labor_tax_j_ss_1
 enddo
 do i = n_p +1, bigT, 1
-    labor_tax_j_vfi(:,:,i) = labor_tax_j_vfi_ss_2
+    labor_tax_j(:,:,i) = labor_tax_j_ss_2
 enddo
 avg_aime_replacement_rate = 0.33d0
 !LabIncAVG_vfi = 0.33d0*w_bar

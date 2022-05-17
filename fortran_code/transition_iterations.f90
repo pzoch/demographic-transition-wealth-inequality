@@ -52,7 +52,9 @@ do iter = 1,n_iter_t,1
 
 
         r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr
-        w_bar = zbar*(1 - alpha_t)*k**alpha_t * type_multiplier
+        do m = 1,bigM
+        w_bar(m,:) = zbar*(1 - alpha_t)*k**alpha_t * type_multiplier(m)
+        enddo
         y = zbar*k**(alpha_t)
    
     do i = 1,bigT,1
@@ -61,7 +63,9 @@ do iter = 1,n_iter_t,1
         endif
     enddo
     do j = 1,bigJ,1
-        w_j(j,:,:) = (1-tl(:))*(1 - t1(j,:)-t2(j,:))*w_bar(:,:)
+        do m = 1,bigM,1
+        w_j(j,m,:) = (1-tl(:))*(1 - t1(j,:)-t2(j,:))*w_bar(m,:)
+        enddo
     enddo
     if (switch_tauK_gross == 0) then
         r = 1+ (1 - tk)*r_bar  
@@ -93,7 +97,6 @@ endif
 
 include 'pension_system.f90'
 include 'closures.f90'
-include 'implicit_tax_trans.f90'
 
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -123,7 +126,7 @@ include 'implicit_tax_trans.f90'
             tc_vfi = tc + 1.0_dp
             gam_vfi = gam_t
             N_t_j_vfi = N_t_j
-            b_j_vfi= b_pom_j(:,m,:)
+            b_j_vfi= b_j(:,m,:)
             bequest_vfi = bequest(m,:)
             bequest_j_vfi =  bequest_j(:,m,:)
             bequest_j_vfi_dif = bequest_j(:,m,:) - bequest_j_old(:,m,:)
@@ -135,7 +138,7 @@ include 'implicit_tax_trans.f90'
 
         call agent_vf_trans()
         
-            prob_trans_big(:,:,:,:,:,:,:,m) = prob_trans
+            !prob_trans_big(:,:,:,:,:,:,:,m) = prob_trans
             c_j(:,m,:) = c_j_vfi
             l_j(:,m,:) = l_j_vfi
             s_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
@@ -148,7 +151,6 @@ include 'implicit_tax_trans.f90'
         
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
-        
       ! aggregation
         do i  = 2,bigT
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*s_j(1:bigJ-1,:,i)

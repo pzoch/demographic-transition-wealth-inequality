@@ -33,7 +33,7 @@
         call steady(switch_residual_2, switch_tauK_gross, switch_unequal_bequest, switch_param_2, switch_type_2, rho_2,k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2, l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2 ,upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2, b1_ss_j_2, b2_ss_j_2, pillar1_ss_j_2, pillar2_ss_j_2)       
     endif ! run_2
     
-    if (switch_run_2 == 1 .AND. switch_run_t == 1) then
-       call transition_path_DB(switch_residual_t, switch_tauK_gross, switch_unequal_bequest,switch_param_2, l_db, c_db, tax_c_db, r_db,  V_20_years_old_db, g_per_capita_db)
-    endif
+    !if (switch_run_2 == 1 .AND. switch_run_t == 1) then
+    !   call transition_path_DB(switch_residual_t, switch_tauK_gross, switch_unequal_bequest,switch_param_2, l_db, c_db, s_db, tax_c_db, r_db,  V_20_years_old_db, g_per_capita_db)
+    !endif
     

@@ -88,8 +88,8 @@ IMPLICIT NONE
 
     real(dp) :: debt_constr
 ! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
-    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1, w_bar_ss_L_1, w_bar_ss_H_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
-    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2, w_bar_ss_L_2, w_bar_ss_H_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
+    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1,  upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
+    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2,  upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
     real(dp), dimension(bigJ,bigM) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
@@ -103,12 +103,12 @@ IMPLICIT NONE
 
 ! transition variables
     integer, dimension(bigT) :: jbar_t
-	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, tauL_t, tauK_t, debt_constr_t, alpha_t, gy_factor_t 
+	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, tauL_t, tauK_t, debt_constr_t, alpha_t, gy_factor_t
     real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
   
 ! LSRA
-    real(dp), dimension(bigJ, bigT) :: c_db, l_db, better_j !  c_base, l_base,  c_ref, l_ref
+    real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref
     real(dp), dimension(- bigJ: bigT) ::  V_20_years_old_db !  V_20_years_old_base, V_20_years_old_ref
     real(dp), dimension(bigT) :: r_db, tax_c_db, g_per_capita_db, better !  r_base, tax_c_base, g_per_capita_base, r_ref, tax_c_ref, g_per_capita_ref
     real(dp), dimension(bigJ, bigT) :: x_j_pro,  x_unif_pro, sum_x_pro, x_c_j_pro, eq_unif_pro, sum_eq_pro
@@ -116,7 +116,6 @@ IMPLICIT NONE
 
     real(dp), dimension(bigM) :: bigM_share_ss
     real(dp), dimension(bigM) :: type_multiplier
-
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1, n_beq = 5
@@ -137,7 +136,7 @@ IMPLICIT NONE
     real*8 :: sum_b_weight_ss_vfi
     real*8, dimension(bigJ) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT)
-    real*8, dimension(bigT) :: avg_ef_l_suply_trans, sum_b1_help
+    real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help
 
 
 ! implicit tax
@@ -147,6 +146,8 @@ IMPLICIT NONE
                                  transfer_pfi
     
      real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2, s_pom_ss_j_1, s_pom_ss_j_2, w_pom_ss_j_1, w_pom_ss_j_2
+     real(dp), dimension(bigJ,bigM) :: labor_tax_j_ss_1, labor_tax_j_ss_2
+     
     
                                  
     
@@ -155,7 +156,7 @@ IMPLICIT NONE
     
  ! progression
     real*8  :: lambda_old = 0.15d0, lambda_new = 0.15d0, progression_param= 0.15d0
-    real*8  :: tau, lambda, lambda_trans(bigT), labor_tax_j_vfi_ss_1(bigJ), labor_tax_j_vfi_ss_2(bigJ), debt_constr_trans(bigT)
+    real*8  :: tau, lambda, lambda_trans(bigT),  debt_constr_trans(bigT)
     integer :: i_temp
     real*8  :: tl_com, lambda_com
     
