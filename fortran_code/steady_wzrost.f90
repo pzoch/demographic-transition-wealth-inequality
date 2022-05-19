@@ -138,7 +138,7 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
     r_bar_ss = (1 + 0.03_dp)**(zbar) - 1 !(1 + 0.078_dp)**(zbar) - 1
     k_ss = ((r_bar_ss + depr)/(alpha*zbar))**(1/(alpha - 1))
     w_bar_ss(:) = zbar*(1 - alpha)*k_ss**alpha * type_multiplier
-    LabIncAVG_ss_vfi = sum(0.33*w_bar_ss*bigM_share_ss)
+    LabIncAVG_ss_vfi = zbar*(1 - alpha)*k_ss**alpha * 0.33
     ! upsilon gess residual closure ( we need only upsil, other parameters are given in set globals)
     select case (switch_residual)
     case(0)
