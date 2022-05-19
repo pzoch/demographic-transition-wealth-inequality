@@ -124,9 +124,9 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: bigM_share_ss
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
-    real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1, n_beq = 5
-    real*8, parameter  ::  zipf = 2.5d0        
+real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
+    integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1    , n_beq = 5
+    real*8, parameter  ::  zipf = 2.5d0          
     real*8 :: zeta_p, a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ),  sigma_nu_p, n_sp_initial, sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, &
                pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp)

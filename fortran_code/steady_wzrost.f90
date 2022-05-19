@@ -313,10 +313,12 @@ endif
 
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
             bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
-      
+            upsilon_ss_vf = upsilon_ss
+            upsilon_dif_ss = upsilon_ss - upsilon_old_ss
+
+            
             call agent_vf()
             prob_ss_big(:, :, :, :, :, :,m) =  bigM_share_ss(m) * prob_ss
-            print*, 'prob_ss sums to  = ', sum(prob_ss), 'for type ', m
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
@@ -343,7 +345,7 @@ endif
         
         do m = 1,bigM,1
             
-            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  * l_ss_j(1:jbar_ss-1,m))
+            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
             average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross    = consumption_ss_gross + bigM_share_ss(m) * sum(N_ss_j  * consumption_ss_gross_j(:,m))
@@ -427,7 +429,7 @@ enddo
         sum_b_weight_trans(1) = sum_b_weight_ss
     else
         l_ss_pen_j_2 = l_ss_pen_j
-         sum_b_weight_trans(2:) = sum_b_weight_ss
+        sum_b_weight_trans(2:) = sum_b_weight_ss
     endif
 
     tc_new = tc_ss
