@@ -32,7 +32,7 @@
         
         share_neg = 0d0
         share_nonpos = 0d0
-        
+        sum_b_weight_ss_vfi = 0d0
         labor_tax_ss_j_vfi(:) = 0d0
         lw_lambda_ss_j_vfi(:) = 0d0
         lw_ss_j_vfi(:) = 0d0

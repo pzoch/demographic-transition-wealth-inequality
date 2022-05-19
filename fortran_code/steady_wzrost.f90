@@ -339,7 +339,6 @@ endif
         avg_ef_l_supply     = 0d0
         LabIncAVG_ss_vfi    = 0d0
         avg_wl              = 0d0
-        
         bigl_ss             = 0d0
         
         do m = 1,bigM,1

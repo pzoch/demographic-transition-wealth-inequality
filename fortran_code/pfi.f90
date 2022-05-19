@@ -56,9 +56,9 @@ real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss
 
 real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi,  b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, &
-                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_ss_j_vfi, l_ss_pen_j_vfi
+                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_ss_j_vfi, l_ss_pen_j_vfi 
 
-real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, LabIncAVG_ss_vfi_L, LabIncAVG_ss_vfi_H, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi
+real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, LabIncAVG_ss_vfi_L, LabIncAVG_ss_vfi_H, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi, sum_b_weight_ss_vfi
 real*8 ::   gini_weight_sv(bigJ, 0:n_a)
 integer ::  jbar_ss_vf
 
