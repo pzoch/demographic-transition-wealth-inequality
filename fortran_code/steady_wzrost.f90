@@ -303,7 +303,7 @@ endif
             w_pom_ss_vfi = w_pom_ss(m)
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
             bequest_ss_vfi =  bequest_ss(m)
-            w_pom_ss_j(:,m) = w_ss_j(:,m)
+            w_pom_ss_vfi = w_ss_j(:,m)
             b_ss_j_vfi = b_ss_j(:,m)
 
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)

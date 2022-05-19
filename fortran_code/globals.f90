@@ -9,7 +9,7 @@ IMPLICIT NONE
     integer, parameter ::  n_iter_t = 50
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 2
+    integer, parameter :: bigM = 2 ! number of permanent types
     integer, parameter :: n_p = 100, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
@@ -87,9 +87,15 @@ IMPLICIT NONE
     !real(dp), dimension(n_p)  :: lambda - name conflict
 
     real(dp) :: debt_constr
+    
 ! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
-    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, w_bar_ss_1,  upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
-    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, w_bar_ss_2,  upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
+    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
+    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
+    
+    real(dp), dimension(bigM) :: w_bar_ss_1
+    real(dp), dimension(bigM) :: w_bar_ss_2
+    
+    
     real(dp), dimension(bigJ,bigM) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
@@ -114,6 +120,7 @@ IMPLICIT NONE
     real(dp), dimension(bigJ, bigT) :: x_j_pro,  x_unif_pro, sum_x_pro, x_c_j_pro, eq_unif_pro, sum_eq_pro
     real(dp) :: LS_pro , g_trans(bigT), g_ss_2, upsilon_r_ss_nr
 
+! multiple types
     real(dp), dimension(bigM) :: bigM_share_ss
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 

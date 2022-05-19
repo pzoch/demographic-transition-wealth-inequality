@@ -146,6 +146,9 @@ call chdir(cwd_r)
     switch_vf      = 1         ! 0 = analitical solution, 1 endogenous grid
     
 
+    
+    
+    
     !
    if (bigJ == 4) then ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age. ex switch  = 45 means jbar = 45 
         switch_fix_retirement_age = 3 
@@ -181,8 +184,6 @@ endif
     valor_share = 1.0_dp ! % of growth rate, to ma być 25%, jednak w REV mielismy 0.2 wiec na razie jest tyle
     
     tc_ss =  -0.0674225d0 !
-
-  
     tL = tL
     tk = tK
     tc = tc_ss
@@ -205,10 +206,14 @@ endif
    
     up_t = 0.7d0
     
+    ! parameters related to types
+    
+    
     ! population shares of types
     bigM_share_ss = 1.0d0 / bigM
+    
     ! productivity multiplier
-    type_multiplier = 1.0d0
+    type_multiplier(:) = 1.0d0
 
     include 'parameters_CD.f90'
     
