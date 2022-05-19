@@ -28,7 +28,7 @@
         lab_high_ss_j_vfi(:)= 0d0
         gini_weight_sv = 0d0
         gini_weight_consumption = 0d0
-        sum_b_weight_ss = 0d0
+
         
         share_neg = 0d0
         share_nonpos = 0d0

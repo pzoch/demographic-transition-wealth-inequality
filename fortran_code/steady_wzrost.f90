@@ -298,11 +298,11 @@ endif
         jbar_ss_vf = ceiling(jbar_ss)
         N_ss_j_vfi =  N_ss_j
         iter_com = iter
-       
+        sum_b_weight_ss = 0.0d0
         
 
         ! calling each type separately
-        sum_b_weight_ss = 0.0d0
+
         do m = 1,bigM,1
             
             w_bar_ss_vfi = w_bar_ss(m)
