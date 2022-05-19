@@ -170,9 +170,7 @@ do iter = 1,n_iter_ss,1
         endif
       
 
-    do m = 1,bigM,1
-        w_ss_j(:,m) = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss(m)
-    enddo
+
     
     ! g due to closure consruction is expresse as G/bigL
     if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
@@ -284,26 +282,32 @@ endif
             r_ss_pretax_vfi = r_bar_ss
             endif  
             
+            
+        ! no implicit here, but need to keep track for these objects for conformability    
+        do m = 1,bigM,1
+            w_ss_j(:,m) = (1-tl_ss)*(1 - t1_ss-t2_ss)*w_bar_ss(m)
+            w_pom_ss_implicit(:,m) =  (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss(m) ! will be zero here
+        enddo   
+        
+        w_pom_ss_j=  w_ss_j
+        
         tc_ss_vfi = 1_dp + tc_ss
         gam_ss_vfi = gam_ss
         pi_ss_vfi = pi_ss
         jbar_ss_vf = ceiling(jbar_ss)
         N_ss_j_vfi =  N_ss_j
         iter_com = iter
-        w_pom_ss=  (1.0_dp - t1_ss - t2_ss)*w_bar_ss 
+       
         
-        do m = 1,bigM, 1
-            w_pom_ss_implicit(:,m) =  (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss(m)
-        enddo
+
         ! calling each type separately
         sum_b_weight_ss = 0.0d0
         do m = 1,bigM,1
             
             w_bar_ss_vfi = w_bar_ss(m)
-            w_pom_ss_vfi = w_pom_ss(m)
+            w_pom_ss_vfi = w_pom_ss_j(:,m)
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
             bequest_ss_vfi =  bequest_ss(m)
-            w_pom_ss_vfi = w_ss_j(:,m)
             b_ss_j_vfi = b_ss_j(:,m)
 
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
