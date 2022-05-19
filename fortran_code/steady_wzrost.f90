@@ -343,9 +343,9 @@ endif
         
         do m = 1,bigM,1
             
-            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
-            average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  * l_ss_j(1:jbar_ss-1,m))
+            average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross    = consumption_ss_gross + bigM_share_ss(m) * sum(N_ss_j  * consumption_ss_gross_j(:,m))
             
             

@@ -145,7 +145,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(8)
 
     
-    sigma2_epsilon_t = 2 *  sigma2_epsilon_t *(1-zeta_p**zbar)/(1-zeta_p) ! increased
+    sigma2_epsilon_t =  sigma2_epsilon_t *(1-zeta_p**zbar)/(1-zeta_p) ! increased
     
 
  
