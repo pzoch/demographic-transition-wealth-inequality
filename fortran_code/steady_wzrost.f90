@@ -289,7 +289,7 @@ endif
             w_pom_ss_implicit(:,m) =  (t1_ss*tau1_ss +  t2_ss*tau2_ss)*w_bar_ss(m) ! will be zero here
         enddo   
         
-        w_pom_ss_j=  w_ss_j
+        !w_pom_ss_j=  w_ss_j
         
         tc_ss_vfi = 1_dp + tc_ss
         gam_ss_vfi = gam_ss
@@ -305,7 +305,7 @@ endif
         do m = 1,bigM,1
             
             w_bar_ss_vfi = w_bar_ss(m)
-            w_pom_ss_vfi = w_pom_ss_j(:,m)
+            w_pom_ss_vfi =  (1.0_dp - t1_ss - t2_ss)*w_bar_ss(m) ! in the original code there is something overwritten: we build a large w_pom_ss object equal to w_ss_j, but the _vfi object does not use it
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
             bequest_ss_vfi =  bequest_ss(m)
             b_ss_j_vfi = b_ss_j(:,m)
