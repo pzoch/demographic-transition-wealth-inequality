@@ -1,9 +1,18 @@
-select case (switch_residual)
+    labor_tax_revenue_ss = 0.0d0
+    do m = 1,bigM,1
+       labor_tax_revenue_ss = labor_tax_revenue_ss +  bigM_share_ss(m) *  sum(N_ss_j(1:bigJ)*labor_tax_ss_j(1:bigJ,m),dim = 1)
+    enddo
+    
+    
+    
+    select case (switch_residual)
+        
+        
     case(0)
 !       case 0 - upsilon is residual
         
         if (switch_tauK_gross == 0) then
-            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*(r_bar_ss)*(sum_priv_sv_ss)/(gam_ss*nu_ss) + sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  !+ tL_ss*sum_b_ss   
+            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*(r_bar_ss)*(sum_priv_sv_ss)/(gam_ss*nu_ss) + labor_tax_revenue_ss/bigl_ss  !+ tL_ss*sum_b_ss   
             upsilon_ss = (subsidy_ss + g_ss + (1 + r_bar_ss)*debt_ss/(gam_ss*nu_ss) - debt_ss - Tax_ss)*bigl_ss/(sum(N_ss_j))
             upsilon_r_ss = (upsilon_ss*(sum(N_ss_j))/bigl_ss)/y_ss
             if (param_ss == 1) then
@@ -11,7 +20,7 @@ select case (switch_residual)
             endif  
             
         else
-            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) + sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  !+ tL_ss*sum_b_ss   
+            Tax_ss = tc_ss*consumption_ss_gross + tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) + labor_tax_revenue_ss/bigl_ss  !+ tL_ss*sum_b_ss   
             upsilon_ss = (subsidy_ss + g_ss + (r_ss)*debt_ss/(gam_ss*nu_ss) - debt_ss - Tax_ss)*bigl_ss/(sum(N_ss_j))
             upsilon_r_ss = (upsilon_ss*(sum(N_ss_j))/bigl_ss)/y_ss
             if (param_ss == 1) then
@@ -32,13 +41,13 @@ select case (switch_residual)
         if (switch_tauK_gross == 0) then
             
         deficit_ss =   (debt_ss * (1 - (1 + r_bar_ss) / (gam_ss * nu_ss)))    
-        tc_ss = (subsidy_ss + g_ss - deficit_ss - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross
+        tc_ss = (subsidy_ss + g_ss - deficit_ss - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     - labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross
           
              
         else
             
         deficit_ss =   (debt_ss * (1 - (r_ss) / (gam_ss * nu_ss)))       
-        tc_ss = (subsidy_ss + g_ss - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross
+        tc_ss = (subsidy_ss + g_ss - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss - labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross
     
          !       tc_ss = (subsidy_ss + g_ss + (1 + r_ss)*debt_ss/(gam_ss*nu_ss) - debt_ss &
          !       - tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  &
@@ -51,7 +60,7 @@ select case (switch_residual)
         if (switch_tauK_gross == 0) then
             
         deficit_ss =   (debt_ss * (1 - (1 + r_bar_ss) / (gam_ss * nu_ss)))    
-            g_ss   =  tc_ss * consumption_ss_gross - (subsidy_ss - deficit_ss - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))) 
+            g_ss   =  tc_ss * consumption_ss_gross - (subsidy_ss - deficit_ss - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     -labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))) 
             g_per_capita_ss = g_ss*bigl_ss/N_ss       
             g_share_ss = g_ss/y_ss 
 
@@ -60,7 +69,7 @@ select case (switch_residual)
             deficit_ss =   (debt_ss * (1 - (r_ss) / (gam_ss * nu_ss)))       
 
             
-            g_ss =    tc_ss * consumption_ss_gross - (subsidy_ss  - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))
+            g_ss =    tc_ss * consumption_ss_gross - (subsidy_ss  - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss -labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))
             g_per_capita_ss = g_ss*bigl_ss/N_ss       
             g_share_ss = g_ss/y_ss 
 

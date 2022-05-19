@@ -18,7 +18,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, income_ss, &
-                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss
+                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss
     
     real(dp), dimension(bigM) :: bequest_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
@@ -46,9 +46,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      real(dp) :: avg_wl, mult_ss
      
      real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j
-     real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
-                           bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
-                           labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
+     !real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
+     !                      bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
+     !                      labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
      real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
@@ -259,7 +259,7 @@ else
             
             
             bequest_left_ss_j(bigj,m) = bigM_share_ss(m) *  pi_weight_ss(bigJ) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
-            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) 
 
             enddo
         endif
@@ -314,7 +314,8 @@ endif
             bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
       
             call agent_vf()
-            prob_ss_big(:, :, :, :, :, :,m) = prob_ss
+            prob_ss_big(:, :, :, :, :, :,m) =  bigM_share_ss(m) * prob_ss
+            print*, 'prob_ss sums to  = ', sum(prob_ss), 'for type ', m
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
@@ -331,6 +332,8 @@ endif
         average_l_ss    = 0d0
         average_w_ss    = 0d0
         consumption_ss_gross = 0d0
+        savings_ss = 0d0
+        
         avg_ef_l_supply     = 0d0
         LabIncAVG_ss_vfi    = 0d0
         avg_wl              = 0d0
@@ -347,7 +350,7 @@ endif
             savings_ss              = savings_ss +  bigM_share_ss(m) * sum(N_ss_j  * savings_ss_j(:,m))
             
             
-            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss(m))/sum(N_ss_j(1:jbar_ss-1)) 
+            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             avg_ef_l_supply         = avg_ef_l_supply + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
