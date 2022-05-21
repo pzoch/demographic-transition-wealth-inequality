@@ -187,7 +187,7 @@
                     dist = min(dist, 1d0)
 
                     prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, n_sp_initial, n_sr_initial, n_sd_initial,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk³ad
-                    prob_trans(1, iar, 0, :, :, :, i) = prob_trans(1, iar, 0, n_sp_initial,  n_sr_initial, n_sd_initial,i) + p_initial(ind)*(1d0 - dist)
+                    prob_trans(1, iar, 0, :, :, :, i) = prob_trans(1, iar, 0,  n_sp_initial,  n_sr_initial, n_sd_initial,i) + p_initial(ind)*(1d0 - dist)
                 enddo
                 
                    do ia = 0, n_a, 1

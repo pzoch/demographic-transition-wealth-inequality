@@ -49,7 +49,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      !real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
      !                      bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
      !                      labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
-     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big
+     real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big, aime_plus_ss_big
     
     real(dp), dimension(bigj, n_a) :: V_ss_j
 
@@ -67,9 +67,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         tK_ss   = tauK_ss_old
         lambda= lambda_ss_old
         debt_constr= debt_constr_ss_old
-        pi_ip = pi_ip_ss_old
-        n_sp_value = n_sp_value_ss_old
-        pi_ip_init = pi_ip_init_ss_old
+        pi_ip_big = pi_ip_ss_old_big
+        n_sp_value_big = n_sp_value_ss_old_big
+        pi_ip_init_big = pi_ip_init_ss_old_big
         g_share_ss = g_share_ss
         
     else 
@@ -85,10 +85,10 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         tL_ss  = tauL_ss_new
         tK_ss   = tauK_ss_new
         lambda = lambda_ss_new
-        pi_ip = pi_ip_ss_new
+        pi_ip_big = pi_ip_ss_new_big
         debt_constr= debt_constr_ss_new
-        n_sp_value = n_sp_value_ss_new
-        pi_ip_init = pi_ip_init_ss_new
+        n_sp_value_big = n_sp_value_ss_new_big
+        pi_ip_init_big = pi_ip_init_ss_new_big
         g_share_ss = g_share_ss_2
     endif
 !OPEN (unit=121, FILE = version//experiment//closure//"test_k_NEW.txt")
@@ -305,6 +305,12 @@ endif
 
         do m = 1,bigM,1
             
+            ! load shock matrices
+            
+            pi_ip = pi_ip_ss_new_big(:,:,m)
+            n_sp_value = n_sp_value_ss_new_big(:,m)
+            pi_ip_init = pi_ip_init_ss_new_big(:,m)
+            
             w_bar_ss_vfi = w_bar_ss(m)
             w_pom_ss_vfi =  w_pom_ss_j(:,m) 
             w_pom_ss_implicit_vfi = w_pom_ss_implicit(:,m)
@@ -315,10 +321,11 @@ endif
             bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
             upsilon_ss_vf = upsilon_ss
             upsilon_dif_ss = upsilon_ss - upsilon_old_ss
-
+            aime_plus_ss  = aime_plus_ss_big(:, :, :, :, :, :,m)
             
             call agent_vf()
             prob_ss_big(:, :, :, :, :, :,m) =  bigM_share_ss(m) * prob_ss
+            aime_plus_ss_big(:, :, :, :, :, :,m) = aime_plus_ss
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 

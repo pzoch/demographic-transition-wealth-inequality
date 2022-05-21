@@ -109,7 +109,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
       
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
-    zeta_p  =  0.977d0
+    zeta_p(:)  =  0.977d0
 
      if (switch_starting_year == 0) then 
         Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
@@ -124,32 +124,38 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
     endif
     
-     if (switch_sigma2_epsilon_t == 1) then 
-        do i = 1, last_data_sigma2_epsilon, 1
-            read(8,*) sigma2_epsilon_t(i)
-        enddo
-        sigma2_epsilon_t(last_data_sigma2_epsilon+1:) = sigma2_epsilon_t(last_data_sigma2_epsilon)
+    ! reading sigma2_epsilon_t
     
+     if (switch_sigma2_epsilon_t == 1) then 
+        do m = 1,bigM,1
+            do i = 1, last_data_sigma2_epsilon, 1
+                read(8,*) sigma2_epsilon_t_big(i,m)
+            enddo
+            sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
+        enddo
      elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year == 3) then   
         last_data_sigma2_epsilon = 5
-        do i = 1, last_data_sigma2_epsilon, 1
-            read(8,*) sigma2_epsilon_t(i)
+        do m = 1,bigM,1
+            do i = 1, last_data_sigma2_epsilon, 1
+                read(8,*) sigma2_epsilon_t_big(i,m)
+            enddo
         enddo
-       sigma2_epsilon_t(last_data_sigma2_epsilon+1:) = sigma2_epsilon_t(last_data_sigma2_epsilon)  
+        
+       sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)  
        
        
-    elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 3) then
-        read(8,*) sigma2_epsilon_t(1)
-        sigma2_epsilon_t(2:) = sigma2_epsilon_t(1)
+     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 3) then
+        do m = 1,bigM,1 
+            read(8,*) sigma2_epsilon_t_big(1,m)
+             sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)
+        enddo
+        
     endif
     close(8)
 
-    
-    sigma2_epsilon_t =  sigma2_epsilon_t *(1-zeta_p**zbar)/(1-zeta_p) ! increased
-    
-
- 
-
+    do m = 1,bigM,1
+    sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**zbar)/(1-zeta_p(m)) ! increased
+    enddo
 
       
     

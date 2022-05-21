@@ -15,8 +15,7 @@ real*8 :: dist, c_help, l_help
                     tot_income_ss = 0d0
                     tot_income_pretax_ss = 0d0
                     labor_tax = 0d0
-                    svplus_ss=0d0
-                    aime_plus_ss = 0d0
+                    svplus_ss=0d0                
                     V_ss = 0d0
 
 

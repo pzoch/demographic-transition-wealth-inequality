@@ -9,7 +9,7 @@ IMPLICIT NONE
     integer, parameter ::  n_iter_t = 50
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 1 ! number of permanent types
+    integer, parameter :: bigM = 2 ! number of permanent types
     integer, parameter :: n_p = 100, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
@@ -103,6 +103,7 @@ IMPLICIT NONE
     real(dp) :: alpha, beta, delta, depr, theta, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
+    real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big
     real(dp) :: tc_growth, up_tc
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new 
     real(dp) :: superstar_factor_1, superstar_factor_2
@@ -111,6 +112,7 @@ IMPLICIT NONE
     integer, dimension(bigT) :: jbar_t
 	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, tauL_t, tauK_t, debt_constr_t, alpha_t, gy_factor_t
     real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t
+    real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
   
 ! LSRA
@@ -126,16 +128,27 @@ IMPLICIT NONE
  ! pfi 
 real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1    , n_beq = 5
-    real*8, parameter  ::  zipf = 2.5d0          
-    real*8 :: zeta_p, a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ),  sigma_nu_p, n_sp_initial, sigma_nu_r, n_sr_initial,&
-                zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, &
+    
+    real*8, parameter  ::  zipf = 2.5d0     
+    real*8, dimension(bigM) :: zeta_p
+    
+        
+    real*8 :: a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ), sigma_nu_r, n_sr_initial,&
+                zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, n_sp_initial,&
                pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp)
     real*8 :: aime_cap, aime_cap_ge
     
  ! cohort/time specific shock grids
-    real*8   :: pi_ip_trans(n_sp,n_sp,bigT), n_sp_value_trans(n_sp,bigT), pi_ip_init_trans(n_sp,bigT)! added one extra dimension to handle time/cohort specific variances
-    real(dp) :: sigma2_epsilon_ss_old, sigma2_epsilon_ss_new ! steady state variances
+    real*8   ::  pi_ip_trans(n_sp,n_sp,bigT), n_sp_value_trans(n_sp,bigT), pi_ip_init_trans(n_sp,bigT) ! these will be used in pfi.90 
+    real*8   ::  pi_ip_trans_big(n_sp,n_sp,bigM,bigT), n_sp_value_trans_big(n_sp,bigM,bigT), pi_ip_init_trans_big(n_sp,bigM, bigT) ! these are used in the outer routine and hold all the information
+    
+    real(dp) :: sigma2_epsilon_ss_old_big(bigM), sigma2_epsilon_ss_new_big(bigM) ! these will be used in pfi.90 
+    real(dp) :: sigma2_epsilon_ss_old, sigma2_epsilon_ss_new ! these are used in the outer routine and hold all the information
+    
+    real*8   :: pi_ip_ss_old_big(n_sp,n_sp,bigM), n_sp_value_ss_old_big(n_sp,bigM), pi_ip_ss_new_big(n_sp,n_sp,bigM), n_sp_value_ss_new_big(n_sp,bigM), pi_ip_init_ss_old_big(n_sp,bigM), pi_ip_init_ss_new_big(n_sp,bigM) ! steady state shock 
     real*8   :: pi_ip_ss_old(n_sp,n_sp), n_sp_value_ss_old(n_sp), pi_ip_ss_new(n_sp,n_sp), n_sp_value_ss_new(n_sp), pi_ip_init_ss_old(n_sp), pi_ip_init_ss_new(n_sp) ! steady state shock realizations and transition probabilities
+    
+    real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
     real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp) ! holder to make this code compatibile with older subroutines
     
  ! pension system 
