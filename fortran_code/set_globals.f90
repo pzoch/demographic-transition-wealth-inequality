@@ -102,8 +102,8 @@ call chdir(cwd_r)
     !
     ! 
      
-        switch_mortality         = 0      
-        switch_unstable_dem_ss   = 0        
+        switch_mortality         = 1      
+        switch_unstable_dem_ss   = 1        
         switch_go_to_lower_gamma = 1         
         switch_change_tauL       = 1
         switch_change_lambda     = 1      
@@ -212,8 +212,8 @@ endif
     ! population shares of types
     bigM_share_ss = 1.0d0 / bigM
     
-    ! productivity multiplier
-    type_multiplier(:) = 1.0d0
+    ! parameter in CES production function 
+    type_multiplier(:) = 1.0d0 / 4.0d0
 
     include 'parameters_CD.f90'
     

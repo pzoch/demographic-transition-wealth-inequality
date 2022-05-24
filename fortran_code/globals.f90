@@ -100,7 +100,7 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
 ! Parametry
-    real(dp) :: alpha, beta, delta, depr, theta, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
+    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big
@@ -135,7 +135,7 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
         
     real*8 :: a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ), sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, n_sp_initial,&
-               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr), pi_ip_init(n_sp)
+               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr)
     real*8 :: aime_cap, aime_cap_ge
     
  ! cohort/time specific shock grids
@@ -148,8 +148,8 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     real*8   :: pi_ip_ss_old_big(n_sp,n_sp,bigM), n_sp_value_ss_old_big(n_sp,bigM), pi_ip_ss_new_big(n_sp,n_sp,bigM), n_sp_value_ss_new_big(n_sp,bigM), pi_ip_init_ss_old_big(n_sp,bigM), pi_ip_init_ss_new_big(n_sp,bigM) ! steady state shock 
     real*8   :: pi_ip_ss_old(n_sp,n_sp), n_sp_value_ss_old(n_sp), pi_ip_ss_new(n_sp,n_sp), n_sp_value_ss_new(n_sp), pi_ip_init_ss_old(n_sp), pi_ip_init_ss_new(n_sp) ! steady state shock realizations and transition probabilities
     
-    real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
-    real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp) ! holder to make this code compatibile with older subroutines
+    real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM), pi_ip_init_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
+    real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp), pi_ip_init(n_sp)! holder to make this code compatibile with older subroutines
     
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib

@@ -16,11 +16,11 @@ CONTAINS
 
 subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
-                jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross, &
+                jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, upsilon_ss, income_ss, &
-                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss
+                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss
     
-    real(dp), dimension(bigM) :: bequest_ss
+    real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
     
@@ -137,7 +137,12 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
     
     r_bar_ss = (1 + 0.03_dp)**(zbar) - 1 !(1 + 0.078_dp)**(zbar) - 1
     k_ss = ((r_bar_ss + depr)/(alpha*zbar))**(1/(alpha - 1))
-    w_bar_ss(:) = zbar*(1 - alpha)*k_ss**alpha * type_multiplier
+    
+    ! this one requires some information about the L-aggregator
+    ! this will matter also for the bigL object
+    ! bigL = f(bigL_m)
+    include 'ces_production.f90'
+
     LabIncAVG_ss_vfi = zbar*(1 - alpha)*k_ss**alpha * 0.33
     ! upsilon gess residual closure ( we need only upsil, other parameters are given in set globals)
     select case (switch_residual)
@@ -157,7 +162,8 @@ do iter = 1,n_iter_ss,1
     
     r_bar_ss = zbar*alpha*k_ss**(alpha - 1) - depr
     y_ss     = zbar* k_ss**(alpha)
-    w_bar_ss(:) = zbar*(1 - alpha)*k_ss**alpha * type_multiplier
+    
+    include 'ces_production_ss.f90'
     
     if (r_bar_ss < 0) then
         r_bar_ss = 0
@@ -307,9 +313,9 @@ endif
             
             ! load shock matrices
             
-            pi_ip = pi_ip_ss_new_big(:,:,m)
-            n_sp_value = n_sp_value_ss_new_big(:,m)
-            pi_ip_init = pi_ip_init_ss_new_big(:,m)
+            pi_ip = pi_ip_big(:,:,m)
+            n_sp_value = n_sp_value_big(:,m)
+            pi_ip_init = pi_ip_init_big(:,m)
             
             w_bar_ss_vfi = w_bar_ss(m)
             w_pom_ss_vfi =  w_pom_ss_j(:,m) 
@@ -339,6 +345,7 @@ endif
         savings_ss_j           = s_ss_j
         ! aggregation
         bigl_ss         = 0d0
+        bigl_type_ss    = 0d0
         average_l_ss    = 0d0
         average_w_ss    = 0d0
         
@@ -352,7 +359,8 @@ endif
         
         do m = 1,bigM,1
             
-            bigl_ss                 = bigl_ss + bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
+            bigl_type_ss(m)         = bigM_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
+            bigl_ss                 = bigl_ss + type_multiplier(m) * bigl_type_ss(m) ** rho_subst ! with CES production function this
             average_l_ss            = average_l_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             average_w_ss            = average_w_ss + bigM_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross    = consumption_ss_gross + bigM_share_ss(m) * sum(N_ss_j  * consumption_ss_gross_j(:,m))
@@ -366,6 +374,8 @@ endif
             avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
+        
+            bigl_ss                 =   bigl_ss ** (1.0d0/rho_subst)
             consumption_ss_gross    =   consumption_ss_gross/bigl_ss
             savings_ss              =   savings_ss/bigl_ss
             

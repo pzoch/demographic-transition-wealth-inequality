@@ -41,6 +41,8 @@ integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_trans,  aime_plus_trans, l_trans, c_trans, labor_tax_trans, &
                                                   RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
+real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_trans_big,  aime_plus_trans_big, l_trans_big, c_trans_big, labor_tax_trans_big, &
+                                                  RHS_trans_big, prob_trans_big, ERHS_trans_big, sv_tempo_trans_big, V_trans_big, EV_trans_big, lab_income_trans_big, lab_income_pretax_trans_big,  tot_income_trans_big, tot_income_pretax_trans_big, bequest_j_trans_big
 
 real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi,  w_pom_trans_implicit_vfi, &
                                  check_euler_trans, V_j_vfi_const_lambda, V_j_vfi_higher_lambda, V_j_vfi,&
@@ -53,6 +55,10 @@ integer :: jbar_t_vfi(bigT)
 !steady state variables
 real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, prob_ss, &
  gini_weight_consumption,  aime_plus_ss, aime_tempo
+
+!steady state variables - big
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, l_ss_big, c_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
+ gini_weight_consumption_big,  aime_plus_ss_big, aime_tempo_big
 
 real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi,  b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, &
@@ -236,22 +242,25 @@ contains
             ! aggregate individual decisions
             call aggregation_ss()
           
+            
+            
+            !!!! THESE SEEMS TO BE SOMETHING WE NEED TO ADJUST IN THE STEADY STARE ROUTINE
             if (switch_run_1 == 1) then 
                 V_j_vfi(:,1) = 0d0 ! to d0
                 
                 avg_ef_l_supply_trans(1) = avg_ef_l_supply
-                c_trans(:, :, :, :, :, :, 1) = c_ss
-                l_trans(:, :, :, :, :, :, 1) = l_ss  
-                lab_income_trans(:, :, :, :, :, :, 1) = lab_income_ss
-                lab_income_pretax_trans(:, :, :, :, :, :, 1) = lab_income_pretax_ss
-                tot_income_trans(:, :, :, :, :, :, 1) = tot_income_ss
-                tot_income_pretax_trans(:, :, :, :, :, :, 1) = tot_income_pretax_ss
+                c_trans_big(:, :, :, :, :, :, :, 1) = c_ss_big
+                l_trans_big(:, :, :, :, :, :, :, 1) = l_ss_Big  
+                lab_income_trans_big(:, :, :, :, :, :, :, 1) = lab_income_ss_big
+                lab_income_pretax_trans_big(:, :, :, :, :, :, :, 1) = lab_income_pretax_ss_big
+                tot_income_trans_big(:, :, :, :, :, :, :, 1) = tot_income_ss_big
+                tot_income_pretax_trans_big(:, :, :, :, :, :, :, 1) = tot_income_pretax_ss_big
                 
-                labor_tax_trans(:, :, :, :, :, :, 1) = labor_tax
-                prob_trans(:, :, :, :, :, :, 1) = prob_ss
-                svplus_trans(:, :, :, :, :, :, 1) = svplus_ss
-                aime_plus_trans(:, :, :, :, :, :, 1) = aime_plus_ss
-                V_trans(:, :, :, :, :, :, 1) = V_ss
+                labor_tax_trans_big(:, :, :, :, :, :, :, 1) = labor_tax_big
+                prob_trans_big(:, :, :, :, :, :, :, 1) = prob_ss_big
+                svplus_trans_big(:, :, :, :, :, :, :,1) = svplus_ss
+                aime_plus_trans_big(:, :, :, :, :, :, 1) = aime_plus_ss_big
+                V_trans_big(:, :, :, :, :, :, 1) = V_ss
                 c_j_vfi(:,1) = c_ss_j_vfi   
                 l_j_vfi(:,1) = l_ss_j_vfi 
                 l_pen_j_vfi(:,1) = l_ss_pen_j_vfi
@@ -264,15 +273,15 @@ contains
                 LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
             else
                 do i = 2,bigT,1            
-                    c_trans(:, :, :, :, :, :, i) = c_ss
-                    l_trans(:, :, :, :, :, :, i) = l_ss  
-                    lab_income_trans(:, :, :, :, :, :, i) = lab_income_ss  
-                    lab_income_pretax_trans(:, :, :, :, :, :, i) = lab_income_pretax_ss  
-                    labor_tax_trans(:, :, :, :, :, :, i) = labor_tax
-                    prob_trans(:, :, :, :, :, :, i) = prob_ss
-                    svplus_trans(:, :, :, :, :, :, i) = svplus_ss
-                    aime_plus_trans(:, :, :, :, :, :, i) = aime_plus_ss
-                    V_trans(:, :, :,:, :, :, i) = V_ss
+                    c_trans_big(:, :, :, :, :, :, i) = c_ss_big
+                    l_trans_big(:, :, :, :, :, :, i) = l_ss_big
+                    lab_income_trans_big(:, :, :, :, :, :, i) = lab_income_ss_big  
+                    lab_income_pretax_trans_big(:, :, :, :, :, :, i) = lab_income_pretax_ss_big  
+                    labor_tax_trans_big(:, :, :, :, :, :, i) = labor_tax_big
+                    prob_trans_big(:, :, :, :, :, :, i) = prob_ss_big
+                    svplus_trans_big(:, :, :, :, :, :, i) = svplus_ss_big
+                    aime_plus_trans_big(:, :, :, :, :, :, i) = aime_plus_ss_big
+                    V_trans_big(:, :, :,:, :, :, i) = V_ss_big
                     c_j_vfi(:,i) = c_ss_j_vfi   
                     l_j_vfi(:,i) = l_ss_j_vfi 
                     l_pen_j_vfi(:,i) = l_ss_pen_j_vfi

@@ -79,7 +79,9 @@
 		<File RelativePath=".\Initial_values_DB.f90"/>
 		<File RelativePath=".\parameters_CD.f90"/>
 		<File RelativePath=".\set_globals.f90"/>
-		<File RelativePath=".\shocks_parameters.f90"/></Filter>
+		<File RelativePath=".\shocks_parameters.f90"/>
+		<File RelativePath=".\ces_production_ss.f90"/>
+		<File RelativePath=".\ces_production.f90"/></Filter>
 		<Filter Name="implicit_tax_and_bequest">
 		<File RelativePath=".\bequest.f90"/></Filter>
 		<Filter Name="pension_system">
