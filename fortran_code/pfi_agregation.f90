@@ -196,6 +196,7 @@
         l_pen_j_vfi(:,i) = 0d0
         s_pom_j_vfi(:,i) = 0d0
         lab_j_vfi(:,i) = 0d0
+        labor_tax_j_vfi(:,i) = 0d0
         asset_trans(:,i) = 0d0
         top_ten_trans(:,i) = 0d0
         savings_top_ten_trans(:,i) = 0d0

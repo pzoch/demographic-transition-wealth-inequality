@@ -164,6 +164,7 @@ include 'closures.f90'
             l_j(:,m,:) = l_j_vfi
             s_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
+            labor_tax_j(:,m,:) = labor_tax_j_vfi
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
 
