@@ -18,7 +18,7 @@
     enddo
     rI(n_p+2:bigT) = nu(n_p+1)*gam_t(n_p+2) - 1
     
-
+    do m = 1,bigM,1
     do i = 1, bigT, 1
         avg_wl(i) = 0d0
         
@@ -27,7 +27,7 @@
         enddo
         avg_wl(i) = avg_wl(i)/real(jbar_t(max(i-1,1)) -1)
     enddo 
-    
+    enddo
 
     
     !!!!!!!!!!!!!!!!! DB pension system !!!!!!!!!!!!!!!!!

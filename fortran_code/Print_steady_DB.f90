@@ -118,34 +118,34 @@
         write(*,'(A30,F16.7,A)') ' feasibility = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
         write(*,*) '********************************************'
 
-    OPEN (unit=666, FILE = version//experiment//closure//no_steady//"aggregates.csv")
-
- 
-    write(666, '(A)') "Outcomes"
-    write(666, '(A)') "y;k/y;c/y;i/y;bigl;r;tauC;tauK;tauL;lambda;beq/y;gam_ss;average hours;r-g;replacement;"
-    write(666, '(F20.10,A)', advance='no') y_ss, ";"
-    write(666, '(F20.10,A)', advance='no') k_ss/y_ss, ";"
-    write(666, '(F20.10,A)', advance='no') consumption_ss_gross/(y_ss), ";"
-    write(666, '(F20.10,A)', advance='no') ((gam_ss+depr-1)*k_ss)/y_ss, ";"
-    write(666, '(F20.10,A)', advance='no') bigl_ss, ";"
-    write(666, '(F20.10,A)', advance='no') r_ss, ";"
-    write(666, '(F20.10,A)', advance='no') tc_ss, ";"
-    write(666, '(F20.10,A)', advance='no') tk_ss, ";"
-    write(666, '(F20.10,A)', advance='no') tl_ss, ";"
-    write(666, '(F20.10,A)', advance='no')lambda, ";"
-    write(666, '(F20.10,A)', advance='no') bequest_ss/y_ss, ";"
-    write(666, '(F20.10,A)', advance='no') gam_ss, ";"
-    write(666, '(F20.10,A)', advance='no') bigl_ss/sum(N_ss_j(1:jbar_ss-1)), ";"
-    write(666, '(F20.10,A)', advance='no') r_ss-gam_ss, ";"
-    write(666, '(F20.10,A)', advance='no') replacement_ss, ";"
-
-    write(666, '(A)') ""
-    write(666, '(A)') "Lifecycle"
-    write(666, '(A)') "yr;c;l;s;V;disc"
-    !do j = 1, bigJ
-    !    write(666, '(I2,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') j, ";", c_ss_j(j), ";", l_ss_j(j), ";", s_ss_j(j), ";", V_ss_j_vfi(j), ";", beta*delta**(j-1)*(pi_ss(j)/pi_ss(1))
-    !enddo
-CLOSE(666)
+!    OPEN (unit=666, FILE = version//experiment//closure//no_steady//"aggregates.csv")
+!
+! 
+!    write(666, '(A)') "Outcomes"
+!    write(666, '(A)') "y;k/y;c/y;i/y;bigl;r;tauC;tauK;tauL;lambda;beq/y;gam_ss;average hours;r-g;replacement;"
+!    write(666, '(F20.10,A)', advance='no') y_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') k_ss/y_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') consumption_ss_gross/(y_ss), ";"
+!    write(666, '(F20.10,A)', advance='no') ((gam_ss+depr-1)*k_ss)/y_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') bigl_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') r_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') tc_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') tk_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') tl_ss, ";"
+!    write(666, '(F20.10,A)', advance='no')lambda, ";"
+!    write(666, '(F20.10,A)', advance='no') bequest_ss/y_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') gam_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') bigl_ss/sum(N_ss_j(1:jbar_ss-1)), ";"
+!    write(666, '(F20.10,A)', advance='no') r_ss-gam_ss, ";"
+!    write(666, '(F20.10,A)', advance='no') replacement_ss, ";"
+!
+!    write(666, '(A)') ""
+!    write(666, '(A)') "Lifecycle"
+!    write(666, '(A)') "yr;c;l;s;V;disc"
+!    !do j = 1, bigJ
+!    !    write(666, '(I2,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') j, ";", c_ss_j(j), ";", l_ss_j(j), ";", s_ss_j(j), ";", V_ss_j_vfi(j), ";", beta*delta**(j-1)*(pi_ss(j)/pi_ss(1))
+!    !enddo
+!CLOSE(666)
 
     
 if (switch_ss_write == 1) then

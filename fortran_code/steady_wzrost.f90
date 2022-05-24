@@ -141,7 +141,7 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
     ! this one requires some information about the L-aggregator
     ! this will matter also for the bigL object
     ! bigL = f(bigL_m)
-    include 'ces_production.f90'
+    include 'ces_production_ss.f90'
 
     LabIncAVG_ss_vfi = zbar*(1 - alpha)*k_ss**alpha * 0.33
     ! upsilon gess residual closure ( we need only upsil, other parameters are given in set globals)
@@ -330,8 +330,18 @@ endif
             aime_plus_ss  = aime_plus_ss_big(:, :, :, :, :, :,m)
             
             call agent_vf()
-            prob_ss_big(:, :, :, :, :, :,m) =  bigM_share_ss(m) * prob_ss
-            aime_plus_ss_big(:, :, :, :, :, :,m) = aime_plus_ss
+            prob_ss_big(:, :, :, :, :, :,m)          =  bigM_share_ss(m) * prob_ss
+            aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
+            c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
+            l_ss_big(:, :, :, :, :, : ,m)            = l_ss
+            lab_income_ss_big(:, :, :, :, :, :,m)    = lab_income_ss
+            lab_income_pretax_ss_big(:, :, :, :, :, :,m) = lab_income_pretax_ss
+            tot_income_ss_big(:, :, :, :, :, :,m)        = tot_income_ss
+            tot_income_pretax_ss_big(:, :, :, :, :, :,m) = tot_income_pretax_ss
+            labor_tax_big(:, :, :, :, :, :,m)            = labor_tax
+            svplus_ss_big(:, :, :, :, :, :,m)            = svplus_ss
+            V_ss_big(:, :, :, :, :, :,m)                 = V_ss
+
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
@@ -374,7 +384,7 @@ endif
             avg_wl                  = avg_wl + bigM_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
-        
+     
             bigl_ss                 =   bigl_ss ** (1.0d0/rho_subst)
             consumption_ss_gross    =   consumption_ss_gross/bigl_ss
             savings_ss              =   savings_ss/bigl_ss

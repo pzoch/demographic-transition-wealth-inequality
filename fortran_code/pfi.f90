@@ -244,10 +244,8 @@ contains
           
             
             
-            !!!! THESE SEEMS TO BE SOMETHING WE NEED TO ADJUST IN THE STEADY STARE ROUTINE
+            !!!! THESE SEEMS TO BE SOMETHING WE NEED TO ADJUST IN THE STEADY STATE ROUTINE
             if (switch_run_1 == 1) then 
-                V_j_vfi(:,1) = 0d0 ! to d0
-                
                 avg_ef_l_supply_trans(1) = avg_ef_l_supply
                 c_trans_big(:, :, :, :, :, :, :, 1) = c_ss_big
                 l_trans_big(:, :, :, :, :, :, :, 1) = l_ss_Big  
@@ -255,43 +253,28 @@ contains
                 lab_income_pretax_trans_big(:, :, :, :, :, :, :, 1) = lab_income_pretax_ss_big
                 tot_income_trans_big(:, :, :, :, :, :, :, 1) = tot_income_ss_big
                 tot_income_pretax_trans_big(:, :, :, :, :, :, :, 1) = tot_income_pretax_ss_big
-                
                 labor_tax_trans_big(:, :, :, :, :, :, :, 1) = labor_tax_big
                 prob_trans_big(:, :, :, :, :, :, :, 1) = prob_ss_big
-                svplus_trans_big(:, :, :, :, :, :, :,1) = svplus_ss
-                aime_plus_trans_big(:, :, :, :, :, :, 1) = aime_plus_ss_big
-                V_trans_big(:, :, :, :, :, :, 1) = V_ss
-                c_j_vfi(:,1) = c_ss_j_vfi   
-                l_j_vfi(:,1) = l_ss_j_vfi 
-                l_pen_j_vfi(:,1) = l_ss_pen_j_vfi
-                labor_tax_j_vfi(:,1)  = labor_tax_ss_j_vfi
-                lw_j_vfi(:,1)  = lw_ss_j_vfi
-                lw_lambda_j_vfi(:,1)  = lw_lambda_ss_j_vfi
-                s_pom_j_vfi(:,1) = s_pom_ss_j_vfi
-                V_j_vfi(:,1) = V_ss_j_vfi 
+                svplus_trans_big(:, :, :, :, :, :, :, 1) = svplus_ss_big
+                aime_plus_trans_big(:, :, :, :, :, :, :, 1) = aime_plus_ss_big
+                V_trans_big(:, :, :, :, :, :, :,  1) = V_ss_big
                 gini_weight_trans(:,:, 1) = gini_weight_sv
                 LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
             else
                 do i = 2,bigT,1            
-                    c_trans_big(:, :, :, :, :, :, i) = c_ss_big
-                    l_trans_big(:, :, :, :, :, :, i) = l_ss_big
-                    lab_income_trans_big(:, :, :, :, :, :, i) = lab_income_ss_big  
-                    lab_income_pretax_trans_big(:, :, :, :, :, :, i) = lab_income_pretax_ss_big  
-                    labor_tax_trans_big(:, :, :, :, :, :, i) = labor_tax_big
-                    prob_trans_big(:, :, :, :, :, :, i) = prob_ss_big
-                    svplus_trans_big(:, :, :, :, :, :, i) = svplus_ss_big
-                    aime_plus_trans_big(:, :, :, :, :, :, i) = aime_plus_ss_big
-                    V_trans_big(:, :, :,:, :, :, i) = V_ss_big
-                    c_j_vfi(:,i) = c_ss_j_vfi   
-                    l_j_vfi(:,i) = l_ss_j_vfi 
-                    l_pen_j_vfi(:,i) = l_ss_pen_j_vfi
-                    labor_tax_j_vfi(:,i)  = labor_tax_ss_j_vfi
-                    lw_j_vfi(:,i)  = lw_ss_j_vfi
-                    lw_lambda_j_vfi(:,i)  = lw_lambda_ss_j_vfi
-                    s_pom_j_vfi(:,i) = s_pom_ss_j_vfi
-                    V_j_vfi(:,i) = V_ss_j_vfi
-                    gini_weight_trans(:,:, i) = gini_weight_sv
                     avg_ef_l_supply_trans(i) = avg_ef_l_supply
+                    c_trans_big(:, :, :, :, :, :, :, i) = c_ss_big
+                    l_trans_big(:, :, :, :, :, :, :, i) = l_ss_big
+                    lab_income_trans_big(:, :, :, :, :, :, :, i) = lab_income_ss_big  
+                    lab_income_pretax_trans_big(:, :, :, :, :, :, :, i) = lab_income_pretax_ss_big  
+                    tot_income_trans_big(:, :, :, :, :, :, :, i) = tot_income_ss_big
+                    tot_income_pretax_trans_big(:, :, :, :, :, :, :, i) = tot_income_pretax_ss_big                    
+                    labor_tax_trans_big(:, :, :, :, :, :, :, i) = labor_tax_big
+                    prob_trans_big(:, :, :, :, :, :, :, i) = prob_ss_big
+                    svplus_trans_big(:, :, :, :, :, :, :, i) = svplus_ss_big
+                    aime_plus_trans_big(:, :, :, :, :, :, :, i) = aime_plus_ss_big
+                    V_trans_big(:, :, :,:, :, :, :,  i) = V_ss_big
+                    gini_weight_trans(:,:, i) = gini_weight_sv
                     LabIncAVG_vfi(i) = LabIncAVG_ss_vfi
                 enddo
             endif

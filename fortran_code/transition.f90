@@ -21,7 +21,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
-	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK,wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
+	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
 	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
@@ -147,11 +147,12 @@ include 'Initial_values_db.f90'
     bigl_j_aux = 0.0d0
     
     do m = 1,bigM,1
-        bigl_type(:,m)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:))
+        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
 
     enddo
-
+    
+    bigl = bigl ** (1.0d0/rho_subst)        
     
     nu(1) = nu_ss_old
     nu_pop(1) = nu_ss_old

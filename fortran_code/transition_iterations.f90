@@ -98,7 +98,9 @@ include 'closures.f90'
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         do m = 1,bigM, 1
-           
+
+            
+            
             do i = 1, bigT,1
                 w_pom_trans_vfi(:,i) = (1 - t1(:,i) - t2(:,i))*w_bar(m,i) !w_j(:,1:bigT)
                 w_pom_trans_implicit_vfi(:,i) = (t1_contrib(:,i)*tau1_s_t(:,i) + t2(:,i)*tau2_s_t(:,i))*w_bar(m,i)
@@ -119,41 +121,7 @@ include 'closures.f90'
             endif
             
             
-            !!!! HERE NEED TO LOAD ALL THESE NASTY _SS OBJECTS
-            !!!! FOR THAT WE NEED TO SAVE _SS_BIG 
-            !!!! and load from it here
-            !!!! ALL THESE ARE NEEDED
-            !!!! IMPORTANT no not mess things up
-            
-            !!! ACTUALLY NO - THESE ARE CREATED IN STEADY STATE - NEED TO GO BACK AND REARRANGE THIS PART
-            
-            
-               !avg_ef_l_supply_trans(1) = avg_ef_l_supply
-               ! c_trans(:, :, :, :, :, :, 1) = c_ss
-               ! l_trans(:, :, :, :, :, :, 1) = l_ss  
-               ! lab_income_trans(:, :, :, :, :, :, 1) = lab_income_ss
-               ! lab_income_pretax_trans(:, :, :, :, :, :, 1) = lab_income_pretax_ss
-               ! tot_income_trans(:, :, :, :, :, :, 1) = tot_income_ss
-               ! tot_income_pretax_trans(:, :, :, :, :, :, 1) = tot_income_pretax_ss
-               ! 
-               ! labor_tax_trans(:, :, :, :, :, :, 1) = labor_tax
-               ! prob_trans_big(:, :, :, :, :, :, 1) = prob_ss
-               ! svplus_trans(:, :, :, :, :, :, 1) = svplus_ss
-               ! aime_plus_trans_big(:, :, :, :, :, :, 1) = aime_plus_ss
-               ! V_trans(:, :, :, :, :, :, 1) = V_ss
-               ! c_j_vfi(:,1) = c_ss_j_vfi   
-               ! l_j_vfi(:,1) = l_ss_j_vfi 
-               ! l_pen_j_vfi(:,1) = l_ss_pen_j_vfi
-               ! labor_tax_j_vfi(:,1)  = labor_tax_ss_j_vfi
-               ! lw_j_vfi(:,1)  = lw_ss_j_vfi
-               ! lw_lambda_j_vfi(:,1)  = lw_lambda_ss_j_vfi
-               ! s_pom_j_vfi(:,1) = s_pom_ss_j_vfi
-               ! V_j_vfi(:,1) = V_ss_j_vfi 
-               ! gini_weight_trans(:,:, 1) = gini_weight_sv
-               ! LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
-            
-            
-            
+
             tc_vfi = tc + 1.0_dp
             gam_vfi = gam_t
             N_t_j_vfi = N_t_j
@@ -169,13 +137,29 @@ include 'closures.f90'
             
             iter_com = iter
             
+
             pi_ip_trans = pi_ip_trans_big(:,:,m,:)
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
-
+            
         call agent_vf_trans()
             
-            !prob_trans_big(:,:,:,:,:,:,:,m) = prob_trans
+        
+        
+        
+            prob_trans_big(:,:,:,:,:,:,m,:)               = bigM_share_ss(m) *  prob_trans
+            aime_plus_trans_big(:,:,:,:,:,:,m,:)          = aime_plus_trans
+            c_trans_big(:, :, :, :, :, : ,m,:)              = c_trans
+            l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans
+            lab_income_trans_big(:, :, :, :, :, :,m,:)      = lab_income_trans
+            lab_income_pretax_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_trans
+            tot_income_trans_big(:, :, :, :, :, :,m,:)        = tot_income_trans
+            tot_income_pretax_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_trans
+            labor_tax_trans_big(:, :, :, :, :, :,m,:)         = labor_tax_trans
+            svplus_trans_big(:, :, :, :, :, :,m,:)            = svplus_trans
+            V_trans_big(:, :, :, :, :, :,m,:)                 = V_trans
+
+            
             c_j(:,m,:) = c_j_vfi
             l_j(:,m,:) = l_j_vfi
             s_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
@@ -206,15 +190,12 @@ include 'closures.f90'
         
         
     do m = 1,bigM,1
-        
-        bigl_j = bigl_j + bigM_share_ss(m) * N_t_j*l_j(:,m,:)
-        bigl_j_aux = bigl_j_aux + bigM_share_ss(m) * N_t_j*l_j(:,m,:)
+        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
+        bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
+
     enddo
     
-
-
-    bigl = sum(bigl_j, dim=1)
-    bigl_aux = sum(bigl_j_aux, dim=1)
+    bigl = bigl ** (1.0d0/rho_subst)
 
     nu(1) = nu_ss_old
     do i = 2,bigT,1
