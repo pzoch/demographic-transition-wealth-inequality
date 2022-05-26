@@ -136,6 +136,11 @@ include 'closures.f90'
             upsilon_dif = upsilon - upsilon_old
             b_pom_j_dif(:,:) = b_j(:,m,:) - b_j_old(:,m,:)
             aime_plus_trans  = aime_plus_trans_big(:, :, :, :, :, :,m,:)
+            c_j_vfi = c_j(:,m,:)
+            l_j_vfi = l_j(:,m,:)
+            s_pom_j_vfi = s_j(:,m,:)  
+             w_pom_trans_vfi = w_pom_trans(:,m,:) 
+            labor_tax_j_vfi = labor_tax_j(:,m,:) 
             
             iter_com = iter
             
@@ -149,24 +154,24 @@ include 'closures.f90'
         
         
         
-            prob_trans_big(:,:,:,:,:,:,m,:)               = bigM_share_ss(m) *  prob_trans
-            aime_plus_trans_big(:,:,:,:,:,:,m,:)          = aime_plus_trans
-            c_trans_big(:, :, :, :, :, : ,m,:)              = c_trans
-            l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans
-            lab_income_trans_big(:, :, :, :, :, :,m,:)      = lab_income_trans
-            lab_income_pretax_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_trans
-            tot_income_trans_big(:, :, :, :, :, :,m,:)        = tot_income_trans
-            tot_income_pretax_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_trans
-            labor_tax_trans_big(:, :, :, :, :, :,m,:)         = labor_tax_trans
-            svplus_trans_big(:, :, :, :, :, :,m,:)            = svplus_trans
-            V_trans_big(:, :, :, :, :, :,m,:)                 = V_trans
+            prob_trans_big(:,:,:,:,:,:,m,2:bigT)               = bigM_share_ss(m) *  prob_trans(:,:,:,:,:,:,2:bigT) 
+            aime_plus_trans_big(:,:,:,:,:,:,m,2:bigT)          = aime_plus_trans(:,:,:,:,:,:,2:bigT) 
+            c_trans_big(:, :, :, :, :, : ,m,2:bigT)              = c_trans(:,:,:,:,:,:,2:bigT) 
+            l_trans_big(:, :, :, :, :, : ,m,2:bigT)              = l_trans(:,:,:,:,:,:,2:bigT) 
+            lab_income_trans_big(:, :, :, :, :, :,m,2:bigT)      = lab_income_trans(:,:,:,:,:,:,2:bigT) 
+            lab_income_pretax_trans_big(:, :, :, :, :, :,m,2:bigT) = lab_income_pretax_trans(:,:,:,:,:,:,2:bigT) 
+            tot_income_trans_big(:, :, :, :, :, :,m,2:bigT)        = tot_income_trans(:,:,:,:,:,:,2:bigT) 
+            tot_income_pretax_trans_big(:, :, :, :, :, :,m,2:bigT) = tot_income_pretax_trans(:,:,:,:,:,:,2:bigT) 
+            labor_tax_trans_big(:, :, :, :, :, :,m,2:bigT)         = labor_tax_trans(:,:,:,:,:,:,2:bigT) 
+            svplus_trans_big(:, :, :, :, :, :,m,2:bigT)            = svplus_trans(:,:,:,:,:,:,2:bigT) 
+            V_trans_big(:, :, :, :, :, :,m,2:bigT)                 = V_trans(:,:,:,:,:,:,2:bigT) 
 
             
-            c_j(:,m,:) = c_j_vfi
-            l_j(:,m,:) = l_j_vfi
-            s_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
-            w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
-            labor_tax_j(:,m,:) = labor_tax_j_vfi
+            c_j(:,m,2:bigT) = c_j_vfi(:,2:bigT)
+            l_j(:,m,2:bigT) = l_j_vfi(:,2:bigT)
+            s_j(1:bigJ-1,m,2:bigT) = s_pom_j_vfi(1:bigJ-1,2:bigT) 
+            w_pom_trans(:,m,2:bigT) = w_pom_trans_vfi(:,2:bigT) 
+            labor_tax_j(:,m,2:bigT) = labor_tax_j_vfi(:,2:bigT)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
 
