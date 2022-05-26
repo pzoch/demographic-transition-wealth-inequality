@@ -102,7 +102,7 @@ call chdir(cwd_r)
     !
     ! 
      
-        switch_mortality         = 1      
+        switch_mortality         = 0      
         switch_unstable_dem_ss   = 1        
         switch_go_to_lower_gamma = 1         
         switch_change_tauL       = 1
@@ -117,7 +117,7 @@ call chdir(cwd_r)
         switch_discount_risk     = 1
         switch_return_risk       = 0
         switch_change_gy         = 1
-        switch_keep_fixed        = 0
+        switch_keep_fixed        = 1
         
     experiment = 'hir_'
     switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960

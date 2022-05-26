@@ -628,7 +628,9 @@ close(1)
 
 if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
-    sigma2_epsilon_t(2:) = sigma2_epsilon_t(1)  
+    do m = 1,bigM,1
+    sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+    enddo
     tauK_d(2:) = tauK_d(1)
     tauL_d(2:) = tauL_d(1)
     alpha_d(2:) = alpha_d(1)

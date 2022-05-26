@@ -31,7 +31,7 @@ do iter = 1,n_iter_t,1
     bigl_type = 0.0d0
     bigl      = 0d0
     do m = 1,bigM,1
-        bigl_type(:,m)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:))
+        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
 
     enddo
