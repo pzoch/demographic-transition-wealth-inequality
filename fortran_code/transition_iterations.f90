@@ -97,17 +97,6 @@ include 'closures.f90'
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        do m = 1,bigM, 1
-
-            
-            
-            do i = 1, bigT,1
-                w_pom_trans_vfi(:,i) = (1 - t1(:,i) - t2(:,i))*w_bar(m,i) !w_j(:,1:bigT)
-                w_pom_trans_implicit_vfi(:,i) = (t1_contrib(:,i)*tau1_s_t(:,i) + t2(:,i)*tau2_s_t(:,i))*w_bar(m,i)
-            enddo
-            
-            w_bar_vfi = w_bar(m,:)
-            
             if (switch_tauK_gross == 0) then
                 r_vfi = (1 - tk)*r_bar  
             else
@@ -119,6 +108,19 @@ include 'closures.f90'
             else
                 r_vfi_pretax = r_bar 
             endif
+
+        do m = 1,bigM, 1
+
+            
+            
+            do i = 1, bigT,1
+                w_pom_trans_vfi(:,i) = (1 - t1(:,i) - t2(:,i))*w_bar(m,i) !w_j(:,1:bigT)
+                w_pom_trans_implicit_vfi(:,i) = (t1_contrib(:,i)*tau1_s_t(:,i) + t2(:,i)*tau2_s_t(:,i))*w_bar(m,i)
+            enddo
+            
+            w_bar_vfi = w_bar(m,:)
+            
+
             
             
 
@@ -137,7 +139,7 @@ include 'closures.f90'
             
             iter_com = iter
             
-
+            V_trans = V_trans_big(:, :, :, :, :, :,m,:)
             pi_ip_trans = pi_ip_trans_big(:,:,m,:)
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
