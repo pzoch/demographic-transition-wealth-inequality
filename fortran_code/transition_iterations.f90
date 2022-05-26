@@ -138,8 +138,7 @@ include 'closures.f90'
             aime_plus_trans  = aime_plus_trans_big(:, :, :, :, :, :,m,:)
             c_j_vfi = c_j(:,m,:)
             l_j_vfi = l_j(:,m,:)
-            s_pom_j_vfi = s_j(:,m,:)  
-             w_pom_trans_vfi = w_pom_trans(:,m,:) 
+            s_pom_j_vfi = sv_j(:,m,:)   
             labor_tax_j_vfi = labor_tax_j(:,m,:) 
             
             iter_com = iter
@@ -169,7 +168,7 @@ include 'closures.f90'
             
             c_j(:,m,2:bigT) = c_j_vfi(:,2:bigT)
             l_j(:,m,2:bigT) = l_j_vfi(:,2:bigT)
-            s_j(1:bigJ-1,m,2:bigT) = s_pom_j_vfi(1:bigJ-1,2:bigT) 
+            sv_j(1:bigJ-1,m,2:bigT) = s_pom_j_vfi(1:bigJ-1,2:bigT) 
             w_pom_trans(:,m,2:bigT) = w_pom_trans_vfi(:,2:bigT) 
             labor_tax_j(:,m,2:bigT) = labor_tax_j_vfi(:,2:bigT)
             ! what to do with this?
@@ -177,12 +176,12 @@ include 'closures.f90'
 
         
         enddo
-        
+        sv_old_pom_j = 
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
       ! aggregation
         do i  = 2,bigT
-            sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*s_j(1:bigJ-1,:,i)
+            sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
             avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
