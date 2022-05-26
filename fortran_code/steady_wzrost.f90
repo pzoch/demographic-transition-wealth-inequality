@@ -507,6 +507,7 @@ endif
                 svplus_trans_big(:, :, :, :, :, :, :, 1) = svplus_ss_big
                 aime_plus_trans_big(:, :, :, :, :, :, :, 1) = aime_plus_ss_big
                 V_trans_big(:, :, :, :, :, :, :,  1) = V_ss_big
+                EV_trans_big(:, :, :, :, :, :, :,  1) = EV_ss_big
                 gini_weight_trans(:,:, 1) = gini_weight_sv
                 LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
             else
@@ -523,6 +524,7 @@ endif
                     svplus_trans_big(:, :, :, :, :, :, :, i) = svplus_ss_big
                     aime_plus_trans_big(:, :, :, :, :, :, :, i) = aime_plus_ss_big
                     V_trans_big(:, :, :,:, :, :, :,  i) = V_ss_big
+                    EV_trans_big(:, :, :,:, :, :, :,  i) = EV_ss_big
                     gini_weight_trans(:,:, i) = gini_weight_sv
                     LabIncAVG_vfi(i) = LabIncAVG_ss_vfi
                 enddo

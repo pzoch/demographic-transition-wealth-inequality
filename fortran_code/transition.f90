@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, s_j, tax_c, r_f, g_per_capita)
+subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom
@@ -24,7 +24,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
-	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
+	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
     real(dp), dimension(bigM, bigT) :: w_bar
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
@@ -33,7 +33,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 
     
     
-    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, s_j
+    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j
     
     ! partial equilibrum stohastic vs deterministic model 
     ! this is probably not needed for anything

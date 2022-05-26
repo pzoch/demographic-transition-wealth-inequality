@@ -44,7 +44,7 @@ do iter = 1,n_iter_t,1
     enddo
     
     sv_old_j = sv_j
-    sv_old_pom_j = sv_pom_j
+    sv_old_pom_j = sv_old_j
     tau1_s_t_old = tau1_s_t
     tau2_s_t_old = tau2_s_t
 
@@ -140,52 +140,61 @@ include 'closures.f90'
             l_j_vfi = l_j(:,m,:)
             s_pom_j_vfi = sv_j(:,m,:)   
             labor_tax_j_vfi = labor_tax_j(:,m,:) 
-            
+            prob_trans             = prob_trans_big(:, :, :, :, :, :,m,:) / bigM_share_ss(m)
             iter_com = iter
-            
+            EV_trans = EV_trans_big(:, :, :, :, :, :,m,:)
             V_trans = V_trans_big(:, :, :, :, :, :,m,:)
+            c_trans = c_trans_big(:, :, :, :, :, : ,m,:)        
+            l_trans = l_trans_big(:, :, :, :, :, : ,m,:) 
+            svplus_trans = svplus_trans_big(:, :, :, :, :, :,m,:) 
             pi_ip_trans = pi_ip_trans_big(:,:,m,:)
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
             
-        call agent_vf_trans()
             
-        
-        
-        
-            prob_trans_big(:,:,:,:,:,:,m,2:bigT)               = bigM_share_ss(m) *  prob_trans(:,:,:,:,:,:,2:bigT) 
-            aime_plus_trans_big(:,:,:,:,:,:,m,2:bigT)          = aime_plus_trans(:,:,:,:,:,:,2:bigT) 
-            c_trans_big(:, :, :, :, :, : ,m,2:bigT)              = c_trans(:,:,:,:,:,:,2:bigT) 
-            l_trans_big(:, :, :, :, :, : ,m,2:bigT)              = l_trans(:,:,:,:,:,:,2:bigT) 
-            lab_income_trans_big(:, :, :, :, :, :,m,2:bigT)      = lab_income_trans(:,:,:,:,:,:,2:bigT) 
-            lab_income_pretax_trans_big(:, :, :, :, :, :,m,2:bigT) = lab_income_pretax_trans(:,:,:,:,:,:,2:bigT) 
-            tot_income_trans_big(:, :, :, :, :, :,m,2:bigT)        = tot_income_trans(:,:,:,:,:,:,2:bigT) 
-            tot_income_pretax_trans_big(:, :, :, :, :, :,m,2:bigT) = tot_income_pretax_trans(:,:,:,:,:,:,2:bigT) 
-            labor_tax_trans_big(:, :, :, :, :, :,m,2:bigT)         = labor_tax_trans(:,:,:,:,:,:,2:bigT) 
-            svplus_trans_big(:, :, :, :, :, :,m,2:bigT)            = svplus_trans(:,:,:,:,:,:,2:bigT) 
-            V_trans_big(:, :, :, :, :, :,m,2:bigT)                 = V_trans(:,:,:,:,:,:,2:bigT) 
+
+
+
 
             
-            c_j(:,m,2:bigT) = c_j_vfi(:,2:bigT)
-            l_j(:,m,2:bigT) = l_j_vfi(:,2:bigT)
-            sv_j(1:bigJ-1,m,2:bigT) = s_pom_j_vfi(1:bigJ-1,2:bigT) 
-            w_pom_trans(:,m,2:bigT) = w_pom_trans_vfi(:,2:bigT) 
-            labor_tax_j(:,m,2:bigT) = labor_tax_j_vfi(:,2:bigT)
+            call agent_vf_trans()
+            
+        
+        
+        
+            prob_trans_big(:,:,:,:,:,:,m,:)               = bigM_share_ss(m) *  prob_trans(:,:,:,:,:,:,:) 
+            aime_plus_trans_big(:,:,:,:,:,:,m,:)          = aime_plus_trans(:,:,:,:,:,:,:) 
+            c_trans_big(:, :, :, :, :, : ,m,:)              = c_trans(:,:,:,:,:,:,:) 
+            l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans(:,:,:,:,:,:,:) 
+            lab_income_trans_big(:, :, :, :, :, :,m,:)      = lab_income_trans(:,:,:,:,:,:,:) 
+            lab_income_pretax_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_trans(:,:,:,:,:,:,:) 
+            tot_income_trans_big(:, :, :, :, :, :,m,:)        = tot_income_trans(:,:,:,:,:,:,:) 
+            tot_income_pretax_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_trans(:,:,:,:,:,:,:) 
+            labor_tax_trans_big(:, :, :, :, :, :,m,:)         = labor_tax_trans(:,:,:,:,:,:,:) 
+            svplus_trans_big(:, :, :, :, :, :,m,:)            = svplus_trans(:,:,:,:,:,:,:) 
+            V_trans_big(:, :, :, :, :, :,m,:)                 = V_trans(:,:,:,:,:,:,:) 
+            EV_trans_big(:, :, :, :, :, :,m,:)                = EV_trans(:,:,:,:,:,:,:) 
+            
+            c_j(:,m,:) = c_j_vfi(:,:)
+            l_j(:,m,:) = l_j_vfi(:,:)
+            sv_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
+            w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
+            labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
 
         
         enddo
-        sv_old_pom_j = 
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
       ! aggregation
+        sv_pom_j(:,:,1) = sv_j(:,:,1)
         do i  = 2,bigT
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
             avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
-            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i)*(w_pom_trans(:,m,i)))/sum(N_t_j(1:jbar_t(i)-1,i))   
+            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
             
         enddo
