@@ -204,7 +204,7 @@ include 'closures.f90'
 
         
         
-        
+        bigl = 0.0d0
     do m = 1,bigM,1
         bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
@@ -238,9 +238,13 @@ include 'closures.f90'
     savings_j = sv_j + pillarII_j
     
     savings = 0.0d0
+    do i=1,bigT,1
     do m=1,bigM,1
-        savings = savings +  bigM_share_ss(m) * sum(N_t_j*savings_j(:,m,:), dim=1)/bigl
+        savings(i) = savings(i) +  bigM_share_ss(m) * sum(N_t_j(:,i)*savings_j(:,m,i), dim=1)
     enddo
+    savings(i) = savings(i) /bigl(i)
+    enddo
+    
     
     include 'bequest.f90'
 

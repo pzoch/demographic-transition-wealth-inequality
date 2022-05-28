@@ -36,11 +36,11 @@ call chdir(cwd_r)
     
     
 !!! DEBUG_SWITCH
-       switch_labor_choice      = 0        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
+       switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
        switch_cohort_ps         = 0         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
        switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
        switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-       switch_fix_labor         = 0.33         ! if labor is fixed it is fixed to this number
+       switch_fix_labor         = 0         ! if labor is fixed it is fixed to this number
        switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
        switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
        switch_reduce_pension    = 0
@@ -102,7 +102,7 @@ call chdir(cwd_r)
     !
     ! 
      
-        switch_mortality         = 0      
+        switch_mortality         = 1      
         switch_unstable_dem_ss   = 1        
         switch_go_to_lower_gamma = 1         
         switch_change_tauL       = 1
@@ -110,6 +110,7 @@ call chdir(cwd_r)
         switch_change_tauK       = 1
         switch_steady_demo       = 1
         switch_sigma2_epsilon_t  = 1
+        !switch_change_premium    = 1
         
         switch_change_debt       = 1
         switch_change_sl         = 1
@@ -117,7 +118,7 @@ call chdir(cwd_r)
         switch_discount_risk     = 1
         switch_return_risk       = 0
         switch_change_gy         = 1
-        switch_keep_fixed        = 1
+        switch_keep_fixed        = 0
         
     experiment = 'hir_'
     switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960
@@ -213,8 +214,10 @@ endif
     bigM_share_ss = 1.0d0 / bigM
     
     ! parameter in CES production function 
-    type_multiplier(:) = 1.0d0 / 4.0d0
-
+    !type_multiplier(:) = 1.0d0 / 4.0d0
+    type_multiplier(1) = 1.0d0
+    !type_multiplier(2) = 1.0d0
+    
     include 'parameters_CD.f90'
     
 

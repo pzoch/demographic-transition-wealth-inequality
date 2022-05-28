@@ -209,7 +209,7 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
         if (switch_unequal_bequest==0) then
             do m = 1,bigM,1
                 do j = 2,bigJ,1
-                    bequest_left_ss_j(j-1,m) = bigM_share_ss(m) * (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
+                    bequest_left_ss_j(j-1,m) = (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
                 enddo
                 
             bequest_left_ss_j(bigJ,m) = (N_ss_j(bigJ))*(r_ss*s_ss_j(bigJ,m))/gam_ss
@@ -219,7 +219,7 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
             bequest_ss_j(1,m) = 0d0
     
             do j = 2,bigJ,1
-                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(bigM_share_ss(m)*N_ss_j(j))  
+                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(N_ss_j(j))  
             enddo 
             enddo
     
@@ -328,6 +328,8 @@ endif
             upsilon_ss_vf = upsilon_ss
             upsilon_dif_ss = upsilon_ss - upsilon_old_ss
             aime_plus_ss  = aime_plus_ss_big(:, :, :, :, :, :,m)
+            V_ss = V_ss_big(:, :, :, :, :, :,m)                
+            
             
             call agent_vf()
             prob_ss_big(:, :, :, :, :, :,m)          =  bigM_share_ss(m) * prob_ss

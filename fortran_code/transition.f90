@@ -190,8 +190,10 @@ include 'Initial_values_db.f90'
     
     savings = 0.0d0
     do m = 1,bigM,1
-        savings = savings + bigM_share_ss(m) * sum(N_t_j *savings_j(:,m,:), dim=1)/bigl
+        savings = savings + bigM_share_ss(m) * sum(N_t_j *savings_j(:,m,:), dim=1)
     enddo    
+    
+    savings = savings / bigl
     
     wl_bar = 0.0d0
     do i = 1,bigT,1
