@@ -82,7 +82,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_test.txt")    
+     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j)
       end do

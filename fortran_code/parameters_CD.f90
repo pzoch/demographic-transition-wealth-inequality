@@ -18,8 +18,8 @@
             phi = 0.4d0 ! 0.3920313 !0.359375_dp
             rho_1 = 0.5d0 !0.225_dp!*0.0d0
             rho_2 = 0.5d0 !0.225_dp!*0.0d0
-            t1_ss_old =  0.04_dp!*0.5d0 0d0 !
-            t1_ss_new =  0.04_dp
+            t1_ss_old =  0.1_dp!*0.5d0 0d0 !
+            t1_ss_new =  0.1_dp
             t2_ss_old = 0d0 !0.077_dp*0.5d0 !
             t2_ss_new = 0.0d0 !39d0
             
