@@ -36,11 +36,11 @@ call chdir(cwd_r)
     
     
 !!! DEBUG_SWITCH
-       switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
+       switch_labor_choice      = 0        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
        switch_cohort_ps         = 0         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
        switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
        switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-       switch_fix_labor         = 0         ! if labor is fixed it is fixed to this number
+       switch_fix_labor         = 0.33         ! if labor is fixed it is fixed to this number
        switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
        switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
        switch_reduce_pension    = 0
@@ -102,25 +102,25 @@ call chdir(cwd_r)
     !
     ! 
      
-        switch_mortality         = 1      
-        switch_unstable_dem_ss   = 1        
-        switch_go_to_lower_gamma = 1         
+        switch_mortality         = 5      
+        switch_unstable_dem_ss   = 1       
+        switch_go_to_lower_gamma = -1         
         switch_change_tauL       = 1
         switch_change_lambda     = 1      
         switch_change_tauK       = 1
         switch_steady_demo       = 1
         switch_sigma2_epsilon_t  = 1
-        !switch_change_premium    = 1
-        
+        switch_change_premium    = 1
+        switch_change_type_share = 1
         switch_change_debt       = 1
-        switch_change_sl         = 1
+        switch_change_sl         = -1
         switch_income_risk       = 1
         switch_discount_risk     = 1
         switch_return_risk       = 0
         switch_change_gy         = 1
         switch_keep_fixed        = 0
         
-    experiment = 'hir_'
+    experiment = 'bnd_'
     switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960
     switch_reform = 0           ! 0 = base transition, 1 = main LSRA (baseline + reform + welfare change)
     
@@ -202,7 +202,7 @@ endif
     superstar_factor_1 = 6.5d0
     superstar_factor_2 = 25.0d0
     
-    alpha = 0.33_dp
+    alpha = 0.35_dp
     theta = 2.0_dp!2.0_dp
    
     up_t = 0.7d0
@@ -215,7 +215,7 @@ endif
     
     ! parameter in CES production function 
     !type_multiplier(:) = 1.0d0 / 4.0d0
-    type_multiplier(1) = 1.0d0
+    !type_multiplier(1) = 1.0d0
     !type_multiplier(2) = 1.0d0
     
     include 'parameters_CD.f90'
@@ -225,7 +225,7 @@ endif
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, gy_factor_t)
+    call read_data(omega_ss, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
     include 'shocks_parameters.f90'
     ! it is need for implicit tax subroutine
     ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
@@ -293,6 +293,12 @@ endif
     
     alpha_ss_old = alpha_t(1)
     alpha_ss_new = alpha_t(bigT)
+    
+    type_multiplier_ss_old = type_multiplier_t(:,1)
+    type_multiplier_ss_new = type_multiplier_t(:,bigT)
+    
+    type_share_ss_old = type_share_t(:,1)
+    type_share_ss_new = type_share_t(:,bigT)
     
 call chdir(cwd_w)    
 end subroutine globals

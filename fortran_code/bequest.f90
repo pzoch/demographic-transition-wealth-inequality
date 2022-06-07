@@ -35,12 +35,12 @@ if (switch_unequal_bequest==0) then
       do m = 1,bigM,1  
       do i = 1,bigT,1
         do j = 2,jbar_t(i),1
-             bequest_left_j(j-1,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*sv_j(j-1,m,max(i-1,1))   
+             bequest_left_j(j-1,m,max(i-1,1)) = type_share_j_t(j-1,m,max(i-1,1)) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*sv_j(j-1,m,max(i-1,1))   
         enddo
         do j = jbar_t(i)+1,bigJ,1
-            bequest_left_j(j-1,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*sv_j(j-1,m,max(i-1,1))
+            bequest_left_j(j-1,m,max(i-1,1)) = type_share_j_t(j-1,m,max(i-1,1))* (N_t_j(j-1,max(i-1,1)) - N_t_j(j,i))*sv_j(j-1,m,max(i-1,1))
         enddo
-        bequest_left_j(bigJ,m,max(i-1,1)) = bigM_share_ss(m) * (N_t_j(bigJ,max(i-1,1)))*(sv_j(bigJ,m,max(i-1,1)))    
+        bequest_left_j(bigJ,m,max(i-1,1)) = type_share_j_t(j-1,m,max(i-1,1)) * (N_t_j(bigJ,max(i-1,1)))*(sv_j(bigJ,m,max(i-1,1)))    
       enddo
       enddo
       

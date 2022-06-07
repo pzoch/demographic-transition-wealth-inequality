@@ -3,7 +3,7 @@
     wl_bar = 0.0d0
     do i = 1,bigT,1
     do m = 1,bigM,1
-        wl_bar(i) = wl_bar(i) +  bigM_share_ss(m) * sum( N_t_j(:,i) *l_j(:,m,i)*w_bar(m,i), dim=1)   
+        wl_bar(i) = wl_bar(i) +  sum( N_t_j(:,i) * type_share_j_t(:,m,i) * l_j(:,m,i)*w_bar(m,i), dim=1)   
     enddo
     enddo
     do i = 3,bigT,1
@@ -23,7 +23,7 @@
         avg_wl(i) = 0d0
         do m = 1,bigM,1
         do j = 1, jbar_t(max(i-1,1)) -1
-            avg_wl(i) = avg_wl(i) + bigM_share_ss(m) * w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
+            avg_wl(i) = avg_wl(i) + type_share_j_t(jbar_t(max(i-1,1)) -j,m,max(i-j,1)) *w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
         enddo
         enddo 
         avg_wl(i) = avg_wl(i)/real(jbar_t(max(i-1,1)) -1)
@@ -64,12 +64,12 @@
             enddo 
         b_j(:,m,i) = b_scale_factor(i)*b1_j(:,m,i)    
         do j = 1, bigJ, 1
-            subsidy_j(j,m,i) = sum_b_weight_trans(min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,m,i) - t1(j,i)*w_bar(m,i)* l_j(j,m,i)   
+            subsidy_j(j,m,i) = sum_b_weight_trans_outer(min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,m,i) - t1(j,i)*w_bar(m,i)* l_j(j,m,i)   
         enddo
         contribution_j(:,m,i) = t1(:,i)*w_bar(m,i)*l_j(:,m,i)
     enddo 
     
-    subsidy_j(:,m,1) = (sum_b_weight_trans(1)*b_j(:,m,1) - t1(:,1))*w_bar(m,1)*l_j(:,m,1)   
+    subsidy_j(:,m,1) = (sum_b_weight_trans_outer(1)*b_j(:,m,1) - t1(:,1))*w_bar(m,1)*l_j(:,m,1)   
     contribution_j(:,m,1) = t1(:,1)*w_bar(m,1)*l_j(:,m,1)
     enddo
      ! macro agg   
@@ -77,15 +77,15 @@
     contribution = 0.0d0
     do m = 1,bigM,1
     
-	subsidy = subsidy + bigM_share_ss(m) * sum(N_t_j*subsidy_j(:,m,:), dim=1)/bigl   
-    contribution = contribution +  bigM_share_ss(m) * sum(N_t_j*contribution_j(:,m,:), dim=1)/bigl 
+	subsidy = subsidy +  sum(N_t_j*type_share_j_t(:,m,:)*subsidy_j(:,m,:), dim=1)/bigl   
+    contribution = contribution +   sum(N_t_j*type_share_j_t(:,m,:)*contribution_j(:,m,:), dim=1)/bigl 
     enddo
     
     do i = 1, bigT, 1
     sum_b(i) = 0d0
     do m = 1, bigM, 1
         do j = jbar_t(i), bigJ, 1
-            sum_b(i) = sum_b(i) +  bigM_share_ss(m) *  sum_b_weight_trans(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,m,i)*N_t_j(j,i)/bigl(i)
+            sum_b(i) = sum_b(i) +    sum_b_weight_trans_outer(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,m,i)*type_share_j_t(j,m,i)*N_t_j(j,i)/bigl(i)
         enddo
     enddo
     

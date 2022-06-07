@@ -2,13 +2,13 @@
 
         
         
-       
+        
         zeta_p = zeta_p**zbar   
         zeta_r = 0.00 ! this does not do anything
         sigma_nu_r = 0.008d0 ** 2.0d0
         
-        zeta_d = 0.994d0
-        sigma_nu_d = 0.0035d0 ** 2.0d0 
+        zeta_d = 0.995d0
+        sigma_nu_d = 0.01d0 ** 2.0d0 
         sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
         zeta_d = zeta_d**zbar 
          
@@ -168,13 +168,16 @@ if (n_sp>5) then
         
         pi_ip_init_ss_old_big(:,m)   = pi_ip_init_ss_old
         pi_ip_init_ss_new_big(:,m)   = pi_ip_init_ss_new
+        
         pi_ip_init_trans_big(:,m,:)  = pi_ip_init_trans
         
         n_sp_value_trans_big(:,m,:)  = n_sp_value_trans
+        
         n_sp_value_ss_old_big(:,m) = n_sp_value_ss_old
         n_sp_value_ss_new_big(:,m) = n_sp_value_ss_new
         
         pi_ip_trans_big(:,:,m,:) =  pi_ip_trans
+        
         pi_ip_ss_old_big(:,:,m)  =  pi_ip_ss_old
         pi_ip_ss_new_big(:,:,m)  =  pi_ip_ss_new
         enddo

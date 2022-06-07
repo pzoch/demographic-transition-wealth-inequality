@@ -31,8 +31,8 @@ do iter = 1,n_iter_t,1
     bigl_type = 0.0d0
     bigl      = 0d0
     do m = 1,bigM,1
-        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
-        bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
+        bigl_type(m,:)         =  sum(N_t_j * type_share_j_t(:,m,:)  * l_j(:,m,:), dim = 1 )
+        bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
     
@@ -108,7 +108,7 @@ include 'closures.f90'
             else
                 r_vfi_pretax = r_bar 
             endif
-
+            sum_b_weight_trans_outer = 0.0d0
         do m = 1,bigM, 1
 
             
@@ -140,7 +140,13 @@ include 'closures.f90'
             l_j_vfi = l_j(:,m,:)
             s_pom_j_vfi = sv_j(:,m,:)   
             labor_tax_j_vfi = labor_tax_j(:,m,:) 
-            prob_trans             = prob_trans_big(:, :, :, :, :, :,m,:) / bigM_share_ss(m)
+            
+            do i = 1,bigT
+            do j = 1,bigJ
+            prob_trans(j,:,:,:,:,:,i) = prob_trans_big(j,:,:,:,:,:,m,i) / type_share_j_t(j,m,i) 
+            enddo
+            enddo
+
             iter_com = iter
             EV_trans = EV_trans_big(:, :, :, :, :, :,m,:)
             V_trans = V_trans_big(:, :, :, :, :, :,m,:)
@@ -160,9 +166,11 @@ include 'closures.f90'
             call agent_vf_trans()
             
         
-        
-        
-            prob_trans_big(:,:,:,:,:,:,m,:)               = bigM_share_ss(m) *  prob_trans(:,:,:,:,:,:,:) 
+            do i = 1,bigT
+            do j = 1,bigJ
+            prob_trans_big(j,:,:,:,:,:,m,i)               = type_share_j_t(j,m,i) *  prob_trans(j,:,:,:,:,:,i) 
+            enddo
+            enddo
             aime_plus_trans_big(:,:,:,:,:,:,m,:)          = aime_plus_trans(:,:,:,:,:,:,:) 
             c_trans_big(:, :, :, :, :, : ,m,:)              = c_trans(:,:,:,:,:,:,:) 
             l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans(:,:,:,:,:,:,:) 
@@ -182,8 +190,9 @@ include 'closures.f90'
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
-
-        
+            do i = 1,bigT
+            sum_b_weight_trans_outer(i) = sum_b_weight_trans_outer(i) +  type_share_j_t(jbar_t_vfi(i),m,i)  * sum_b_weight_trans(i)
+            enddo
         enddo
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
@@ -193,8 +202,8 @@ include 'closures.f90'
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
-            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
-            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + bigM_share_ss(m) * sum(N_t_j(:,i)*l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
+            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_t_j(:,i)* type_share_j_t(:,m,i) *l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
+            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          +sum(N_t_j(:,i)* type_share_j_t(:,m,i) *l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
             
         enddo
@@ -206,8 +215,8 @@ include 'closures.f90'
         
         bigl = 0.0d0
     do m = 1,bigM,1
-        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
-        bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
+        bigl_type(m,:)         =sum(N_t_j  * type_share_j_t(:,m,:) * l_j(:,m,:), dim = 1 )
+        bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
     
@@ -222,15 +231,15 @@ include 'closures.f90'
     do i = 1,bigT,1
          
         do m = 1,bigM,1  
-        average_l(i) = average_l(i) +  bigM_share_ss(m) * sum(N_t_j(1:jbar_t(i)-1,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
-        average_w(i) = average_w(i) +  bigM_share_ss(m) * sum(N_t_j(1:jbar_t(i)-1,i)*w_j(1:jbar_t(i)-1,m,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
+        average_l(i) = average_l(i) + sum(N_t_j(1:jbar_t(i)-1,i)*  type_share_j_t(1:jbar_t(i)-1,m,i) *  l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
+        average_w(i) = average_w(i) + sum(N_t_j(1:jbar_t(i)-1,i)* type_share_j_t(1:jbar_t(i)-1,m,i) * w_j(1:jbar_t(i)-1,m,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         enddo
     enddo    
 
     consumption_gross_j = c_j     
     consumption_gross = 0.0d0 
     do m=1,bigM,1
-        consumption_gross = consumption_gross + bigM_share_ss(m) * sum(N_t_j*consumption_gross_j(:,m,:), dim=1)/bigl       
+        consumption_gross = consumption_gross + sum(N_t_j* type_share_j_t(:,m,:) * consumption_gross_j(:,m,:), dim=1)/bigl       
     enddo
     
     consumption_gross_new = up_t*consumption_gross_new + (1.0_dp-up_t)*consumption_gross
@@ -240,7 +249,7 @@ include 'closures.f90'
     savings = 0.0d0
     do i=1,bigT,1
     do m=1,bigM,1
-        savings(i) = savings(i) +  bigM_share_ss(m) * sum(N_t_j(:,i)*savings_j(:,m,i), dim=1)
+        savings(i) = savings(i) +  sum(N_t_j(:,i)* type_share_j_t(:,m,i) *savings_j(:,m,i), dim=1)
     enddo
     savings(i) = savings(i) /bigl(i)
     enddo
@@ -265,11 +274,17 @@ include 'closures.f90'
             exit ! iterations end
         endif
     endif
-    !replacement(1) = sum_b_weight_trans(1)*b_j(jbar_t(1),1)/(w_bar(i)*l_pen_j(jbar_t(1)-1,1)) 
-    !replacement(1) = b_j(jbar_t(1),1)/(w_j(jbar_t(1)-1,1)*l_pen_j(jbar_t(1)-1, 1))    
-    !do i = 2,bigT,1
-     !       !replacement(i) = b_j(jbar_t(i),i)/(w_j(jbar_t(i)-1,i-1)*l_pen_j(jbar_t(i)-1, i-1)) 
-     !       replacement(i) = sum_b_weight_trans(i)*b_j(jbar_t(i),i)/(w_bar(i)*l_pen_j(jbar_t(i)-1, i-1)) 
-    !enddo
+    
+    do m = 1,bigM,1
+            replacement(1) = replacement(1) + type_share_j_t(jbar_t(1),m,1) * sum_b_weight_trans(1)* b_j(jbar_t(1),m,1)/(w_j(jbar_t(1)-1,m,1)*l_pen_j(jbar_t(1)-1,m, 1))  
+    enddo
+    
+
+  
+    do i = 2,bigT,1
+        do m = 1,bigM,1
+            replacement(i) = replacement(i) + type_share_j_t(jbar_t(i),m,i) * sum_b_weight_trans(i)*b_j(jbar_t(i),m,i)/(w_bar(m,i)*l_pen_j(jbar_t(i)-1,m, i-1)) 
+        enddo
+    enddo
     
 enddo

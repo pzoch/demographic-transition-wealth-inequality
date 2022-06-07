@@ -6,10 +6,10 @@ MODULE global_vars
 IMPLICIT NONE
    save
     integer, parameter ::  n_iter_ss =  50
-    integer, parameter ::  n_iter_t = 50
+    integer, parameter ::  n_iter_t = 25
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 1 ! number of permanent types
+    integer, parameter :: bigM = 2 ! number of permanent types
     integer, parameter :: n_p = 100, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
@@ -64,6 +64,7 @@ IMPLICIT NONE
     integer :: switch_pension                              ! 0 = all are in new pension scheme in transitionFF; 1 = old cohorts remain in the old system in transitionFF
     integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
     integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
+    integer :: switch_change_premium                    ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
     integer :: switch_discount_risk
     integer :: switch_return_risk
@@ -71,7 +72,7 @@ IMPLICIT NONE
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
     integer :: switch_partial_eq                           ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
     integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-                                                           
+         integer ::   switch_change_type_share                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
     integer :: switch_elas  !0 - non elasticity calculation, 1 - elasticity using OPD, 2 - semileasticity using OPD 
@@ -103,7 +104,7 @@ IMPLICIT NONE
     real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
-    real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big
+    real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new 
     real(dp) :: superstar_factor_1, superstar_factor_2
@@ -113,6 +114,7 @@ IMPLICIT NONE
 	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, tauL_t, tauK_t, debt_constr_t, alpha_t, gy_factor_t
     real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
+    real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
   
 ! LSRA
@@ -127,7 +129,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
 real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 40, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1    , n_beq = 5
+    integer, parameter :: n_a = 70, n_aime = 4, n_sp = 3, n_sd = 3, n_sr = 1    , n_beq = 5
     
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p
@@ -154,7 +156,7 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
     real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
-    real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT)
+    real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
     real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help
 
 

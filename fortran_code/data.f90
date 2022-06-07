@@ -10,7 +10,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn_d, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn_d, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! dp zliczenia populacji USA
       real(dp), dimension(bigT)::  N_temp_vec ! dp zliczenia populacji USA
@@ -19,10 +19,11 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn
       real(dp), dimension(bigJ), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
       real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d, pi_d, pi_weight_d
+      real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
       
       integer :: start_year ! first year for which we have data
-      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_gy ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
+      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_gy, last_data_type_multiplier, last_data_type_share ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
 call chdir(cwd_r)
 
   
@@ -41,6 +42,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sl = 17 ! for sl
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
         last_data_debt           = 19 ! debt/gdp
+        last_data_type_multiplier= 17 ! type multip
+        last_data_type_share= 17 ! type share
     elseif (switch_starting_year == 1) then
         start_year = 1960
         last_data = 28 ! for demography
@@ -50,7 +53,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_tauK = 12 ! for tauK
         last_data_sl = 12 ! for sl
         last_data_sigma2_epsilon = 12 ! for sigma2_epsilon
-
+        last_data_type_multiplier= 12 ! type multip
+        last_data_type_share= 12 ! type share
      elseif (switch_starting_year == 2) then
         start_year = 1950
         last_data = 30 ! for demography
@@ -59,6 +63,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_tauL = 14 ! for tauL    
         last_data_tauK = 14 ! for tauK
         last_data_sigma2_epsilon = 14 ! for sigma2_epsilon
+        last_data_type_multiplier= 14 ! type multip
+        last_data_type_share= 14 ! type share
        elseif (switch_starting_year == 3) then
         start_year = 1935
         last_data = 33 ! for demography
@@ -70,11 +76,13 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
         last_data_debt           = 19 ! debt/gdp
         last_data_sl = 17 ! for sl
+        last_data_type_multiplier= 17 ! type multip
+        last_data_type_share= 17 ! type share
        endif
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
+     OPEN (unit=3, FILE = "_data_omega_test.txt")    
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j)
       end do
@@ -109,8 +117,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
       
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
-    zeta_p(:)  =  0.977d0
-
+    zeta_p = 0.975d0
+    !zeta_p(1)  =  0.970092462623928d0
+    !zeta_p(2)  =  0.981321444933393d0
      if (switch_starting_year == 0) then 
         Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
 
@@ -139,9 +148,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             do i = 1, last_data_sigma2_epsilon, 1
                 read(8,*) sigma2_epsilon_t_big(i,m)
             enddo
+            sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m) 
         enddo
         
-       sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)  
+        
        
        
      elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 3) then
@@ -157,7 +167,101 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**zbar)/(1-zeta_p(m)) ! increased
     enddo
 
+! -------------------------------- type multiplier --------------------
+    
+       if (switch_starting_year == 0) then 
+        Open(unit = 8, FILE = "_data_type_mutliplier_1935.txt")  
+
+    elseif (switch_starting_year == 1) then
+        Open(unit = 8, FILE = "_data_type_mutliplier_1960.txt")  
+
+    elseif (switch_starting_year == 2) then
+        Open(unit = 8, FILE = "_data_type_mutliplier_1950.txt")  
+    
+    elseif (switch_starting_year == 3) then
+        Open(unit = 8, FILE = "_data_type_mutliplier_1935.txt")  
+    endif
+    
+    ! reading type_mutliplier
+    
+     
+        do m = 1,bigM,1
+            do i = 1, last_data_type_multiplier, 1
+                read(8,*) type_multiplier_d(m,i)
+            enddo
+            type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)
+        enddo
+        
+
+
+     if (switch_change_premium == 0.AND.switch_starting_year == 3) then   
+
+        do m = 1,bigM,1
+    last_data_type_multiplier = 5
+             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
+        enddo
+        
       
+       
+       
+     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 3) then
+        do m = 1,bigM,1 
+            read(8,*) type_multiplier_d(m,1)
+             type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+        enddo
+        
+    endif
+    close(8)
+
+    ! -------------------------------- type share --------------------
+    
+       if (switch_starting_year == 0) then 
+        Open(unit = 8, FILE = "_data_type_share_1935.txt")  
+
+    elseif (switch_starting_year == 1) then
+        Open(unit = 8, FILE = "_data_type_share_1960.txt")  
+
+    elseif (switch_starting_year == 2) then
+        Open(unit = 8, FILE = "_data_type_share_1950.txt")  
+    
+    elseif (switch_starting_year == 3) then
+        Open(unit = 8, FILE = "_data_type_share_1935.txt")  
+    endif
+    
+    ! reading type_share
+    
+     
+        do m = 1,bigM,1
+            do i = 1, last_data_type_share, 1
+                read(8,*) type_share_d(m,i)
+            enddo
+            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)
+        enddo
+     if (switch_change_type_share == 0.AND.switch_starting_year == 3) then   
+        last_data_type_share = 5
+        do m = 1,bigM,1
+
+            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
+        enddo
+        
+       
+       
+       
+     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 3) then
+        do m = 1,bigM,1 
+            read(8,*) type_share_d(m,1)
+             type_share_d(m,2:) = type_share_d(m,1)
+        enddo
+        
+     endif
+     
+  ! ensure it sums up to 1
+     do i = 1,bigT,1
+     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     enddo
+    close(8)
+    
+    
     
 ! -------------------------------- JBAR -------------------------------
 
@@ -265,9 +369,17 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         alpha_d(2:) = alpha_d(1)
     endif
     
+
     
     alpha_d = 1.0d0 - alpha_d / 100.0d0
+    
+    
     close(5)
+    
+    if (switch_change_sl == -1) then
+        alpha_d(1:) = 0.35d0
+        
+    endif
     
   !    -------------------------------- DEBT/GDP -------------------------------
     if (switch_starting_year == 0) then 
@@ -316,6 +428,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Open(unit = 6, FILE = "_data_lambda_1950.txt")  
         
     elseif (switch_starting_year == 3) then
+
         Open(unit = 6, FILE = "_data_lambda_1935.txt")      
         
     endif
@@ -378,6 +491,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
         
     close(4)
+    
+     if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
+      gam_d(:) = 1.01d0 ** 5   
+     endif
     ! need to convert it to labor augmenting 
     
     zet_d(1) = 1
@@ -630,6 +747,7 @@ if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
     sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
     enddo
     tauK_d(2:) = tauK_d(1)
     tauL_d(2:) = tauL_d(1)

@@ -1,6 +1,6 @@
     labor_tax_revenue_ss = 0.0d0
     do m = 1,bigM,1
-       labor_tax_revenue_ss = labor_tax_revenue_ss +  bigM_share_ss(m) *  sum(N_ss_j(1:bigJ)*labor_tax_ss_j(1:bigJ,m))
+       labor_tax_revenue_ss = labor_tax_revenue_ss +  type_share_ss(m) *  sum(N_ss_j(1:bigJ)*labor_tax_ss_j(1:bigJ,m))
     enddo
     
     

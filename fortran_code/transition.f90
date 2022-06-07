@@ -24,7 +24,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
-	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j
+	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j, type_share_j_t
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
     real(dp), dimension(bigM, bigT) :: w_bar
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
@@ -137,6 +137,18 @@ enddo
            !!!INITIAL VALUES
 include 'Initial_values_db.f90'
 
+! create a big matrix of cohort type shares
+ do m = 1,bigM,1
+        type_share_j_t(:,m,1) = type_share_t(m,1)
+     do i = 2,bigT,1
+         type_share_j_t(1,m,i) = type_share_t(m,i)
+         do j = 2,bigJ,1
+             type_share_j_t(j,m,i) = type_share_j_t(j-1,m,i-1)  
+         enddo
+        enddo
+     
+    enddo
+     
 
     
     N_t_j = Nn_
@@ -147,8 +159,8 @@ include 'Initial_values_db.f90'
     bigl_j_aux = 0.0d0
     
     do m = 1,bigM,1
-        bigl_type(m,:)         = bigM_share_ss(m) * sum(N_t_j  * l_j(:,m,:), dim = 1 )
-        bigl                   = bigl + type_multiplier(m) * bigl_type(m,:) ** rho_subst 
+        bigl_type(m,:)         = sum(N_t_j  * type_share_j_t(:,m,:) * l_j(:,m,:), dim = 1 )
+        bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
     
@@ -190,7 +202,7 @@ include 'Initial_values_db.f90'
     
     savings = 0.0d0
     do m = 1,bigM,1
-        savings = savings + bigM_share_ss(m) * sum(N_t_j *savings_j(:,m,:), dim=1)
+        savings = savings +  sum(N_t_j * type_share_j_t(:,m,:)  *savings_j(:,m,:), dim=1)
     enddo    
     
     savings = savings / bigl
@@ -198,7 +210,7 @@ include 'Initial_values_db.f90'
     wl_bar = 0.0d0
     do i = 1,bigT,1
         do m = 1,bigM,1
-           wl_bar(i) = wl_bar(i) +  bigM_share_ss(m) * sum( N_t_j(:,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
+           wl_bar(i) = wl_bar(i) +  sum( N_t_j(:,i) * type_share_j_t(:,m,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
         enddo
     enddo
     valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(1)
@@ -221,7 +233,7 @@ include 'bequest.f90'
 
 consumption = 0.0d0
 do m=1,bigM,1
-    consumption = consumption + bigM_share_ss(m) * sum(N_t_j*c_j(:,m,:), dim=1)/bigl       
+    consumption = consumption + sum(N_t_j* type_share_j_t(:,m,:)  *c_j(:,m,:), dim=1)/bigl       
 enddo
 
     consumption_gross = consumption!/(1+tc)

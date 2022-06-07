@@ -338,33 +338,36 @@ write(107, '(A)') "prob;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
 close(107)
 
 open(unit = 108, FILE = version//experiment//closure//"mass_trans.csv")
-write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
+write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
+            do m = 1, bigM, 1
             do ia = 0, n_a, 1
                 do i_aime = 0, n_aime, 1
                     do ip = 1, n_sp, 1
                         do ir = 1, n_sr, 1
                             do id = 1, n_sd, 1
-                            write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
-                            prob_trans(j, ia, i_aime, ip, ir, id,i)*N_t_j_vfi(j,i)/sum(N_t_j_vfi(:,i)), ";", & ! mass
-                            c_trans(j, ia, i_aime, ip, ir, id,i), ";", & !consumption
-                            l_trans(j, ia, i_aime, ip, ir, id,i), ";", & !hours
-                            lab_income_trans(j, ia, i_aime, ip, ir, id,i), ";", & !lab income
-                            lab_income_pretax_trans(j, ia, i_aime, ip, ir, id,i), ";", & !lab income
-                            tot_income_pretax_trans(j, ia, i_aime, ip, ir, id,i), ";", & !pretax income
-                            sv(ia) + bequest_j_trans(j, ia, i_aime, ip, ir, id,i), ";", & !sav
-                            svplus_trans(j, ia, i_aime, ip, ir, id,i), ";", & !sav
+                            write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+                            prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_t_j_vfi(j,i)/sum(N_t_j_vfi(:,i)), ";", & ! mass
+                            c_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !consumption
+                            l_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !hours
+                            lab_income_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
+                            lab_income_pretax_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
+                            tot_income_pretax_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !pretax income
+                            sv(ia) + bequest_j_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !sav
+                            svplus_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !sav
                             i, ";", & !year
                             j , ";",  & !age
                             ia , ";",  & !asset
                             i_aime , ";",  & !aime
                             ip , ";",  & !income
                             ir , ";",  & !return
-                            id  !discount
+                            id , ";",  & !discount
+                            m   !type
                             enddo        
                         enddo
                     enddo
+                enddo
                 enddo
             enddo
         enddo

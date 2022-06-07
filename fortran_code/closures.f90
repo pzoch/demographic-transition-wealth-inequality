@@ -9,7 +9,7 @@
     ! calculate labor tax revenue
     labor_tax_revenue = 0.0d0
     do m = 1,bigM,1
-       labor_tax_revenue = labor_tax_revenue +  bigM_share_ss(m) *  sum(N_t_j(1:bigJ,:)*labor_tax_j(1:bigJ,m,:),dim = 1)
+       labor_tax_revenue = labor_tax_revenue +   sum(N_t_j(1:bigJ,:)*type_share_j_t(1:bigJ,m,:)*labor_tax_j(1:bigJ,m,:),dim = 1)
     enddo
     
     
