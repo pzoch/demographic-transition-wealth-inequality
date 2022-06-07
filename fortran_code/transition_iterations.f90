@@ -31,7 +31,7 @@ do iter = 1,n_iter_t,1
     bigl_type = 0.0d0
     bigl      = 0d0
     do m = 1,bigM,1
-        bigl_type(m,:)         =  sum(N_t_j * type_share_j_t(:,m,:)  * l_j(:,m,:), dim = 1 )
+        bigl_type(m,:)         = sum(N_t_j * type_share_j_t(:,m,:)  * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
@@ -140,6 +140,7 @@ include 'closures.f90'
             l_j_vfi = l_j(:,m,:)
             s_pom_j_vfi = sv_j(:,m,:)   
             labor_tax_j_vfi = labor_tax_j(:,m,:) 
+            l_pen_j_vfi(:,:) = l_j(:,m,:)
             
             do i = 1,bigT
             do j = 1,bigJ
@@ -188,6 +189,7 @@ include 'closures.f90'
             sv_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
+            l_pen_j(:,m,:)  = l_pen_j_vfi(:,:)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
             do i = 1,bigT
@@ -274,7 +276,7 @@ include 'closures.f90'
             exit ! iterations end
         endif
     endif
-    
+    replacement = 0.d0
     do m = 1,bigM,1
             replacement(1) = replacement(1) + type_share_j_t(jbar_t(1),m,1) * sum_b_weight_trans(1)* b_j(jbar_t(1),m,1)/(w_j(jbar_t(1)-1,m,1)*l_pen_j(jbar_t(1)-1,m, 1))  
     enddo

@@ -102,7 +102,7 @@ call chdir(cwd_r)
     !
     ! 
      
-        switch_mortality         = 5      
+        switch_mortality         = 5     
         switch_unstable_dem_ss   = 1       
         switch_go_to_lower_gamma = -1         
         switch_change_tauL       = 1

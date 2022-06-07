@@ -348,7 +348,7 @@ endif
             labor_tax_big(:, :, :, :, :, :,m)            = labor_tax
             svplus_ss_big(:, :, :, :, :, :,m)            = svplus_ss
             V_ss_big(:, :, :, :, :, :,m)                 = V_ss
-
+            l_ss_pen_j(:,m) = l_ss_j_vfi
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
@@ -540,7 +540,10 @@ endif
             endif    
     !include 'utility_ss.f90' 
 
-    !replacement_ss = sum_b_weight_ss*b_ss_j_vfi(jbar_ss)/((1 - t1_ss - t2_ss)*w_bar_ss*l_ss_pen_j(jbar_ss-1))   
+            replacement_ss = 0.0d0
+      do m = 1,bigM,1      
+        replacement_ss  = replacement_ss + type_share_ss(m) * sum_b_weight_ss*b_ss_j(jbar_ss,m)/((1 - t1_ss - t2_ss)*w_bar_ss(m)*l_ss_pen_j(jbar_ss-1,m)) 
+    enddo
     if (switch_print == 1) then
         include 'Print_steady_db.f90'
     endif
