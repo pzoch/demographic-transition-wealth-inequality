@@ -130,17 +130,16 @@
                                     !if (prob_ss(j, ia, i_aime, ip, ir, id) > 1d-10) then 
                                         V_ss_j_vfi(j)  =  V_ss_j_vfi(j) + V_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
                                    ! endif
-                                    sum_y = sum_y + prob_ss(j, ia, i_aime, ip, ir, id)  
+                                      
                                 enddo
                             enddo
                         enddo
-                        if(j>1)then
-                            w_sum(j) = w_sum(j-1) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
-                        else
-                            w_sum(j) = 0d0 + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
-                        endif
-               
-                    enddo
+                        !if(j>1)then
+                        !    w_sum(j) = w_sum(j-1) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
+                        !else
+                        !    w_sum(j) = 0d0 + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
+                        !endif
+                       enddo
                
                     ia_last = ia
                 enddo
@@ -274,7 +273,7 @@
                                     ! this is not correct!!!
                                     ERHS_trans(j, ia, i_aime, ip, ir, id,i) = abs(margu(c_trans(j, ia, i_aime, ip, ir, id, i),l_trans(j, ia, i_aime, ip, ir, id,i), tc_vfi(i)) - sum_help*beta*r_vfi(min(i+1, bigT))*n_sr_value(ir)/gam_vfi(min(i+1, bigT))*pi_trans_vfi_cond(j+1,min(i+1, bigT)))
                                 endif
-                                sum_y = sum_y + prob_trans(j, ia, i_aime, ip, ir, id,i)
+                              
                                 avg_aime_replacement_rate(j,i) = aime_replacement_rate(i_aime)*prob_trans(j, ia, i_aime, ip, ir, id,i)
                             enddo
                         enddo

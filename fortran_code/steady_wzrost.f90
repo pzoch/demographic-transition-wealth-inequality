@@ -96,8 +96,8 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         type_multiplier_ss =  type_multiplier_ss_new
         type_share_ss = type_share_ss_new
     endif
-!OPEN (unit=121, FILE = version//experiment//closure//"test_k_NEW.txt")
- 
+    
+      
 ! force it to treat it as a 2nd steady state - for test purposes    
 !switch_run_1 = 0
     
@@ -131,7 +131,7 @@ write(*,*) "ret/work force  ", sum(N_ss_j(jbar_ss:))/sum(N_ss_j(:jbar_ss-1))
 
 b_scale_factor_ss = 1d0
 avg_ef_l_supply = 0.33 
-
+!type_multiplier_ss = 1.0d0
 
 
 valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss 
@@ -182,30 +182,10 @@ do iter = 1,n_iter_ss,1
       
 
 
-    
-    ! g due to closure consruction is expresse as G/bigL
-    if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
-         if (switch_residual .ne. 6) then! unless it is used as closure 
-            g_ss = g_share_ss*y_ss
-            g_per_capita_ss = g_ss*bigl_ss/N_ss
-         endif
-         
-         
-    else 
-        if (switch_g_const == 1) then ! 
-            g_per_capita_ss = g_per_capita_ss_1 
-            if (iter == 1) then ! we do not have big l in first iter 
-                g_ss = g_share_ss_2*y_ss
-            else
-                g_ss = g_per_capita_ss*N_ss/bigl_ss 
-            endif
-        elseif (switch_g_const == 0) then
-            g_ss = g_share_ss_2*y_ss
-        endif
-    endif  
+ 
     
     debt_ss = debt_constr*y_ss
-    sum_priv_sv_ss = k_ss*gam_ss*nu_ss + debt_ss - PillarII_ss
+    sum_priv_sv_ss = k_ss*gam_ss*nu_ss + debt_ss 
 
 
 ! no interest is added when switch_unequal_bequest == 1
@@ -328,6 +308,9 @@ endif
             bequest_ss_vfi =  bequest_ss(m)
             b_ss_j_vfi = b_ss_j(:,m)
 
+
+            upsilon_ss = 0d0
+             upsilon_old_ss = 0d0
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
             bequest_ss_j_vfi_dif(:) = bequest_ss_j(:,m) - bequest_ss_j_old(:,m)
             upsilon_ss_vf = upsilon_ss
@@ -423,11 +406,33 @@ endif
 
     
 
-   
+      
+    ! g due to closure consruction is expresse as G/bigL
+    if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
+         if (switch_residual .ne. 6) then! unless it is used as closure 
+            g_ss = g_share_ss*y_ss
+            g_per_capita_ss = g_ss*bigl_ss/N_ss
+         endif
+         
+         
+    else 
+        if (switch_g_const == 1) then ! 
+            g_per_capita_ss = g_per_capita_ss_1 
+            if (iter == 1) then ! we do not have big l in first iter 
+                g_ss = g_share_ss_2*y_ss
+            else
+                g_ss = g_per_capita_ss*N_ss/bigl_ss 
+            endif
+        elseif (switch_g_const == 0) then
+            g_ss = g_share_ss_2*y_ss
+        endif
+    endif  
    
     
 
     include 'closure_ss.f90'
+    
+    
          
     k_ss_new = (savings_ss - debt_ss)/(gam_ss*nu_ss)
     err_ss = abs(k_ss_new - k_ss)
@@ -548,6 +553,7 @@ endif
         include 'Print_steady_db.f90'
     endif
     
+
     k_ss_o = k_ss
     
     !! calculate marginal

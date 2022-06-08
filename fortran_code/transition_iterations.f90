@@ -38,6 +38,7 @@ do iter = 1,n_iter_t,1
     
 
 
+
     nu(1) = nu_ss_old
     do i = 2,bigT,1
         nu(i) = bigl(i)/bigl(i-1)
@@ -54,8 +55,8 @@ do iter = 1,n_iter_t,1
         y = zbar*k**(alpha_t)
         
     do i = 1,bigT,1
-        if (r_bar(i) < 0) then
-            r_bar(i) = 0.0_dp
+        if (r_bar(i) < -0.0_dp) then
+            r_bar(i) = -0.0_dp
         endif
     enddo
     do j = 1,bigJ,1
@@ -158,7 +159,6 @@ include 'closures.f90'
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
             
-            
 
 
 
@@ -221,6 +221,7 @@ include 'closures.f90'
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
+
     
     bigl = bigl ** (1.0d0/rho_subst)
 
@@ -237,6 +238,7 @@ include 'closures.f90'
         average_w(i) = average_w(i) + sum(N_t_j(1:jbar_t(i)-1,i)* type_share_j_t(1:jbar_t(i)-1,m,i) * w_j(1:jbar_t(i)-1,m,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         enddo
     enddo    
+
 
     consumption_gross_j = c_j     
     consumption_gross = 0.0d0 
@@ -255,19 +257,19 @@ include 'closures.f90'
     enddo
     savings(i) = savings(i) /bigl(i)
     enddo
-    
+
     
     include 'bequest.f90'
-
+    
     k_new(1) = k(1)
     k_new(n_p+1) = (savings(n_p+1) - debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
     do i = 2,n_p+1,1
         k_new(i) = (savings(i-1) - debt(i-1))/(nu(i)*gam_t(i))
         err(i) = abs(k_new(i) - k(i))
         k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
-        l_j(:,:,i) = up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
+        l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
     enddo    
-        
+                print*, 'k= ', k    
     cum_err(iter) = sum(err)
 
     if (iter < n_iter_t+1) then         
@@ -276,6 +278,7 @@ include 'closures.f90'
             exit ! iterations end
         endif
     endif
+
     replacement = 0.d0
     do m = 1,bigM,1
             replacement(1) = replacement(1) + type_share_j_t(jbar_t(1),m,1) * sum_b_weight_trans(1)* b_j(jbar_t(1),m,1)/(w_j(jbar_t(1)-1,m,1)*l_pen_j(jbar_t(1)-1,m, 1))  

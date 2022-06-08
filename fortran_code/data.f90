@@ -82,7 +82,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
+     OPEN (unit=3, FILE = "_data_omega_test.txt")    
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j)
       end do
@@ -747,7 +747,11 @@ if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
     sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
-    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    type_share_d(m,2:) = type_share_d(m,1)
+    
+
+    
     enddo
     tauK_d(2:) = tauK_d(1)
     tauL_d(2:) = tauL_d(1)
@@ -766,7 +770,9 @@ if (switch_keep_fixed == 1) then
         enddo
     enddo
 
-    
+     do i = 1,bigT,1
+     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     enddo
     pi_weight_d = pi_d
     nu_ss_old = 1.0d0
     nu_ss_new = 1.0d0

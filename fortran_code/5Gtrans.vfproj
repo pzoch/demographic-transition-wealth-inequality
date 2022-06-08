@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnShape="true" WarnInterfaces="true" FloatingPointSpeculation="fpSpeculationFast" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" OptimizeReferences="optReferences" EnableCOMDATFolding="optFolding"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -74,14 +74,14 @@
 		<File RelativePath=".\pfi_household_problem.f90"/>
 		<File RelativePath=".\pfi_print.f90"/></Filter>
 		<Filter Name="globals_and_params">
+		<File RelativePath=".\ces_production.f90"/>
+		<File RelativePath=".\ces_production_ss.f90"/>
 		<File RelativePath=".\data.f90"/>
 		<File RelativePath=".\globals.f90"/>
 		<File RelativePath=".\Initial_values_DB.f90"/>
 		<File RelativePath=".\parameters_CD.f90"/>
 		<File RelativePath=".\set_globals.f90"/>
-		<File RelativePath=".\shocks_parameters.f90"/>
-		<File RelativePath=".\ces_production_ss.f90"/>
-		<File RelativePath=".\ces_production.f90"/></Filter>
+		<File RelativePath=".\shocks_parameters.f90"/></Filter>
 		<Filter Name="implicit_tax_and_bequest">
 		<File RelativePath=".\bequest.f90"/></Filter>
 		<Filter Name="pension_system">
