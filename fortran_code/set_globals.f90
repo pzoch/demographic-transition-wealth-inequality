@@ -36,11 +36,11 @@ call chdir(cwd_r)
     
     
 !!! DEBUG_SWITCH
-       switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
+       switch_labor_choice      = 0        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
        switch_cohort_ps         = 0         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
        switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
        switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-       switch_fix_labor         = 0        ! if labor is fixed it is fixed to this number
+       switch_fix_labor         = 0.3d0        ! if labor is fixed it is fixed to this number
        switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
        switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
        switch_reduce_pension    = 0

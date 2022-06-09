@@ -36,8 +36,9 @@ do iter = 1,n_iter_t,1
 
     enddo
     
-
-
+    do i = 1,bigT,1
+        bigl(i) = bigl(i)  ** (1.0d0/rho_subst)
+    enddo
 
     nu(1) = nu_ss_old
     do i = 2,bigT,1
@@ -167,7 +168,7 @@ include 'closures.f90'
             call agent_vf_trans()
             
         
-            do i = 1,bigT
+            do i = 2,bigT
             do j = 1,bigJ
             prob_trans_big(j,:,:,:,:,:,m,i)               = type_share_j_t(j,m,i) *  prob_trans(j,:,:,:,:,:,i) 
             enddo
@@ -222,9 +223,9 @@ include 'closures.f90'
 
     enddo
 
-    
-    bigl = bigl ** (1.0d0/rho_subst)
-
+    do i = 1,bigT,1
+    bigl(i) = bigl(i) ** (1.0d0/rho_subst)
+    enddo
     nu(1) = nu_ss_old
     do i = 2,bigT,1
         nu(i) = bigl(i)/bigl(i-1)

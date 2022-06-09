@@ -414,6 +414,7 @@ do j = bigJ-1, ij, -1
                                 if(j>=jbar_t_vfi(it)) then
                                     l_trans(j, ia, i_aime, ip, ir, id, it)=0d0
                                     lab_income = 0d0
+                                    labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = 0d0
                                     lab_income_pretax = 0d0
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
@@ -442,7 +443,7 @@ do j = bigJ-1, ij, -1
                                     optimal_choice = optimal_consumption_and_labor_new(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1)), phi, theta, tl(it), lambda_trans(it), w_opt, wage_non_tax, tc_vfi(it), LabIncAVG_vfi(it) )
                                     c_trans(j, ia, i_aime, ip, ir, id, it)  = optimal_choice(1)
                                     l_trans(j, ia, i_aime, ip, ir, id, it)  = optimal_choice(2)
-                                
+                                    !labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = optimal_choice(3)
                                     lab_income = (1-tL(it))*(w_opt/LabIncAVG_vfi(it)*l_trans(j, ia, i_aime, ip, ir, id, it))**(1-lambda_trans(it))*LabIncAVG_vfi(it)+ &
                                                  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
                                     lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
@@ -454,6 +455,8 @@ do j = bigJ-1, ij, -1
                                 else
                                     c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(phi -theta*phi -1)),1d-15)
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = 0d0
+                                    labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = 0d0
+                                    
                                     lab_income = 0d0
                                     lab_income_pretax = 0d0
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
@@ -500,6 +503,8 @@ do j = bigJ-1, ij, -1
                             endif
                             l_trans(j, ia, i_aime, ip, ir, id, it)=0d0
                             c_trans(j, ia, i_aime, ip, ir, id, it) = max( (available - svplus_trans(j, ia, i_aime, ip, ir, id, it))/tc_vfi(it), 1e-10)
+                             labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = 0d0
+                            
                             labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = 0d0
                             aime_plus_trans(j, ia, i_aime, ip, ir, id, it) = aime(i_aime)
                             bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
