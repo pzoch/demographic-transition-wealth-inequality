@@ -14,7 +14,7 @@
             ! k/y =2.75, alpha = 0.33
             depr = (1.0_dp + 0.0550_dp)**zbar - 1.0_dp 
             rho_subst = 1 ! CES elasticity of subst between types of labor (rho = 1 substitutes, 0 cobb-douglas)
-            delta =  (1.00_dp)**zbar ! 0.9726968 !1.0476838584 !1.0447238439d0 !1.0150d0**(zbar)   !(0.9862_dp)
+            delta =   (1.00_dp)**zbar ! 0.9726968 !1.0476838584 !1.0447238439d0 !1.0150d0**(zbar)   !(0.9862_dp)
             phi = 0.3d0 ! 0.3920313 !0.359375_dp
             rho_1 = 0.7d0 !0.225_dp!*0.0d0
             rho_2 = 0.7d0 !0.225_dp!*0.0d0

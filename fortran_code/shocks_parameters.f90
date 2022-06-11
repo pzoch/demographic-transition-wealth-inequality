@@ -342,6 +342,15 @@ endif
              n_sp_value_trans_big(:,:,:) = 1.0d0
              n_sp_value_ss_old_big(:,:)  = 1.0d0
              n_sp_value_ss_new_big(:,:)  = 1.0d0
+             sigma2_epsilon_t_big(:,:) = 0.d0
+             epsilon_correction_t_big(:,:) = 0.0d0
+
+            epsilon_correction_ss_old_big(:) = 0.0d0
+            sigma2_epsilon_ss_old_big(:) = 0.0d0
+            epsilon_correction_ss_new_big(:) = 0.0d0
+            sigma2_epsilon_ss_new_big(:) = 0.0d0
+             
+
            
         endif
     

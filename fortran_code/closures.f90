@@ -7,11 +7,12 @@
 ! RETURN : updated tax rate 
 
     ! calculate labor tax revenue
-    labor_tax_revenue = 0.0d0
+    do i = 1,bigT,1
+    labor_tax_revenue(i) = 0.0d0
     do m = 1,bigM,1
-       labor_tax_revenue = labor_tax_revenue +   sum(N_t_j(1:bigJ,:)*type_share_j_t(1:bigJ,m,:)*labor_tax_j(1:bigJ,m,:),dim = 1)
+       labor_tax_revenue(i) = labor_tax_revenue(i) +   sum(N_t_j(1:bigJ,i)*type_share_j_t(1:bigJ,m,i)*labor_tax_j(1:bigJ,m,i),dim = 1)
     enddo
-    
+    enddo
     
     
 select case (switch_residual)

@@ -5,12 +5,12 @@
 MODULE global_vars
 IMPLICIT NONE
    save
-    integer, parameter ::  n_iter_ss =  100
+    integer, parameter ::  n_iter_ss =  200
     integer, parameter ::  n_iter_t = 25
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 1 ! number of permanent types
-    integer, parameter :: n_p = 100, n_debt  = 60, forward = 1 ! id does not work :( 
+    integer, parameter :: bigM = 2 ! number of permanent types
+    integer, parameter :: n_p = 110, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
     integer, parameter :: ofe_u = 0  

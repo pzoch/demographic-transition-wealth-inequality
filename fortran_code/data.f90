@@ -610,6 +610,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Nn_d(1,i) = Nn_d(1,i-1)*nu_ss_new
     enddo
     
+    
+    
    !Nn_d(1,last_data+1:) = Nn_d(1, last_data) 
     do i = 2,bigT, 1
         do j = 2, bigJ
@@ -747,35 +749,36 @@ if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
     sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
-    !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
     type_share_d(m,2:) = type_share_d(m,1)
     
 
     
     enddo
-    tauK_d(2:) = tauK_d(1)
-    tauL_d(2:) = tauL_d(1)
+    !tauK_d(2:) = tauK_d(1)
+    !tauL_d(2:) = tauL_d(1)
     alpha_d(2:) = alpha_d(1)
-    debt_constr_d(2:) = debt_constr_d(1)
-    lambda_d(2:) = lambda_d(1)
-    gam_d(2:) = gam_d(1)
-    
+    !debt_constr_d(2:) = debt_constr_d(1)
+    !lambda_d(2:) = lambda_d(1)
+    !gam_d(2:) = gam_d(1)
+    !    pi_d = 1.0d0
     do i = 2, bigT,1
-        pi_d(1,i) = pi_d(1,1)
-        Nn_d(1,i) = Nn_d(1,1)
+    !    pi_d(1,i) = pi_d(1,1)
+     !   Nn_d(1,i) = Nn_d(1,1)
         do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,1)
-            Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
+      !      pi_d(j,i) = pi_d(j,1)
+       !     Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
             
         enddo
     enddo
 
      do i = 1,bigT,1
-     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     !type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
      enddo
-    pi_weight_d = pi_d
-    nu_ss_old = 1.0d0
-    nu_ss_new = 1.0d0
+
+   ! pi_weight_d = pi_d
+   ! nu_ss_old = 1.0d0
+   ! nu_ss_new = 1.0d0
     endif
 end subroutine read_data
 

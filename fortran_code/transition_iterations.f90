@@ -153,10 +153,16 @@ include 'closures.f90'
             iter_com = iter
             EV_trans = EV_trans_big(:, :, :, :, :, :,m,:)
             V_trans = V_trans_big(:, :, :, :, :, :,m,:)
-            c_trans = c_trans_big(:, :, :, :, :, : ,m,:)        
+            labor_tax_trans = labor_tax_trans_big(:, :, :, :, :, : ,m,:)        
+            c_trans = c_trans_big(:, :, :, :, :, : ,m,:) 
             l_trans = l_trans_big(:, :, :, :, :, : ,m,:) 
             svplus_trans = svplus_trans_big(:, :, :, :, :, :,m,:) 
             pi_ip_trans = pi_ip_trans_big(:,:,m,:)
+            
+            lab_income_trans    = lab_income_trans_big(:, :, :, :, :, :,m,:)
+            lab_income_pretax_trans = lab_income_pretax_trans_big(:, :, :, :, :, :,m,:)
+            tot_income_trans      = tot_income_trans_big(:, :, :, :, :, :,m,:)
+            tot_income_pretax_trans = tot_income_pretax_trans_big(:, :, :, :, :, :,m,:)
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
             
@@ -247,7 +253,7 @@ include 'closures.f90'
         consumption_gross = consumption_gross + sum(N_t_j* type_share_j_t(:,m,:) * consumption_gross_j(:,m,:), dim=1)/bigl       
     enddo
     
-    consumption_gross_new = up_t*consumption_gross_new + (1.0_dp-up_t)*consumption_gross
+    consumption_gross_new = consumption_gross!up_t*consumption_gross_new + (1.0_dp-up_t)*consumption_gross
         
     savings_j = sv_j + pillarII_j
     
@@ -270,7 +276,7 @@ include 'closures.f90'
         k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
         l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
     enddo    
-                print*, 'k= ', k    
+    
     cum_err(iter) = sum(err)
 
     if (iter < n_iter_t+1) then         
