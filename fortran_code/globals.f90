@@ -51,7 +51,7 @@ IMPLICIT NONE
     integer :: switch_change_debt
     integer :: switch_change_sl
     integer :: switch_change_gy
-    
+    integer :: switch_utility_function
     integer :: switch_print
     integer :: switch_vf
     integer :: switch_labor_choice                         ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
@@ -101,7 +101,7 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
 ! Parametry
-    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol
+    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, frisch, disutil
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new

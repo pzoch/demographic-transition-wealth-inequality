@@ -89,8 +89,15 @@ contains
     function margu(cons, labor, tc)
         real*8, intent(in) :: cons, labor, tc !cosumption , labor and consumption tax
         real*8 :: margu, leis
+        if (switch_utility_function == 0) then
         leis=1d0-labor
         margu = 1/tc*phi*(cons**phi*leis**(1d0-phi))**(1d0-theta)/cons
+        elseif (switch_utility_function == 1) then
+        margu = 1/tc*(cons)**(1d0-theta)/cons     
+        elseif (switch_utility_function == 2) then
+        margu = 1/tc*(cons)**(1d0-theta)*(1d0 - disutil * (1d0 - theta) * labor ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta/cons         
+        endif
+        
     end function 
 
 !*******************************************************************************************
@@ -128,12 +135,34 @@ contains
                         (1d0-dist)*(1d0-dist_aime)*EV_ss(j+1, iar, aimer, ip, ir, id), 1d-10)**(1d0-theta)/(1d0-theta)
             endif
         endif    
-        ! add todays part and discount
-        if (theta == 1) then
-            valuefunc = (phi*log(c_help) + (1d0-phi)*log(1d0-l_help)) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
-        else
-            valuefunc = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta) + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+        
+                ! add todays part and discount
+        if (switch_utility_function == 0) then
+        
+            if (theta == 1) then
+                valuefunc = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            else
+                valuefunc = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            endif
+            
+        elseif (switch_utility_function == 1) then
+            
+            if (theta == 1) then
+                valuefunc = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            else
+                valuefunc = (c_help)**(1d0-theta)/(1d0-theta) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            endif
+            
+        elseif (switch_utility_function == 2) then
+            if (theta == 1) then
+                valuefunc = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            else
+                valuefunc =(c_help**(1d0-theta) * (1d0 - disutil * (1d0 - theta) * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta - 1.0d0) /(1d0-theta)   + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+            endif
+            
         endif
+        
+
     end function
 
 !*******************************************************************************************
@@ -170,11 +199,31 @@ contains
             endif
         endif    
         ! add todays part and discount
-        if (theta == 1) then
-            valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-        else
-            valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+        if (switch_utility_function == 0) then
+        
+            if (theta == 1) then
+                valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            else
+                valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            endif
+            
+        elseif (switch_utility_function == 1) then
+            
+            if (theta == 1) then
+                valuefunc_trans = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            else
+                valuefunc_trans = (c_help)**(1d0-theta)/(1d0-theta) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            endif
+            
+        elseif (switch_utility_function == 2) then
+            if (theta == 1) then
+                valuefunc_trans = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            else
+                valuefunc_trans =(c_help**(1d0-theta) * (1d0 - disutil * (1d0 - theta) * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta - 1.0d0) /(1d0-theta)   + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            endif
+            
         endif
+        
     end function       
     
  !*******************************************************************************************   
@@ -204,6 +253,7 @@ contains
        
         integer :: iter
        
+        if (switch_utility_function == 0) then
         c_mult = (1-phi)/phi
    
 
@@ -220,6 +270,25 @@ contains
 
        
         optimal_labor = min(1d0,max(l,0d0))
+        elseif (switch_utility_function == 1) then
+                
+             l = (c ** (-theta)  * (1d0 - lambda) / disutil * (1d0-tau) * (w/LabIncAVG)**(1-lambda) * LabIncAVG) ** (1d0 / (1d0/frisch + lambda))
+        
+        optimal_labor = min(1d0,max(l,0d0)) ! probably not needed here
+        
+        
+        elseif (switch_utility_function == 2) then
+            l = 0.0001
+            do iter = 1, 6, 1
+            f_iter =    c * theta * disutil * l ** (1d0/frisch) - (1-lambda) *(1-tau)*(w/LabIncAVG)**(1-lambda)*LabIncAVG * (1 - disutil / (1 + 1/frisch) * (1-theta) * l ** (1 + 1/frisch)) * l ** lambda
+            f_prim_iter =(1d0/frisch)  * c * theta * disutil * l ** (1d0/frisch- 1) - (1-lambda) *(1-tau)*(w/LabIncAVG)**(1-lambda)*LabIncAVG * (lambda * l ** (lambda-1) * (1 - disutil / (1 + 1/frisch) * (1-theta) * l ** (1 + 1/frisch)) - disutil * (1-theta) * l ** lambda * l ** (1d0/frisch))
+             l = l-f_iter/f_prim_iter
+            enddo
+            optimal_labor = min(1d0,max(l,0d0)) 
+        endif
+        
+         
+        
      end function
     
 !*******************************************************************************************
@@ -528,6 +597,9 @@ function optimal_consumption_and_labor_new(RHS,phi, theta, tau, lambda,w, w_NT, 
     integer :: iter, iter_max
     
     iter_max = 50
+    
+    if (switch_utility_function == 0) then
+    
     if (switch_fix_labor > 0d0 ) then 
         optimal_consumption_and_labor_new(1) = max(RHS**(1d0/(-theta)),1d-15)
         optimal_consumption_and_labor_new(2) =  switch_fix_labor
@@ -623,5 +695,13 @@ endif
     optimal_consumption_and_labor_new(2) = min(max(l, 0d0), 1d0-1d-8)
     
     endif
+    
+    elseif (switch_utility_function == 1) then
+    
+    
+    
+    elseif (switch_utility_function == 2) then
+    endif
+    
 endfunction 
 end module

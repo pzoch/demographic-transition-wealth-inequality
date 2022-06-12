@@ -28,7 +28,7 @@ allocate(l_trans, labor_tax_trans, c_trans, RHS_trans, prob_trans, lab_income_tr
 allocate(l_trans_big, labor_tax_trans_big, c_trans_big, RHS_trans_big, prob_trans_big, lab_income_trans_big, tot_income_trans_big, tot_income_pretax_trans_big, lab_income_pretax_trans_big, bequest_j_trans_big,  &
          sv_tempo_trans_big, V_trans_big, EV_trans_big, ERHS_trans_big, aime_plus_trans_big, source = svplus_trans_big)
     sv_tempo_trans = 0.0d0
-    version = 'llab_'
+
 
     switch_print = 1
 

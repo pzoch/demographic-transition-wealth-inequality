@@ -49,6 +49,7 @@ call chdir(cwd_r)
        switch_persistent_delta  = 0
        switch_epsilon_corr      = 0
        switch_change_gy         = 1
+       switch_utility_function  = 0        ! 0 - Cobb-Douglas in leisure and consumption, 1 - sepearable with constant Frisch, 2 - Uhlig
      
        
 
