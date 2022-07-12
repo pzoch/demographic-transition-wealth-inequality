@@ -36,20 +36,19 @@ call chdir(cwd_r)
     
     
 !!! DEBUG_SWITCH
-       switch_labor_choice      = 0        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
-       switch_cohort_ps         = 0         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
+       switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
+       switch_cohort_ps         = 1         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
        switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
        switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-       switch_fix_labor         = 0.1d0        ! if labor is fixed it is fixed to this number
+       switch_fix_labor         = 0        ! if labor is fixed it is fixed to this number
        switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
        switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
        switch_reduce_pension    = 0
        switch_increase_ret_age  = 0                                
        switch_calibration       = 0
        switch_persistent_delta  = 0
-       switch_epsilon_corr      = 0
-       switch_change_gy         = 1
-       switch_utility_function  = 0        ! 0 - Cobb-Douglas in leisure and consumption, 1 - sepearable with constant Frisch, 2 - Uhlig
+       switch_epsilon_corr      = 1
+       switch_utility_function  = 1        ! 0 - Cobb-Douglas in leisure and consumption, 1 - separable with constant Frisch, 2 - Uhlig
      
        
 
@@ -105,7 +104,7 @@ call chdir(cwd_r)
      
         switch_mortality         = 5     
         switch_unstable_dem_ss   = 1       
-        switch_go_to_lower_gamma = -1         
+        switch_go_to_lower_gamma = 1         
         switch_change_tauL       = 1
         switch_change_lambda     = 1      
         switch_change_tauK       = 1
@@ -114,15 +113,15 @@ call chdir(cwd_r)
         switch_change_premium    = 1
         switch_change_type_share = 1
         switch_change_debt       = 1
-        switch_change_sl         = -1
-        switch_income_risk       = 0
+        switch_change_sl         = 1
+        switch_income_risk       = 1
         switch_discount_risk     = 0
         switch_return_risk       = 0
         switch_change_gy         = 1
-        switch_keep_fixed        = 0
+        switch_keep_fixed        = 1
     
-    version = 'llab_' ! this is just to organize some versions, does not change anything in the code
-    experiment = 'nd1_'
+    version = 'xxxx_' ! this is just to organize some versions, does not change anything in the code
+    experiment = 'all_'
     switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960
     switch_reform = 0           ! 0 = base transition, 1 = main LSRA (baseline + reform + welfare change)
     
@@ -131,11 +130,11 @@ call chdir(cwd_r)
     switch_partial_eq = 0   ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
     switch_elas = 0 !0 - non elasticity calculation, 1 - elasticity using OPD, 2 - semileasticity using OPD 
 
-    switch_ss_write = 0        ! 0 - do not save big csv files with steady state, 1 save
-
+    switch_ss_write = 1        ! 0 - do not save big csv files with steady state, 1 save
+    switch_profile = 1        
     switch_run_1 = 1            ! 0 = don't run old steady state; 1 = run old steady state
     switch_run_2 = 1            ! 0 = don't run new steady state; 1 = run new steady state
-    switch_run_t = 1            ! 0 = don't run transition; 1 = run transition
+    switch_run_t = 0            ! 0 = don't run transition; 1 = run transition
     
     switch_type_1 = 0           ! initial ss: 0 = DB; 1 = DC 
     switch_type_2 = 0           ! final   ss: 0 = DB; 1 = DC
@@ -180,6 +179,7 @@ endif
 
         closure = 'taxC__'
 
+    l_bound =  1050.0d0 ! upper bound on labor supply
 
     up_ss = 0.9d0 
 
@@ -201,13 +201,13 @@ endif
     g_share_ss = 0.28d0 ! 0.17d0 !0.17_dp
     
     
-    superstar_factor_1 = 6.5d0
+    superstar_factor_1 = 2.0d0
     superstar_factor_2 = 25.0d0
     
     alpha = 0.35_dp
     theta = 2.0_dp!2.0_dp
    
-    up_t = 0.8d0
+    up_t = 0.55d0
     
     ! parameters related to types
     
@@ -227,7 +227,7 @@ endif
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
+    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
     include 'shocks_parameters.f90'
     ! it is need for implicit tax subroutine
     ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
@@ -258,7 +258,7 @@ endif
     t1_ss_contrib = t1_ss_old
     t1 = t1_ss_old
     do i = 1,bigT,1
-        omega(:,i) = omega_ss
+        omega_big(:,:,i) = omega_ss_big
     enddo
     
     g_share    =  g_share_ss * gy_factor_t

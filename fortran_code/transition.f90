@@ -64,7 +64,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
         do i = 1,bigT,1
-		    omega(:,i)  = omega_ss
+		    omega_big(:,:,i)  = omega_ss_big
             pi(:,i)     = pi_ss_old
             pi_weight(:,i)     = pi_weight_ss_old
             Nn_(:,i)    = N_ss_old

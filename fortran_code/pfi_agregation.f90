@@ -14,10 +14,14 @@
         savings_cohort_ten = 0d0
         c_ss_j_vfi(:) = 0d0
         V_ss_j_vfi(:) = 0d0
+        lab_income_ss_j_vfi(:) = 0d0
+        lab_income_pretax_ss_j_vfi(:) = 0d0
+        tot_income_pretax_ss_j_vfi(:) = 0d0
+        tot_income_ss_j_vfi(:) = 0d0
         l_ss_j_vfi(:) = 0d0
         s_pom_ss_j_vfi(:) = 0d0
         lab_ss_j_vfi(:) = 0d0
-        asset_pom_ss_j(:) = 0d0
+        asset_pom_ss_j_vfi(:) = 0d0
         l_ss_pen_j_vfi(:) = 0d0
         w_sum(0) = 0d0
         ERHS_ss = 0d0
@@ -28,7 +32,7 @@
         lab_high_ss_j_vfi(:)= 0d0
         gini_weight_sv = 0d0
         gini_weight_consumption = 0d0
-
+        pension_ss_j_vfi(:) = 0d0
         
         share_neg = 0d0
         share_nonpos = 0d0
@@ -111,9 +115,12 @@
                                         savings_cohort_ten(3,j) = savings_cohort_ten(3,j) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id)
                                         consumption_top_ten(3,j) =  consumption_top_ten(3,j) + c_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     endif
-                            
+                                    pension_ss_j_vfi(j) = pension_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     c_ss_j_vfi(j) = c_ss_j_vfi(j) + c_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
-                            
+                                    lab_income_ss_j_vfi(j) = lab_income_ss_j_vfi(j) + lab_income_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                    lab_income_pretax_ss_j_vfi(j) = lab_income_pretax_ss_j_vfi(j) + lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                    tot_income_ss_j_vfi(j) = tot_income_ss_j_vfi(j) + tot_income_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                    tot_income_pretax_ss_j_vfi(j) = tot_income_pretax_ss_j_vfi(j) + tot_income_pretax_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     if(ip<6)then
                                         l_ss_pen_j_vfi(j) = l_ss_pen_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/p_1_5(j)
                                     endif 
@@ -126,7 +133,7 @@
                                     lw_lambda_ss_j_vfi(j) = lw_lambda_ss_j_vfi(j) + (omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip,ir, id))**(1-lambda)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     lw_ss_j_vfi(j) = lw_ss_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip, ir, id) 
                                     s_pom_ss_j_vfi(j) = s_pom_ss_j_vfi(j) + svplus_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
-                                    asset_pom_ss_j(j) = asset_pom_ss_j(j) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id) 
+                                    asset_pom_ss_j_vfi(j) = asset_pom_ss_j_vfi(j) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id) 
                                     !if (prob_ss(j, ia, i_aime, ip, ir, id) > 1d-10) then 
                                         V_ss_j_vfi(j)  =  V_ss_j_vfi(j) + V_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
                                    ! endif

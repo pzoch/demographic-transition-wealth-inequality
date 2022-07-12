@@ -26,7 +26,7 @@
         write(*,'(A25,F10.7,A)') ' 100*subsidy/y =', 100*subsidy_ss/y_ss, '  |  Should be 0.0%'
         if (bigJ == 16)  then
             if (switch_vf > 0) then 
-            write(*,'(A25,F10.7,A)') ' average hours =  ', 100*sum(N_ss_j(1:jbar_ss-1)*lab_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1)), '  |  Should be 33%' 
+            write(*,'(A25,F10.7,A)') ' average hours =  ', 100*average_lab_ss, '  |  Should be 33%' 
              error_labor = 100*sum(N_ss_j(1:jbar_ss-1)*lab_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
 
             else 
@@ -96,9 +96,9 @@
         write(*,'(A30,F16.7,A)') ' g_ss = ', g_ss
         write(*,'(A30,F16.7,A)') ' g_per_capia = ', g_per_capita_ss
         write(*,'(A30,F16.7,A)') ' upsilon_ss = ', upsilon_ss
-        write(*,'(A30,F16.7,A)') ' savings_top_ten = ',  savings_top_ten(10)/sum(N_ss_j*asset_pom_ss_j)
-        write(*,'(A30,F16.7,A)') ' savings_top_100 = ',  savings_top_100(100)/sum(N_ss_j*asset_pom_ss_j)
-        write(*,'(A30,F16.7,A)') 'private_wealth/y_ss ratio =', sum(N_ss_j*asset_pom_ss_j)/y_ss
+        !write(*,'(A30,F16.7,A)') ' savings_top_ten = ',  savings_top_ten(10)/asset_pom_ss
+        !write(*,'(A30,F16.7,A)') ' savings_top_100 = ',  savings_top_100(100)/asset_pom_ss
+        write(*,'(A30,F16.7,A)') 'private_wealth/y_ss ratio =', asset_pom_ss/y_ss
         write(*,'(A30,F16.7,A)') 'share negative assets =', share_neg
         write(*,'(A30,F16.7,A)') 'share nonpositive assets =', share_nonpos
         write(*,'(A30,F16.7,A)') 'borrowing limit to LabIncAVG_ss_vfi', sv(0) / LabIncAVG_ss_vfi
@@ -146,80 +146,3 @@
 !    !    write(666, '(I2,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') j, ";", c_ss_j(j), ";", l_ss_j(j), ";", s_ss_j(j), ";", V_ss_j_vfi(j), ";", beta*delta**(j-1)*(pi_ss(j)/pi_ss(1))
 !    !enddo
 !CLOSE(666)
-
-    
-if (switch_ss_write == 1) then
-    open(unit = 106, FILE = version//experiment//closure//no_steady//"gini_weight.csv")
-    write(106, '(A)') "weight;age;assets"
-
-            do j = 1, bigJ, 1
-                do ia = 0, n_a, 1
-        write(106, '(F20.10,A,I5,A,F20.10)') &
-                    gini_weight_sv(j,ia), ";", & ! weight
-                    j , ";",  & !age
-                    sv(ia)  !assets
-                enddo        
-            enddo
-
-    close(106)
-
-
-    open(unit = 107, FILE = version//experiment//closure//no_steady//"prob.csv")
-    write(107, '(A)') "prob;age;asset;aime;inc_shock;ret_shock;disc_shock"
-   
-            do j = 1, bigJ, 1
-                do ia = 0, n_a, 1
-                    do i_aime = 0, n_aime, 1
-                        do ip = 1, n_sp, 1
-                            do ir = 1, n_sr, 1
-                                do id = 1, n_sd, 1
-                                write(107, '(F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
-                                prob_ss(j, ia, i_aime, ip, ir, id), ";", & ! probability
-                                j , ";",  & !age
-                                ia , ";",  & !asset
-                                i_aime , ";",  & !aime
-                                ip , ";",  & !income
-                                ir , ";",  & !return
-                                id  !discount
-                                enddo        
-                            enddo
-                        enddo
-                    enddo
-                enddo
-            enddo
-
-
-    close(107)
-
-    open(unit = 108, FILE = version//experiment//closure//no_steady//"mass.csv")
-    write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;age;asset;aime;inc_shock;ret_shock;disc_shock"
-        do i = 1, bigT, 1
-            do j = 1, bigJ, 1
-                do ia = 0, n_a, 1
-                    do i_aime = 0, n_aime, 1
-                        do ip = 1, n_sp, 1
-                            do ir = 1, n_sr, 1
-                                do id = 1, n_sd, 1
-                                write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
-                                prob_ss(j, ia, i_aime, ip, ir, id)*n_ss_j(j)/sum(n_ss_j(:)), ";", & ! mass
-                                c_ss(j, ia, i_aime, ip, ir, id), ";", & !consumption
-                                l_ss(j, ia, i_aime, ip, ir, id), ";", & !hours
-                                lab_income_ss(j, ia, i_aime, ip, ir, id), ";", & !lab income
-                                lab_income_pretax_ss(j, ia, i_aime, ip, ir, id), ";", & !lab income
-                    
-                                j , ";",  & !age
-                                ia , ";",  & !asset
-                                i_aime , ";",  & !aime
-                                ip , ";",  & !income
-                                ir , ";",  & !return
-                                id  !discount
-                                enddo        
-                            enddo
-                        enddo
-                    enddo
-                enddo
-            enddo
-        enddo
-    
-    endif
-    

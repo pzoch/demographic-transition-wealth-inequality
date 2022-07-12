@@ -56,8 +56,8 @@ do iter = 1,n_iter_t,1
         y = zbar*k**(alpha_t)
         
     do i = 1,bigT,1
-        if (r_bar(i) < -0.0_dp) then
-            r_bar(i) = -0.0_dp
+        if (r_bar(i) < -0.05_dp) then
+            r_bar(i) = -0.05_dp
         endif
     enddo
     do j = 1,bigJ,1

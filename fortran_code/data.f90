@@ -16,7 +16,7 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn
       real(dp), dimension(bigT)::  N_temp_vec ! dp zliczenia populacji USA
       real(dp), dimension(bigT)::  a_d ! temp labor augmenting
       
-      real(dp), dimension(bigJ), intent(out) :: omega_ss_d
+      real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
       real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d, pi_d, pi_weight_d
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
@@ -68,7 +68,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
        elseif (switch_starting_year == 3) then
         start_year = 1935
         last_data = 33 ! for demography
-        last_data_gamma = 17 ! for tfp
+        last_data_gamma = 25 ! for tfp
         last_data_lambda = 17 ! for lambda
         last_data_tauL = 17 ! for tauL
         last_data_tauK = 17 ! for tauK
@@ -82,10 +82,12 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_test.txt")    
+     OPEN (unit=3, FILE = "_data_omega_deaton.txt")    
+     do m = 1, bigM, 1
        do j = 1, bigJ, 1
-        read(3,*) omega_ss_d(j)
-      end do
+        read(3,*) omega_ss_d(j,m)
+       end do
+    end do
 
 
     close(3)
@@ -117,9 +119,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
       
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
-    zeta_p = 0.975d0
-    !zeta_p(1)  =  0.970092462623928d0
-    !zeta_p(2)  =  0.981321444933393d0
+    !zeta_p = 0.985d0
+    zeta_p(1)  =  0.9640d0
+    zeta_p(2)  =  0.9799d0
      if (switch_starting_year == 0) then 
         Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
 
@@ -143,13 +145,16 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
      elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year == 3) then   
-        last_data_sigma2_epsilon = 5
+
         do m = 1,bigM,1
             do i = 1, last_data_sigma2_epsilon, 1
                 read(8,*) sigma2_epsilon_t_big(i,m)
             enddo
-            sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m) 
+            
+            last_data_sigma2_epsilon = 5
+            sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
+
         
         
        
@@ -466,7 +471,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
     elseif (switch_starting_year == 3) then
         !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
-        Open(unit = 4, FILE = "_data_gamma_smooth_1935.txt") 
+        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
         
     endif
      
@@ -493,7 +498,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(4)
     
      if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
-      gam_d(:) = 1.01d0 ** 5   
+      gam_d(:) = 1.02d0 ** 5   
      endif
     ! need to convert it to labor augmenting 
     
@@ -504,10 +509,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     a_d(1) = 1
     do i = 2,bigT,1
-        a_d(i) = zet_d(i) **  ( 1/(1-alpha_d(i)))    
+        a_d(i) = zet_d(i)! **  ( 1/(1-alpha_d(i)))    
     enddo
     
-    gam_d(1) = gam_d(1) ** (1/(1-alpha_d(1)))  
+    gam_d(1) = gam_d(1) !** (1/(1-alpha_d(1)))  
      do i = 2,bigT,1
         gam_d(i) =  a_d(i) /  a_d(i-1)
     enddo
@@ -755,30 +760,30 @@ if (switch_keep_fixed == 1) then
 
     
     enddo
-    !tauK_d(2:) = tauK_d(1)
-    !tauL_d(2:) = tauL_d(1)
+    tauK_d(2:) = tauK_d(1)
+    tauL_d(2:) = tauL_d(1)
     alpha_d(2:) = alpha_d(1)
-    !debt_constr_d(2:) = debt_constr_d(1)
-    !lambda_d(2:) = lambda_d(1)
-    !gam_d(2:) = gam_d(1)
+    debt_constr_d(2:) = debt_constr_d(1)
+    lambda_d(2:) = lambda_d(1)
+    gam_d(2:) = gam_d(1)
     !    pi_d = 1.0d0
     do i = 2, bigT,1
     !    pi_d(1,i) = pi_d(1,1)
-     !   Nn_d(1,i) = Nn_d(1,1)
+    !    Nn_d(1,i) = Nn_d(1,1)
         do j = 2, bigJ, 1   
       !      pi_d(j,i) = pi_d(j,1)
-       !     Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
+            !Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
             
         enddo
     enddo
 
      do i = 1,bigT,1
-     !type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
      enddo
 
-   ! pi_weight_d = pi_d
-   ! nu_ss_old = 1.0d0
-   ! nu_ss_new = 1.0d0
+    pi_weight_d = pi_d
+    !nu_ss_old = 1.0d0
+    !nu_ss_new = 1.0d0
     endif
 end subroutine read_data
 

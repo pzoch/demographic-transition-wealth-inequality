@@ -5,8 +5,8 @@
 MODULE global_vars
 IMPLICIT NONE
    save
-    integer, parameter ::  n_iter_ss =  200
-    integer, parameter ::  n_iter_t = 25
+    integer, parameter ::  n_iter_ss =  120
+    integer, parameter ::  n_iter_t = 15
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
     integer, parameter :: bigM = 2 ! number of permanent types
@@ -28,6 +28,7 @@ IMPLICIT NONE
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
     
     integer :: switch_run_1, switch_run_2, switch_run_t     ! 0 = don't run the first/second steady state/transition path; 1 = run the first/second steady state/transition path
+    integer :: switch_profile                               ! 0 = do not calculate profiles; 1 = calculate profiles 
     integer :: switch_param_1, switch_param_2               ! 0 = with old parameters; 1 = with new parameters (pi,gam,N,jbar) 
     integer :: switch_type_1, switch_type_2                 ! 0 = payg; 1 = ff
     integer :: switch_steady_demo                           ! this is a switch that needs to be set to 1 to have nu_ss not equal to 1 in the initial steady state: 0 = demographical structure as in the data, 1 = demographical structure obtained by taking survival probabilities and some prespecified population growth rate
@@ -81,6 +82,7 @@ IMPLICIT NONE
 
     ! Deklaracja zmiennych wczytywanych
     real(dp), dimension(bigJ) :: omega_ss 
+    real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam
     real(dp), dimension(n_p)  :: tauL
     real(dp), dimension(n_p)  :: tauK
@@ -101,7 +103,7 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
 ! Parametry
-    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, frisch, disutil
+    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, frisch, disutil, l_bound
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
@@ -116,7 +118,7 @@ IMPLICIT NONE
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
-  
+    real(dp), dimension(bigJ,bigM, bigT) :: omega_big
 ! LSRA
     real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref
     real(dp), dimension(- bigJ: bigT) ::  V_20_years_old_db !  V_20_years_old_base, V_20_years_old_ref
@@ -129,7 +131,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
 real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 70, n_aime = 4, n_sp = 1, n_sd = 1, n_sr = 1    , n_beq = 5
+    integer, parameter :: n_a = 50, n_aime = 5, n_sp = 3, n_sd =1, n_sr = 1    , n_beq = 5
 
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p
@@ -152,10 +154,9 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     
     real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM), pi_ip_init_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
     real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp), pi_ip_init(n_sp)! holder to make this code compatibile with older subroutines
-    
+    real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
-    real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
     real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help
 
@@ -168,8 +169,8 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     
      real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2, s_pom_ss_j_1, s_pom_ss_j_2, w_pom_ss_j_1, w_pom_ss_j_2
      real(dp), dimension(bigJ,bigM) :: labor_tax_j_ss_1, labor_tax_j_ss_2
-     
-    
+     real(dp), dimension(bigJ,bigM) :: bequest_ss_j_1, bequest_ss_j_2
+    real(dp), dimension(bigM) :: bequest_ss_1, bequest_ss_2
                                  
     
     real(dp), dimension(bigJ, bigM) :: b1_ss_j_1, b2_ss_j_1, b1_ss_j_2, b2_ss_j_2
