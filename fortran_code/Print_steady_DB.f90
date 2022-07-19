@@ -25,13 +25,11 @@
         endif
         write(*,'(A25,F10.7,A)') ' 100*subsidy/y =', 100*subsidy_ss/y_ss, '  |  Should be 0.0%'
         if (bigJ == 16)  then
-            if (switch_vf > 0) then 
+           
             write(*,'(A25,F10.7,A)') ' average hours =  ', 100*average_lab_ss, '  |  Should be 33%' 
              error_labor = 100*sum(N_ss_j(1:jbar_ss-1)*lab_ss_j_vfi(1:jbar_ss-1))/sum(N_ss_j(1:jbar_ss-1))
 
-            else 
-            write(*,'(A25,F10.7,A)') ' average hours = ', bigl_ss/sum(N_ss_j(1:jbar_ss-1)), '  |  Should be 33%'    
-            endif
+           
         else
             write(*,'(A25,F10.7,A)') ' average hours = ', bigl_ss/sum(N_ss_j(1:jbar_ss-1)), '  |  Should be 56.8%' 
         endif

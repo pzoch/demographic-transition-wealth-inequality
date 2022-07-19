@@ -18,12 +18,11 @@ IMPLICIT NONE
     integer :: iter, i, j, s, m, cl
     character(5) :: version
     character(6) :: closure
-    
-    integer :: experiment_no
+    character(12) :: variant
     character(4) :: experiment
     character(4) :: no_steady
     
-    character(128) :: cwd, cwd_r, cwd_w
+    character(128) :: cwd, cwd_r, cwd_w, cwd_i
     
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
     
@@ -54,15 +53,11 @@ IMPLICIT NONE
     integer :: switch_change_gy
     integer :: switch_utility_function
     integer :: switch_print
-    integer :: switch_vf
     integer :: switch_labor_choice                         ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
     integer :: switch_mortality                            ! 0 = no mortality on transition, 1 mortality according to data 
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
     integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
-    integer :: switch_reform                               ! 0 = base transition, 1 = main LSRA (baseline + reform + welfare change)
-    integer :: switch_partial_eq_cal                       ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
     integer :: switch_cohort_ps                             ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
-    integer :: switch_pension                              ! 0 = all are in new pension scheme in transitionFF; 1 = old cohorts remain in the old system in transitionFF
     integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
     integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
     integer :: switch_change_premium                    ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
@@ -71,12 +66,10 @@ IMPLICIT NONE
     integer :: switch_return_risk
     integer :: switch_keep_fixed                      
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
-    integer :: switch_partial_eq                           ! 0 = full transition model, 1 = decomposition of variance and expected value effect for welafare 2 (see file partial_eq_decomposition)
     integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-         integer ::   switch_change_type_share                            
+    integer ::   switch_change_type_share                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
-    integer :: switch_elas  !0 - non elasticity calculation, 1 - elasticity using OPD, 2 - semileasticity using OPD 
     integer :: switch_increase_ret_age
 
 
@@ -131,7 +124,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
 real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 5, n_sp = 3, n_sd =1, n_sr = 1    , n_beq = 5
+    integer, parameter :: n_a = 70, n_aime = 15, n_sp = 5, n_sd =1, n_sr = 1    , n_beq = 5
 
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p

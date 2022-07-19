@@ -211,8 +211,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
        
      elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 3) then
         do m = 1,bigM,1 
-            read(8,*) type_multiplier_d(m,1)
-             type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+            last_data_type_multiplier = 1
+            
+             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier) 
         enddo
         
     endif
@@ -253,9 +254,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
        
        
      elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 3) then
+         last_data_type_share = 1
         do m = 1,bigM,1 
-            read(8,*) type_share_d(m,1)
-             type_share_d(m,2:) = type_share_d(m,1)
+        type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
         enddo
         
      endif
@@ -768,11 +769,11 @@ if (switch_keep_fixed == 1) then
     gam_d(2:) = gam_d(1)
     !    pi_d = 1.0d0
     do i = 2, bigT,1
-    !    pi_d(1,i) = pi_d(1,1)
-    !    Nn_d(1,i) = Nn_d(1,1)
+        !pi_d(1,i) = pi_d(1,1)
+        Nn_d(1,i) = Nn_d(1,1)
         do j = 2, bigJ, 1   
-      !      pi_d(j,i) = pi_d(j,1)
-            !Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
+            !pi_d(j,i) = pi_d(j,1)
+            Nn_d(j,i) = pi_d(j,1)/pi_d(j-1,1)*Nn_d(j-1,i-1)
             
         enddo
     enddo
@@ -780,10 +781,14 @@ if (switch_keep_fixed == 1) then
      do i = 1,bigT,1
      type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
      enddo
-
-    pi_weight_d = pi_d
+     
+     do i = 2,bigT,1
+        pi_weight_d(:,i) = pi_d(:,1)
+     enddo
+    
+    !pi_weight_d = pi_d
     !nu_ss_old = 1.0d0
-    !nu_ss_new = 1.0d0
+    nu_ss_new = nu_ss_old
     endif
 end subroutine read_data
 

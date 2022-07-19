@@ -14,7 +14,7 @@
         a_l    = 0.0d0   !dla bigJ = 80, a_l = -2d0, inaczej -8d0
         a_u    = 60d0   !dla bigJ = 80, a_u = 10d0, inaczej 30d0
         a_grow = 0.04d0 !dla bigJ = 80, a_grow = 0.05d0, inaczej 0.04d0        
-        aime_l    = 0d0
+        aime_l    = 0.001d0
     
         aime_u    = 9165d0/3921d0 ! to capture Old-Age, Survivors, and Disability Insurance (OASDI) tax cap
                             ! based on https://fas.org/sgp/crs/misc/R43542.pdf

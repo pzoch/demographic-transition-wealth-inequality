@@ -324,10 +324,12 @@ endif
             aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
             c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
             l_ss_big(:, :, :, :, :, : ,m)            = l_ss
+            srate_ss_big(:, :, :, :, :, : ,m)            = srate_ss
             lab_income_ss_big(:, :, :, :, :, :,m)    = lab_income_ss
             lab_income_pretax_ss_big(:, :, :, :, :, :,m) = lab_income_pretax_ss
             tot_income_ss_big(:, :, :, :, :, :,m)        = tot_income_ss
             tot_income_pretax_ss_big(:, :, :, :, :, :,m) = tot_income_pretax_ss
+            disposable_ss_big(:, :, :, :, :, :,m)       = disposable_ss
             labor_tax_big(:, :, :, :, :, :,m)            = labor_tax
             svplus_ss_big(:, :, :, :, :, :,m)            = svplus_ss
             V_ss_big(:, :, :, :, :, :,m)                 = V_ss

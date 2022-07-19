@@ -38,6 +38,7 @@ do ia = 0, n_a, 1
                     labor_tax(bigj, ia, i_aime, ip, ir, id) = 0d0
                     svplus_ss(bigj, ia, i_aime, ip, ir, id)=0d0
                     aime_plus_ss(bigJ, ia, i_aime, ip, ir, id) = aime(i_aime)
+                    disposable_ss(bigJ, ia, i_aime, ip, ir, id) =  tot_income_ss(bigJ, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(bigJ) 
                     V_ss(bigj, ia, i_aime, ip, ir, id) = valuefunc(0d0, aime_plus_ss(bigJ, ia, i_aime, ip, ir, id), c_ss(bigj, ia, i_aime, ip, ir, id),l_ss(bigJ,ia, i_aime, ip, ir, id), bigJ, ip, ir, id)
                 enddo
             enddo
@@ -113,6 +114,8 @@ do j = bigJ-1, 1, -1
                                 lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) =lab_income_pretax
                                 tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                 tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                                disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                                
                             else
                                 l_ss(j,ia, i_aime, ip, ir, id) = 0d0
                                 lab_income = 0d0
@@ -121,6 +124,7 @@ do j = bigJ-1, 1, -1
                                 lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax
                                 tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi 
                                 tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi  +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                                disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             endif
                             sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
                                                                   -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)- bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
@@ -134,7 +138,8 @@ do j = bigJ-1, 1, -1
                                     lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) =lab_income_pretax
                                     tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                     tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi  +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
-                                    
+                                    disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+
                                     if(theta == 1)then ! consumption can be calculated diractly from RHS
                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id),1d-15)
                                     elseif ((theta .ne. 1) .and. switch_utility_function == 0) then
@@ -171,7 +176,8 @@ do j = bigJ-1, 1, -1
                                     lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax
                                     tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                     tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi  +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
-                                    
+                                    disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j)  + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                                   
                             endif   
                             sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
                                                                   - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
@@ -216,6 +222,8 @@ do j = bigJ-1, 1, -1
                             aime_plus_ss(j, ia, i_aime, ip, ir, id) = aime(i_aime)
                             tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                            disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j)  + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                            srate_ss(j, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_ss(j, ia, i_aime, ip, ir, id))  / ( tot_income_ss(j, ia, i_aime, ip, ir, id)   + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ bequest_ss_j_vfi(j) ) 
                         else                     
                             wage =  w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)
                             wage_non_tax = w_pom_ss_implicit_vfi(j)*omega_ss(j)*n_sp_value(ip)
@@ -237,7 +245,8 @@ do j = bigJ-1, 1, -1
                             tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
-
+                            disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
+                            srate_ss(j, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_ss(j, ia, i_aime, ip, ir, id)) / ( tot_income_ss(j, ia, i_aime, ip, ir, id) +  aime_replacement_rate(i_aime)*b_ss_j_vfi(j) +  bequest_ss_j_vfi(j) ) 
                         endif
                         pi_com = pi_ss_vfi_cond(j)
                         V_ss(j, ia, i_aime, ip, ir, id) = valuefunc(svplus_ss(j, ia, i_aime, ip, ir, id), aime_plus_ss(j, ia, i_aime, ip, ir, id), c_ss(j, ia, i_aime, ip, ir, id), l_ss(j, ia, i_aime, ip, ir, id), j,  ip, ir, id) 

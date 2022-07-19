@@ -12,13 +12,12 @@ do iter = 1,n_iter_t,1
 
 
       if (switch_print == 1) then
-        if ((switch_vf == 0)) then 
+       
             if  (MOD(iter,50) == 0) then            
                 include 'print_iter.f90'            
             endif
-        else 
-            include 'print_iter.f90'
-        endif
+
+
       endif
   
     pillarI_old_j = pillarI_j

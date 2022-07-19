@@ -53,11 +53,11 @@ real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, L
 integer :: jbar_t_vfi(bigT)
 
 !steady state variables
-real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, prob_ss, &
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, srate_ss,lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, disposable_ss, prob_ss, &
  gini_weight_consumption,  aime_plus_ss, aime_tempo
 
 !steady state variables - big
-real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, l_ss_big, c_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, l_ss_big, c_ss_big, srate_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, disposable_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
  gini_weight_consumption_big,  aime_plus_ss_big, aime_tempo_big
 
 real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, lab_income_ss_j_vfi, lab_income_pretax_ss_j_vfi, tot_income_ss_j_vfi, tot_income_pretax_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi,  b_ss_j_vfi, &
@@ -526,7 +526,7 @@ implicit none
       
       !!! Cobb-Douglas utility function
     if (switch_utility_function == 0) then
-      if ((switch_partial_eq == 0) .and.  (switch_fix_labor == 0d0) ) then 
+      if ( (switch_fix_labor == 0d0) ) then 
           do i= 1, maxit
             taxinc = w_tax*l0
             nontaxinc = w_non_tax*l0
@@ -554,7 +554,7 @@ implicit none
 
      !!! Constant Frisch separable function
 elseif (switch_utility_function == 1) then
-    if ((switch_partial_eq == 0) .and.  (switch_fix_labor == 0d0) ) then 
+    if  ((switch_fix_labor == 0d0) ) then 
           do i= 1, maxit
             taxinc = w_tax*l0
             nontaxinc = w_non_tax*l0
@@ -582,7 +582,7 @@ elseif (switch_utility_function == 1) then
       
       !!! Harald's favorite function
 elseif (switch_utility_function == 2) then
-     if ((switch_partial_eq == 0) .and.  (switch_fix_labor == 0d0) ) then 
+     if ((switch_fix_labor == 0d0) ) then 
           do i= 1, maxit
             taxinc = w_tax*l0
             nontaxinc = w_non_tax*l0

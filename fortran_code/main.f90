@@ -14,6 +14,7 @@ program olg2
 
     ! set paths for inputs and outputs
     call getcwd(cwd)
+    cwd_i = trim(cwd)//"/Instructions"
     cwd_r = trim(cwd)//"/Data"
     cwd_w = trim(cwd)//"/Results"    
     
