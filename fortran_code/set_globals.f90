@@ -104,24 +104,18 @@ call chdir(cwd_p)
         read(3,*) t2_ss_new 
         read(3,*) valor_share 
         read(3,*) switch_fix_retirement_age 
-        
         read(3,*) superstar_factor_1 
         read(3,*) superstar_factor_2 
-        
-  
         read(3,*)  pi_i_6 != 5e-3
         read(3,*)  pi_6_6 != 0.95d0
         read(3,*)  pi_6_7 != 0.0025d0
         read(3,*)  pi_7_7  != 0.73d0
-        
         read(3,*)  a_l  
         read(3,*)  a_u  
         read(3,*)  a_grow  
-        
         read(3,*) aime_l !=0.001d0
         read(3,*) aime_u !=9165d0/3921d0
         read(3,*) aime_cap !=9165d0/3921d0
-        
         read(3,*) zeta_d
         read(3,*) sigma_nu_d
         read(3,*) zeta_r
@@ -141,10 +135,10 @@ call chdir(cwd_p)
   
 
         ! rescale to account for zbar
-        depr = (1.0_dp + depr)**zbar - 1.0_dp 
-        zeta_p = zeta_p**zbar  
-        sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
-        zeta_d = zeta_d**zbar 
+        depr        = (1.0_dp + depr)**zbar - 1.0_dp 
+        zeta_p      = zeta_p**zbar  
+        sigma_nu_d  = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
+        zeta_d      = zeta_d**zbar 
 
     ones = 1 
  
@@ -188,6 +182,7 @@ call chdir(cwd_p)
     
     t1_ss_contrib = t1_ss_old
     t1 = t1_ss_old
+    
     do i = 1,bigT,1
         omega_big(:,:,i) = omega_ss_big
     enddo
