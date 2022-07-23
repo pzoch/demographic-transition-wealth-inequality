@@ -5,8 +5,8 @@
 MODULE global_vars
 IMPLICIT NONE
    save
-    integer, parameter ::  n_iter_ss =  120
-    integer, parameter ::  n_iter_t = 15
+    integer ::  n_iter_ss
+    integer ::  n_iter_t
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
     integer, parameter :: bigM = 2 ! number of permanent types
@@ -22,7 +22,7 @@ IMPLICIT NONE
     character(4) :: experiment
     character(4) :: no_steady
     
-    character(128) :: cwd, cwd_r, cwd_w, cwd_i
+    character(128) :: cwd, cwd_r, cwd_w, cwd_i, cwd_p
     
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
     
@@ -83,7 +83,7 @@ IMPLICIT NONE
     !real(dp), dimension(n_p)  :: lambda - name conflict
 
     real(dp) :: debt_constr
-    
+        real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
 ! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
     real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
     real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
@@ -123,7 +123,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: bigM_share_ss
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
-real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
+    real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     integer, parameter :: n_a = 70, n_aime = 15, n_sp = 5, n_sd =1, n_sr = 1    , n_beq = 5
 
     real*8, parameter  ::  zipf = 2.5d0     
@@ -170,7 +170,6 @@ real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
     real(dp) :: ret1_help, ret2_help, savings_ss_pom, pom2
     
  ! progression
-    real*8  :: lambda_old = 0.15d0, lambda_new = 0.15d0, progression_param= 0.15d0
     real*8  :: tau, lambda, lambda_trans(bigT),  debt_constr_trans(bigT)
     integer :: i_temp
     real*8  :: tl_com, lambda_com

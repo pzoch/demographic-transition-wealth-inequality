@@ -120,8 +120,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
     !zeta_p = 0.985d0
-    zeta_p(1)  =  0.9640d0
-    zeta_p(2)  =  0.9799d0
+    !zeta_p(1)  =  0.9640d0
+    !zeta_p(2)  =  0.9799d0
      if (switch_starting_year == 0) then 
         Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
 

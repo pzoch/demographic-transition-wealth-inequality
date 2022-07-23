@@ -17,7 +17,7 @@ program olg2
     cwd_i = trim(cwd)//"/Instructions"
     cwd_r = trim(cwd)//"/Data"
     cwd_w = trim(cwd)//"/Results"    
-    
+    cwd_p = trim(cwd)//"/Parameters"
     
 call clear_globals
 call globals         ! globals is a subroutine in global_vars2 module                                                                

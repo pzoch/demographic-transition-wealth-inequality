@@ -2,25 +2,25 @@
 
                 
         
-        zeta_p = zeta_p**zbar   
-        zeta_r = 0.00 ! this does not do anything
-        sigma_nu_r = 0.008d0 ** 2.0d0
+        !zeta_p = zeta_p**zbar   
+        !zeta_r = 0.00 ! this does not do anything
+        !sigma_nu_r = 0.008d0 ** 2.0d0
         
-        zeta_d = 0.95d0
-        sigma_nu_d = 0.0001d0 ** 2.0d0 
-        sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
-        zeta_d = zeta_d**zbar 
+        !zeta_d = 0.95d0
+        !sigma_nu_d = 0.0001d0 ** 2.0d0 
+        !sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
+        !zeta_d = zeta_d**zbar 
          
-        a_l    = 0.0d0   !dla bigJ = 80, a_l = -2d0, inaczej -8d0
-        a_u    = 60d0   !dla bigJ = 80, a_u = 10d0, inaczej 30d0
-        a_grow = 0.04d0 !dla bigJ = 80, a_grow = 0.05d0, inaczej 0.04d0        
-        aime_l    = 0.001d0
+        !a_l    = 0.0d0   !dla bigJ = 80, a_l = -2d0, inaczej -8d0
+        !a_u    = 60d0   !dla bigJ = 80, a_u = 10d0, inaczej 30d0
+        !a_grow = 0.04d0 !dla bigJ = 80, a_grow = 0.05d0, inaczej 0.04d0        
+        !aime_l    = 0.001d0
     
-        aime_u    = 9165d0/3921d0 ! to capture Old-Age, Survivors, and Disability Insurance (OASDI) tax cap
+        !aime_u    = 9165d0/3921d0 ! to capture Old-Age, Survivors, and Disability Insurance (OASDI) tax cap
                             ! based on https://fas.org/sgp/crs/misc/R43542.pdf
                             ! and https://www.thebalancecareers.com/average-salary-information-for-us-workers-2060808
         
-        aime_cap = 9165d0/3921d0 ! to capture Old-Age, Survivors, and Disability Insurance (OASDI) tax cap
+        !aime_cap = 9165d0/3921d0 ! to capture Old-Age, Survivors, and Disability Insurance (OASDI) tax cap
                     ! based on https://fas.org/sgp/crs/misc/R43542.pdf
                     ! and https://www.thebalancecareers.com/average-salary-information-for-us-workers-2060808
 
@@ -102,10 +102,10 @@ if (n_sp>5) then
             n_sp_value = exp(n_sp_value)  
         
         
-            pi_i_6 = 5e-3
-            pi_6_6 = 0.95d0
-            pi_6_7 = 0.0025d0
-            pi_7_7 = 0.73d0
+            !pi_i_6 = 5e-3
+            !pi_6_6 = 0.95d0
+            !pi_6_7 = 0.0025d0
+            !pi_7_7 = 0.73d0
         
             n_sp_value_trans(n_sp-1,:) = superstar_factor_1*n_sp_value_trans(n_sp-2,:)
             n_sp_value_trans(n_sp,:) = superstar_factor_2*n_sp_value_trans(n_sp-1,:)

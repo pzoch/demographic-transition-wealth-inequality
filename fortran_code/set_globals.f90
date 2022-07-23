@@ -12,13 +12,15 @@ CONTAINS
 
 subroutine globals 
     real, dimension(bigJ, bigT) :: ones
-    real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
-    
 
-call chdir(cwd_i)
+    
+    
     version = 'base_' ! this is just to organize some versions, does not change anything in the code
     experiment = 'lng_'
     closure = 'taxC__'
+
+call chdir(cwd_i)
+
     OPEN (unit=3, FILE = "instructions.txt")
         ! preamble
         ! switches of the specification
@@ -72,63 +74,92 @@ call chdir(cwd_i)
 
 
 
-
-    
-   
-switch_fix_retirement_age = 10         
-if (switch_increase_ret_age == 1 ) then 
-    switch_fix_retirement_age = 0
-endif
+call chdir(cwd_p)
+    OPEN (unit=3, FILE = "parameters.txt")
+   ! load these parameter values
+        read(3,*) n_iter_ss             
+        read(3,*) n_iter_t
+        read(3,*) err_ss_tol             
+        read(3,*) err_tol
+        read(3,*) up_ss
+        read(3,*) up_t
+        read(3,*) up_tc
+        read(3,*) l_bound
+        read(3,*) beta
+        read(3,*) delta            
+        read(3,*) theta           
+        read(3,*) alpha   
+        read(3,*) depr        
+        read(3,*) rho_subst      
+        read(3,*) phi 
+        read(3,*) disutil 
+        read(3,*) frisch 
+        read(3,*) tc_ss 
+        read(3,*) g_share_ss 
+        read(3,*) rho_1 
+        read(3,*) rho_2 
+        read(3,*) t1_ss_old 
+        read(3,*) t1_ss_new 
+        read(3,*) t2_ss_old 
+        read(3,*) t2_ss_new 
+        read(3,*) valor_share 
+        read(3,*) switch_fix_retirement_age 
+        
+        read(3,*) superstar_factor_1 
+        read(3,*) superstar_factor_2 
+        
   
-!!!!!!!!!!!!!!!!!!!
-    err_tol = 1e-7 !! 0.05_dp !! 
-    err_ss_tol = 1e-11
+        read(3,*)  pi_i_6 != 5e-3
+        read(3,*)  pi_6_6 != 0.95d0
+        read(3,*)  pi_6_7 != 0.0025d0
+        read(3,*)  pi_7_7  != 0.73d0
+        
+        read(3,*)  a_l  != 0.73d0
+        read(3,*)  a_u  != 0.73d0
+        read(3,*)  a_grow  != 0.73d0
+        
+        read(3,*) aime_l !=0.001d0
+        read(3,*) aime_u !=9165d0/3921d0
+        read(3,*) aime_cap !=9165d0/3921d0
+        
+        read(3,*) zeta_d
+        read(3,*) sigma_nu_d
+        read(3,*) zeta_r
+        read(3,*) sigma_nu_r
+        
+        ! zeta_p loaded at the end to ensure the correct number is loaded
+        do m = 1,bigM,1 
+            read(3,*) zeta_p(m)
+        enddo
+        
+        CLOSE(3) 
+        
+        
+        if (switch_increase_ret_age == 1 ) then 
+            switch_fix_retirement_age = 0
+        endif
+  
+
+        ! rescale to account for zbar
+        depr = (1.0_dp + depr)**zbar - 1.0_dp 
+        zeta_p = zeta_p**zbar  
+        sigma_nu_d = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
+        zeta_d = zeta_d**zbar 
+
     ones = 1 
-    l_bound =  1050.0d0 ! upper bound on labor supply
-    up_ss = 0.9d0  
-    valor_share = 1.0_dp ! % of growth rate, to ma być 25%, jednak w REV mielismy 0.2 wiec na razie jest tyle
-    tc_ss =  -0.0674225d0 !
+ 
     tL = tL
     tk = tK
     tc = tc_ss
-    up_tc = 0.6d0 
-    g_share_ss = 0.28d0 ! 0.17d0 !0.17_dp
-    superstar_factor_1 = 2.0d0
-    superstar_factor_2 = 25.0d0
-    alpha = 0.35_dp
-    theta = 2.0_dp!2.0_dp
-    up_t = 0.55d0
-    beta = 1.0d0
-    disutil = 15.0d0
-    frisch = 0.50d0
-    depr = (1.0_dp + 0.04_dp)**zbar - 1.0_dp 
-    rho_subst = 1 ! CES elasticity of subst between types of labor (rho = 1 substitutes, 0 cobb-douglas)
-    delta =   1.25d0!1.16d0* (0.995_dp)**zbar ! 0.9726968 !1.0476838584 !1.0447238439d0 !1.0150d0**(zbar)   !(0.9862_dp)
-    phi = 0.34d0 ! 0.3920313 !0.359375_dp
-    rho_1 = 0.7d0!1.05d0 !0.225_dp!*0.0d0
-    rho_2 = 0.7d0!1.05d0 !0.225_dp!*0.0d0
-    t1_ss_old =  0.080_dp!*0.5d0 0d0 !
-    t1_ss_new =  0.000_dp
-    t2_ss_old = 0d0 !0.077_dp*0.5d0 !
-    t2_ss_new = 0.000 !39d0
-       if (switch_cohort_ps == 1) then
-            rho_1 =0.5d0 !0.225_dp!*0.0d0
-            rho_2 =0.5d0 !0.225_dp!*0.0d0 
-            t1_ss_old =  0.080_dp!*0.5d0 0d0 !
-            t1_ss_new =  0.080_dp
-            t2_ss_old = 0d0 !0.077_dp*0.5d0 !
-            t2_ss_new = 0.0d0 !39d0
-        endif
-
-
-    
-
+   
     if (switch_labor_choice == 0) then
         phi  = 1.00_dp 
     endif
 
     call read_data(omega_ss_big, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
     include 'shocks_parameters.f90'
+    
+    ! THIS JUNK BELOW CAN BE AXED
     ! it is need for implicit tax subroutine
     ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
     new_ret_yob = -bigT
