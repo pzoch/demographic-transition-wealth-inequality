@@ -114,9 +114,9 @@ call chdir(cwd_p)
         read(3,*)  pi_6_7 != 0.0025d0
         read(3,*)  pi_7_7  != 0.73d0
         
-        read(3,*)  a_l  != 0.73d0
-        read(3,*)  a_u  != 0.73d0
-        read(3,*)  a_grow  != 0.73d0
+        read(3,*)  a_l  
+        read(3,*)  a_u  
+        read(3,*)  a_grow  
         
         read(3,*) aime_l !=0.001d0
         read(3,*) aime_u !=9165d0/3921d0

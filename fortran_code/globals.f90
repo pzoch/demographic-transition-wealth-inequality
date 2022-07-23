@@ -83,7 +83,7 @@ IMPLICIT NONE
     !real(dp), dimension(n_p)  :: lambda - name conflict
 
     real(dp) :: debt_constr
-        real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
+    real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
 ! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
     real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
     real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
@@ -173,7 +173,7 @@ IMPLICIT NONE
     real*8  :: tau, lambda, lambda_trans(bigT),  debt_constr_trans(bigT)
     integer :: i_temp
     real*8  :: tl_com, lambda_com
-    
+    !real*8  :: lambda_old = 0.15d0, lambda_new = 0.15d0, progression_param= 0.15d0
 ! partial 
     real*8  :: avg_aime_replacement_rate(bigJ, bigT)
     integer :: switch_partial_efficiency = 0d0 , iter_theta, if_border, time_iter
