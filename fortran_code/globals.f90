@@ -102,8 +102,9 @@ IMPLICIT NONE
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc
+    real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new 
-    real(dp), dimension(bigJ,bigM) :: pi_ss_old_big, pi_ss_new_big, pi_weight_ss_old_big, pi_weight_ss_new_big, N__big, N_ss_old_big, N_ss_new_big 
+    real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_weight_big_ss_old, pi_weight_big_ss_new, N_big_ss_old, N_big_ss_new 
     real(dp) :: superstar_factor_1, superstar_factor_2
 
 ! transition variables
@@ -113,7 +114,7 @@ IMPLICIT NONE
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
-     real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_weight_big
+    real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_weight_big, Nn_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
 ! LSRA
     real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref

@@ -56,9 +56,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
         alpha = alpha_ss_old
         gam_ss = gam_ss_old
-        pi_ss = pi_ss_old 
-        pi_weight_ss = pi_weight_ss_old
-        N_ss_j =  N_ss_old
+        pi_big_ss = pi_big_ss_old 
+        pi_weight_big_ss = pi_weight_big_ss_old
+        N_big_ss_j =  N_big_ss_old
         jbar_ss = jbar_ss_old
         nu_ss =  nu_ss_old
         t1_ss = t1_ss_old
@@ -77,9 +77,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     else 
         alpha = alpha_ss_new
         gam_ss = gam_ss_new
-        pi_ss = pi_ss_new
-        pi_weight_ss = pi_weight_ss_new
-        N_ss_j =  N_ss_new
+        pi_big_ss = pi_big_ss_new
+        pi_big_weight_ss = pi_big_weight_ss_new
+        N_big_ss_j =  N_big_ss_new
         jbar_ss = jbar_ss_new
         nu_ss = nu_ss_new
         t1_ss = t1_ss_new

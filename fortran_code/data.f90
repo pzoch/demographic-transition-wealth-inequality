@@ -10,15 +10,15 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,pi_d_big, pi_weight_d_big, Nn_d, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_weight_d_big, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
       integer :: bigJT
-      real(dp)::  sum_N_temp , N_temp ! dp zliczenia populacji USA
-      real(dp), dimension(bigT)::  N_temp_vec ! dp zliczenia populacji USA
+      real(dp)::  sum_N_temp , N_temp ! pop summation
+      real(dp), dimension(bigT)::  N_temp_vec ! pop summation
       real(dp), dimension(bigT)::  a_d ! temp labor augmenting
-      
+      real(dp), dimension(bigJ,bigT)::  Nn_d ! total population
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
-      real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
+     ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
       real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_weight_d_big, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
@@ -221,7 +221,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     ! -------------------------------- type share --------------------
     
-       if (switch_starting_year == 0) then 
+    if (switch_starting_year == 0) then 
         Open(unit = 8, FILE = "_data_type_share_1935.txt")  
 
     elseif (switch_starting_year == 1) then
@@ -243,20 +243,20 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             enddo
             type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)
         enddo
-     if (switch_change_type_share == 0.AND.switch_starting_year == 3) then   
-        last_data_type_share = 5
-        do m = 1,bigM,1
-
-            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
-        enddo
+    
+        if (switch_change_type_share == 0.AND.switch_starting_year == 3) then   
+            last_data_type_share = 5
+            do m = 1,bigM,1
+                type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
+            enddo
         
        
        
        
      elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 3) then
-         last_data_type_share = 1
+        last_data_type_share = 1
         do m = 1,bigM,1 
-        type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
+            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
         enddo
         
      endif
@@ -556,14 +556,19 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     do i = 1,last_data ,1 
             do j = 1, bigJ
-                read(121,*) pi_d_big(j,:,i)
+                read(121,*) pi_d_big(j,1,i)
             enddo 
         read(122,*) Nn_d(1,i)
     enddo
-    
+
     do i = last_data+1, bigT, 1 
          pi_d_big(:,:,i)=  pi_d_big(:,:,last_data)    
     enddo
+    
+    do m = 1, bigM, 1
+        pi_d_big(:,m,:) =  pi_d_big(:,1,:)
+    enddo
+    
     
     elseif (switch_het_mortality == 1) then
         
@@ -652,26 +657,19 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     enddo
     
     
-    
     do j = 1, bigJ, 1
         read(123,*) Nn_d(j,1) 
+        do m = 1, bigM, 1
+        Nn_d_big(j,m,1) =    Nn_d(j,1) * type_share_d(m,1)
         if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
             !=Nn_d(1,1) = 1.0_dp ! temporary
-            Nn_d(j,1) = nu_ss_old**(-j+1)*pi_d(j,1)/pi_d(1,1) * Nn_d(1,1)
+            Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
+             
         endif
-    enddo
-    ! account for heterogeneity - calculate the number of people of each age and type at t
-
-        do j = 1, bigJ, 1
-            do m = 1, bigM, 1
-            read(123,*) Nn_d_big(j,m,1) * type_share(m,1)
-            if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
-            !=Nn_d(1,1) = 1.0_dp ! temporary
-                Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
-            endif
-            enddo
         enddo
-        
+
+    enddo
+
     close(121) 
     close(122)
     close(123)
@@ -684,13 +682,12 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     
     
-   !Nn_d(1,last_data+1:) = Nn_d(1, last_data) 
     do i = 2,bigT, 1
         do j = 2, bigJ
-            Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
             do m = 1, bigM, 1
-                Nn_d_big(j,i) = pi_d_big(j,m,i)/pi_d(j-1,m,i-1)*Nn_d_big(j-1,m,i-1)
+                Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1)
             enddo
+            Nn_d(j,i) = sum(Nn_d_big(j,:,i))
         enddo
     enddo
 
@@ -703,107 +700,141 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 ! -------------------------------- there is no mortality
 if (switch_mortality == 0) then 
-    pi_d = 1.0_dp
+    pi_d_big = 1.0_dp
     do i = 1,bigT, 1
-        Nn_d(1,i) = 1.0d0
-        do j = 2, bigJ
-            Nn_d(j,i) = Nn_d(j-1,max(i-1,1))
+        do m = 1,bigM,1
+            Nn_d_big(1,m,i) = 1.0d0 * type_share_d(m,i)
+        
+            do j = 2, bigJ
+                Nn_d_big(j,m,i) = Nn_d_big(j-1,m,max(i-1,1))
+            enddo
         enddo
     enddo
+    
       pi_weight_d_big = pi_d_big  
     
 elseif (switch_mortality == 3) then 
     do i = 2, bigT,1
-        do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,1)
-            Nn_d(j,i) = pi_d(j,i-1)/pi_d(j-1,max(i-2,1))*Nn_d(j-1,i-1)
-        enddo    
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_d_big(j,m,i) = pi_d_big(j,m,1)
+                Nn_d_big(j,m,i) = pi_d_big(j,m,i-1)/pi_d_big(j-1,m,max(i-2,1))*Nn_d_big(j-1,m,i-1)
+            enddo    
+        enddo
     enddo
-      pi_weight_d = pi_d  
+            pi_weight_d_big = pi_d_big  
     
     
 elseif (switch_mortality == 4) then 
     do i = 2, bigT,1
-        do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,1)
-        enddo    
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_d_big(j,m,i) = pi_d_big(j,m,1)
+            enddo    
+        enddo
     enddo
     
     do i = 1, bigT,1
-        Nn_d(1,i) = 1d0 
-        do j = 2, bigJ, 1   
-            Nn_d(j,i) = pi_d(j,max(i-1,1))/pi_d(j-1,max(i-2,1))*Nn_d(j-1,max(i-1,1))
-        enddo    
+        do m = 1, bigM, 1
+        Nn_d_big(1,m,i) = 1d0 * type_share_d(m,i)
+            do j = 2, bigJ, 1   
+                Nn_d_big(j,m,i) = pi_d_big(j,m,max(i-1,1))/pi_d_big(j-1,m,max(i-2,1))*Nn_d_big(j-1,m,max(i-1,1))
+            enddo    
+        enddo
     enddo
+    
      
      
 elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
-   pi_weight_d = pi_d
+    pi_weight_d_big = pi_d_big
     do i = 2, bigT,1
         do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,1)
+            pi_d_big(j,:,i) = pi_d_big(j,:,1)
         enddo    
     enddo
+    
 
   
 elseif (switch_mortality == 5.AND. switch_starting_year ==3) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
-    pi_weight_d = pi_d
+    pi_weight_d_big = pi_d_big
     do i = 6, bigT,1
         do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,5)
+            pi_d_big(j,:,i) = pi_d_big(j,:,5)
         enddo    
     enddo  
     
     
-   elseif (switch_mortality == 6.AND. switch_starting_year ==3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
-   
+elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
        
-    do i = 6, bigT,1
-        do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,5)
-            Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
-            
+    do i = 2, bigT,1
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_d_big(j,m,i) = pi_d_big(j,m,5)
+                Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
+            enddo
         enddo
     enddo
-    pi_weight_d = pi_d
+    pi_weight_d_big = pi_d_big
+    
+   elseif (switch_mortality == 6.AND. switch_starting_year ==3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
+       
+    do i = 2, bigT,1
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_d_big(j,m,i) = pi_d_big(j,m,5)
+                Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
+            enddo
+        enddo
+    enddo
+    pi_weight_d_big = pi_d_big
 
   
     
   elseif (switch_mortality == 7 .AND. switch_starting_year .NE.3) then ! this will keep the population structure as in the initial period (mortality) and will let the number of j=1 agents grow at nu_ss_new rate
     
     do i = 2, bigT,1
-        do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,1)
-            pi_weight_d(j,i) = pi_d(j,i)
-        enddo    
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_d_big(j,m,i) = pi_d_big(j,m,1)
+                pi_weight_d_big(j,m,i) = pi_d_big(j,m,i)
+            enddo    
+        enddo
     enddo
-
+    
     do i = 2, bigT,1
-        Nn_d(1,i) = Nn_d(1,i-1) * nu_ss_new
-        do j = 2, bigJ, 1   
-            Nn_d(j,i) = pi_d(j,max(i-1,1))/pi_d(j-1,max(i-2,1))*Nn_d(j-1,max(i-1,1))
-        enddo    
+        do m = 1, bigM, 1
+        Nn_d_big(1,m,i) = Nn_d_big(1,m,i-1) * nu_ss_new * type_share_d(m,i) / type_share_d(m,i-1)
+            do j = 2, bigJ, 1   
+                Nn_d_big(j,m,i) = pi_d_big(j,m,max(i-1,1))/pi_d_big(j-1,m,max(i-2,1))*Nn_d_big(j-1,m,max(i-1,1))
+            enddo    
+        enddo
     enddo
+    
     
   elseif (switch_mortality == 7 .AND. switch_starting_year ==3) then ! this will keep the population structure as in  1955  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
         
 
-    N_temp_vec = sum(Nn_d, dim=1)
+    N_temp_vec = sum(sum(Nn_d_big, dim=1),dim=1)
     nu_ss_new = N_temp_vec(5)/N_temp_vec(4)
     
     
     do i = 6, bigT,1
+
+        do m = 1, bigM, 1
         do j = 2, bigJ, 1   
-            pi_d(j,i) = pi_d(j,5)
-            pi_weight_d(j,i) = pi_d(j,i)
+            pi_d_big(j,m,i) = pi_d_big(j,m,5)
+            pi_weight_d_big(j,m,i) = pi_d_big(j,m,i)
         enddo    
+        enddo
     enddo
 
     do i = 6, bigT,1
-        Nn_d(1,i) = Nn_d(1,i-1) * nu_ss_new
-        do j = 2, bigJ, 1   
-            Nn_d(j,i) = pi_d(j,max(i-1,1))/pi_d(j-1,max(i-2,1))*Nn_d(j-1,max(i-1,1))
-             
+        N_temp_vec(i) = N_temp_vec(i-1) * nu_ss_new 
+        do m = 1, bigM, 1
+        Nn_d_big(1,m,i) = N_temp_vec(i) * type_share_d(m,i)
+            do j = 2, bigJ, 1   
+                Nn_d_big(j,m,i) = pi_d_big(j,m,max(i-1,1))/pi_d_big(j-1,m,max(i-2,1))*Nn_d_big(j-1,m,max(i-1,1))
+            enddo
         enddo    
     enddo 
     
