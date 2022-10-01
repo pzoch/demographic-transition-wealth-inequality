@@ -10,7 +10,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn_d, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,pi_d_big, pi_weight_d_big, Nn_d, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! dp zliczenia populacji USA
       real(dp), dimension(bigT)::  N_temp_vec ! dp zliczenia populacji USA
@@ -18,7 +18,8 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d,  pi_d, pi_weight_d, Nn
       
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
-      real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d, pi_d, pi_weight_d
+      real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
+      real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_weight_d_big, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
       
@@ -65,7 +66,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sigma2_epsilon = 14 ! for sigma2_epsilon
         last_data_type_multiplier= 14 ! type multip
         last_data_type_share= 14 ! type share
-       elseif (switch_starting_year == 3) then
+    elseif (switch_starting_year == 3) then
         start_year = 1935
         last_data = 33 ! for demography
         last_data_gamma = 25 ! for tfp
@@ -78,7 +79,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sl = 17 ! for sl
         last_data_type_multiplier= 17 ! type multip
         last_data_type_share= 17 ! type share
-       endif
+    endif
     
 
 ! -------------------------------- OMEGA -------------------------------
@@ -132,11 +133,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Open(unit = 8, FILE = "_data_sigma2eps_1950.txt")  
     
     elseif (switch_starting_year == 3) then
-        Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
+        Open(unit = 8, FILE = "_data_sigma2eps_deaton_1935.txt")  
     endif
     
     ! reading sigma2_epsilon_t
-    
      if (switch_sigma2_epsilon_t == 1) then 
         do m = 1,bigM,1
             do i = 1, last_data_sigma2_epsilon, 1
@@ -169,7 +169,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(8)
 
     do m = 1,bigM,1
-    sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**zbar)/(1-zeta_p(m)) ! increased
+    sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**(2.0d0*zbar))/(1-zeta_p(m)**2.0d0) ! increased
     enddo
 
 ! -------------------------------- type multiplier --------------------
@@ -533,7 +533,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
  ! -------------------------------- BIGJ = 16 - US
 
         
-        
+    if (switch_het_mortality == 0) then
     
     ! NEED TO MAKE THIS MORE AUTOMATIC!    
     if (switch_starting_year == 0) then 
@@ -551,10 +551,61 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     elseif (switch_starting_year == 3) then 
         Open(unit = 121, FILE = "_data_pi_cond_US_since1935.txt")  
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")   
-        
+        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
     endif
     
+    do i = 1,last_data ,1 
+            do j = 1, bigJ
+                read(121,*) pi_d_big(j,:,i)
+            enddo 
+        read(122,*) Nn_d(1,i)
+    enddo
+    
+    do i = last_data+1, bigT, 1 
+         pi_d_big(:,:,i)=  pi_d_big(:,:,last_data)    
+    enddo
+    
+    elseif (switch_het_mortality == 1) then
+        
+    if (switch_starting_year == 0) then 
+        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1935.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")
+    elseif (switch_starting_year == 1) then
+        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1960.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1960_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1960_init_old.txt")
+    elseif (switch_starting_year == 2) then
+        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1950.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1950_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1950_init_old.txt")
+    elseif (switch_starting_year == 3) then 
+        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1935.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
+    endif   
+        
+    do i = 1,last_data ,1 
+        read(122,*) Nn_d(1,i)
+        do m = 1,bigM,1
+            do j = 1, bigJ
+                read(121,*) pi_d_big(j,m,i)
+            enddo 
+            Nn_d_big(1,m,i) = type_share_d(m,i) * Nn_d(1,i)
+        enddo
+    enddo
+    
+    do i = last_data+1, bigT, 1
+        do m = 1,bigM,1
+            pi_d_big(:,m,i)=  pi_d_big(:,m,last_data)
+        enddo
+    enddo
+    
+    endif
+    
+            ! fill in population and mortality matrix
+    
+
     
     ! -------------------------------- unstable demography
     if (switch_unstable_dem_ss == 1) then 
@@ -573,28 +624,33 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     endif
     
 
+
     
-    ! fill in population and mortality matrix
-    do i = 1,last_data ,1 
-        do j = 1, bigJ
-            read(121,*) pi_d(j,i)
-        enddo 
-        read(122,*) Nn_d(1,i)
-    enddo
     
-    do i = last_data+1, bigT, 1
-     pi_d(:,i)=  pi_d(:,last_data)
-    enddo
+    !! fill in population and mortality matrix
+    !do i = 1,last_data ,1 
+    !    do j = 1, bigJ
+    !        read(121,*) pi_d(j,i)
+    !    enddo 
+    !    read(122,*) Nn_d(1,i)
+    !enddo
+    !
+    !do i = last_data+1, bigT, 1
+    ! pi_d(:,i)=  pi_d(:,last_data)
+    !enddo
      
      
-    ! potrzebujemy przeliczyc pi na bezwarunkowe bo cay model na takim chodzi 
+    ! calculate conditional probabilities
 
     do i = 1,bigT, 1
-        pi_d(1,i) = 1.0_dp
-        do j = 2, bigJ
-            pi_d(j,i) = pi_d(j-1,max(i-1,1))*pi_d(j,i)
-        enddo
-    enddo      
+        do m = 1,bigM,1
+            pi_d_big(1,m,i) = 1.0_dp
+            do j = 2, bigJ
+                pi_d_big(j,m,i) = pi_d_big(j-1,m,max(i-1,1))*pi_d_big(j,m,i)
+            enddo
+        enddo      
+    enddo
+    
     
     
     do j = 1, bigJ, 1
@@ -604,9 +660,18 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             Nn_d(j,1) = nu_ss_old**(-j+1)*pi_d(j,1)/pi_d(1,1) * Nn_d(1,1)
         endif
     enddo
+    ! account for heterogeneity - calculate the number of people of each age and type at t
 
-    
-
+        do j = 1, bigJ, 1
+            do m = 1, bigM, 1
+            read(123,*) Nn_d_big(j,m,1) * type_share(m,1)
+            if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
+            !=Nn_d(1,1) = 1.0_dp ! temporary
+                Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
+            endif
+            enddo
+        enddo
+        
     close(121) 
     close(122)
     close(123)
@@ -614,6 +679,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     do i = last_data+1, bigT, 1
         Nn_d(1,i) = Nn_d(1,i-1)*nu_ss_new
+        Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1)*nu_ss_new
     enddo
     
     
@@ -622,13 +688,18 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     do i = 2,bigT, 1
         do j = 2, bigJ
             Nn_d(j,i) = pi_d(j,i)/pi_d(j-1,i-1)*Nn_d(j-1,i-1)
+            do m = 1, bigM, 1
+                Nn_d_big(j,i) = pi_d_big(j,m,i)/pi_d(j-1,m,i-1)*Nn_d_big(j-1,m,i-1)
+            enddo
         enddo
     enddo
 
 
+
     ! pi_weight seems to be needed to calculate relative masses in steady states
     ! along the transition path these masses are handled by N
-    pi_weight_d = pi_d
+    pi_weight_d_big = pi_d_big
+    !pi_weight_d = pi_d
     
 ! -------------------------------- there is no mortality
 if (switch_mortality == 0) then 
@@ -639,7 +710,7 @@ if (switch_mortality == 0) then
             Nn_d(j,i) = Nn_d(j-1,max(i-1,1))
         enddo
     enddo
-      pi_weight_d = pi_d  
+      pi_weight_d_big = pi_d_big  
     
 elseif (switch_mortality == 3) then 
     do i = 2, bigT,1
@@ -770,10 +841,10 @@ if (switch_keep_fixed == 1) then
     !    pi_d = 1.0d0
     do i = 2, bigT,1
         !pi_d(1,i) = pi_d(1,1)
-        Nn_d(1,i) = Nn_d(1,1)
+       ! Nn_d(1,i) = Nn_d(1,1)
         do j = 2, bigJ, 1   
             !pi_d(j,i) = pi_d(j,1)
-            Nn_d(j,i) = pi_d(j,1)/pi_d(j-1,1)*Nn_d(j-1,i-1)
+            !Nn_d(j,i) = pi_d(j,1)/pi_d(j-1,1)*Nn_d(j-1,i-1)
             
         enddo
     enddo
@@ -783,12 +854,12 @@ if (switch_keep_fixed == 1) then
      enddo
      
      do i = 2,bigT,1
-        pi_weight_d(:,i) = pi_d(:,1)
+     !   pi_weight_d(:,i) = pi_d(:,1)
      enddo
     
     !pi_weight_d = pi_d
     !nu_ss_old = 1.0d0
-    nu_ss_new = nu_ss_old
+    !nu_ss_new = nu_ss_old
     endif
 end subroutine read_data
 

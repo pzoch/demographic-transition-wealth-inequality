@@ -15,8 +15,8 @@ subroutine globals
 
     
     
-    version = 'base_' ! this is just to organize some versions, does not change anything in the code
-    experiment = 'lng_'
+    version = 'car1_' ! this is just to organize some versions, does not change anything in the code
+    experiment = 'dem_'
     closure = 'taxC__'
 
 call chdir(cwd_i)
@@ -44,6 +44,7 @@ call chdir(cwd_i)
 
         
         ! second, some debug switches/options
+        read(3,*) switch_het_mortality
         read(3,*) switch_utility_function
         read(3,*) switch_labor_choice
         read(3,*) switch_cohort_ps             
@@ -79,8 +80,10 @@ call chdir(cwd_p)
    ! load these parameter values
         read(3,*) n_iter_ss             
         read(3,*) n_iter_t
+        read(3,*) n_iter_prof
         read(3,*) err_ss_tol             
         read(3,*) err_tol
+        read(3,*) err_prof_tol
         read(3,*) up_ss
         read(3,*) up_t
         read(3,*) up_tc
@@ -137,7 +140,7 @@ call chdir(cwd_p)
         ! rescale to account for zbar
         depr        = (1.0_dp + depr)**zbar - 1.0_dp 
         zeta_p      = zeta_p**zbar  
-        sigma_nu_d  = sigma_nu_d*(1-zeta_d**zbar)/(1-zeta_d)
+        sigma_nu_d  = sigma_nu_d*(1-zeta_d**(2*zbar))/(1-zeta_d**2)
         zeta_d      = zeta_d**zbar 
 
     ones = 1 
@@ -152,6 +155,8 @@ call chdir(cwd_p)
 
     call read_data(omega_ss_big, gam_t, gam_cum, zet, pi, pi_weight, Nn_, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
     include 'shocks_parameters.f90'
+    include 'print_stamp.f90' 
+    
     
     ! THIS JUNK BELOW CAN BE AXED
     ! it is need for implicit tax subroutine
@@ -229,7 +234,7 @@ call chdir(cwd_p)
     type_share_ss_new = type_share_t(:,bigT)
     
 call chdir(cwd_w)    
-include 'print_stamp.f90' 
+
 end subroutine globals
 
 

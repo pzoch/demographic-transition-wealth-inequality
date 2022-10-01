@@ -116,9 +116,77 @@
         write(*,'(A30,F16.7,A)') ' feasibility = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
         write(*,*) '********************************************'
 
-!    OPEN (unit=666, FILE = version//experiment//closure//no_steady//"aggregates.csv")
-!
-! 
+!   
+    OPEN (unit=666, FILE = version//experiment//closure//variant//"information_run.txt")
+         write(666, '(A)') '******* INFORMATION *******'
+         write(666, '(A)')
+         write(666, '(A)') '*********************************'
+         write(666, '(A)') 'THIS STEADY STATE HAD THE FOLLOWING PARAMETERS' 
+         write(666, '(A)')
+         write(666,'(A30,F20.10 )') 'alpha =',  alpha  
+         write(666,'(A30,F20.10 )') 'theta =',  theta 
+         write(666,'(A30,F20.10 )') 'beta =',  beta 
+         write(666,'(A30,F20.10 )') 'depr =',  depr 
+         write(666,'(A30,F20.10 )') 'rho_subst =',  rho_subst 
+         write(666,'(A30,F20.10 )') 'alpha =',  alpha 
+         write(666,'(A30,F20.10 )') 'frisch =',  frisch 
+         write(666,'(A30,F20.10 )') 'disutil =',  disutil 
+         write(666,'(A30,F20.10 )') 'phi =',  phi 
+         write(666,'(A30,F20.10 )') 'gam_ss =',     gam_ss  
+         write(666,'(A30,F20.10 )') 'jbar_ss =',     jbar_ss  
+         write(666,'(A30,F20.10 )') 'nu_ss =',     nu_ss  
+         write(666,'(A30,F20.10 )') 't1_ss =',     t1_ss  
+         write(666,'(A30,F20.10 )') 't2_ss =',     t2_ss  
+         write(666,'(A30,F20.10 )') 'tL_ss =',     tL_ss
+         write(666,'(A30,F20.10 )') 'tK_ss =',     tK_ss  
+         write(666,'(A30,F20.10 )') 'tC_ss =',     tC_ss  
+         write(666,'(A30,F20.10 )') 'rho =' ,      rho 
+         write(666,'(A30,F20.10 )') 'lambda =',     lambda 
+         write(666,'(A30,F20.10 )') 'debt_constr =',     debt_constr  
+         write(666,'(A30,F20.10 )') 'g_share_ss =',     g_share_ss          
+         write(666,'(A30,F20.10 )') 'err_tol =',     err_tol  
+         write(666,'(A30,F20.10 )') 'beta =',     beta  
+         write(666,'(A30,F20.10 )') 'frisch =',     frisch  
+         write(666,'(A30,F20.10 )') 'depr =',     depr  
+         write(666,'(A30,F20.10 )') 'rho_subst =',     rho_subst  
+         write(666,'(A30,F20.10 )') 'delta =',     delta  
+         write(666,'(A30,F20.10 )') 'phi =',     phi  
+         write(666, '(A)')
+         write(666, '(A)') 'OPTIONS THAT WERE USED:' 
+         write(666, '(A)')
+         write(666,'(A30,I5.1 )') 'utility function =',     switch_utility_function  
+         write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor
+         write(666,'(A30,I5.1)') 'switch_unequal_bequest =', switch_unequal_bequest
+         write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross              
+         write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
+         write(666,'(A30,I5.1)') 'switch_increase_ret_age =', switch_increase_ret_age      
+         write(666,'(A30,I5.1)') 'switch_persistent_delta =',switch_persistent_delta  
+         write(666,'(A30,I5.1)') 'switch_epsilon_corr =',    switch_epsilon_corr            
+         write(666,'(A30,I5.1)') 'switch_steady_demo =', switch_steady_demo      
+         write(666,'(A30,I5.1)') 'switch_income_risk =',switch_income_risk  
+         write(666,'(A30,I5.1)') 'switch_discount_risk =',switch_discount_risk  
+         write(666,'(A30,I5.1)') 'switch_return_risk =',switch_return_risk  
+         write(666,'(A30,I5.1)') 'switch_initial_dispersion =',    switch_initial_dispersion   
+         write(666,'(A30,I5.1)') 'superstars =',   (n_p > 5)
+         write(666, '(A)')
+         write(666, '(A)') 'mortality was ...' 
+         do i = 1,bigJ,1
+            write(666,'(A30,F20.10 )') ' ', pi_ss(i)
+         enddo
+         write(666, '(A)')
+         write(666, '(A)') 'population weights ...' 
+         do i = 1,bigJ,1
+            write(666,'(A30,F20.10 )') ' ', pi_weight_ss(i)
+            enddo
+         write(666, '(A)')
+         write(666, '(A)') 'types income risk autocorrelation ...' 
+         do m = 1,bigM,1
+            write(666,'(A30,F20.10 )') ' ', zeta_p(m)
+         enddo
+         CLOSE(666)
+
+ 
+
 !    write(666, '(A)') "Outcomes"
 !    write(666, '(A)') "y;k/y;c/y;i/y;bigl;r;tauC;tauK;tauL;lambda;beq/y;gam_ss;average hours;r-g;replacement;"
 !    write(666, '(F20.10,A)', advance='no') y_ss, ";"

@@ -7,6 +7,7 @@ IMPLICIT NONE
    save
     integer ::  n_iter_ss
     integer ::  n_iter_t
+    integer ::  n_iter_prof
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
     integer, parameter :: bigM = 2 ! number of permanent types
@@ -67,11 +68,11 @@ IMPLICIT NONE
     integer :: switch_keep_fixed                      
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
     integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-    integer ::   switch_change_type_share                            
+    integer ::switch_change_type_share                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
     integer :: switch_increase_ret_age
-
+    integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
 
     ! Deklaracja zmiennych wczytywanych
     real(dp), dimension(bigJ) :: omega_ss 
@@ -95,13 +96,14 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
-! Parametry
-    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, frisch, disutil, l_bound
+! parameters
+    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new 
+    real(dp), dimension(bigJ,bigM) :: pi_ss_old_big, pi_ss_new_big, pi_weight_ss_old_big, pi_weight_ss_new_big, N__big, N_ss_old_big, N_ss_new_big 
     real(dp) :: superstar_factor_1, superstar_factor_2
 
 ! transition variables
@@ -111,6 +113,7 @@ IMPLICIT NONE
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
+     real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_weight_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
 ! LSRA
     real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref
