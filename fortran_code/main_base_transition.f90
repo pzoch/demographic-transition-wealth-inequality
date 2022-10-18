@@ -32,7 +32,8 @@
     
         !experiment = 'beg_'
         variant    = 'partial_eqm_'
-
+        pi_big_ss_old = pi_big(:,:,bigT)
+        
         pi_ss_old = pi(:,bigT)
         call profile_steady(switch_tauK_gross, switch_unequal_bequest, switch_param_1, &
         rho_1, tc_ss, r_bar_ss_1, w_bar_ss_1, b_ss_j_1, bequest_ss_j_1, bequest_ss_1)

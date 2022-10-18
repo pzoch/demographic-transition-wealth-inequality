@@ -10,16 +10,19 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_weight_d_big, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! pop summation
       real(dp), dimension(bigT)::  N_temp_vec ! pop summation
       real(dp), dimension(bigT)::  a_d ! temp labor augmenting
       real(dp), dimension(bigJ,bigT)::  Nn_d ! total population
+      real(dp), dimension(bigT)::  efficiency_t, raw_labor, eff_labor ! various measures of labor
+   
+      real(dp), dimension(bigJ,bigT)::  pi_implied_d ! implied probabilities
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
      ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
-      real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_weight_d_big, Nn_d_big
+      real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_big_weight_d, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
       
@@ -458,75 +461,6 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     endif
         
     close(6)
-    
-! -------------------------------- GAMMA -------------------------------
-    if (switch_starting_year == 0) then 
-        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
-
-    elseif (switch_starting_year == 1) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1960.txt")  
-
-    
-    elseif (switch_starting_year == 2) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
-        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
-        
-    endif
-     
-    
-    
-    if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
-        do i = 1, last_data_gamma, 1
-            read(4,*) gam_d(i)
-        enddo
-        gam_d(last_data_gamma+1:) = 1.03
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 3) then
-        last_data_gamma= 5
-        do i = 1, last_data_gamma, 1
-            read(4,*) gam_d(i)
-        enddo
-        gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
-        
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 3) then
-        read(4,*) gam_d(1)
-        gam_d(2:) = gam_d(1)
-    endif
-        
-        
-    close(4)
-    
-     if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
-      gam_d(:) = 1.02d0 ** 5   
-     endif
-    ! need to convert it to labor augmenting 
-    
-    zet_d(1) = 1
-    do i = 2,bigT,1
-        zet_d(i) = zet_d(i-1)*gam_d(i)    
-    enddo
-    
-    a_d(1) = 1
-    do i = 2,bigT,1
-        a_d(i) = zet_d(i)! **  ( 1/(1-alpha_d(i)))    
-    enddo
-    
-    gam_d(1) = gam_d(1) !** (1/(1-alpha_d(1)))  
-     do i = 2,bigT,1
-        gam_d(i) =  a_d(i) /  a_d(i-1)
-    enddo
-    
-    zet_d = a_d
-    
-    gam_cum_d(1) = gam_d(1)
-    do i = 2,bigT,1
-        gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
-    enddo
-
-
-
 ! -------------------------------- N & PI -------------------------------
     bigJT = bigJ*bigT
     
@@ -560,7 +494,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             enddo 
         read(122,*) Nn_d(1,i)
     enddo
-
+    
     do i = last_data+1, bigT, 1 
          pi_d_big(:,:,i)=  pi_d_big(:,:,last_data)    
     enddo
@@ -568,6 +502,17 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     do m = 1, bigM, 1
         pi_d_big(:,m,:) =  pi_d_big(:,1,:)
     enddo
+
+   do i = 1,last_data ,1 
+        
+        do m = 1,bigM,1
+
+            Nn_d_big(1,m,i) = type_share_d(m,i) * Nn_d(1,i)
+        enddo
+    enddo
+    
+    
+
     
     
     elseif (switch_het_mortality == 1) then
@@ -695,7 +640,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     ! pi_weight seems to be needed to calculate relative masses in steady states
     ! along the transition path these masses are handled by N
-    pi_weight_d_big = pi_d_big
+    pi_big_weight_d = pi_d_big
     !pi_weight_d = pi_d
     
 ! -------------------------------- there is no mortality
@@ -711,7 +656,7 @@ if (switch_mortality == 0) then
         enddo
     enddo
     
-      pi_weight_d_big = pi_d_big  
+      pi_big_weight_d = pi_d_big  
     
 elseif (switch_mortality == 3) then 
     do i = 2, bigT,1
@@ -722,7 +667,7 @@ elseif (switch_mortality == 3) then
             enddo    
         enddo
     enddo
-            pi_weight_d_big = pi_d_big  
+            pi_big_weight_d = pi_d_big  
     
     
 elseif (switch_mortality == 4) then 
@@ -746,7 +691,7 @@ elseif (switch_mortality == 4) then
      
      
 elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
-    pi_weight_d_big = pi_d_big
+    pi_big_weight_d = pi_d_big
     do i = 2, bigT,1
         do j = 2, bigJ, 1   
             pi_d_big(j,:,i) = pi_d_big(j,:,1)
@@ -756,7 +701,7 @@ elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this chang
 
   
 elseif (switch_mortality == 5.AND. switch_starting_year ==3) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
-    pi_weight_d_big = pi_d_big
+    pi_big_weight_d = pi_d_big
     do i = 6, bigT,1
         do j = 2, bigJ, 1   
             pi_d_big(j,:,i) = pi_d_big(j,:,5)
@@ -774,7 +719,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
             enddo
         enddo
     enddo
-    pi_weight_d_big = pi_d_big
+    pi_big_weight_d = pi_d_big
     
    elseif (switch_mortality == 6.AND. switch_starting_year ==3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
        
@@ -786,7 +731,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
             enddo
         enddo
     enddo
-    pi_weight_d_big = pi_d_big
+    pi_big_weight_d = pi_d_big
 
   
     
@@ -796,7 +741,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
         do m = 1, bigM, 1
             do j = 2, bigJ, 1   
                 pi_d_big(j,m,i) = pi_d_big(j,m,1)
-                pi_weight_d_big(j,m,i) = pi_d_big(j,m,i)
+                pi_big_weight_d(j,m,i) = pi_d_big(j,m,i)
             enddo    
         enddo
     enddo
@@ -823,7 +768,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
         do m = 1, bigM, 1
         do j = 2, bigJ, 1   
             pi_d_big(j,m,i) = pi_d_big(j,m,5)
-            pi_weight_d_big(j,m,i) = pi_d_big(j,m,i)
+            pi_big_weight_d(j,m,i) = pi_d_big(j,m,i)
         enddo    
         enddo
     enddo
@@ -844,7 +789,6 @@ CLOSE(4)
 CLOSE(9)
 
 open(unit = 1, file= "population.csv")
-
     do i = 1,bigT,1
         write(1, '(1x, F, 16(",", F))') (Nn_d(j,i), j = 1,bigJ)
     enddo
@@ -891,7 +835,124 @@ if (switch_keep_fixed == 1) then
     !pi_weight_d = pi_d
     !nu_ss_old = 1.0d0
     !nu_ss_new = nu_ss_old
+endif
+
+
+    
+! -------------------------------- GAMMA -------------------------------
+    if (switch_starting_year == 0) then 
+        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+
+    elseif (switch_starting_year == 1) then
+        Open(unit = 4, FILE = "_data_gamma_tfp_1960.txt")  
+
+    
+    elseif (switch_starting_year == 2) then
+        Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
+        
+    elseif (switch_starting_year == 3) then
+        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
+        
     endif
+     
+    
+    
+    if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
+        do i = 1, last_data_gamma, 1
+            read(4,*) gam_d(i)
+        enddo
+        gam_d(last_data_gamma+1:) = 1.03
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 3) then
+        last_data_gamma= 5
+        do i = 1, last_data_gamma, 1
+            read(4,*) gam_d(i)
+        enddo
+        gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
+        
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 3) then
+        read(4,*) gam_d(1)
+        gam_d(2:) = gam_d(1)
+    endif
+        
+        
+    close(4)
+    
+     if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
+      gam_d(:) = 1.02d0 ** 5   
+     endif
+     
+     
+    ! need to convert it to labor augmenting 
+    ! this requires some assumptions about the average hours of each agent
+    
+    do m = 1,bigM,1
+        bigl_type(m,:)         = sum(N_big_t_j(:,m,:) * l_j(:,m,:), dim = 1 )
+        bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
+
+    enddo
+    
+    do i = 1,bigT,1
+        
+    enddo
+     
+    ! calculate effective labor in each period
+    do i = 1,bigT,1
+        do m = 1,bigM,1
+        do j = 1,jbar_d(i)-1,1
+            eff_labor(i) =  eff_labor(i) + type_multiplier_d(m,i) * (omega_ss_d(j,m)  * labor_constant * Nn_d_big(j,m,i)) ** rho_subst
+            raw_labor(i) =  raw_labor(i)                                              + labor_constant * Nn_d_big(j,m,i)
+        enddo   
+        enddo
+        eff_labor(i)    = eff_labor(i)  ** (1.0d0/rho_subst)
+        efficiency_t(i) = eff_labor(i)/raw_labor(i)
+    enddo
+    
+    ! effective labor growth
+
+    zet_d(1) = 1
+    do i = 2,bigT,1
+        zet_d(i) = zet_d(i-1)*gam_d(i)    
+    enddo
+    
+    !a_d(1) = 1 / efficiency_t(1)
+    do i = 1,bigT,1
+        a_d(i) = zet_d(i) **  ( 1/(1-alpha_d(i))) / efficiency_t(i) 
+    enddo
+    
+    !gam_d(1) = gam_d(1) !** (1/(1-alpha_d(1)))  
+    do i = 2,bigT,1
+        gam_d(i) =  a_d(i) /  a_d(i-1)
+    enddo
+    
+    zet_d = a_d
+    
+    gam_cum_d(1) = gam_d(1)
+    do i = 2,bigT,1
+        gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
+    enddo
+
+
+
+
+
+
+call chdir(cwd_w)
+
+!!! here output aggregate pi from our model
+        OPEN (unit=111, FILE = "implied_pi.txt")
+        do i = 1, bigT,1
+        pi_implied_d(1,i) = 1.0d0
+        write(111,'(F20.10)'), pi_implied_d(1,i)
+        do j = 2, bigJ, 1   
+            pi_implied_d(j,i) = sum(Nn_d_big(j,:,i)) / sum(Nn_d_big(j-1,:,max(i-1,1)))
+        write(111,'(F20.10)'), pi_implied_d(j,i)
+        enddo
+        enddo
+        CLOSE(111)
+
+        
+        
 end subroutine read_data
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

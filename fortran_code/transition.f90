@@ -65,9 +65,9 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
         do i = 1,bigT,1
 		    omega_big(:,:,i)  = omega_ss_big
-            pi(:,i)     = pi_ss_old
-            pi_weight(:,i)     = pi_weight_ss_old
-            Nn_(:,i)    = N_ss_old
+            pi_big(:,i)       = pi_ss_old
+            pi_big_weight(:,i)     = pi_weight_ss_old
+            N_big_t_j(:,i)    = N_big_ss_old
             gam_t(i)    = gam_ss_old
             jbar_t(i)   = jbar_ss_old
             tL(i)       = tauL_ss_old
@@ -159,7 +159,7 @@ include 'Initial_values_db.f90'
     bigl_j_aux = 0.0d0
     
     do m = 1,bigM,1
-        bigl_type(m,:)         = sum(N_t_j  * type_share_j_t(:,m,:) * l_j(:,m,:), dim = 1 )
+        bigl_type(m,:)         = sum(N_big_t_j(:,m,:) * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
@@ -202,7 +202,7 @@ include 'Initial_values_db.f90'
     
     savings = 0.0d0
     do m = 1,bigM,1
-        savings = savings +  sum(N_t_j * type_share_j_t(:,m,:)  *savings_j(:,m,:), dim=1)
+        savings = savings +  sum(N_big_t_j(:,m,:)  *savings_j(:,m,:), dim=1)
     enddo    
     
     savings = savings / bigl
@@ -210,7 +210,7 @@ include 'Initial_values_db.f90'
     wl_bar = 0.0d0
     do i = 1,bigT,1
         do m = 1,bigM,1
-           wl_bar(i) = wl_bar(i) +  sum( N_t_j(:,i) * type_share_j_t(:,m,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
+           wl_bar(i) = wl_bar(i) +  sum(N_big_t_j(:,m,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
         enddo
     enddo
     valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(1)
@@ -233,7 +233,7 @@ include 'bequest.f90'
 
 consumption = 0.0d0
 do m=1,bigM,1
-    consumption = consumption + sum(N_t_j* type_share_j_t(:,m,:)  *c_j(:,m,:), dim=1)/bigl       
+    consumption = consumption + sum(N_big_t_j(:,m,i)  *c_j(:,m,:), dim=1)/bigl       
 enddo
 
     consumption_gross = consumption!/(1+tc)

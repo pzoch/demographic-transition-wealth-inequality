@@ -26,11 +26,11 @@ do iter = 1,n_iter_t,1
     b_j_old    = b_j
     
     
-    
+    N_big_t_j
     bigl_type = 0.0d0
     bigl      = 0d0
     do m = 1,bigM,1
-        bigl_type(m,:)         = sum(N_t_j * type_share_j_t(:,m,:)  * l_j(:,m,:), dim = 1 )
+        bigl_type(m,:)         = sum(N_big_t_j(:,m,:) * l_j(:,m,:), dim = 1 )
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
@@ -110,9 +110,12 @@ include 'closures.f90'
                 r_vfi_pretax = r_bar 
             endif
             sum_b_weight_trans_outer = 0.0d0
+            
         do m = 1,bigM, 1
 
             
+            pi(:,:) = pi_big(:,m,:)
+            pi_vfi = pi
             
             do i = 1, bigT,1
                 w_pom_trans_vfi(:,i) = (1 - t1(:,i) - t2(:,i))*w_bar(m,i) !w_j(:,1:bigT)
@@ -123,12 +126,10 @@ include 'closures.f90'
             
 
             
-            
-
             tc_vfi = tc + 1.0_dp
             gam_vfi = gam_t
-            N_t_j_vfi = N_t_j
-            b_j_vfi= b_j(:,m,:)
+            N_t_j_vfi = N_big_t_j(:,m,:)
+            b_j_vfi   = b_j(:,m,:)
             bequest_vfi = bequest(m,:)
             bequest_j_vfi =  bequest_j(:,m,:)
             bequest_j_vfi_dif = bequest_j(:,m,:) - bequest_j_old(:,m,:)
@@ -144,9 +145,9 @@ include 'closures.f90'
             l_pen_j_vfi(:,:) = l_j(:,m,:)
             
             do i = 1,bigT
-            do j = 1,bigJ
-            prob_trans(j,:,:,:,:,:,i) = prob_trans_big(j,:,:,:,:,:,m,i) / type_share_j_t(j,m,i) 
-            enddo
+                do j = 1,bigJ
+                prob_trans(j,:,:,:,:,:,i) = prob_trans_big(j,:,:,:,:,:,m,i)
+                enddo
             enddo
 
             iter_com = iter
@@ -175,7 +176,7 @@ include 'closures.f90'
         
             do i = 2,bigT
             do j = 1,bigJ
-            prob_trans_big(j,:,:,:,:,:,m,i)               = type_share_j_t(j,m,i) *  prob_trans(j,:,:,:,:,:,i) 
+            prob_trans_big(j,:,:,:,:,:,m,i)               =  prob_trans(j,:,:,:,:,:,i) 
             enddo
             enddo
             aime_plus_trans_big(:,:,:,:,:,:,m,:)          = aime_plus_trans(:,:,:,:,:,:,:) 
@@ -210,8 +211,8 @@ include 'closures.f90'
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
-            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_t_j(:,i)* type_share_j_t(:,m,i) *l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
-            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          +sum(N_t_j(:,i)* type_share_j_t(:,m,i) *l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
+            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_big_t_j(:,m,i) *l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
+            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          +sum(N_big_t_j(:,m,i) * *l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
             
         enddo

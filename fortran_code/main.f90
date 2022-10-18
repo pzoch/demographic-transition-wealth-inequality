@@ -5,7 +5,6 @@ program olg2
     use global_vars2
     use transition_DB
     use get_data
-    use get_data
     use clock 
     !use geompack3
  

@@ -23,7 +23,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
-    
+    real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss 
     
 	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
     real*8, dimension(0:n_a) :: prob_ss_marg
@@ -57,7 +57,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         alpha = alpha_ss_old
         gam_ss = gam_ss_old
         pi_big_ss = pi_big_ss_old 
-        pi_weight_big_ss = pi_weight_big_ss_old
+        pi_big_weight_ss = pi_big_weight_ss_old
         N_big_ss_j =  N_big_ss_old
         jbar_ss = jbar_ss_old
         nu_ss =  nu_ss_old
@@ -103,18 +103,24 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     
 !normalized structure of population such as N_ss_j(1) = 1 (number of 20 years old)  --- MAYBE THIS IS THE KEY???
 if (switch_run_1 == 0) then 
-    n_ss_j(1) = 1.0_dp 
-    do j = 2, bigj
-        n_ss_j(j) = nu_ss**(-j+1)*pi_weight_ss(j)/pi_weight_ss(1)
+    do m = 1, bigM, 1
+        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m)
+        do j = 2, bigj
+             N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
+        enddo
     enddo
+    
 endif
 
 if (switch_steady_demo == 1) then 
-    n_ss_j(1) = 1.0_dp 
-    do j = 2, bigj
-        n_ss_j(j) = nu_ss**(-j+1)*pi_weight_ss(j)/pi_weight_ss(1)
+    do m = 1, bigM, 1
+        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m) 
+        do j = 2, bigj
+            N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
+        enddo
     enddo
 endif
+
 
 life_exp = 0
 do j = 1,bigJ,1       
@@ -136,8 +142,11 @@ avg_ef_l_supply = 0.33
 
 valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss 
     rI_ss = gam_ss*nu_ss - 1
-    N_ss = sum(N_ss_j(1:bigJ))       
-
+    N_ss = sum(N_big_ss_j(1:bigJ,1:bigM))       
+    
+    do j = 1, bigJ, 1
+    N_ss_j(j) = sum(N_big_ss_j(j,1:bigM))   
+    enddo
     ! guess 
     
     r_bar_ss = (1 + 0.03_dp)**(zbar) - 1 !(1 + 0.078_dp)**(zbar) - 1
@@ -225,9 +234,9 @@ else
         if (switch_unequal_bequest==0) then
             do m = 1,bigM,1
             do j = 2,bigJ,1
-            bequest_left_ss_j(j-1,m) = type_share_ss(m) * (pi_weight_ss(j-1) - pi_weight_ss(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
+            bequest_left_ss_j(j-1,m) = type_share_ss(m) * (pi_big_weight_ss(j-1,m) - pi_big_weight_ss(j,m))*(r_ss*s_ss_j(j-1,m))/gam_ss
             enddo
-            bequest_left_ss_j(bigJ,m) = type_share_ss(m) *  (pi_weight_ss(bigJ))*(r_ss*s_ss_j(bigJ,m))/gam_ss
+            bequest_left_ss_j(bigJ,m) = type_share_ss(m) *  (pi_big_weight_ss(bigJ,m))*(r_ss*s_ss_j(bigJ,m))/gam_ss
 
             
             bequest_ss(m)= sum(bequest_left_ss_j(1:bigJ,m))
@@ -236,7 +245,7 @@ else
             bequest_ss_j(1,m) = 0d0
             
             do j = 2,bigJ,1
-                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(type_share_ss(m) * pi_weight_ss(j))  
+                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(type_share_ss(m) * pi_big_weight_ss(j,m))  
             enddo  
             enddo
         elseif (switch_unequal_bequest==1) then
@@ -245,11 +254,11 @@ else
             
             do j = 2,bigJ,1
                 bequest_ss_j(j,m) = 0d0
-                bequest_left_ss_j(j-1,m) = type_share_ss(m) *  (pi_weight_ss(j-1) -   pi_weight_ss(j))*s_ss_j(j-1,m) / nu_ss**(j-1)
+                bequest_left_ss_j(j-1,m) = type_share_ss(m) *  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*s_ss_j(j-1,m) / nu_ss**(j-1)
             enddo
             
             
-            bequest_left_ss_j(bigj,m) = type_share_ss(m) *  pi_weight_ss(bigJ) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
+            bequest_left_ss_j(bigj,m) = type_share_ss(m) *  pi_big_weight_ss(bigJ,m) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
             bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) 
 
             enddo
@@ -285,9 +294,7 @@ endif
         
         tc_ss_vfi = 1_dp + tc_ss
         gam_ss_vfi = gam_ss
-        pi_ss_vfi = pi_ss
         jbar_ss_vf = ceiling(jbar_ss)
-        N_ss_j_vfi =  N_ss_j
         iter_com = iter
         sum_b_weight_ss = 0.0d0
         
@@ -295,7 +302,11 @@ endif
         ! calling each type separately
          do m = 1,bigM,1
             
+             
             ! load shock matrices
+            pi_ss(:) = pi_big_ss(:,m)
+            pi_ss_vfi = pi_ss
+            N_ss_j_vfi =  N_big_ss_j(:,m)
             
             pi_ip = pi_ip_big(:,:,m)
             n_sp_value = n_sp_value_big(:,m)
@@ -364,18 +375,18 @@ endif
         
         do m = 1,bigM,1
             
-            bigl_type_ss(m)         = type_share_ss(m) * sum(N_ss_j  * l_ss_j(1:jbar_ss-1,m))
+            bigl_type_ss(m)         = sum(N_big_ss_j(:,m)  * l_ss_j(1:jbar_ss-1,m))
             bigl_ss                 = bigl_ss + type_multiplier_ss(m) * bigl_type_ss(m) ** rho_subst ! with CES production function this
-            average_l_ss            = average_l_ss + type_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            average_w_ss            = average_w_ss + type_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
-            consumption_ss_gross    = consumption_ss_gross + type_share_ss(m) * sum(N_ss_j  * consumption_ss_gross_j(:,m))
-            average_lab_ss          = average_lab_ss + type_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            asset_pom_ss            = asset_pom_ss + type_share_ss(m) * sum(N_ss_j  * asset_pom_ss_j(:,m))
-            savings_ss              = savings_ss +  type_share_ss(m) * sum(N_ss_j  * savings_ss_j(:,m))
+            average_l_ss            = average_l_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_w_ss            = average_w_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            consumption_ss_gross    = consumption_ss_gross +  sum(N_big_ss_j(:,m)  * consumption_ss_gross_j(:,m))
+            average_lab_ss          = average_lab_ss + sum(N_big_ss_j(1:jbar_ss-1,m)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            asset_pom_ss            = asset_pom_ss +  sum(N_big_ss_j(:,m)  * asset_pom_ss_j(:,m))
+            savings_ss              = savings_ss +   sum(N_big_ss_j(:,m)  * savings_ss_j(:,m))
             
             
-            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + type_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            avg_ef_l_supply         = avg_ef_l_supply + type_share_ss(m) * sum(N_ss_j(1:jbar_ss-1)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
+            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi +sum(N_big_ss_j(1:jbar_ss-1,m)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            avg_ef_l_supply         = avg_ef_l_supply + sum(N_big_ss_j(1:jbar_ss-1,m)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             avg_wl                  = avg_wl + type_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
@@ -400,12 +411,12 @@ endif
             
             sum_b_ss = 0.0d0
             do m = 1,bigM,1
-                sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*type_share_ss(m)*b_ss_j(:,m)*N_ss_j(1:bigJ))/bigl_ss
+                sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*b_ss_j(:,m)*N_big_ss_j(1:bigJ,m))/bigl_ss
             enddo
             
             subsidy_ss = 0.0d0
             do m = 1,bigM,1 
-                subsidy_ss = subsidy_ss + type_share_ss(m)*sum(N_ss_j*(sum_b_weight_ss*b_ss_j(:,m) - t1_ss*w_bar_ss(m)*l_ss_j(:,m)))/bigl_ss
+                subsidy_ss = subsidy_ss + sum(N_big_ss_j(:,m)*(sum_b_weight_ss*b_ss_j(:,m) - t1_ss*w_bar_ss(m)*l_ss_j(:,m)))/bigl_ss
             enddo
            
 

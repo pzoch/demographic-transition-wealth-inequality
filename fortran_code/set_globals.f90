@@ -15,7 +15,7 @@ subroutine globals
 
     
     
-    version = 'car1_' ! this is just to organize some versions, does not change anything in the code
+    version = 'the2_' ! this is just to organize some versions, does not change anything in the code
     experiment = 'dem_'
     closure = 'taxC__'
 
@@ -123,6 +123,7 @@ call chdir(cwd_p)
         read(3,*) sigma_nu_d
         read(3,*) zeta_r
         read(3,*) sigma_nu_r
+        read(3,*) labor_constant
         
         ! zeta_p loaded at the end to ensure the correct number is loaded
         do m = 1,bigM,1 
@@ -153,7 +154,7 @@ call chdir(cwd_p)
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_weight_big, Nn_big, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
+    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
@@ -206,11 +207,11 @@ call chdir(cwd_p)
     gam_ss_old = gam_t(1)
     gam_ss_new = gam_t(bigT)
 
-    pi_big_ss_old = pi(:,1)
-    pi_big_ss_new = pi(:,bigT)
+    pi_big_ss_old = pi_big(:,:,1)
+    pi_big_ss_new = pi_big(:,:,bigT)
 
-    pi_weight_big_ss_old = pi_weight_big(:,1)
-    pi_weight_big_ss_new = pi_weight_big(:,bigT)
+    pi_big_weight_ss_old = pi_big_weight(:,:,1)
+    pi_big_weight_ss_new = pi_big_weight(:,:,bigT)
     
     N_big_ss_old = Nn_big(:,:,1)
     N_big_ss_new = Nn_big(:,:,bigT)
