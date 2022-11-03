@@ -23,6 +23,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
+    real(dp), dimension(bigj, bigM, bigT) :: N_big_t_j
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
 	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j, type_share_j_t
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
@@ -61,13 +62,13 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
         
     tl = tauL_t
     tk = tauK_t
-    
+    N_big_t_j = Nn_big
     if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
         do i = 1,bigT,1
 		    omega_big(:,:,i)  = omega_ss_big
-            pi_big(:,i)       = pi_ss_old
-            pi_big_weight(:,i)     = pi_weight_ss_old
-            N_big_t_j(:,i)    = N_big_ss_old
+            pi_big(:,:,i)       = pi_big_ss_old
+            pi_big_weight(:,:,i) = pi_big_weight_ss_old
+            N_big_t_j(:,:,i)    = N_big_ss_old
             gam_t(i)    = gam_ss_old
             jbar_t(i)   = jbar_ss_old
             tL(i)       = tauL_ss_old
@@ -145,9 +146,9 @@ include 'Initial_values_db.f90'
          do j = 2,bigJ,1
              type_share_j_t(j,m,i) = type_share_j_t(j-1,m,i-1)  
          enddo
-        enddo
-     
     enddo
+     
+enddo
      
 
     
@@ -229,11 +230,11 @@ include 'Initial_values_db.f90'
     
 
 
-include 'bequest.f90'
+include 'bequest.f90' !! review this to see if new pi is accounted for
 
 consumption = 0.0d0
 do m=1,bigM,1
-    consumption = consumption + sum(N_big_t_j(:,m,i)  *c_j(:,m,:), dim=1)/bigl       
+    consumption = consumption + sum(N_big_t_j(:,m,:)  * c_j(:,m,:), dim=1)/bigl       
 enddo
 
     consumption_gross = consumption!/(1+tc)
@@ -278,23 +279,23 @@ tax_c = tc
 !    endif 
 !enddo 
 ! 
-     prob_trans_marg = 0d0
-     do i = 1,bigT,1
-            do ia = 0, n_a, 1
-                 do j = 1, bigJ  
-                     do i_aime = 0, n_aime, 1
-                          do ip = 1 , n_sp, 1
-                            do ir=1, n_sr, 1
-                                do id=1,n_sd,1 
-                                prob_trans_marg(ia,i) = prob_trans_marg(ia,i) + prob_trans(j, ia, i_aime, ip, ir, id,i)* N_t_j(j,i)/N_t(i)
-                                enddo
-                            enddo
-                        enddo
-                    enddo
-                enddo
-            enddo
-     enddo
-     
+     !prob_trans_marg = 0d0
+     !do i = 1,bigT,1
+     !       do ia = 0, n_a, 1
+     !            do j = 1, bigJ  
+     !                do i_aime = 0, n_aime, 1
+     !                     do ip = 1 , n_sp, 1
+     !                       do ir=1, n_sr, 1
+     !                           do id=1,n_sd,1 
+     !                           prob_trans_marg(ia,i) = prob_trans_marg(ia,i) + prob_trans(j, ia, i_aime, ip, ir, id,i)
+     !                           enddo
+     !                       enddo
+     !                   enddo
+     !               enddo
+     !           enddo
+     !       enddo
+     !enddo
+     !
 
 
 if (switch_print == 1) then

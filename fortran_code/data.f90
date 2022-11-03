@@ -19,6 +19,7 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       real(dp), dimension(bigT)::  efficiency_t, raw_labor, eff_labor ! various measures of labor
    
       real(dp), dimension(bigJ,bigT)::  pi_implied_d ! implied probabilities
+      real(dp), dimension(bigM,bigT)::  bigl_type ! for calculating labor augmenting growth
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
       real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
      ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
@@ -885,17 +886,7 @@ endif
      
     ! need to convert it to labor augmenting 
     ! this requires some assumptions about the average hours of each agent
-    
-    do m = 1,bigM,1
-        bigl_type(m,:)         = sum(N_big_t_j(:,m,:) * l_j(:,m,:), dim = 1 )
-        bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
-    enddo
-    
-    do i = 1,bigT,1
-        
-    enddo
-     
     ! calculate effective labor in each period
     do i = 1,bigT,1
         do m = 1,bigM,1
@@ -905,7 +896,7 @@ endif
         enddo   
         enddo
         eff_labor(i)    = eff_labor(i)  ** (1.0d0/rho_subst)
-        efficiency_t(i) = eff_labor(i)/raw_labor(i)
+        efficiency_t(i) = eff_labor(i) / raw_labor(i)
     enddo
     
     ! effective labor growth
