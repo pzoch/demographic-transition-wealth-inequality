@@ -164,7 +164,7 @@ include 'closures.f90'
             tot_income_pretax_trans = tot_income_pretax_trans_big(:, :, :, :, :, :,m,:)
             n_sp_value_trans = n_sp_value_trans_big(:,m,:)
             pi_ip_init_trans = pi_ip_init_trans_big(:,m,:)
-            
+            omega = omega_big(:,m,:)
 
 
 

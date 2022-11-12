@@ -152,7 +152,7 @@ enddo
      
 
     
-    N_t_j = Nn_
+    N_t_j = sum(N_big_t_j,dim=2)
     N_t = sum(N_t_j, dim=1)
     bigl_type = 0.0d0
     bigl      = 0d0
@@ -170,6 +170,7 @@ enddo
     nu(1) = nu_ss_old
     nu_pop(1) = nu_ss_old
     !nu(1) = 1 
+
     do i = 2,bigT,1
         nu(i) = bigl(i)/bigl(i-1)
         nu_pop(i) = N_t(i)/N_t(i-1)

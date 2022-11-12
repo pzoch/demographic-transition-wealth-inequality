@@ -448,6 +448,7 @@ end subroutine
     pi_trans_vfi_cond = 1d0
     pi_ss_vfi_cond = 1d0 !todo 
     
+
     do i = 1 , bigT, 1    
         do j=2, bigJ        
             pi_trans_vfi_cond(j,i)=pi(j,i)/pi(j-1,max(i-1,1))  

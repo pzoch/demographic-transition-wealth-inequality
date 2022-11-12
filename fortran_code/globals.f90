@@ -10,7 +10,7 @@ IMPLICIT NONE
     integer ::  n_iter_prof
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 2 ! number of permanent types
+    integer, parameter :: bigM = 1 ! number of permanent types
     integer, parameter :: n_p = 110, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
@@ -103,7 +103,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
-    real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_big_weight_ss_old, pi_big_weight_ss_new, N_big_ss_old, N_big_ss_new 
+    real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_big_weight_ss_old, pi_big_weight_ss_new, N_big_ss_old, N_big_ss_new, pi_ss_cond_big
     real(dp) :: superstar_factor_1, superstar_factor_2
 
 ! transition variables
@@ -113,7 +113,7 @@ IMPLICIT NONE
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
-    real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_big_weight, Nn_big
+    real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_big_weight, Nn_big, pi_trans_cond_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
 ! LSRA
     real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref
@@ -127,7 +127,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 70, n_aime = 15, n_sp = 5, n_sd =1, n_sr = 1    , n_beq = 5
+    integer, parameter :: n_a = 40, n_aime = 5, n_sp = 3, n_sd =1, n_sr = 1    , n_beq = 5
 
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p

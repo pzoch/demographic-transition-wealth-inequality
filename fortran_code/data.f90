@@ -87,7 +87,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_deaton.txt")    
+     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
      do m = 1, bigM, 1
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j,m)
@@ -757,7 +757,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
     enddo
     
     
-  elseif (switch_mortality == 7 .AND. switch_starting_year ==3) then ! this will keep the population structure as in  1955  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
+  elseif (switch_mortality == 7 .AND. switch_starting_year ==3) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
         
 
     N_temp_vec = sum(sum(Nn_d_big, dim=1),dim=1)
@@ -797,46 +797,6 @@ close(1)
 
 
 
-
-if (switch_keep_fixed == 1) then
-    gy_factor_d(2:) = gy_factor_d(1)
-    do m = 1,bigM,1
-    sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
-    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
-    type_share_d(m,2:) = type_share_d(m,1)
-    
-
-    
-    enddo
-    tauK_d(2:) = tauK_d(1)
-    tauL_d(2:) = tauL_d(1)
-    alpha_d(2:) = alpha_d(1)
-    debt_constr_d(2:) = debt_constr_d(1)
-    lambda_d(2:) = lambda_d(1)
-    gam_d(2:) = gam_d(1)
-    !    pi_d = 1.0d0
-    do i = 2, bigT,1
-        !pi_d(1,i) = pi_d(1,1)
-       ! Nn_d(1,i) = Nn_d(1,1)
-        do j = 2, bigJ, 1   
-            !pi_d(j,i) = pi_d(j,1)
-            !Nn_d(j,i) = pi_d(j,1)/pi_d(j-1,1)*Nn_d(j-1,i-1)
-            
-        enddo
-    enddo
-
-     do i = 1,bigT,1
-     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
-     enddo
-     
-     do i = 2,bigT,1
-     !   pi_weight_d(:,i) = pi_d(:,1)
-     enddo
-    
-    !pi_weight_d = pi_d
-    !nu_ss_old = 1.0d0
-    !nu_ss_new = nu_ss_old
-endif
 
 
     
@@ -923,7 +883,47 @@ endif
         gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
     enddo
 
+! SETTING TO FIXED
 
+if (switch_keep_fixed == 1) then
+    gy_factor_d(2:) = gy_factor_d(1)
+    do m = 1,bigM,1
+    sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    type_share_d(m,2:) = type_share_d(m,1)
+    
+
+    
+    enddo
+    tauK_d(2:) = tauK_d(1)
+    tauL_d(2:) = tauL_d(1)
+    alpha_d(2:) = alpha_d(1)
+    debt_constr_d(2:) = debt_constr_d(1)
+    lambda_d(2:) = lambda_d(1)
+    gam_d(2:) = gam_d(1)
+    
+    do i = 2, bigT,1
+        pi_d_big(1,:,i) = pi_d_big(1,:,1)
+        Nn_d_big(1,:,i) = Nn_d_big(1,:,1)
+        do j = 2, bigJ, 1   
+            pi_d_big(j,:,i) = pi_d_big(j,:,1)
+            Nn_d_big(j,:,i) = pi_d_big(j,:,1)/pi_d_big(j-1,:,1)*Nn_d_big(j-1,:,i-1)
+            
+        enddo
+    enddo
+
+     do i = 1,bigT,1
+     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     enddo
+     
+     do i = 2,bigT,1
+        pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
+     enddo
+    
+    !pi_weight_d = pi_d
+    nu_ss_old = 1.0d0
+    nu_ss_new = nu_ss_old
+endif
 
 
 

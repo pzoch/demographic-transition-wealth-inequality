@@ -101,7 +101,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
 ! force it to treat it as a 2nd steady state - for test purposes    
 !switch_run_1 = 0
     
-!normalized structure of population such as N_ss_j(1) = 1 (number of 20 years old)  --- MAYBE THIS IS THE KEY???
+
 if (switch_run_1 == 0) then 
     do m = 1, bigM, 1
         N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m)
