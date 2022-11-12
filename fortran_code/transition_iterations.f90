@@ -13,7 +13,7 @@ do iter = 1,n_iter_t,1
 
       if (switch_print == 1) then
        
-            if  (MOD(iter,50) == 0) then            
+            if  (MOD(iter,1) == 0) then            
                 include 'print_iter.f90'            
             endif
 
@@ -297,5 +297,6 @@ include 'closures.f90'
             replacement(i) = replacement(i) +N_big_t_j(jbar_t(i),m,i) / N_t_j(jbar_t(i),i) * sum_b_weight_trans(i)*b_j(jbar_t(i),m,i)/(w_bar(m,i)*l_pen_j(jbar_t(i)-1,m, i-1)) 
         enddo
     enddo
+    
     
 enddo

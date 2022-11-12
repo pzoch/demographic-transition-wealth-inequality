@@ -502,6 +502,7 @@ if (switch_run_1 == 1) then
     labor_tax_j_ss_1 = labor_tax_ss_j
     g_share_ss = g_ss/y_ss
     g_share(1) = g_share_ss
+    tc(1) = tc_ss
 else
     s_pom_ss_j_2 = s_pom_ss_j
     tau1_ss_2 = tau1_ss

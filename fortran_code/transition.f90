@@ -86,7 +86,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 
     
 t1 = t1_ss_new
-t2 =  t2_ss_new
+t2 = t2_ss_new
  
 do i = 1,n_p,1
     do j =1, bigj, 1
@@ -186,6 +186,7 @@ enddo
     bigY = y * bigl
 
     do i = n_p+2,bigT,1
+           
         tc(i) = tc_new
         !tl(i) = tl_new
     enddo
