@@ -226,6 +226,7 @@ contains
                 valuefunc_trans = (c_help)**(1d0-theta)/(1d0-theta) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
             endif
             
+            
         elseif (switch_utility_function == 2) then
             if (theta == 1) then
                 valuefunc_trans = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
@@ -521,9 +522,9 @@ implicit none
 
     ! foc_intratemp = phi/(1-phi)*(w_non_tax+lambda*(1-tau_prog)*(w_tax)**(1-tau_prog)*l**(-tau_prog)*(1-l)-c (1-phi)/phi
     ! TAKE a look at ncn emeryt\model\prog_income_tax.lyx
-      maxit  = 28
+      maxit  = 70
       l0  = l_guess
-      del = 1d-11
+      del = 1d-8
       
       !!! Cobb-Douglas utility function
     if (switch_utility_function == 0) then

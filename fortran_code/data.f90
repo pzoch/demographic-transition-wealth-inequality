@@ -900,6 +900,7 @@ if (switch_keep_fixed == 1) then
     alpha_d(2:) = alpha_d(1)
     debt_constr_d(2:) = debt_constr_d(1)
     lambda_d(2:) = lambda_d(1)
+    !lambda_d(1:) = 0.0d0
     gam_d(2:) = gam_d(1)
     
     do i = 2, bigT,1
