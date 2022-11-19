@@ -12,7 +12,7 @@
     l_pen_j(:,:,1) =  l_ss_pen_j_1
     b1_j(:,:,1) = b1_ss_j_1
     b2_j(:,:,1) = b2_ss_j_1
-    
+
     pillarI_j(:,:,1) =  pillar1_ss_j_1
     pillarII_j(:,:,1) =  pillar2_ss_j_1
     bequest_left_j(:,:,1) = bequest_left_ss_j_1

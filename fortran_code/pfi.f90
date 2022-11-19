@@ -188,7 +188,11 @@ contains
 
         ! check whether consumption or leisure are too small
         c_help = max(cons, 1d-10)  
-        l_help = min(max(lab,1d-10), 1-1d-10)
+                if (switch_utility_function ==0 ) then
+        l_help = min(max(lab,1d-10), 1d0-1d-10)    
+        else
+        l_help = lab
+        endif
         ! get tomorrows year
         itp = year(it, j, j+1)
         ! get tomorrows utility
@@ -522,7 +526,7 @@ implicit none
 
     ! foc_intratemp = phi/(1-phi)*(w_non_tax+lambda*(1-tau_prog)*(w_tax)**(1-tau_prog)*l**(-tau_prog)*(1-l)-c (1-phi)/phi
     ! TAKE a look at ncn emeryt\model\prog_income_tax.lyx
-      maxit  = 70
+      maxit  = 20
       l0  = l_guess
       del = 1d-8
       
@@ -684,7 +688,7 @@ function optimal_consumption_and_labor_new(RHS,phi, theta, tau, lambda,w, w_NT, 
     real*8 :: optimal_consumption_and_labor_new(2)
     integer :: iter, iter_max
     
-    iter_max = 50
+    iter_max = 20
     
     !!! Cobb-Douglas utility function
     if (switch_utility_function == 0) then

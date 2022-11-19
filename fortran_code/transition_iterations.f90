@@ -196,6 +196,9 @@ include 'closures.f90'
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
             l_pen_j(:,m,:)  = l_pen_j_vfi(:,:)
+           placeholder =  c_trans(1,0,0,1,1,1,2)
+           placeholder =  c_trans(1,0,0,1,1,1,3)
+           placeholder =  c_trans(1,0,0,1,1,1,10)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
             do i = 1,bigT

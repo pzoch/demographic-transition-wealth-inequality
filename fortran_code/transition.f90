@@ -13,7 +13,7 @@ CONTAINS
 subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita)
 
     integer, parameter :: dp = kind(1.0d0)
-    real(dp) :: pom
+    real(dp) :: pom, placeholder
     integer :: i_mark
     real(dp), dimension(n_iter_t) :: cum_err
     real(dp), dimension(bigj+n_p) :: u_all

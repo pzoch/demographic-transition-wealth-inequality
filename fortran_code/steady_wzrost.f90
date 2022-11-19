@@ -20,10 +20,10 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss
     
-    real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss
+    real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
-    real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss 
+    real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss, type_share_big_ss
     
 	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
     real*8, dimension(0:n_a) :: prob_ss_marg
@@ -122,6 +122,16 @@ if (switch_steady_demo == 1) then
 endif
 
 
+! calculate the effective type share
+ do m = 1, bigM, 1
+     do j = 1, bigJ,1
+     type_share_big_ss(j,m) = N_big_ss_j(j,m)/sum(N_big_ss_j(j,:))
+     enddo
+ enddo
+do m = 1, bigM, 1
+    type_share_eff_ss(m) = sum(N_big_ss_j(:,m))/sum(N_big_ss_j(:,:))
+enddo 
+
 life_exp = 0
 do j = 1,bigJ,1       
     do s = 0,bigJ-j,1
@@ -201,6 +211,7 @@ do iter = 1,n_iter_ss,1
 if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also weird! need to check!!!! 
 
         if (switch_unequal_bequest==0) then
+            ! to be changes
             do m = 1,bigM,1
                 do j = 2,bigJ,1
                     bequest_left_ss_j(j-1,m) = (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
@@ -217,26 +228,28 @@ if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also
             enddo 
             enddo
     
-        elseif (switch_unequal_bequest==1) then
-            do m = 1,bigM,1
-             bequest_ss_j(1,m) = 0d0
-            do j = 2,bigJ,1
-                bequest_ss_j(j,m) = 0d0
-                bequest_left_ss_j(j-1,m) = type_share_ss(m) *  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j(j-1,m) 
-            enddo
-            bequest_left_ss_j(bigJ,m) = (N_ss_j(bigJ))*s_ss_j(bigJ,m) 
-            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
-            enddo
+        !elseif (switch_unequal_bequest==1) then
+        !    ! to be changed
+        !    do m = 1,bigM,1
+        !     bequest_ss_j(1,m) = 0d0
+        !    do j = 2,bigJ,1
+        !        bequest_ss_j(j,m) = 0d0
+        !        bequest_left_ss_j(j-1,m) = type_share_ss(m) *  (N_ss_j(j-1) - N_ss_j(j))*s_ss_j(j-1,m) 
+        !    enddo
+        !    bequest_left_ss_j(bigJ,m) = (N_ss_j(bigJ))*s_ss_j(bigJ,m) 
+        !    bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m))
+        !    enddo
 
         endif
     
 else
         if (switch_unequal_bequest==0) then
+
             do m = 1,bigM,1
             do j = 2,bigJ,1
-            bequest_left_ss_j(j-1,m) = type_share_ss(m) * (pi_big_weight_ss(j-1,m) - pi_big_weight_ss(j,m))*(r_ss*s_ss_j(j-1,m))/gam_ss
+            bequest_left_ss_j(j-1,m) = (pi_big_weight_ss(j-1,m) - pi_big_weight_ss(j,m))*(r_ss*s_ss_j(j-1,m))/gam_ss
             enddo
-            bequest_left_ss_j(bigJ,m) = type_share_ss(m) *  (pi_big_weight_ss(bigJ,m))*(r_ss*s_ss_j(bigJ,m))/gam_ss
+            bequest_left_ss_j(bigJ,m) = (pi_big_weight_ss(bigJ,m))*(r_ss*s_ss_j(bigJ,m))/gam_ss
 
             
             bequest_ss(m)= sum(bequest_left_ss_j(1:bigJ,m))
@@ -245,23 +258,23 @@ else
             bequest_ss_j(1,m) = 0d0
             
             do j = 2,bigJ,1
-                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(type_share_ss(m) * pi_big_weight_ss(j,m))  
+                bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(pi_big_weight_ss(j,m) )  
             enddo  
             enddo
-        elseif (switch_unequal_bequest==1) then
-            do m = 1,bigM,1
-            bequest_ss_j(1,m) = 0d0
-            
-            do j = 2,bigJ,1
-                bequest_ss_j(j,m) = 0d0
-                bequest_left_ss_j(j-1,m) = type_share_ss(m) *  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*s_ss_j(j-1,m) / nu_ss**(j-1)
-            enddo
-            
-            
-            bequest_left_ss_j(bigj,m) = type_share_ss(m) *  pi_big_weight_ss(bigJ,m) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
-            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) 
-
-            enddo
+        !elseif (switch_unequal_bequest==1) then
+        !    do m = 1,bigM,1
+        !    bequest_ss_j(1,m) = 0d0
+        !    
+        !    do j = 2,bigJ,1
+        !        bequest_ss_j(j,m) = 0d0
+        !        bequest_left_ss_j(j-1,m) =  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*s_ss_j(j-1,m) / nu_ss**(j-1)
+        !    enddo
+        !    
+        !    
+        !    bequest_left_ss_j(bigj,m) =   pi_big_weight_ss(bigJ,m) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
+        !    bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) 
+        !
+        !    enddo
         endif
     
 endif        
@@ -331,7 +344,7 @@ endif
             
             
             call agent_vf()
-            prob_ss_big(:, :, :, :, :, :,m)          = type_share_ss(m) * prob_ss
+            prob_ss_big(:, :, :, :, :, :,m)          = type_share_eff_ss(m) * prob_ss
             aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
             c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
             l_ss_big(:, :, :, :, :, : ,m)            = l_ss
@@ -350,7 +363,7 @@ endif
             asset_pom_ss_j(:,m)                         = asset_pom_ss_j_vfi
             lab_ss_j(:,m)                               = lab_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
-            sum_b_weight_ss = sum_b_weight_ss + type_share_ss(m)  * sum_b_weight_ss_vfi
+            sum_b_weight_ss = sum_b_weight_ss + type_share_big_ss(jbar_ss,m)  * sum_b_weight_ss_vfi
             labor_tax_ss_j(:,m) = labor_tax_ss_j_vfi(:)
         
         enddo
@@ -374,7 +387,6 @@ endif
         bigl_ss                 = 0d0
         
         do m = 1,bigM,1
-            
             bigl_type_ss(m)         = sum(N_big_ss_j(:,m)  * l_ss_j(1:jbar_ss-1,m))
             bigl_ss                 = bigl_ss + type_multiplier_ss(m) * bigl_type_ss(m) ** rho_subst ! with CES production function this
             average_l_ss            = average_l_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
@@ -385,9 +397,9 @@ endif
             savings_ss              = savings_ss +   sum(N_big_ss_j(:,m)  * savings_ss_j(:,m))
             
             
-            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi +sum(N_big_ss_j(1:jbar_ss-1,m)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            LabIncAVG_ss_vfi        = LabIncAVG_ss_vfi + sum(N_big_ss_j(1:jbar_ss-1,m)*l_ss_j(1:jbar_ss-1,m)*w_pom_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             avg_ef_l_supply         = avg_ef_l_supply + sum(N_big_ss_j(1:jbar_ss-1,m)*l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
-            avg_wl                  = avg_wl + type_share_ss(m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
+            avg_wl                  = avg_wl + type_share_big_ss(jbar_ss,m) * sum(w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/(real(jbar_ss-1))
             
         enddo
      

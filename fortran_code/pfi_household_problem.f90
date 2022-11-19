@@ -103,8 +103,7 @@ do j = bigJ-1, 1, -1
                 do ir = 1, n_sr,1
                     do id =1, n_sd,1
                        
-                        if((sv(ia)*(1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi + poss_ass_sum_ss(j))  <a_l)then 
-                            if (switch_utility_function == 0) then
+                        if(((sv(ia)*(1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi + poss_ass_sum_ss(j))  <a_l) .and.  (switch_utility_function == 0)) then
                             c_ss(j, ia, i_aime, ip, ir, id) = 1d-10 
                             if(j < jbar_ss_vf)then
                                 l_ss(j, ia, i_aime, ip, ir, id) = 1d0 
@@ -128,7 +127,7 @@ do j = bigJ-1, 1, -1
                             endif
                             sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
                                                                   -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)- bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
-                        endif
+                        
                         else 
                             if(j>=jbar_ss_vf) then ! retired thus labor choice is trivial 
                                     l_ss(j, ia, i_aime, ip, ir, id) = 0d0
@@ -183,6 +182,7 @@ do j = bigJ-1, 1, -1
                                                                   - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
                                                                   - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )                
                         endif
+                        
                     enddo
                 enddo
             enddo
@@ -398,8 +398,12 @@ do ia=0, n_a, 1
                             do ip_p=1,n_sp, 1
                                 if(theta==1_dp)then
                                     EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)    
-                                else 
-                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(phi -theta*phi -1)                                          
+                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then 
+                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(phi -theta*phi -1)      
+                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then     
+                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(-theta)      
+                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then        
+                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(-theta)   
                                 endif 
                                 EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it) + pi_ip_trans(ip, ip_p, tp)*pi_ir(ir,ir_r)*pi_id(id, id_d)*V_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)
                             enddo
@@ -414,13 +418,20 @@ do ia=0, n_a, 1
                     if (theta == 1) then 
                         EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
                     else 
+                        
+                    if (switch_utility_function == 0) then
                         EV_trans(bigj, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(bigj, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
+                    else 
+                        EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
+                    endif
+                        
                     endif
                 enddo
             enddo
         enddo
     enddo
 enddo
+
 
 
 do j = bigJ-1, ij, -1
@@ -470,7 +481,7 @@ do j = bigJ-1, ij, -1
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax
-                                    tot_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) +   aime_replacement_rate(i_aime)*b_j_vfi(bigJ,it)
+                                    tot_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) +   aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it)
                                 endif
                                 sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) - bequest_j_vfi(j,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
@@ -489,7 +500,7 @@ do j = bigJ-1, ij, -1
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax
-                                    tot_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) +    aime_replacement_rate(i_aime)*b_j_vfi(bigJ,it)
+                                    tot_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) +    aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it)
                                     
                                 else
@@ -525,11 +536,11 @@ do j = bigJ-1, ij, -1
                                 
                                     
                                     if (switch_utility_function == 0) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(phi -theta*phi -1)),1d-10)
+                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(phi -theta*phi -1)),1d-15)
                                     elseif (switch_utility_function == 1) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-10)
+                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-15)
                                     elseif (switch_utility_function == 2) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-10)
+                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-15)
                                     endif
                                     
                                     
@@ -611,7 +622,7 @@ do j = bigJ-1, ij, -1
                                 svplus_trans(j, ia, i_aime, ip, ir, id, it) = a_l
                              endif  
 
-                             av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_trans(j, ia, i_aime, ip, ir, id, it) + bequest_j_vfi(j, it)- upsilon_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(bigj,it)
+                             av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_trans(j, ia, i_aime, ip, ir, id, it) + bequest_j_vfi(j, it)- upsilon_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
 
                             wage = w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(ip,tp)
                             wage_non_tax = w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
@@ -704,7 +715,11 @@ do j = bigJ-1, ij, -1
                         if (theta == 1) then 
                             EV_trans(j, ia, i_aime, ip, ir, id, it) = EV_trans(j, ia, i_aime, ip, ir, id, it)
                         else 
-                            EV_trans(j, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(j, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
+                            if (switch_utility_function == 0) then
+                            EV_trans(bigj, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(bigj, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
+                            else 
+                            EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
+                        endif
                         endif
                     enddo
                enddo
