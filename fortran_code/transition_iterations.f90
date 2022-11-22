@@ -213,12 +213,11 @@ include 'closures.f90'
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
-            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_big_t_j(:,m,i) *l_j(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
-            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + sum(N_big_t_j(:,m,i) *l_j(:,m,i)*w_pom_trans(:,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
+            avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *l_j(1:jbar_t(i)-1,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
+            LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *l_j(1:jbar_t(i)-1,m,i)*w_pom_trans(1:jbar_t(i)-1,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
             
         enddo
-        
         l_new_j = l_j
         sv_j=  sv_pom_j
 
