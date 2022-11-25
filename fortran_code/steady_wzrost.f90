@@ -102,30 +102,31 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
 !switch_run_1 = 0
     
 
-if (switch_run_1 == 0) then 
-    do m = 1, bigM, 1
-        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m)
-        do j = 2, bigj
-             N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
-        enddo
-    enddo
-    
-endif
-
-if (switch_steady_demo == 1) then 
-    do m = 1, bigM, 1
-        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m) 
-        do j = 2, bigj
-            N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
-        enddo
-    enddo
-endif
+!if (switch_run_1 == 0) then 
+!    do m = 1, bigM, 1
+!        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m)
+!        do j = 2, bigj
+!             N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
+!        enddo
+!    enddo
+!    
+!endif
+!
+!if (switch_steady_demo == 1) then 
+!    do m = 1, bigM, 1
+!        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m) 
+!        do j = 2, bigj
+!            N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
+!        enddo
+!    enddo
+!endif
 
 
 ! calculate the effective type share
- do m = 1, bigM, 1
-     do j = 1, bigJ,1
-     type_share_big_ss(j,m) = N_big_ss_j(j,m)/sum(N_big_ss_j(j,:))
+ 
+ do j = 1, bigJ,1
+     do m = 1, bigM, 1
+     type_share_big_ss(j,m) = N_big_ss_j(j,m) / sum(N_big_ss_j(j,:))
      enddo
  enddo
 do m = 1, bigM, 1
@@ -344,7 +345,7 @@ endif
             
             
             call agent_vf()
-            prob_ss_big(:, :, :, :, :, :,m)          = type_share_eff_ss(m) * prob_ss
+            prob_ss_big(:, :, :, :, :, :,m)          = prob_ss
             aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
             c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
             l_ss_big(:, :, :, :, :, : ,m)            = l_ss

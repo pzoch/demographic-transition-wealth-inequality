@@ -127,7 +127,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 30, n_aime = 5, n_sp = 3, n_sd =1, n_sr = 1, n_beq = 5
+    integer, parameter :: n_a = 50, n_aime = 8, n_sp = 3, n_sd =1, n_sr = 1, n_beq = 5
 
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p

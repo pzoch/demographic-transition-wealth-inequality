@@ -138,17 +138,7 @@ enddo
            !!!INITIAL VALUES
 include 'Initial_values_db.f90'
 
-! create a big matrix of cohort type shares
- do m = 1,bigM,1
-        type_share_j_t(:,m,1) = type_share_t(m,1)
-     do i = 2,bigT,1
-         type_share_j_t(1,m,i) = type_share_t(m,i)
-         do j = 2,bigJ,1
-             type_share_j_t(j,m,i) = type_share_j_t(j-1,m,i-1)  
-         enddo
-    enddo
-     
-enddo
+
      
 
     
@@ -164,6 +154,18 @@ enddo
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
+    
+    ! create a big matrix of cohort type shares
+    do m = 1,bigM,1
+    do i = 1,bigT,1
+         
+         do j = 1,bigJ,1
+          type_share_j_t(j,m,i) = N_big_t_j(j,m,i) / sum(N_big_t_j(j,:,i))
+         enddo
+    enddo
+     
+enddo
+    
     
     bigl = bigl ** (1.0d0/rho_subst)        
     

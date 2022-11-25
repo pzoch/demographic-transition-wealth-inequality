@@ -554,6 +554,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     endif
     
+
             ! fill in population and mortality matrix
     
 
@@ -604,16 +605,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     
     do j = 1, bigJ, 1
-        read(123,*) Nn_d(j,1) 
         do m = 1, bigM, 1
-        Nn_d_big(j,m,1) =    Nn_d(j,1) * type_share_d(m,1)
         if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
             !=Nn_d(1,1) = 1.0_dp ! temporary
             Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
              
         endif
         enddo
-
+    Nn_d(j,1) = sum(Nn_d_big(j,:,1))
     enddo
 
     close(121) 
@@ -644,20 +643,37 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     pi_big_weight_d = pi_d_big
     !pi_weight_d = pi_d
     
+    
+    ! stable demographic structure in the steady state
+    
+    
+    
 ! -------------------------------- there is no mortality
 if (switch_mortality == 0) then 
     pi_d_big = 1.0_dp
-    do i = 1,bigT, 1
-        do m = 1,bigM,1
-            Nn_d_big(1,m,i) = 1.0d0 * type_share_d(m,i)
-        
+    
+    do j = 1, bigJ, 1
+        do m = 1, bigM, 1
+
+        if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
+            !=Nn_d(1,1) = 1.0_dp ! temporary
+            Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
+             
+        endif
+        enddo
+
+    enddo
+    
+    
+    do i = 2,bigT, 1
+        do m = 1,bigM,1        
             do j = 2, bigJ
                 Nn_d_big(j,m,i) = Nn_d_big(j-1,m,max(i-1,1))
             enddo
         enddo
     enddo
     
-      pi_big_weight_d = pi_d_big  
+    pi_big_weight_d = pi_d_big  
     
 elseif (switch_mortality == 3) then 
     do i = 2, bigT,1
@@ -689,7 +705,7 @@ elseif (switch_mortality == 4) then
         enddo
     enddo
     
-     
+        pi_big_weight_d = pi_d_big  
      
 elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
     pi_big_weight_d = pi_d_big
@@ -888,11 +904,15 @@ close(1)
 if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
-    sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+   sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+   !sigma2_epsilon_t_big(1:,1) = sigma2_epsilon_t_big(1,1)  
+   !sigma2_epsilon_t_big(1:,2) = sigma2_epsilon_t_big(1,1)  
+     
     type_multiplier_d(m,:) = 1.0
     type_share_d(m,2:) = type_share_d(m,1)
-    
-
+    !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    !omega_ss_d(:,1) = omega_ss_d(:,1) 
+    !omega_ss_d(:,2) = omega_ss_d(:,1)
     
     enddo
     tauK_d(2:) = tauK_d(1)
@@ -902,27 +922,27 @@ if (switch_keep_fixed == 1) then
     lambda_d(2:) = lambda_d(1)
     gam_d(2:) = gam_d(1)
     
-    do i = 2, bigT,1
-        pi_d_big(1,:,i) = pi_d_big(1,:,1)
-        Nn_d_big(1,:,i) = Nn_d_big(1,:,1)
-        do j = 2, bigJ, 1   
-            pi_d_big(j,:,i) = pi_d_big(j,:,1)
-            Nn_d_big(j,:,i) = pi_d_big(j,:,1)/pi_d_big(j-1,:,1)*Nn_d_big(j-1,:,i-1)
+    !do i = 2, bigT,1
+    !    pi_d_big(1,:,i) = pi_d_big(1,:,1)
+    !    Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1) * nu_ss_new
+    !    do j = 2, bigJ, 1   
+    !        pi_d_big(j,:,i) = pi_d_big(j,:,1)
+    !        Nn_d_big(j,:,i) = pi_d_big(j,:,1)/pi_d_big(j-1,:,1)*Nn_d_big(j-1,:,i-1)
             
-        enddo
-    enddo
+    !    enddo
+    ! enddo
 
-     do i = 1,bigT,1
-    type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
-     enddo
+    !do i = 1,bigT,1
+    !type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+    ! enddo
      
-     do i = 2,bigT,1
-        pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
-     enddo
+    ! do i = 2,bigT,1
+    !    pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
+    ! enddo
     
     !pi_weight_d = pi_d
-    nu_ss_old = 1.0d0
-    nu_ss_new = nu_ss_old
+    !nu_ss_old = 1.0d0
+    !nu_ss_new = nu_ss_old
 endif
 
 

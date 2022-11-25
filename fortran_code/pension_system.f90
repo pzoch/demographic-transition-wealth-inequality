@@ -3,7 +3,7 @@
     wl_bar = 0.0d0
     do i = 1,bigT,1
     do m = 1,bigM,1
-        wl_bar(i) = wl_bar(i) +  sum( N_t_j(:,i) * type_share_j_t(:,m,i) * l_j(:,m,i)*w_bar(m,i), dim=1)   
+        wl_bar(i) = wl_bar(i) +  sum( N_big_t_j(:,m,i)  * l_j(:,m,i)*w_bar(m,i), dim=1)   
     enddo
     enddo
     do i = 3,bigT,1

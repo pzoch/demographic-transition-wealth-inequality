@@ -9,11 +9,9 @@ if (switch_unequal_bequest==0) then
     do m = 1,bigM,1
 
         do i = 1,bigT,1
-            do j = 2,jbar_t(i),1
+            do j = 2,bigJ,1
                  bequest_left_j(j-1,m,max(i-1,1)) = (N_big_t_j(j-1,m,max(i-1,1)) - N_big_t_j(j,m,i))*r(i)*sv_j(j-1,m,max(i-1,1))/(gam_t(i))   
-            enddo
-            do j = jbar_t(i)+1,bigJ,1
-                bequest_left_j(j-1,m,max(i-1,1)) = (N_big_t_j(j-1,m,max(i-1,1)) - N_big_t_j(j,m,i))*(r(i)*sv_j(j-1,m,max(i-1,1)))/(gam_t(i))
+
             enddo
             bequest_left_j(bigJ,m,max(i-1,1)) = (N_big_t_j(bigJ,m,max(i-1,1)))*(r(i)*sv_j(bigJ,m,max(i-1,1)))/(gam_t(i))    
         enddo        
