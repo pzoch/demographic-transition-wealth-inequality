@@ -1,10 +1,10 @@
 print *, "iter ", iter              
 write(*,*) "cum_err = ", sum(err) 
-feasibility(1)  =   abs(((y(1) - consumption_gross(1) - g(1))/y(1) - (gam_t(1)*nu(1)*k(1) + (depr-1)*k(1))/y(1)))
+feasibility(1)  =   abs(((y(1) - consumption_gross(1) - g(1))/y(1) - (gam_t(1)*nu(1)*k(1) + (depr_t(1)-1)*k(1))/y(1)))
 do i = 2, bigT-1, 1
-    feasibility(i) = abs(((y(i) - consumption_gross(i) - g(i))/y(i) - (gam_t(i+1)*nu(i+1)*k(i+1) + (depr-1)*k(i))/y(i)))
+    feasibility(i) = abs(((y(i) - consumption_gross(i) - g(i))/y(i) - (gam_t(i+1)*nu(i+1)*k(i+1) + (depr_t(i)-1)*k(i))/y(i)))
 enddo
-feasibility(bigT) = abs(((y(bigT) - consumption_gross(bigT) - g(bigT))/y(bigT) - (gam_t(bigT)*nu(bigT)*k(bigT) + (depr-1)*k(bigT))/y(bigT) ))
+feasibility(bigT) = abs(((y(bigT) - consumption_gross(bigT) - g(bigT))/y(bigT) - (gam_t(bigT)*nu(bigT)*k(bigT) + (depr_t(bigT)-1)*k(bigT))/y(bigT) ))
 print *, 'worst feasibility = ', maxval((feasibility),1), 'in period', maxloc((feasibility),1)
 
 print *, 'max error = ', maxval(abs(err),1), 'in period', maxloc(abs(err),1)

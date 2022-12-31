@@ -464,7 +464,7 @@ do j = bigJ-1, ij, -1
                                 
                                 if(j < jbar_t_vfi(it))then  
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = 1d0 
-                                    lab_income = (1-tL(it))*(n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
+                                    lab_income = (1-tL(it))*(omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
                                                  + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
                                     lab_income_pretax = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp)
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income

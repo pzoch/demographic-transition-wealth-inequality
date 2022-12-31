@@ -49,13 +49,13 @@ do iter = 1,n_iter_t,1
     tau2_s_t_old = tau2_s_t
 
 
-        r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr
+        r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr_t
         include 'ces_production.f90'
         y = zbar*k**(alpha_t)
         
     do i = 1,bigT,1
-        if (r_bar(i) < -0.05_dp) then
-            r_bar(i) = -0.05_dp
+        if (r_bar(i) < -0.1_dp) then
+            r_bar(i) = -0.1_dp
         endif
     enddo
     do j = 1,bigJ,1
@@ -66,7 +66,7 @@ do iter = 1,n_iter_t,1
     if (switch_tauK_gross == 0) then
         r = 1+ (1 - tk)*r_bar  
     else
-        r = 1+ (1 - tk)*(r_bar+depr) - depr 
+        r = 1+ (1 - tk)*(r_bar+depr_t) - depr_t 
     endif
     
     r_f = 1 + r_bar
@@ -78,7 +78,7 @@ elseif (switch_g_const == 0) then
 endif
 
     
-   if ((switch_residual .NE. 6) .OR. (switch_residual .NE. 7)) then
+   if ((switch_residual .NE. 2) .AND. (switch_residual .NE. 6)) then
     ! we are not using debt adjustment to smooth tax adjustment 
     debt = debt_constr_t*y
     sum_priv_sv(1) = k(1)*gam_t(1)*nu(1) + debt(1) - PillarII(1)
@@ -90,17 +90,21 @@ endif
         endif 
     enddo 
    endif
+debt_trans_old = debt
+
+            sum_b_weight_trans_outer = sum_b_weight_ss
 
 include 'pension_system.f90'
 include 'closures.f90'
 
+debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             if (switch_tauK_gross == 0) then
                 r_vfi = (1 - tk)*r_bar  
             else
-                r_vfi = (1 - tk)*(r_bar+depr) - depr 
+                r_vfi = (1 - tk)*(r_bar+depr_t) - depr_t 
             endif
             
             if (switch_tauK_gross == 0) then
@@ -108,8 +112,7 @@ include 'closures.f90'
             else
                 r_vfi_pretax = r_bar 
             endif
-            sum_b_weight_trans_outer = 0.0d0
-            
+
         do m = 1,bigM, 1
 
             
@@ -202,7 +205,7 @@ include 'closures.f90'
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
             do i = 1,bigT
-            sum_b_weight_trans_outer(i) = sum_b_weight_trans_outer(i) +  N_big_t_j(jbar_t_vfi(i),m,i) / N_t_j(jbar_t_vfi(i),i)   * sum_b_weight_trans(i)
+            sum_b_weight_trans_outer_mat(m,i) = sum_b_weight_trans(i)
             enddo
         enddo
         avg_ef_l_supply_trans(2:bigT)     = 0d0
@@ -272,7 +275,7 @@ include 'closures.f90'
     k_new(1) = k(1)
     k_new(n_p+1) = (savings(n_p+1) - debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
     do i = 2,n_p+1,1
-        k_new(i) = (savings(i-1) - debt(i-1))/(nu(i)*gam_t(i))
+        k_new(i) = max(0.0001,(savings(i-1) - debt(i-1))/(nu(i)*gam_t(i)))
         err(i) = abs(k_new(i) - k(i))
         k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
         l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
@@ -289,14 +292,14 @@ include 'closures.f90'
 
     replacement = 0.d0
     do m = 1,bigM,1
-            replacement(1) = replacement(1) + N_big_t_j(jbar_t(1),m,1) / N_t_j(jbar_t(1),1)  * sum_b_weight_trans(1)* b_j(jbar_t(1),m,1)/(w_j(jbar_t(1)-1,m,1)*l_pen_j(jbar_t(1)-1,m, 1))  
+            replacement(1) = replacement(1) + N_big_t_j(jbar_t(1),m,1) / N_t_j(jbar_t(1),1)  * sum_b_weight_trans_outer_mat(m,1)* b_j(jbar_t(1),m,1)/(w_j(jbar_t(1)-1,m,1)*l_pen_j(jbar_t(1)-1,m, 1))  
     enddo
     
 
   
     do i = 2,bigT,1
         do m = 1,bigM,1
-            replacement(i) = replacement(i) +N_big_t_j(jbar_t(i),m,i) / N_t_j(jbar_t(i),i) * sum_b_weight_trans(i)*b_j(jbar_t(i),m,i)/(w_bar(m,i)*l_pen_j(jbar_t(i)-1,m, i-1)) 
+            replacement(i) = replacement(i) +N_big_t_j(jbar_t(i),m,i) / N_t_j(jbar_t(i),i) * sum_b_weight_trans_outer_mat(m,i)*b_j(jbar_t(i),m,i)/(w_bar(m,i-1)*l_pen_j(jbar_t(i)-1,m, i-1)) 
         enddo
     enddo
     

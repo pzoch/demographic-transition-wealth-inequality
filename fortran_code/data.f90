@@ -10,7 +10,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! pop summation
       real(dp), dimension(bigT)::  N_temp_vec ! pop summation
@@ -21,14 +21,14 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       real(dp), dimension(bigJ,bigT)::  pi_implied_d ! implied probabilities
       real(dp), dimension(bigM,bigT)::  bigl_type ! for calculating labor augmenting growth
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
-      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, tauL_d, tauK_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d
+      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d, depr_d
      ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
       real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_big_weight_d, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
       
       integer :: start_year ! first year for which we have data
-      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_gy, last_data_type_multiplier, last_data_type_share ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
+      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
 call chdir(cwd_r)
 
   
@@ -49,6 +49,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_debt           = 19 ! debt/gdp
         last_data_type_multiplier= 17 ! type multip
         last_data_type_share= 17 ! type share
+        last_data_t1 = 17 ! SS contrib
+        last_data_tauC = 17 ! for tauC
+        last_data_depr= 17 ! for depr
     elseif (switch_starting_year == 1) then
         start_year = 1960
         last_data = 28 ! for demography
@@ -60,6 +63,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sigma2_epsilon = 12 ! for sigma2_epsilon
         last_data_type_multiplier= 12 ! type multip
         last_data_type_share= 12 ! type share
+        last_data_t1 = 12 ! SS contrib
+        last_data_tauC = 12 ! for tauC
+        last_data_depr= 12! for depr
      elseif (switch_starting_year == 2) then
         start_year = 1950
         last_data = 30 ! for demography
@@ -70,6 +76,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sigma2_epsilon = 14 ! for sigma2_epsilon
         last_data_type_multiplier= 14 ! type multip
         last_data_type_share= 14 ! type share
+        last_data_t1 = 14 ! SS contrib
+        last_data_tauC = 14 ! for tauC
+        last_data_depr= 14 ! for depr
     elseif (switch_starting_year == 3) then
         start_year = 1935
         last_data = 33 ! for demography
@@ -83,11 +92,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_sl = 17 ! for sl
         last_data_type_multiplier= 17 ! type multip
         last_data_type_share= 17 ! type share
+        last_data_t1 = 17 ! SS contrib
+        last_data_tauC = 17 ! for tauC
+        last_data_depr= 14 ! for depr
     endif
     
 
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_jeden.txt")    
+     OPEN (unit=3, FILE = "_data_omega_deaton.txt")    
      do m = 1, bigM, 1
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j,m)
@@ -96,6 +108,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
 
     close(3)
+    
+    
+
 ! -------------------------------- gy -------------------------------
       
         Open(unit = 5, FILE = "_data_gy_1935.txt")  
@@ -279,7 +294,99 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
       jbar_d = switch_fix_retirement_age
 
     
-! -------------------------------- TAU_K -------------------------------    
+    
+    ! -------------------------------- LABOR SHARE -------------------------------
+    if (switch_starting_year == 0) then 
+        Open(unit = 5, FILE = "_data_sl_1935.txt")  
+
+    elseif (switch_starting_year == 1) then
+        Open(unit = 5, FILE = "_data_sl_1960.txt")  
+
+    elseif (switch_starting_year == 2) then
+        Open(unit = 5, FILE = "_data_sl_1950.txt")  
+        
+    elseif (switch_starting_year == 3) then
+        Open(unit = 5, FILE = "_data_sl_1935.txt")  
+    endif
+        
+    if (switch_change_sl == 1) then 
+        do i = 1, last_data_sl, 1
+            read(5,*) alpha_d(i)
+        enddo
+        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
+            
+     elseif (switch_change_sl == 0 .AND. switch_starting_year == 3) then
+         last_data_sl = 5
+         do i = 1, last_data_sl, 1
+            read(5,*) alpha_d(i)
+        enddo
+        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
+        
+    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 3) then   
+        read(5,*) alpha_d(1)
+        alpha_d(2:) = alpha_d(1)
+    endif
+    
+
+    
+    alpha_d = 1.0d0 - alpha_d / 100.0d0
+    
+    
+    close(5)
+    
+    if (switch_change_sl == -1) then
+        alpha_d(1:) = 0.35d0
+        
+    endif
+    
+    ! -------------------------------- DEPRECIATION RATE -------------------------------
+    
+        Open(unit = 5, FILE = "_data_depr_1935.txt")  
+    
+        
+    if (switch_change_depr == 1) then 
+        do i = 1, last_data_sl, 1
+            read(5,*) depr_d(i)
+        enddo
+        depr_d(last_data_depr+1:) = depr_d(last_data_depr)
+            
+     elseif (switch_change_depr == 0 .AND. switch_starting_year == 3) then
+         last_data_sl = 5
+         do i = 1, last_data_depr, 1
+            read(5,*) depr_d(i)
+        enddo
+        depr_d(last_data_depr+1:) = depr_d(last_data_depr) 
+        
+    elseif (switch_change_depr == 0.AND.switch_starting_year.NE. 3) then   
+        read(5,*) depr_d(1)
+        depr_d(2:) = depr_d(1)
+    endif
+    
+    ! -------------------------------- SOCIAL SECURITY CONTRIBUTIONS -------------------------------
+     OPEN (unit=5, FILE = "_data_contrib_1935.txt")    
+     if (switch_change_contrib == 1) then 
+        do i = 1, last_data_t1, 1
+            read(5,*) t1_d(i) 
+        enddo
+        t1_d(last_data_t1+1:) = t1_d(last_data_t1)
+            
+     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 3) then
+         last_data_t1 = 5
+         do i = 1, last_data_t1, 1
+            read(5,*) t1_d(i)
+        enddo
+        t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
+        
+    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 3) then   
+        read(5,*) t1_d(1)
+        t1_d(2:) = t1_d(1)
+    endif
+    
+    ! the above were contributions to gdp, now obtain contrib. rates:
+    t1_d = t1_d / (1-alpha_d)
+
+    close(5)
+    ! -------------------------------- TAU_K -------------------------------    
      if (switch_starting_year == 0) then 
         Open(unit = 7, FILE = "_data_tauK_1935.txt")  
 
@@ -344,52 +451,45 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         tauL_d(2:) = tauL_d(1)
     endif
         
+    
+    ! adjust for social security contributions
+    ! tau_L_data = tau_L_true * (1-tau_ss) + tau_ss 
+    ! tauL_d = (tauL_d - t1_d)/(1-t1_d)
     close(5)
     
-    
-    ! -------------------------------- LABOR SHARE -------------------------------
+! -------------------------------- TAU_C -------------------------------
     if (switch_starting_year == 0) then 
-        Open(unit = 5, FILE = "_data_sl_1935.txt")  
+        Open(unit = 5, FILE = "_data_tauC_1935.txt")  
 
     elseif (switch_starting_year == 1) then
-        Open(unit = 5, FILE = "_data_sl_1960.txt")  
+        Open(unit = 5, FILE = "_data_tauC_1960.txt")  
 
     elseif (switch_starting_year == 2) then
-        Open(unit = 5, FILE = "_data_sl_1950.txt")  
+        Open(unit = 5, FILE = "_data_tauC_1950.txt")  
         
     elseif (switch_starting_year == 3) then
-        Open(unit = 5, FILE = "_data_sl_1935.txt")  
+        Open(unit = 5, FILE = "_data_tauC_1935.txt")  
     endif
         
-    if (switch_change_sl == 1) then 
-        do i = 1, last_data_sl, 1
-            read(5,*) alpha_d(i)
+     if (switch_change_tauC == 1) then 
+        do i = 1, last_data_tauC, 1
+            read(5,*) tauC_d(i)
         enddo
-        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
+        tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC)
             
-     elseif (switch_change_sl == 0 .AND. switch_starting_year == 3) then
-         last_data_sl = 5
-         do i = 1, last_data_sl, 1
-            read(5,*) alpha_d(i)
+     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 3) then
+         last_data_tauC = 5
+         do i = 1, last_data_tauC, 1
+            read(5,*) tauC_d(i)
         enddo
-        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
+        tauL_d(last_data_tauC+1:) = tauL_d(last_data_tauC) 
         
-    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 3) then   
-        read(5,*) alpha_d(1)
-        alpha_d(2:) = alpha_d(1)
+    elseif (switch_change_tauC == 0.AND.switch_starting_year.NE. 3) then   
+        read(5,*) tauC_d(1)
+        tauC_d(2:) = tauC_d(1)
     endif
-    
-
-    
-    alpha_d = 1.0d0 - alpha_d / 100.0d0
-    
-    
+        
     close(5)
-    
-    if (switch_change_sl == -1) then
-        alpha_d(1:) = 0.35d0
-        
-    endif
     
   !    -------------------------------- DEBT/GDP -------------------------------
     if (switch_starting_year == 0) then 
@@ -425,7 +525,12 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         debt_constr_d = debt_constr_d/100   / zbar
     close(5)
     
+    !if there is switch_no_debt == 1 set debt to 0 in all periods
     
+    if (switch_no_debt == 1) then
+    debt_constr_d = 0.0d0
+    endif
+
     
  ! -------------------------------- LAMBDA -------------------------------
     if (switch_starting_year == 0) then 
@@ -538,7 +643,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
     do i = 1,last_data ,1 
         read(122,*) Nn_d(1,i)
-        do m = 1,bigM,1
+    enddo
+    
+     do m = 1,bigM,1
+         do i = 1,last_data,1
             do j = 1, bigJ
                 read(121,*) pi_d_big(j,m,i)
             enddo 
@@ -548,7 +656,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     do i = last_data+1, bigT, 1
         do m = 1,bigM,1
-            pi_d_big(:,m,i)=  pi_d_big(:,m,last_data)
+            do j = 1, bigJ
+            pi_d_big(j,m,i)=  pi_d_big(j,m,last_data)
+            enddo
         enddo
     enddo
     
@@ -644,7 +754,96 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     !pi_weight_d = pi_d
     
     
-    ! stable demographic structure in the steady state
+
+    
+    
+        
+   ! --------------------------------calculate GAMMA now -------------------------------
+    if (switch_starting_year == 0) then 
+        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+
+    elseif (switch_starting_year == 1) then
+        Open(unit = 4, FILE = "_data_gamma_tfp_1960.txt")  
+
+    
+    elseif (switch_starting_year == 2) then
+        Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
+        
+    elseif (switch_starting_year == 3) then
+        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
+        
+    endif
+     
+    
+    
+    if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
+        do i = 1, last_data_gamma, 1
+            read(4,*) gam_d(i)
+        enddo
+        gam_d(last_data_gamma+1:) = 1.03
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 3) then
+        last_data_gamma= 5
+        do i = 1, last_data_gamma, 1
+            read(4,*) gam_d(i)
+        enddo
+        gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
+        
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 3) then
+        read(4,*) gam_d(1)
+        gam_d(2:) = gam_d(1)
+    endif
+        
+        
+    close(4)
+    
+     if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
+      gam_d(:) = 1.02d0 ** 5   
+     endif
+     
+     
+    ! need to convert it to labor augmenting 
+    ! this requires some assumptions about the average hours of each agent
+
+    ! calculate effective labor in each period
+    do i = 1,bigT,1
+        do m = 1,bigM,1
+        do j = 1,jbar_d(i)-1,1
+            eff_labor(i) =  eff_labor(i) + type_multiplier_d(m,i) * (omega_ss_d(j,m)  * labor_constant * Nn_d_big(j,m,i)) ** rho_subst
+            raw_labor(i) =  raw_labor(i)                                              + labor_constant * Nn_d_big(j,m,i)
+        enddo   
+        enddo
+        eff_labor(i)    = eff_labor(i)  ** (1.0d0/rho_subst)
+        efficiency_t(i) = eff_labor(i) / raw_labor(i)
+    enddo
+    
+    ! effective labor growth
+
+    zet_d(1) = 1
+    do i = 2,bigT,1
+        zet_d(i) = zet_d(i-1)*gam_d(i)    
+    enddo
+    
+    !a_d(1) = 1 / efficiency_t(1)
+    do i = 1,bigT,1
+        a_d(i) = zet_d(i) **  ( 1/(1-alpha_d(i))) / efficiency_t(i) 
+    enddo
+    
+    !gam_d(1) = gam_d(1) !** (1/(1-alpha_d(1)))  
+    do i = 2,bigT,1
+        gam_d(i) =  a_d(i) /  a_d(i-1)
+    enddo
+    
+    zet_d = a_d
+    
+    gam_cum_d(1) = gam_d(1)
+    do i = 2,bigT,1
+        gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
+    enddo
+! --------------------------------end calculating GAMMA  -------------------------------
+    
+    
+    
     
     
     
@@ -805,7 +1004,8 @@ CLOSE(3)
 CLOSE(4)
 CLOSE(9)
 
-open(unit = 1, file= "population.csv")
+call chdir(cwd_w)
+open(unit = 1, file= version//experiment//closure//"population.csv")
     do i = 1,bigT,1
         write(1, '(1x, F, 16(",", F))') (Nn_d(j,i), j = 1,bigJ)
     enddo
@@ -815,130 +1015,50 @@ close(1)
 
 
 
-    
-! -------------------------------- GAMMA -------------------------------
-    if (switch_starting_year == 0) then 
-        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1960.txt")  
-
-    
-    elseif (switch_starting_year == 2) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
-        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
-        
-    endif
-     
-    
-    
-    if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
-        do i = 1, last_data_gamma, 1
-            read(4,*) gam_d(i)
-        enddo
-        gam_d(last_data_gamma+1:) = 1.03
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 3) then
-        last_data_gamma= 5
-        do i = 1, last_data_gamma, 1
-            read(4,*) gam_d(i)
-        enddo
-        gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
-        
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 3) then
-        read(4,*) gam_d(1)
-        gam_d(2:) = gam_d(1)
-    endif
-        
-        
-    close(4)
-    
-     if (switch_go_to_lower_gamma == -1) then !this one sets growth rate to a constant
-      gam_d(:) = 1.02d0 ** 5   
-     endif
-     
-     
-    ! need to convert it to labor augmenting 
-    ! this requires some assumptions about the average hours of each agent
-
-    ! calculate effective labor in each period
-    do i = 1,bigT,1
-        do m = 1,bigM,1
-        do j = 1,jbar_d(i)-1,1
-            eff_labor(i) =  eff_labor(i) + type_multiplier_d(m,i) * (omega_ss_d(j,m)  * labor_constant * Nn_d_big(j,m,i)) ** rho_subst
-            raw_labor(i) =  raw_labor(i)                                              + labor_constant * Nn_d_big(j,m,i)
-        enddo   
-        enddo
-        eff_labor(i)    = eff_labor(i)  ** (1.0d0/rho_subst)
-        efficiency_t(i) = eff_labor(i) / raw_labor(i)
-    enddo
-    
-    ! effective labor growth
-
-    zet_d(1) = 1
-    do i = 2,bigT,1
-        zet_d(i) = zet_d(i-1)*gam_d(i)    
-    enddo
-    
-    !a_d(1) = 1 / efficiency_t(1)
-    do i = 1,bigT,1
-        a_d(i) = zet_d(i) **  ( 1/(1-alpha_d(i))) / efficiency_t(i) 
-    enddo
-    
-    !gam_d(1) = gam_d(1) !** (1/(1-alpha_d(1)))  
-    do i = 2,bigT,1
-        gam_d(i) =  a_d(i) /  a_d(i-1)
-    enddo
-    
-    zet_d = a_d
-    
-    gam_cum_d(1) = gam_d(1)
-    do i = 2,bigT,1
-        gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
-    enddo
 
 ! SETTING TO FIXED
 
 if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
-   sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+   !sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
    !sigma2_epsilon_t_big(1:,1) = sigma2_epsilon_t_big(1,1)  
    !sigma2_epsilon_t_big(1:,2) = sigma2_epsilon_t_big(1,1)  
      
-    type_multiplier_d(m,:) = 1.0
-    type_share_d(m,2:) = type_share_d(m,1)
+    !type_multiplier_d(m,:) = 1.0
+    !type_share_d(m,2:) = type_share_d(m,1)
     !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
     !omega_ss_d(:,1) = omega_ss_d(:,1) 
     !omega_ss_d(:,2) = omega_ss_d(:,1)
     
     enddo
-    tauK_d(2:) = tauK_d(1)
-    tauL_d(2:) = tauL_d(1)
-    alpha_d(2:) = alpha_d(1)
+    !tauK_d(2:) = tauK_d(1)
+    !tauL_d(2:) = tauL_d(1)
+    !tauC_d(2:) = taUC_d(1)
+    !alpha_d(2:) = alpha_d(1)
     debt_constr_d(2:) = debt_constr_d(1)
-    lambda_d(2:) = lambda_d(1)
-    gam_d(2:) = gam_d(1)
+    !lambda_d(2:) = lambda_d(1)
+    !gam_d(2:) = gam_d(1)
+    !depr_d(2:) = depr_d(1)
+    !t1_d(2:) = t1_d(1)
+    do i = 2, bigT,1
+        pi_d_big(1,:,i) = pi_d_big(1,:,1)
+        Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1) * nu_ss_new
+        do j = 2, bigJ, 1   
+            pi_d_big(j,:,i) = pi_d_big(j,:,1)
+            Nn_d_big(j,:,i) = pi_d_big(j,:,1)/pi_d_big(j-1,:,1)*Nn_d_big(j-1,:,i-1)
+           
+        enddo
+     enddo
     
-    !do i = 2, bigT,1
-    !    pi_d_big(1,:,i) = pi_d_big(1,:,1)
-    !    Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1) * nu_ss_new
-    !    do j = 2, bigJ, 1   
-    !        pi_d_big(j,:,i) = pi_d_big(j,:,1)
-    !        Nn_d_big(j,:,i) = pi_d_big(j,:,1)/pi_d_big(j-1,:,1)*Nn_d_big(j-1,:,i-1)
-            
-    !    enddo
-    ! enddo
-
-    !do i = 1,bigT,1
-    !type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
-    ! enddo
-     
-    ! do i = 2,bigT,1
-    !    pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
-    ! enddo
+    do i = 1,bigT,1
+    type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     enddo
+    ! 
+     do i = 2,bigT,1
+        pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
+     enddo
     
     !pi_weight_d = pi_d
     !nu_ss_old = 1.0d0

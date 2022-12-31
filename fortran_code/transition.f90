@@ -21,7 +21,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
-	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces
+	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: N_big_t_j
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
@@ -62,6 +62,16 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
         
     tl = tauL_t
     tk = tauK_t
+    tc = tauC_t
+    do i = 1,bigT,1
+        do j = 1,bigJ,1
+        t1(j,i) = t1_t(i)
+        enddo
+    
+    enddo
+    
+    
+
     N_big_t_j = Nn_big
     if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
         do i = 1,bigT,1
@@ -74,7 +84,10 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
             tL(i)       = tauL_ss_old
             lambda_t(i) = lambda_ss_old
             tK(i)       = tauK_ss_old
+            tC(i)       = tauC_ss_old
+            t1(:,i)     = t1_ss_old
             alpha_t(i)       = alpha_ss_old
+            depr_t(i)       = depr_ss_old
             debt_constr_t(i) = debt_constr_ss_old
             g_share(i)      = g_share_ss
 	    enddo
@@ -85,18 +98,18 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     endif
 
     
-t1 = t1_ss_new
+
 t2 = t2_ss_new
  
-do i = 1,n_p,1
-    do j =1, bigj, 1
-        if (j-i+3 > ofe_u) then 
-            t1(j,i) = t1_ss_old
-            t2(j,i) = t2_ss_old  
-        endif
-    enddo
-enddo 
-t1(:,1) = t1_ss_old
+!do i = 1,n_p,1
+!    do j =1, bigj, 1
+!        if (j-i+3 > ofe_u) then 
+!            t1(j,i) = t1_ss_old
+!            t2(j,i) = t2_ss_old  
+!        endif
+!    enddo
+!enddo 
+
 t2(:,1) = t2_ss_old
 t1_contrib = t1
 
@@ -141,7 +154,7 @@ include 'Initial_values_db.f90'
 
      
 
-    
+    debt = debt_trans
     N_t_j = sum(N_big_t_j,dim=2)
     N_t = sum(N_t_j, dim=1)
     bigl_type = 0.0d0
@@ -179,9 +192,9 @@ enddo
     enddo 
 
 
-    r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr
+    r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr_t
     y = zbar*k**(alpha_t)
-    
+
     include 'ces_production.f90'
     
     bigK = k * bigl
@@ -229,7 +242,7 @@ enddo
     if (switch_tauK_gross == 0) then
         r = 1 + (1 - tk)*r_bar  
         else
-        r = 1 + (1 - tk)*(r_bar+depr) - depr 
+        r = 1 + (1 - tk)*(r_bar+depr_t) - depr_t 
     endif
     
 

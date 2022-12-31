@@ -21,6 +21,8 @@
     
     OPEN (unit=20, FILE = version//experiment//closure//"upsilon_share_trans.txt")
     OPEN (unit=21, FILE = version//experiment//closure//"replacement2_trans.txt") !rozumiane jako pierwsza emerytura do ostatniej placy
+    OPEN (unit=22, FILE = version//experiment//closure//"bigL_trans.txt")
+    OPEN (unit=23, FILE = version//experiment//closure//"Nt_trans.txt")
     OPEN (unit=24, FILE = version//experiment//closure//"g_share_trans.txt")
     OPEN (unit=25, FILE = version//experiment//closure//"rbar_trans.txt")
     
@@ -47,12 +49,15 @@
     OPEN (unit=71, FILE = version//experiment//closure//"nu_trans.txt")
     OPEN (unit=72, FILE = version//experiment//closure//"depend_ratio_trans.txt")
     
-    OPEN (unit=73,  FILE = version//experiment//closure//"wage_trans.txt")
-    OPEN (unit=74,  FILE = version//experiment//closure//"bequest_trans.txt")
+    OPEN (unit=73,  FILE = version//experiment//closure//"r_pretax_trans_1y.txt")
+    OPEN (unit=74,  FILE = version//experiment//closure//"r_afterax_trans_1y.txt")
     OPEN (unit=75,  FILE = version//experiment//closure//"r_trans.txt")
     OPEN (unit=76,  FILE = version//experiment//closure//"sum_b_weight_trans.txt")
     OPEN (unit=77,  FILE = version//experiment//closure//"zet_trans.txt")
     OPEN (unit=78,  FILE = version//experiment//closure//"gdp_trans.txt")
+    OPEN (unit=79,  FILE = version//experiment//closure//"ky_ratio_trans_1y.txt")
+    OPEN (unit=80,  FILE = version//experiment//closure//"irr_1y_trans.txt")
+    OPEN (unit=81,  FILE = version//experiment//closure//"iy_ratio_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -78,12 +83,20 @@
         write(17, '(F20.10)') debt_share(i)
         write(18, '(F20.10)') ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)
         write(20, '(F20.10)') upsilon(i)/(bigl(i)/N_t(i))/y(i) 
-        write(21, '(F20.10)') replacement2(i)            
+        write(21, '(F20.10)') replacement2(i)         
+        write(22, '(F20.10)') bigl(i)
+        write(23, '(F20.10)') N_t(i)
         write(24, '(F20.10)') g(i)/y(i)
         write(25, '(F20.10)') (1d0 + r_bar(i))**(1d0/real(zbar)) - 1d0
         write(26, '(F20.10)') tc(i)*consumption_gross(i)/y(i)
-        !write(27, '(F20.10)') sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i)
-        write(28, '(F20.10)') tk(i)*r_bar(i)*sum_priv_sv(i)/(nu(i)*gam_t(i))/y(i) !! this is calculated in a wrong way!!! 
+        
+        write(27, '(F20.10)') labor_tax_revenue(i)/bigl(i)/y(i)
+         if (switch_tauK_gross == 0) then 
+            write(28, '(F20.10)') tk(i)*r_bar(i)*k(i) /y(i) !! i am not sure if this is calculated correctly - need to check also in closure.f90
+         else
+            write(28, '(F20.10)') tk(i)*(r_bar(i)+depr)*k(i) / y(i)
+         endif
+         
         write(30,  '(F20.16)') t1(2,i)
         write(64,  '(F20.10)') gam_t(i) 
         write(65,  '(F20.10)') consumption_gross(i)/y(i) 
@@ -94,14 +107,17 @@
         write(70,  '(F20.10)') life_exp(1,i)
         write(71,  '(F20.10)') nu(i)
         write(72,  '(F20.10)') sum(N_t_j(jbar_t_vfi(i):bigJ,i))/bigl(i)
-        !write(73,  '(F20.10)') w_bar(i)
-        !write(74,  '(F20.10)') bequest(i)
-        write(75,  '(F20.10)') r(i)  
         
-         write(76,  '(F20.10)') sum_b_weight_trans(i)
-         write(77,  '(F20.10)') zet(i) 
-         write(78,  '(F20.10)') zet(i) * bigY(i)
-
+        write(73,  '(F20.10)') 100*((1 + r_bar(i))**0.2_dp -1d0)
+        write(74,  '(F20.10)') 100*(r(i)**0.2_dp -1d0)
+        
+        write(75,  '(F20.10)') r(i)  
+        write(76,  '(F20.10)') sum_b_weight_trans(i)
+        write(77,  '(F20.10)') zet(i) 
+        write(78,  '(F20.10)') zet(i) * bigY(i)
+        write(79,  '(F20.10)') k(i)/y(i) * real(zbar)
+        write(80,  '(F20.10)') 100*((1 + r_bar(i))**0.2_dp -1d0)
+        write(81,  '(F20.10)') (y(i)-consumption_gross(i)-g(i))/y(i) 
     enddo
     
     
@@ -146,6 +162,7 @@
     CLOSE(20)
     CLOSE(21)
     CLOSE(22)
+    CLOSE(23)
     CLOSE(24)
     CLOSE(25)
     CLOSE(26)
@@ -170,6 +187,9 @@
      CLOSE(76)
      CLOSE(77)
      CLOSE(78)
+     CLOSE(79)
+     CLOSE(80)
+     CLOSE(81)
 ! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")
@@ -197,89 +217,8 @@
     write(203,  '(F20.10)') (debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
     CLOSE(202)
     CLOSE(203)
-        
-
-    
-!open(unit = 104, file= version//experiment//closure//"tax_decomp.csv")
-!write(104, '(A)') "TL;TC;TK;upsilon;tcontrib;subsidy;g;debt"
-!do i = 1, n_p
-!    write(104, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10)') &
-!                sum(N_t_j(1:bigJ,i)*labor_tax_j(1:bigJ,i))/bigl(i)/y(i), ";", & ! tl
-!                tc(i)*consumption_gross_new(i)/y(i), ";", & ! tc
-!                tk(i)*r_bar(i)*sum_priv_sv(max(i-1,1))/(nu(i)*gam_t(i))/y(i) , ";",  & ! tk
-!                upsilon(i)/(bigl(i)/N_t(i))/y(i) , ";", & !upsilon
-!                sum(N_t_j(:,i)*w_bar(i)*t1(:,i)*l_j(:,i), dim=1)/bigl(i) , ";", & !t1constrib
-!                subsidy(i)/y(i) , ";", & ! subsdy
-!                g(i)/y(i) , ";", & ! g 
-!                ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)! debt
-!enddo   
-!close(104) 
-! temporary printing     
-!OPEN (unit=202,  FILE = version//experiment//closure//"Value_function_20_years_old_trans.txt")
-!    do j = -bigJ,bigT, 1
-!        write(202,  '(F20.10)') V_20_years_old(j)
-!    enddo
-!CLOSE(202)
-    
-!open(unit = 104, file= version//experiment//closure//"Value_function_trans.csv")
-!do j = 1, bigJ,1  
-!    do i = 1,bigT,1
-!        write(104, '(F20.10)', advance='no') V_j_vfi(j, i)
-!        write(104, '(A)', advance='no') ";"
-!    enddo
-!    write(104, '(F20.10)') V_j_vfi(j, bigT)
-!enddo      
-!close(104)
-
-OPEN (unit=202,  FILE = version//experiment//closure//"g_per_capita_trans.txt")
-do i = 1,bigT, 1
-    write(202,  '(F20.10)') g_per_capita(i)
-enddo
-CLOSE(202)
 
 
-open(unit = 104, file= version//experiment//closure//"savings_top_ten.csv")
-do t = 1, 10,1  
-    do i = 2,bigT,1
-        write(104, '(F20.10)', advance='no') savings_top_ten_trans(t,i)/sum(N_t_j(:,i)*asset_trans(:,i))
-        write(104, '(A)', advance='no') ";"
-    enddo
-    write(104, '(F20.10)')savings_top_ten_trans(t,bigT)/sum(N_t_j(:,bigT)*asset_trans(:,bigT))
-enddo      
-close(104) 
-
-
-open(unit = 104, file= version//experiment//closure//"savings_top_ten_1.csv")
-do t = 1, 10,1  
-    do i = 2,bigT,1
-        write(104, '(F20.10)', advance='no') savings_top_ten_trans(t,i)
-        write(104, '(A)', advance='no') ";"
-    enddo
-    write(104, '(F20.10)')savings_top_ten_trans(t,bigT)
-enddo      
-close(104) 
-
-
-open(unit = 104, file= version//experiment//closure//"savings_top_ten_2.csv")
-do t = 1, 10,1  
-    do i = 2,bigT,1
-        write(104, '(F20.10)', advance='no') sum(N_t_j(:,i)*asset_trans(:,i))
-        write(104, '(A)', advance='no') ";"
-    enddo
-    write(104, '(F20.10)')sum(N_t_j(:,bigT)*asset_trans(:,bigT))
-enddo      
-close(104) 
-     
-!open(unit = 104, file= version//experiment//closure//"l_pen_j.csv")
-!do j = 1, bigJ,1  
-!    do i = 1,bigT,1
-!        write(104, '(F20.10)', advance='no') l_pen_j(j, i)
-!        write(104, '(A)', advance='no') ";"
-!    enddo
-!    write(104, '(F20.10)')l_pen_j(j, bigT)
-!enddo      
-!close(104)
- 
 
 OPEN (unit=1, FILE = version//experiment//closure//"gini_weight_trans.txt")
     do i = 1, bigT, 1
@@ -348,7 +287,7 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
                         do ir = 1, n_sr, 1
                             do id = 1, n_sd, 1
                             write(108, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
-                            prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_t_j_vfi(j,i)/sum(N_t_j_vfi(:,i)), ";", & ! mass
+                            prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i)), ";", & ! mass
                             c_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !consumption
                             l_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !hours
                             lab_income_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
@@ -376,15 +315,3 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
     
 close(108)
 
-    OPEN (unit=109, FILE = version//experiment//closure//"prob_trans_marg.csv")
-        do i = 1, bigT, 1
-    
-            do ia = 0, n_a, 1
-               
-                            write(109, '(F20.10,A,F20.10)') &
-                            prob_trans_marg(ia,i), ";", & ! mass
-                            sv(ia)  !assets
-            enddo
-
-            enddo
-close(109)

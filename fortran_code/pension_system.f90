@@ -23,7 +23,7 @@
         avg_wl(i) = 0d0
         do m = 1,bigM,1
         do j = 1, jbar_t(max(i-1,1)) -1
-            avg_wl(i) = avg_wl(i) + type_share_j_t(jbar_t(max(i-1,1)) -j,m,max(i-j,1)) *w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
+            avg_wl(i) = avg_wl(i) + type_share_j_t(jbar_t(max(i-1,1)),m,max(i-j,1)) *w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
         enddo
         enddo 
         avg_wl(i) = avg_wl(i)/real(jbar_t(max(i-1,1)) -1)
@@ -64,12 +64,12 @@
             enddo 
         b_j(:,m,i) = b_scale_factor(i)*b1_j(:,m,i)    
         do j = 1, bigJ, 1
-            subsidy_j(j,m,i) = sum_b_weight_trans_outer(min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,m,i) - t1(j,i)*w_bar(m,i)* l_j(j,m,i)   
+            subsidy_j(j,m,i) = sum_b_weight_trans_outer_mat(m,min(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1), bigT))*b_j(j,m,i) - t1(j,i)*w_bar(m,i)* l_j(j,m,i)   
         enddo
         contribution_j(:,m,i) = t1(:,i)*w_bar(m,i)*l_j(:,m,i)
     enddo 
     
-    subsidy_j(:,m,1) = (sum_b_weight_trans_outer(1)*b_j(:,m,1) - t1(:,1))*w_bar(m,1)*l_j(:,m,1)   
+    subsidy_j(:,m,1) = (sum_b_weight_trans_outer_mat(m,1)*b_j(:,m,1) - t1(:,1))*w_bar(m,1)*l_j(:,m,1)   
     contribution_j(:,m,1) = t1(:,1)*w_bar(m,1)*l_j(:,m,1)
     enddo
      ! macro agg   
@@ -85,7 +85,7 @@
     sum_b(i) = 0d0
     do m = 1, bigM, 1
         do j = jbar_t(i), bigJ, 1
-            sum_b(i) = sum_b(i) +    sum_b_weight_trans_outer(max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,m,i)*type_share_j_t(j,m,i)*N_t_j(j,i)/bigl(i)
+            sum_b(i) = sum_b(i) +    sum_b_weight_trans_outer_mat(m,max(i + jbar_t_yob(max(i-j+1, -bigj)) -j,1))*b_j(j,m,i)*type_share_j_t(j,m,i)*N_t_j(j,i)/bigl(i)
         enddo
     enddo
     

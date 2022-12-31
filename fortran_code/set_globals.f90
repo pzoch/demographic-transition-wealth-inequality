@@ -15,19 +15,20 @@ subroutine globals
 
     
     
-    version = 'the2_' ! this is just to organize some versions, does not change anything in the code
-    experiment = 'dem_'
-    closure = 'taxC__'
+    version = 'test_' ! these three strings allow us to load a correct version
+    experiment = 'all_'
+    closure = 'govt__'
 
 call chdir(cwd_i)
 
-    OPEN (unit=3, FILE = "instructions.txt")
+    OPEN (unit=3, FILE = version//experiment//closure//"instructions.txt")
         ! preamble
         ! switches of the specification
         read(3,*) switch_mortality             
         read(3,*) switch_unstable_dem_ss       
         read(3,*) switch_go_to_lower_gamma   
         read(3,*) switch_change_tauL
+        read(3,*) switch_change_tauC
         read(3,*) switch_change_lambda            
         read(3,*) switch_change_tauK           
         read(3,*) switch_steady_demo   
@@ -37,11 +38,13 @@ call chdir(cwd_i)
         read(3,*) switch_change_debt 
         read(3,*) switch_change_sl 
         read(3,*) switch_change_gy 
+        read(3,*) switch_change_depr 
+        read(3,*) switch_change_contrib
         read(3,*) switch_keep_fixed 
         read(3,*) switch_residual_t 
         read(3,*) switch_residual_1 
         read(3,*) switch_residual_2 
-
+        read(3,*) switch_no_debt
         
         ! second, some debug switches/options
         read(3,*) switch_het_mortality
@@ -76,7 +79,7 @@ call chdir(cwd_i)
 
 
 call chdir(cwd_p)
-    OPEN (unit=3, FILE = "parameters.txt")
+    OPEN (unit=3, FILE = version//experiment//closure//"parameters.txt")
    ! load these parameter values
         read(3,*) n_iter_ss             
         read(3,*) n_iter_t
@@ -86,6 +89,7 @@ call chdir(cwd_p)
         read(3,*) err_prof_tol
         read(3,*) up_ss
         read(3,*) up_t
+        read(3,*) up_debt_t
         read(3,*) up_tc
         read(3,*) l_bound
         read(3,*) beta
@@ -124,7 +128,7 @@ call chdir(cwd_p)
         read(3,*) zeta_r
         read(3,*) sigma_nu_r
         read(3,*) labor_constant
-        
+        read(3,*) g_correction_last_period
         ! zeta_p loaded at the end to ensure the correct number is loaded
         do m = 1,bigM,1 
             read(3,*) zeta_p(m)
@@ -139,7 +143,6 @@ call chdir(cwd_p)
   
 
         ! rescale to account for zbar
-        depr        = (1.0_dp + depr)**zbar - 1.0_dp 
         zeta_p      = zeta_p**zbar  
         sigma_nu_d  = sigma_nu_d*(1-zeta_d**(2*zbar))/(1-zeta_d**2)
         zeta_d      = zeta_d**zbar 
@@ -154,11 +157,13 @@ call chdir(cwd_p)
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, tauL_t, tauK_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t)
+    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t)
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
-    
+        ! rescale to account for zbar
+        !depr_t        = (1.0_dp + depr_t)**zbar - 1.0_dp 
+    !depr_t        = 1.0d0-(1.0_dp -depr_t)**zbar
     ! THIS JUNK BELOW CAN BE AXED
     ! it is need for implicit tax subroutine
     ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
@@ -186,8 +191,7 @@ call chdir(cwd_p)
         endif
     enddo
     
-    t1_ss_contrib = t1_ss_old
-    t1 = t1_ss_old
+
     
     do i = 1,bigT,1
         omega_big(:,:,i) = omega_ss_big
@@ -197,6 +201,8 @@ call chdir(cwd_p)
     g_share_ss =  g_share(1)
     g_share_ss_2 =g_share(bigT)
     
+    t1_ss_old    = t1_t(1)
+    t1_ss_new    = t1_t(bigT)
     
     jbar_ss_old = jbar_t(1)
     jbar_ss_new = jbar_t(bigT)
@@ -219,14 +225,23 @@ call chdir(cwd_p)
     tauL_ss_old = tauL_t(1)
     tauL_ss_new = tauL_t(bigT)
     
+    t1_ss_old = t1_t(1)
+    t1_ss_new = t1_t(bigT)
+    
     tauK_ss_old = tauK_t(1)
     tauK_ss_new = tauK_t(bigT)
+    
+    tauC_ss_old = tauC_t(1)
+    tauC_ss_new = tauC_t(bigT)
     
     lambda_ss_old = lambda_t(1)
     lambda_ss_new = lambda_t(bigT)
     
     alpha_ss_old = alpha_t(1)
     alpha_ss_new = alpha_t(bigT)
+    
+    depr_ss_old = depr_t(1)
+    depr_ss_new = depr_t(bigT)
     
     type_multiplier_ss_old = type_multiplier_t(:,1)
     type_multiplier_ss_new = type_multiplier_t(:,bigT)

@@ -41,7 +41,7 @@ integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_trans,  aime_plus_trans, l_trans, c_trans, labor_tax_trans, &
                                                   RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
-real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_trans_big,  aime_plus_trans_big, l_trans_big, c_trans_big, labor_tax_trans_big, &
+real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_trans_big,  aime_plus_trans_big, l_trans_big, lab_trans_big, c_trans_big, labor_tax_trans_big, &
                                                   RHS_trans_big, prob_trans_big, ERHS_trans_big, sv_tempo_trans_big, V_trans_big, EV_trans_big, lab_income_trans_big, lab_income_pretax_trans_big,  tot_income_trans_big, tot_income_pretax_trans_big, bequest_j_trans_big
 
 real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi,  w_pom_trans_implicit_vfi, &
@@ -53,11 +53,11 @@ real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, L
 integer :: jbar_t_vfi(bigT)
 
 !steady state variables
-real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, srate_ss,lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, disposable_ss, prob_ss, &
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_ss, srate_ss,lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, disposable_ss, prob_ss, &
  gini_weight_consumption,  aime_plus_ss, aime_tempo
 
 !steady state variables - big
-real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, l_ss_big, c_ss_big, srate_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, disposable_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
+real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, lab_ss_big, l_ss_big, c_ss_big, srate_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, disposable_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
  gini_weight_consumption_big,  aime_plus_ss_big, aime_tempo_big
 
 real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, lab_income_ss_j_vfi, lab_income_pretax_ss_j_vfi, tot_income_ss_j_vfi, tot_income_pretax_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi,  b_ss_j_vfi, &

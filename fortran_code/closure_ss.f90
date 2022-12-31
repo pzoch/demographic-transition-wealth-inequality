@@ -1,10 +1,11 @@
     labor_tax_revenue_ss = 0.0d0
+    do j = 1,bigJ,1
     do m = 1,bigM,1
-       labor_tax_revenue_ss = labor_tax_revenue_ss +  type_share_ss(m) *  sum(N_ss_j(1:bigJ)*labor_tax_ss_j(1:bigJ,m))
+       labor_tax_revenue_ss = labor_tax_revenue_ss +  N_big_ss_j(j,m)*labor_tax_ss_j(j,m)
+    enddo
     enddo
     
-    
-    
+
     select case (switch_residual)
         
         
@@ -53,6 +54,30 @@
          !       - tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  &
          !      - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross 
         endif
+        
+    case(2)             
+!       case 2 - debt is residual
+
+
+        
+        !deficit_ss =  (1 + r_bar_ss)/(gam_ss * nu_ss)  * debt_ss - debt_ss 
+        if (switch_tauK_gross == 0) then
+            
+       
+        deficit_ss  = subsidy_ss + g_ss - tc_ss *  consumption_ss_gross  - tk_ss*r_bar_ss*k_ss  - 0.0d0 * tk_ss*r_bar_ss*debt_ss / (gam_ss * nu_ss)     - labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))
+        debt_ss  =  deficit_ss * (1 - (r_bar_ss) / (gam_ss * nu_ss))**(-1)      
+             
+        else
+            
+              
+        deficit_ss  =  subsidy_ss + g_ss -  tc_ss * consumption_ss_gross - tk_ss*(r_bar_ss + depr)*k_ss - labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))
+        debt_ss  =  deficit_ss * (1 - (r_ss) / (gam_ss * nu_ss))**(-1)      
+        
+         !       tc_ss = (subsidy_ss + g_ss + (1 + r_ss)*debt_ss/(gam_ss*nu_ss) - debt_ss &
+         !       - tk_ss*(r_bar_ss+depr)*(sum_priv_sv_ss-debt_ss+PillarII_ss)/(gam_ss*nu_ss) - sum(N_ss_j*labor_tax_ss_j_vfi(1:bigJ))/bigl_ss  &
+         !      - upsilon_ss/(bigl_ss/(sum(N_ss_j))))/consumption_ss_gross 
+        endif     
+        
         
   
     

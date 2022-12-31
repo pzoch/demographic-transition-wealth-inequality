@@ -15,16 +15,16 @@ IMPLICIT NONE
 CONTAINS
 
 subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss)
-    real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, &
+    real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss
     
-    real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss
+    real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss, sum_b_weight_vec_ss
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
     real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss, type_share_big_ss
-    
+    real(dp) :: check_pension_clearing
 	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
     real*8, dimension(0:n_a) :: prob_ss_marg
     real(dp), intent(in)  :: rho	
@@ -55,6 +55,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
 
     if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
         alpha = alpha_ss_old
+        depr =depr_ss_old
         gam_ss = gam_ss_old
         pi_big_ss = pi_big_ss_old 
         pi_big_weight_ss = pi_big_weight_ss_old
@@ -65,6 +66,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         t2_ss = t2_ss_old
         tL_ss   = tauL_ss_old
         tK_ss   = tauK_ss_old
+        tC_ss   = tauC_ss_old
         lambda= lambda_ss_old
         debt_constr= debt_constr_ss_old
         pi_ip_big = pi_ip_ss_old_big
@@ -76,6 +78,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         
     else 
         alpha = alpha_ss_new
+        depr =depr_ss_new
         gam_ss = gam_ss_new
         pi_big_ss = pi_big_ss_new
         pi_big_weight_ss = pi_big_weight_ss_new
@@ -86,6 +89,8 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         t2_ss = t2_ss_new
         tL_ss  = tauL_ss_new
         tK_ss   = tauK_ss_new
+        tC_ss   = tauC_ss_new
+
         lambda = lambda_ss_new
         
         pi_ip_big = pi_ip_ss_new_big
@@ -97,7 +102,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         type_share_ss = type_share_ss_new
     endif
     
-      
+
 ! force it to treat it as a 2nd steady state - for test purposes    
 !switch_run_1 = 0
     
@@ -190,8 +195,8 @@ do iter = 1,n_iter_ss,1
     
     include 'ces_production_ss.f90'
     
-    if (r_bar_ss < -0.05) then
-        r_bar_ss = -0.05
+    if (r_bar_ss < 0.0) then
+        r_bar_ss = 0.0
     endif
     
     if (switch_tauK_gross == 0) then
@@ -311,7 +316,7 @@ endif
         jbar_ss_vf = ceiling(jbar_ss)
         iter_com = iter
         sum_b_weight_ss = 0.0d0
-        
+        sum_b_weight_vec_ss = 0.0d0
 
         ! calling each type separately
          do m = 1,bigM,1
@@ -349,6 +354,7 @@ endif
             aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
             c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
             l_ss_big(:, :, :, :, :, : ,m)            = l_ss
+            lab_ss_big(:, :, :, :, :, : ,m)          = lab_ss
             srate_ss_big(:, :, :, :, :, : ,m)            = srate_ss
             lab_income_ss_big(:, :, :, :, :, :,m)    = lab_income_ss
             lab_income_pretax_ss_big(:, :, :, :, :, :,m) = lab_income_pretax_ss
@@ -361,10 +367,11 @@ endif
             l_ss_pen_j(:,m)                             = l_ss_j_vfi
             c_ss_j(:,m)                                 = c_ss_j_vfi
             l_ss_j(:,m)                                 = l_ss_j_vfi
-            asset_pom_ss_j(:,m)                         = asset_pom_ss_j_vfi
             lab_ss_j(:,m)                               = lab_ss_j_vfi
+            asset_pom_ss_j(:,m)                         = asset_pom_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
-            sum_b_weight_ss = sum_b_weight_ss + type_share_big_ss(jbar_ss,m)  * sum_b_weight_ss_vfi
+            sum_b_weight_vec_ss(m) = sum_b_weight_ss_vfi
+            !sum_b_weight_ss = sum_b_weight_ss + type_share_big_ss(jbar_ss,m)  * sum_b_weight_ss_vfi
             labor_tax_ss_j(:,m) = labor_tax_ss_j_vfi(:)
         
         enddo
@@ -377,11 +384,10 @@ endif
         bigl_type_ss    = 0d0
         average_l_ss    = 0d0
         average_w_ss    = 0d0
-        
+        average_lab_ss  = 0d0
         consumption_ss_gross    = 0d0
         savings_ss              = 0d0
         asset_pom_ss            = 0d0
-        average_lab_ss          = 0d0
         avg_ef_l_supply         = 0d0
         LabIncAVG_ss_vfi        = 0d0
         avg_wl                  = 0d0
@@ -391,9 +397,9 @@ endif
             bigl_type_ss(m)         = sum(N_big_ss_j(:,m)  * l_ss_j(1:jbar_ss-1,m))
             bigl_ss                 = bigl_ss + type_multiplier_ss(m) * bigl_type_ss(m) ** rho_subst ! with CES production function this
             average_l_ss            = average_l_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_lab_ss            = average_lab_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             average_w_ss            = average_w_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross    = consumption_ss_gross +  sum(N_big_ss_j(:,m)  * consumption_ss_gross_j(:,m))
-            average_lab_ss          = average_lab_ss + sum(N_big_ss_j(1:jbar_ss-1,m)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             asset_pom_ss            = asset_pom_ss +  sum(N_big_ss_j(:,m)  * asset_pom_ss_j(:,m))
             savings_ss              = savings_ss +   sum(N_big_ss_j(:,m)  * savings_ss_j(:,m))
             
@@ -424,15 +430,22 @@ endif
             
             sum_b_ss = 0.0d0
             do m = 1,bigM,1
-                sum_b_ss = sum_b_ss + sum(sum_b_weight_ss*b_ss_j(:,m)*N_big_ss_j(1:bigJ,m))/bigl_ss
+                sum_b_ss = sum_b_ss + sum(sum_b_weight_vec_ss(m)*b_ss_j(:,m)*N_big_ss_j(1:bigJ,m))/bigl_ss
             enddo
             
             subsidy_ss = 0.0d0
             do m = 1,bigM,1 
-                subsidy_ss = subsidy_ss + sum(N_big_ss_j(:,m)*(sum_b_weight_ss*b_ss_j(:,m) - t1_ss*w_bar_ss(m)*l_ss_j(:,m)))/bigl_ss
+                subsidy_ss = subsidy_ss + sum(N_big_ss_j(:,m)*(sum_b_weight_vec_ss(m)*b_ss_j(:,m) - t1_ss*w_bar_ss(m)*l_ss_j(:,m)))/bigl_ss
             enddo
            
+check_pension_clearing = 0.0d0
 
+        do m = 1,bigM,1
+            do j = 1,bigJ,1
+                check_pension_clearing = check_pension_clearing +  N_big_ss_j(j,m)*t1_ss*w_bar_ss(m)*l_ss_j(j,m)
+            enddo
+        enddo
+        check_pension_clearing = check_pension_clearing/bigl_ss + subsidy_ss - sum_b_ss
 
     
 
@@ -461,10 +474,9 @@ endif
     
 
     include 'closure_ss.f90'
-    
-    
-         
-    k_ss_new = (savings_ss - debt_ss)/(gam_ss*nu_ss)
+    debt_share_ss = debt_ss / y_ss
+    !k_ss_new = (savings_ss - debt_ss)/(gam_ss*nu_ss)
+    k_ss_new = max((savings_ss - debt_ss)/(gam_ss*nu_ss),0.0001)
     err_ss = abs(k_ss_new - k_ss)
     k_ss = up_ss*k_ss + (1 - up_ss)*k_ss_new
     
@@ -497,10 +509,21 @@ enddo
         l_ss_pen_j_1 = l_ss_pen_j
         sum_b_weight_trans(1) = sum_b_weight_ss
         sum_b_weight_trans_outer(1) = sum_b_weight_ss
+        sum_b_weight_vec_ss_old = sum_b_weight_vec_ss
+        do m = 1,bigM,1
+        sum_b_weight_trans_outer_mat(m,1) = sum_b_weight_vec_ss_old(m)
+        enddo
+        
     else
         l_ss_pen_j_2 = l_ss_pen_j
         sum_b_weight_trans(2:) = sum_b_weight_ss
         sum_b_weight_trans_outer(2:) = sum_b_weight_ss
+        do i= 2,bigT,1
+            do m = 1,bigM,1
+            sum_b_weight_trans_outer_mat(m,i) = sum_b_weight_vec_ss(m)
+            enddo
+        enddo
+        
     endif
 
     tc_new = tc_ss
@@ -543,6 +566,7 @@ endif
                 avg_ef_l_supply_trans(1) = avg_ef_l_supply
                 c_trans_big(:, :, :, :, :, :, :, 1) = c_ss_big
                 l_trans_big(:, :, :, :, :, :, :, 1) = l_ss_Big  
+                lab_trans_big(:, :, :, :, :, :, :, 1) = lab_ss_Big  
                 lab_income_trans_big(:, :, :, :, :, :, :, 1) = lab_income_ss_big
                 lab_income_pretax_trans_big(:, :, :, :, :, :, :, 1) = lab_income_pretax_ss_big
                 tot_income_trans_big(:, :, :, :, :, :, :, 1) = tot_income_ss_big
@@ -555,11 +579,13 @@ endif
                 EV_trans_big(:, :, :, :, :, :, :,  1) = EV_ss_big
                 gini_weight_trans(:,:, 1) = gini_weight_sv
                 LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
+                debt_trans(1) = debt_ss
             else
                 do i = 2,bigT,1            
                     avg_ef_l_supply_trans(i) = avg_ef_l_supply
                     c_trans_big(:, :, :, :, :, :, :, i) = c_ss_big
                     l_trans_big(:, :, :, :, :, :, :, i) = l_ss_big
+                    lab_trans_big(:, :, :, :, :, :, :, i) = lab_ss_big
                     lab_income_trans_big(:, :, :, :, :, :, :, i) = lab_income_ss_big  
                     lab_income_pretax_trans_big(:, :, :, :, :, :, :, i) = lab_income_pretax_ss_big  
                     tot_income_trans_big(:, :, :, :, :, :, :, i) = tot_income_ss_big
@@ -572,10 +598,38 @@ endif
                     EV_trans_big(:, :, :,:, :, :, :,  i) = EV_ss_big
                     gini_weight_trans(:,:, i) = gini_weight_sv
                     LabIncAVG_vfi(i) = LabIncAVG_ss_vfi
+                    debt_trans(i) = debt_ss
                 enddo
             endif    
     !include 'utility_ss.f90' 
 
+    ! g_y correction
+    
+    if (switch_residual_t /= 6) then
+    
+            
+    if ((switch_run_1 == 1) .and. (switch_residual_1) == 6) then 
+    g_correction_factor_old = g_share_ss / gy_factor_t(1)
+
+    elseif ((switch_run_1 == 0) .and. (switch_residual_1) == 6) then 
+    g_correction_factor_new = g_share_ss / gy_factor_t(bigT)
+    
+    if ((switch_run_t == 1) .and. (switch_residual_t) == 2) then
+        do i = 1,g_correction_last_period,1
+        g_correction_factor_t(i) = g_correction_factor_old + (g_correction_factor_new - g_correction_factor_old) * (i - 1) / (g_correction_last_period - 1)
+        enddo
+        g_correction_factor_t(g_correction_last_period+1:)=g_correction_factor_t(g_correction_last_period)
+
+    endif
+    
+    
+    
+    endif
+    g_share =g_correction_factor_t *  gy_factor_t 
+    endif
+
+            
+            
             replacement_ss = 0.0d0
       do m = 1,bigM,1      
         replacement_ss  = replacement_ss + type_share_ss(m) * sum_b_weight_ss*b_ss_j(jbar_ss,m)/((1 - t1_ss - t2_ss)*w_bar_ss(m)*l_ss_pen_j(jbar_ss-1,m)) 

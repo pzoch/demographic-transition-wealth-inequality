@@ -10,8 +10,8 @@ IMPLICIT NONE
     integer ::  n_iter_prof
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
-    integer, parameter :: bigM = 2 ! number of permanent types
-    integer, parameter :: n_p = 110, n_debt  = 60, forward = 1 ! id does not work :( 
+    integer, parameter :: bigM = 1 ! number of permanent types
+    integer, parameter :: n_p = 140, n_debt  = 60, forward = 1 ! id does not work :( 
     real(dp), parameter :: forward_smoothing = 1d0/real(forward)
 	integer, parameter :: bigT = n_p+bigJ+1
     integer, parameter :: ofe_u = 0  
@@ -45,6 +45,7 @@ IMPLICIT NONE
 
     integer :: switch_go_to_lower_gamma                    ! 0 = const,  1 = empirical     
     integer :: switch_change_tauL                          ! 0 = const,  1 = empirical - warning: how will it interact with various closures?  
+    integer :: switch_change_tauC                          ! 0 = const,  1 = empirical - warning: how will it interact with various closures?  
     integer :: switch_change_lambda                        ! 0 = const,  1 = empirical - warning: how will it interact with various closures?     
     integer :: switch_change_tauK                          ! 0 = const,  1 = empirical - warning: how will it interact with various closures?    
     integer :: switch_tauK_gross                           ! 0 = tax on net capital income,  1 = tax on gross capital income  
@@ -52,6 +53,8 @@ IMPLICIT NONE
     integer :: switch_change_debt
     integer :: switch_change_sl
     integer :: switch_change_gy
+    integer :: switch_change_depr
+    integer :: switch_change_contrib
     integer :: switch_utility_function
     integer :: switch_print
     integer :: switch_labor_choice                         ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
@@ -73,7 +76,9 @@ IMPLICIT NONE
     integer :: switch_reduce_pension
     integer :: switch_increase_ret_age
     integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
-
+    integer :: switch_no_debt                               ! 0 - there is government debt, 1 - government debt set to 0 in all periods
+    
+    
     ! Deklaracja zmiennych wczytywanych
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
@@ -91,27 +96,27 @@ IMPLICIT NONE
     
     real(dp), dimension(bigM) :: w_bar_ss_1
     real(dp), dimension(bigM) :: w_bar_ss_2
-    
+    real(dp), dimension(bigM) :: sum_b_weight_vec_ss_old
     
     real(dp), dimension(bigJ,bigM) :: l_ss_j_1, w_ss_j_1, s_ss_j_1, c_ss_j_1, b_ss_j_1, l_ss_pen_j_1
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2
 
 ! parameters
     real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
-    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new
-    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
+    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, g_correction_factor_old, g_correction_factor_new, depr_ss_old, depr_ss_new
+    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
-    real(dp) :: tc_growth, up_tc
+    real(dp) :: tc_growth, up_tc, up_debt_t
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
     real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_big_weight_ss_old, pi_big_weight_ss_new, N_big_ss_old, N_big_ss_new, pi_ss_cond_big
     real(dp) :: superstar_factor_1, superstar_factor_2
-
+    integer :: g_correction_last_period
 ! transition variables
     integer, dimension(bigT) :: jbar_t
-	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, tauL_t, tauK_t, debt_constr_t, alpha_t, gy_factor_t
-    real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t
+	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t
+    real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t, g_correction_factor_t
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
-    real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t
+    real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t,sum_b_weight_trans_outer_mat
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
     real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_big_weight, Nn_big, pi_trans_cond_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
@@ -154,7 +159,7 @@ IMPLICIT NONE
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
-    real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help
+    real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help, debt_trans, debt_trans_old
 
 
 ! implicit tax
