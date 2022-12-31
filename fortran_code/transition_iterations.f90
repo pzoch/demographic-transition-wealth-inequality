@@ -78,7 +78,7 @@ elseif (switch_g_const == 0) then
 endif
 
     
-   if ((switch_residual .NE. 2) .AND. (switch_residual .NE. 6)) then
+   if ((switch_residual .NE. 2)) then
     ! we are not using debt adjustment to smooth tax adjustment 
     debt = debt_constr_t*y
     sum_priv_sv(1) = k(1)*gam_t(1)*nu(1) + debt(1) - PillarII(1)
@@ -204,7 +204,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
            placeholder =  c_trans(1,0,0,1,1,1,10)
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
-            do i = 1,bigT
+            do i = 2,bigT
             sum_b_weight_trans_outer_mat(m,i) = sum_b_weight_trans(i)
             enddo
         enddo

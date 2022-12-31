@@ -56,7 +56,7 @@
     OPEN (unit=77,  FILE = version//experiment//closure//"zet_trans.txt")
     OPEN (unit=78,  FILE = version//experiment//closure//"gdp_trans.txt")
     OPEN (unit=79,  FILE = version//experiment//closure//"ky_ratio_trans_1y.txt")
-    OPEN (unit=80,  FILE = version//experiment//closure//"irr_1y_trans.txt")
+    OPEN (unit=80,  FILE = version//experiment//closure//"irr_trans_1y.txt")
     OPEN (unit=81,  FILE = version//experiment//closure//"iy_ratio_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 

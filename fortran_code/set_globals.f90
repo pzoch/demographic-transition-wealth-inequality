@@ -15,7 +15,7 @@ subroutine globals
 
     
     
-    version = 'test_' ! these three strings allow us to load a correct version
+    version = 'debt_' ! these three strings allow us to load a correct version
     experiment = 'all_'
     closure = 'govt__'
 

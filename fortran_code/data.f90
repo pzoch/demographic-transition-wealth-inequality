@@ -88,7 +88,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_tauK = 17 ! for tauK
         last_data_gy = 17 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
-        last_data_debt           = 19 ! debt/gdp
+        last_data_debt           = 22 ! debt/gdp
         last_data_sl = 17 ! for sl
         last_data_type_multiplier= 17 ! type multip
         last_data_type_share= 17 ! type share
@@ -494,7 +494,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
   !    -------------------------------- DEBT/GDP -------------------------------
     if (switch_starting_year == 0) then 
         Open(unit = 5, FILE = "_data_debt_1935.txt")  
-
+   ! Open(unit = 5, FILE = "_data_debt_1935fake.txt")  
     elseif (switch_starting_year == 1) then
         Open(unit = 5, FILE = "_data_debt_1960.txt")  
 
@@ -502,7 +502,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         Open(unit = 5, FILE = "_data_debt_1950.txt")  
         
     elseif (switch_starting_year == 3) then
-        Open(unit = 5, FILE = "_data_debt_1935.txt")  
+        Open(unit = 5, FILE = "_data_debt_1935fake.txt")  
     endif
         
      if (switch_change_debt == 1) then 
@@ -529,6 +529,11 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     if (switch_no_debt == 1) then
     debt_constr_d = 0.0d0
+    endif
+    
+    !if there is switch_no_debt == 2 shift debt so that it is 0 in the first period
+    if (switch_no_debt == 2) then
+    debt_constr_d = debt_constr_d - debt_constr_d(1)
     endif
 
     

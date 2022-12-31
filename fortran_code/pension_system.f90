@@ -90,3 +90,5 @@
     enddo
     
     enddo  
+
+    check_pension_clearing = sum_b - subsidy - contribution
