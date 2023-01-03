@@ -28,64 +28,20 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       integer, dimension(bigT), intent(out) :: jbar_d
       
       integer :: start_year ! first year for which we have data
-      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC, last_data_rho ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
+      integer :: break_index ! last period for which we take data
+      integer :: last_data_demo, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC, last_data_rho ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
 call chdir(cwd_r)
 
   
-OPEN (unit=9, FILE = "_data_jbar.txt")
 
 
 ! -------------------------------- FIRST YEAR? -------------------------
 
-    if (switch_starting_year == 0) then 
         start_year = 1935
-        last_data = 33 ! for demography
+        break_index = 5 ! this corresponds to year 1955 
+        
+        last_data_demo = 33 ! for demography
         last_data_gamma = 17 ! for tfp
-        last_data_lambda = 17 ! for lambda
-        last_data_tauL = 17 ! for tauL
-        last_data_tauK = 17 ! for tauK
-        last_data_sl = 17 ! for sl
-        last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
-        last_data_debt           = 19 ! debt/gdp
-        last_data_type_multiplier= 17 ! type multip
-        last_data_type_share= 17 ! type share
-        last_data_t1 = 17 ! SS contrib
-        last_data_tauC = 17 ! for tauC
-        last_data_depr= 17 ! for depr
-        last_data_rho = 17 ! for rho
-    elseif (switch_starting_year == 1) then
-        start_year = 1960
-        last_data = 28 ! for demography
-        last_data_gamma = 12 ! for tfp
-        last_data_lambda = 12 ! for lambda
-        last_data_tauL = 12 ! for tauL
-        last_data_tauK = 12 ! for tauK
-        last_data_sl = 12 ! for sl
-        last_data_sigma2_epsilon = 12 ! for sigma2_epsilon
-        last_data_type_multiplier= 12 ! type multip
-        last_data_type_share= 12 ! type share
-        last_data_t1 = 12 ! SS contrib
-        last_data_tauC = 12 ! for tauC
-        last_data_depr= 12! for depr
-        last_data_rho = 17 ! for rho
-     elseif (switch_starting_year == 2) then
-        start_year = 1950
-        last_data = 30 ! for demography
-        last_data_gamma = 14 ! for tfp
-        last_data_lambda = 14 ! for lambda
-        last_data_tauL = 14 ! for tauL    
-        last_data_tauK = 14 ! for tauK
-        last_data_sigma2_epsilon = 14 ! for sigma2_epsilon
-        last_data_type_multiplier= 14 ! type multip
-        last_data_type_share= 14 ! type share
-        last_data_t1 = 14 ! SS contrib
-        last_data_tauC = 14 ! for tauC
-        last_data_depr= 14 ! for depr
-        last_data_rho = 17 ! for rho
-    elseif (switch_starting_year == 3) then
-        start_year = 1935
-        last_data = 33 ! for demography
-        last_data_gamma = 25 ! for tfp
         last_data_lambda = 17 ! for lambda
         last_data_tauL = 17 ! for tauL
         last_data_tauK = 17 ! for tauK
@@ -97,9 +53,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_type_share= 17 ! type share
         last_data_t1 = 17 ! SS contrib
         last_data_tauC = 17 ! for tauC
-        last_data_depr= 14 ! for depr
+        last_data_depr= 17 ! for depr
         last_data_rho = 17 ! for rho
-    endif
     
 
 ! -------------------------------- OMEGA -------------------------------
@@ -109,7 +64,6 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         read(3,*) omega_ss_d(j,m)
        end do
     end do
-
 
     close(3)
     
@@ -126,14 +80,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy)
             
-     elseif (switch_change_gy == 0 .AND. switch_starting_year == 3) then
-         last_data_gy = 5
+     elseif (switch_change_gy == 0 .AND. switch_starting_year == 1) then
+         last_data_gy = break_index
          do i = 1, last_data_gy, 1
             read(5,*) gy_factor_d(i)
         enddo
         gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy) 
         
-    elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) gy_factor_d(1)
         gy_factor_d(2:) = gy_factor_d(1)
     endif
@@ -163,18 +117,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     !zeta_p = 0.985d0
     !zeta_p(1)  =  0.9640d0
     !zeta_p(2)  =  0.9799d0
-     if (switch_starting_year == 0) then 
-        Open(unit = 8, FILE = "_data_sigma2eps_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 8, FILE = "_data_sigma2eps_1960.txt")  
+    Open(unit = 8, FILE = "_data_sigma2eps_deaton_1935.txt")  
 
-    elseif (switch_starting_year == 2) then
-        Open(unit = 8, FILE = "_data_sigma2eps_1950.txt")  
-    
-    elseif (switch_starting_year == 3) then
-        Open(unit = 8, FILE = "_data_sigma2eps_deaton_1935.txt")  
-    endif
     
     ! reading sigma2_epsilon_t
      if (switch_sigma2_epsilon_t == 1) then 
@@ -184,29 +129,25 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             enddo
             sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
-     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year == 3) then   
+     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year == 1) then   
 
         do m = 1,bigM,1
             do i = 1, last_data_sigma2_epsilon, 1
                 read(8,*) sigma2_epsilon_t_big(i,m)
             enddo
             
-            last_data_sigma2_epsilon = 5
+            last_data_sigma2_epsilon = break_index ! make it more mechanically
             sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
 
-        
-        
-       
-       
-     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 3) then
+     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 1) then
         do m = 1,bigM,1 
             read(8,*) sigma2_epsilon_t_big(1,m)
              sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)
         enddo
         
-    endif
-    close(8)
+        endif
+        close(8)
 
     do m = 1,bigM,1
     sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**(2.0d0*zbar))/(1-zeta_p(m)**2.0d0) ! increased
@@ -214,19 +155,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
 ! -------------------------------- type multiplier --------------------
     
-       if (switch_starting_year == 0) then 
+  
         Open(unit = 8, FILE = "_data_type_mutliplier_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 8, FILE = "_data_type_mutliplier_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 8, FILE = "_data_type_mutliplier_1950.txt")  
-    
-    elseif (switch_starting_year == 3) then
-        Open(unit = 8, FILE = "_data_type_mutliplier_1935.txt")  
-    endif
-    
     ! reading type_mutliplier
     
      
@@ -239,17 +170,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         
 
 
-     if (switch_change_premium == 0.AND.switch_starting_year == 3) then   
+     if (switch_change_premium == 0.AND.switch_starting_year == 1) then   
 
         do m = 1,bigM,1
-    last_data_type_multiplier = 5
+    last_data_type_multiplier = break_index
              type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
         enddo
-        
-      
-       
-       
-     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 3) then
+             
+     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 1) then
         do m = 1,bigM,1 
             last_data_type_multiplier = 1
             
@@ -261,19 +189,9 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     ! -------------------------------- type share --------------------
     
-    if (switch_starting_year == 0) then 
+    
         Open(unit = 8, FILE = "_data_type_share_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 8, FILE = "_data_type_share_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 8, FILE = "_data_type_share_1950.txt")  
-    
-    elseif (switch_starting_year == 3) then
-        Open(unit = 8, FILE = "_data_type_share_1935.txt")  
-    endif
-    
     ! reading type_share
     
      
@@ -284,8 +202,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
             type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)
         enddo
     
-        if (switch_change_type_share == 0.AND.switch_starting_year == 3) then   
-            last_data_type_share = 5
+        if (switch_change_type_share == 0.AND.switch_starting_year == 1) then   
+            last_data_type_share = break_index
             do m = 1,bigM,1
                 type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
             enddo
@@ -293,7 +211,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
        
        
        
-     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 3) then
+     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 1) then
         last_data_type_share = 1
         do m = 1,bigM,1 
             type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
@@ -310,40 +228,28 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
     
 ! -------------------------------- JBAR -------------------------------
-
   
       jbar_d = switch_fix_retirement_age
 
-    
-    
+     
     ! -------------------------------- LABOR SHARE -------------------------------
-    if (switch_starting_year == 0) then 
+    
         Open(unit = 5, FILE = "_data_sl_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 5, FILE = "_data_sl_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 5, FILE = "_data_sl_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        Open(unit = 5, FILE = "_data_sl_1935.txt")  
-    endif
-        
     if (switch_change_sl == 1) then 
         do i = 1, last_data_sl, 1
             read(5,*) alpha_d(i)
         enddo
         alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
             
-     elseif (switch_change_sl == 0 .AND. switch_starting_year == 3) then
-         last_data_sl = 5
+     elseif (switch_change_sl == 0 .AND. switch_starting_year == 1) then
+         last_data_sl = break_index
          do i = 1, last_data_sl, 1
             read(5,*) alpha_d(i)
         enddo
         alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
         
-    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) alpha_d(1)
         alpha_d(2:) = alpha_d(1)
     endif
@@ -371,14 +277,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         depr_d(last_data_depr+1:) = depr_d(last_data_depr)
             
-     elseif (switch_change_depr == 0 .AND. switch_starting_year == 3) then
-         last_data_sl = 5
+     elseif (switch_change_depr == 0 .AND. switch_starting_year == 1) then
+         last_data_sl = break_index
          do i = 1, last_data_depr, 1
             read(5,*) depr_d(i)
         enddo
         depr_d(last_data_depr+1:) = depr_d(last_data_depr) 
         
-    elseif (switch_change_depr == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_depr == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) depr_d(1)
         depr_d(2:) = depr_d(1)
     endif
@@ -391,14 +297,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         t1_d(last_data_t1+1:) = t1_d(last_data_t1)
             
-     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 3) then
-         last_data_t1 = 5
+     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 1) then
+         last_data_t1 = break_index
          do i = 1, last_data_t1, 1
             read(5,*) t1_d(i)
         enddo
         t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
         
-    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) t1_d(1)
         t1_d(2:) = t1_d(1)
     endif
@@ -408,18 +314,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     close(5)
     ! -------------------------------- TAU_K -------------------------------    
-     if (switch_starting_year == 0) then 
-        Open(unit = 7, FILE = "_data_tauK_1935.txt")  
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 7, FILE = "_data_tauK_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 7, FILE = "_data_tauK_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
         Open(unit = 7, FILE = "_data_tauK_1935.txt")  
-    endif
         
      if (switch_change_tauK == 1) then 
         do i = 1, last_data_tauK, 1
@@ -427,32 +323,22 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)
             
-     elseif (switch_change_tauK == 0.AND. switch_starting_year == 3) then
-        last_data_tauK = 5
+     elseif (switch_change_tauK == 0.AND. switch_starting_year == 1) then
+        last_data_tauK = break_index
         do i = 1, last_data_tauK, 1
             read(7,*) tauK_d(i)
         enddo
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)  
          
-     elseif (switch_change_tauK == 0.AND. switch_starting_year .NE. 3) then    
+     elseif (switch_change_tauK == 0.AND. switch_starting_year .NE. 1) then    
         read(7,*) tauK_d(1)
         tauK_d(2:) = tauK_d(1)
     endif
     close(7)
 
 ! -------------------------------- TAU_L -------------------------------
-    if (switch_starting_year == 0) then 
+    
         Open(unit = 5, FILE = "_data_tauL_1935.txt")  
-
-    elseif (switch_starting_year == 1) then
-        Open(unit = 5, FILE = "_data_tauL_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 5, FILE = "_data_tauL_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        Open(unit = 5, FILE = "_data_tauL_1935.txt")  
-    endif
         
      if (switch_change_tauL == 1) then 
         do i = 1, last_data_tauL, 1
@@ -460,14 +346,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL)
             
-     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 3) then
-         last_data_tauL = 5
+     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 1) then
+         last_data_tauL = break_index
          do i = 1, last_data_tauL, 1
             read(5,*) tauL_d(i)
         enddo
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL) 
         
-    elseif (switch_change_tauL == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_tauL == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) tauL_d(1)
         tauL_d(2:) = tauL_d(1)
     endif
@@ -479,18 +365,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(5)
     
 ! -------------------------------- TAU_C -------------------------------
-    if (switch_starting_year == 0) then 
+  
         Open(unit = 5, FILE = "_data_tauC_1935.txt")  
-
-    elseif (switch_starting_year == 1) then
-        Open(unit = 5, FILE = "_data_tauC_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 5, FILE = "_data_tauC_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        Open(unit = 5, FILE = "_data_tauC_1935.txt")  
-    endif
         
      if (switch_change_tauC == 1) then 
         do i = 1, last_data_tauC, 1
@@ -498,14 +374,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC)
             
-     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 3) then
-         last_data_tauC = 5
+     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 1) then
+         last_data_tauC = break_index
          do i = 1, last_data_tauC, 1
             read(5,*) tauC_d(i)
         enddo
         tauL_d(last_data_tauC+1:) = tauL_d(last_data_tauC) 
         
-    elseif (switch_change_tauC == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_tauC == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) tauC_d(1)
         tauC_d(2:) = tauC_d(1)
     endif
@@ -513,18 +389,8 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(5)
     
   !    -------------------------------- DEBT/GDP -------------------------------
-    if (switch_starting_year == 0) then 
-        Open(unit = 5, FILE = "_data_debt_1935.txt")  
-   ! Open(unit = 5, FILE = "_data_debt_1935fake.txt")  
-    elseif (switch_starting_year == 1) then
-        Open(unit = 5, FILE = "_data_debt_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 5, FILE = "_data_debt_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
+ 
         Open(unit = 5, FILE = "_data_debt_1935fake.txt")  
-    endif
         
      if (switch_change_debt == 1) then 
         do i = 1, last_data_debt, 1
@@ -532,14 +398,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         debt_constr_d(last_data_debt+1:) = debt_constr_d(last_data_debt)
             
-     elseif (switch_change_debt == 0 .AND. switch_starting_year == 3) then
-         last_data_debt = 5
+     elseif (switch_change_debt == 0 .AND. switch_starting_year == 1) then
+         last_data_debt = break_index
          do i = 1, last_data_debt, 1
             read(5,*) debt_constr_d(i)
         enddo
         debt_constr_d(last_data_debt+1:) = debt_constr_d(last_data_debt) 
         
-    elseif (switch_change_debt == 0.AND.switch_starting_year.NE. 3) then   
+    elseif (switch_change_debt == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) debt_constr_d(1)
         debt_constr_d(2:) = debt_constr_d(1)
     endif
@@ -559,20 +425,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
 
     
  ! -------------------------------- LAMBDA -------------------------------
-    if (switch_starting_year == 0) then 
-        Open(unit = 6, FILE = "_data_lambda_1935.txt")  
-
-    elseif (switch_starting_year == 1) then
-        Open(unit = 6, FILE = "_data_lambda_1960.txt")  
-
-    elseif (switch_starting_year == 2) then
-        Open(unit = 6, FILE = "_data_lambda_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
+  
 
         Open(unit = 6, FILE = "_data_lambda_1935.txt")      
         
-    endif
     
      if (switch_change_lambda == 1) then 
         do i = 1, last_data_lambda, 1
@@ -580,14 +436,14 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
             
-     elseif (switch_change_lambda == 0 .AND. switch_starting_year == 3 ) then
-        last_data_lambda = 5
+     elseif (switch_change_lambda == 0 .AND. switch_starting_year == 1 ) then
+        last_data_lambda = break_index
         do i = 1, last_data_lambda+1, 1
             read(6,*) lambda_d(i)
         enddo
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
         
-    elseif (switch_change_lambda == 0 .AND. switch_starting_year .NE. 3 ) then   
+    elseif (switch_change_lambda == 0 .AND. switch_starting_year .NE. 1 ) then   
         read(6,*) lambda_d(1)
         lambda_d(2:) = lambda_d(1)
     endif
@@ -602,77 +458,49 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     if (switch_het_mortality == 0) then
     
     ! NEED TO MAKE THIS MORE AUTOMATIC!    
-    if (switch_starting_year == 0) then 
+
         Open(unit = 121, FILE = "_data_pi_cond_US_since1935.txt")  
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
         Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")
-    elseif (switch_starting_year == 1) then
-        Open(unit = 121, FILE = "_data_pi_cond_US_since1960.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1960_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1960_init_old.txt")
-    elseif (switch_starting_year == 2) then
-        Open(unit = 121, FILE = "_data_pi_cond_US_since1950.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1950_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1950_init_old.txt")
-    elseif (switch_starting_year == 3) then 
-        Open(unit = 121, FILE = "_data_pi_cond_US_since1935.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
-    endif
+
     
-    do i = 1,last_data ,1 
+    do i = 1,last_data_demo ,1 
             do j = 1, bigJ
                 read(121,*) pi_d_big(j,1,i)
             enddo 
         read(122,*) Nn_d(1,i)
     enddo
     
-    do i = last_data+1, bigT, 1 
-         pi_d_big(:,:,i)=  pi_d_big(:,:,last_data)    
+    do i = last_data_demo+1, bigT, 1 
+         pi_d_big(:,:,i)=  pi_d_big(:,:,last_data_demo)    
     enddo
     
     do m = 1, bigM, 1
         pi_d_big(:,m,:) =  pi_d_big(:,1,:)
     enddo
 
-   do i = 1,last_data ,1 
+   do i = 1,last_data_demo ,1 
         
         do m = 1,bigM,1
 
             Nn_d_big(1,m,i) = type_share_d(m,i) * Nn_d(1,i)
         enddo
     enddo
-    
-    
 
-    
-    
     elseif (switch_het_mortality == 1) then
         
-    if (switch_starting_year == 0) then 
-        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1935.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")
-    elseif (switch_starting_year == 1) then
-        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1960.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1960_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1960_init_old.txt")
-    elseif (switch_starting_year == 2) then
-        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1950.txt")  
-        Open(unit = 122, FILE = "_data_Nn_US_1950_2100.txt")
-        Open(unit = 123, FILE = "_data_Nn_US_1950_init_old.txt")
-    elseif (switch_starting_year == 3) then 
+ 
         Open(unit = 121, FILE = "_data_pi_cond_het_US_since1935.txt")  
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
         Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
-    endif   
+  
         
-    do i = 1,last_data ,1 
+    do i = 1,last_data_demo ,1 
         read(122,*) Nn_d(1,i)
     enddo
     
      do m = 1,bigM,1
-         do i = 1,last_data,1
+         do i = 1,last_data_demo,1
             do j = 1, bigJ
                 read(121,*) pi_d_big(j,m,i)
             enddo 
@@ -680,10 +508,10 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         enddo
     enddo
     
-    do i = last_data+1, bigT, 1
+    do i = last_data_demo+1, bigT, 1
         do m = 1,bigM,1
             do j = 1, bigJ
-            pi_d_big(j,m,i)=  pi_d_big(j,m,last_data)
+            pi_d_big(j,m,i)=  pi_d_big(j,m,last_data_demo)
             enddo
         enddo
     enddo
@@ -691,7 +519,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     endif
     
 
-            ! fill in population and mortality matrix
+
     
 
     
@@ -711,22 +539,6 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     nu_ss_new =  1.055_dp   ! assume it remained constant
     endif
     
-
-
-    
-    
-    !! fill in population and mortality matrix
-    !do i = 1,last_data ,1 
-    !    do j = 1, bigJ
-    !        read(121,*) pi_d(j,i)
-    !    enddo 
-    !    read(122,*) Nn_d(1,i)
-    !enddo
-    !
-    !do i = last_data+1, bigT, 1
-    ! pi_d(:,i)=  pi_d(:,last_data)
-    !enddo
-     
      
     ! calculate conditional probabilities
 
@@ -756,7 +568,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     close(123)
    
 
-    do i = last_data+1, bigT, 1
+    do i = last_data_demo+1, bigT, 1
         Nn_d(1,i) = Nn_d(1,i-1)*nu_ss_new
         Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1)*nu_ss_new
     enddo
@@ -785,37 +597,23 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     
         
    ! --------------------------------calculate GAMMA now -------------------------------
-    if (switch_starting_year == 0) then 
-        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
+ 
+        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt") 
 
-    elseif (switch_starting_year == 1) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1960.txt")  
 
-    
-    elseif (switch_starting_year == 2) then
-        Open(unit = 4, FILE = "_data_gamma_tfp_1950.txt")  
-        
-    elseif (switch_starting_year == 3) then
-        !Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt")  
-        Open(unit = 4, FILE = "_data_gamma_tfpadj_1935.txt") 
-        
-    endif
-     
-    
-    
     if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
         gam_d(last_data_gamma+1:) = 1.03
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 3) then
-        last_data_gamma= 5
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 1) then
+        last_data_gamma= break_index
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
         gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
         
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 3) then
+    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 1) then
         read(4,*) gam_d(1)
         gam_d(2:) = gam_d(1)
     endif
@@ -932,7 +730,7 @@ elseif (switch_mortality == 4) then
     
         pi_big_weight_d = pi_d_big  
      
-elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
+elseif (switch_mortality == 5.AND. switch_starting_year .NE.1) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
     pi_big_weight_d = pi_d_big
     do i = 2, bigT,1
         do j = 2, bigJ, 1   
@@ -942,33 +740,33 @@ elseif (switch_mortality == 5.AND. switch_starting_year .NE.3) then  !this chang
     
 
   
-elseif (switch_mortality == 5.AND. switch_starting_year ==3) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
+elseif (switch_mortality == 5.AND. switch_starting_year ==1) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
     pi_big_weight_d = pi_d_big
-    do i = 6, bigT,1
+    do i = (break_index+1), bigT,1
         do j = 2, bigJ, 1   
-            pi_d_big(j,:,i) = pi_d_big(j,:,5)
+            pi_d_big(j,:,i) = pi_d_big(j,:,break_index)
         enddo    
     enddo  
     
     
-elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
+elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
        
     do i = 2, bigT,1
         do m = 1, bigM, 1
             do j = 2, bigJ, 1   
-                pi_d_big(j,m,i) = pi_d_big(j,m,5)
+                pi_d_big(j,m,i) = pi_d_big(j,m,break_index)
                 Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
             enddo
         enddo
     enddo
     pi_big_weight_d = pi_d_big
     
-   elseif (switch_mortality == 6.AND. switch_starting_year ==3) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
+   elseif (switch_mortality == 6.AND. switch_starting_year ==1) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
        
     do i = 2, bigT,1
         do m = 1, bigM, 1
             do j = 2, bigJ, 1   
-                pi_d_big(j,m,i) = pi_d_big(j,m,5)
+                pi_d_big(j,m,i) = pi_d_big(j,m,break_index)
                 Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
             enddo
         enddo
@@ -977,7 +775,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
 
   
     
-  elseif (switch_mortality == 7 .AND. switch_starting_year .NE.3) then ! this will keep the population structure as in the initial period (mortality) and will let the number of j=1 agents grow at nu_ss_new rate
+  elseif (switch_mortality == 7 .AND. switch_starting_year .NE.1) then ! this will keep the population structure as in the initial period (mortality) and will let the number of j=1 agents grow at nu_ss_new rate
     
     do i = 2, bigT,1
         do m = 1, bigM, 1
@@ -998,24 +796,24 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.3) then !this change
     enddo
     
     
-  elseif (switch_mortality == 7 .AND. switch_starting_year ==3) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
+  elseif (switch_mortality == 7 .AND. switch_starting_year ==1) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
         
 
     N_temp_vec = sum(sum(Nn_d_big, dim=1),dim=1)
-    nu_ss_new = N_temp_vec(5)/N_temp_vec(4)
+    nu_ss_new = N_temp_vec(break_index)/N_temp_vec(break_index-1)
     
     
-    do i = 6, bigT,1
+    do i = (break_index+1), bigT,1
 
         do m = 1, bigM, 1
         do j = 2, bigJ, 1   
-            pi_d_big(j,m,i) = pi_d_big(j,m,5)
+            pi_d_big(j,m,i) = pi_d_big(j,m,break_index)
             pi_big_weight_d(j,m,i) = pi_d_big(j,m,i)
         enddo    
         enddo
     enddo
 
-    do i = 6, bigT,1
+    do i = (break_index+1), bigT,1
         N_temp_vec(i) = N_temp_vec(i-1) * nu_ss_new 
         do m = 1, bigM, 1
         Nn_d_big(1,m,i) = N_temp_vec(i) * type_share_d(m,i)

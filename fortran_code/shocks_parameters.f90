@@ -8,10 +8,6 @@ if (n_sp>5) then
     n_sp_initial = int((n_sp-2)/2)+1  ! do not allow for people to be born as superstars
     endif
     
-
-    
-
-
         
 ! temporary
 
@@ -62,7 +58,7 @@ if (n_sp>5) then
             do t = 1, bigT, 1
                 call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_value_trans(1:n_sp-2,t), pi_ip_trans(1:n_sp-2,1:n_sp-2,t))
           
-                    !pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+
             enddo
         
             n_sp_value_trans = exp(n_sp_value_trans)  
@@ -126,19 +122,33 @@ if (n_sp>5) then
         
         
         ! now do initial things
-        do t = 1, bigT, 1
+        
+        if (switch_initial_dispersion == 1) then
+            do t = 1, bigT, 1
+                do ip = 1 , n_sp, 1
+                        pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                enddo
+            enddo                
             do ip = 1 , n_sp, 1
-                    pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
+                pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
             enddo
-        enddo                
+            
+        elseif (switch_initial_dispersion == 0) then
+            do t = 1, bigT, 1
+                        pi_ip_init_trans(:,t) = 0.0d0
+                        pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+            enddo        
+            pi_ip_init_ss_old(:) = 0.0d0
+            pi_ip_init_ss_new(:) = 0.0d0
+            pi_ip_init_ss_old(n_sp_initial) = 1.0d0
+            pi_ip_init_ss_new(n_sp_initial) = 1.0d0    
+        endif
+            
         
         
         
-        
-        do ip = 1 , n_sp, 1
-        pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
-        pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
-        enddo
+
         
         
         ! pack
@@ -195,19 +205,27 @@ elseif (n_sp>1)  then
      
             
         ! now do initial things
-        do t = 1, bigT, 1
+        if (switch_initial_dispersion == 1) then
+            do t = 1, bigT, 1
+                do ip = 1 , n_sp, 1
+                        pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                enddo
+            enddo                
             do ip = 1 , n_sp, 1
-                    pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
+                pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
             enddo
-        enddo                
-    
-
-    
-    
-            do ip = 1 , n_sp, 1
-            pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
-            pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
-            enddo
+            
+        elseif (switch_initial_dispersion == 0) then
+            do t = 1, bigT, 1
+                        pi_ip_init_trans(:,t) = 0.0d0
+                        pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+            enddo        
+            pi_ip_init_ss_old(:) = 0.0d0
+            pi_ip_init_ss_new(:) = 0.0d0
+            pi_ip_init_ss_old(n_sp_initial) = 1.0d0
+            pi_ip_init_ss_new(n_sp_initial) = 1.0d0    
+        endif
 
         
             ! pack
@@ -252,15 +270,25 @@ else
     do m=  1, bigM, 1
     do t = 1, bigT, 1
         do ip = 1 , n_sp, 1
-                pi_ip_init_trans_big(ip,m,t) = pi_ip_trans_big(n_sp_initial,ip,m,t)
+                if (switch_initial_dispersion == 1) then
+                    pi_ip_init_trans_big(ip,m,t) = pi_ip_trans_big(n_sp_initial,ip,m,t)
+                elseif (switch_initial_dispersion == 0) then
+                    pi_ip_init_trans_big(:,m,t) = 0.0d0
+                    pi_ip_init_trans_big(n_sp_initial,m,t) = 1.0d0
+                endif
         enddo
     enddo             
     
-    pi_ip_init_ss_old_big(:,m) = pi_ip_ss_old(n_sp_initial,:)
-    pi_ip_init_ss_new_big(:,m) = pi_ip_ss_new(n_sp_initial,:)
-    
+     if (switch_initial_dispersion == 1) then
+        pi_ip_init_ss_old_big(:,m) = pi_ip_ss_old_big(n_sp_initial,:,m)
+        pi_ip_init_ss_new_big(:,m) = pi_ip_ss_new_big(n_sp_initial,:,m)
+     elseif (switch_initial_dispersion == 0) then
+        pi_ip_init_ss_old_big(:,m) = 0.0d0
+        pi_ip_init_ss_new_big(:,m) = 0.0d0
+        pi_ip_init_ss_old_big(n_sp_initial,m) = 1.0d0
+        pi_ip_init_ss_new_big(n_sp_initial,m) = 1.0d0      
+    endif
     enddo
-    
 
 
     
@@ -301,17 +329,11 @@ if (n_sr >1) then
         pi_ir(s,:) = prob_norm   
     
         enddo
-    !call normal_discrete_1(n_sr_value, prob_norm, 1d0, sigma_nu_r)
-    !do  s = 1, n_sr, 1
-    !    pi_ir(s,:) = prob_norm     
-    !enddo
+
 endif   
 
 
-!! to do model is deterministic (evry state is the same) but we use vfi to solve it 
-!n_sp_value = 1d0
-!n_sr_value = 0d0
-!n_sd_value = 0d0
+
 
 
          if (switch_income_risk == 0) then

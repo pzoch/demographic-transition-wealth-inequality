@@ -1,6 +1,4 @@
-! WHAT   : declare values for switches, ATTENTION! : they are overwritten in some subroutines (e.g. ret_age_dem_main etc.) !!!!to do in close future!!!!, clear (reset) global variables before next run of code 
-! DO     : read initial values of switches and base (from base scenario run) values of basic variables
-! RETURN : clean values for next run 
+
 
 MODULE global_vars2
 USE global_vars
