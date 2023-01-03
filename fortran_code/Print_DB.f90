@@ -58,6 +58,7 @@
     OPEN (unit=79,  FILE = version//experiment//closure//"ky_ratio_trans_1y.txt")
     OPEN (unit=80,  FILE = version//experiment//closure//"irr_trans_1y.txt")
     OPEN (unit=81,  FILE = version//experiment//closure//"iy_ratio_trans.txt")
+    OPEN (unit=82,  FILE = version//experiment//closure//"gdp_pc_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -118,6 +119,7 @@
         write(79,  '(F20.10)') k(i)/y(i) * real(zbar)
         write(80,  '(F20.10)') 100*((1 + r_bar(i))**0.2_dp -1d0)
         write(81,  '(F20.10)') (y(i)-consumption_gross(i)-g(i))/y(i) 
+        write(82,  '(F20.10)') zet(i) * bigY(i) / N_t(i) 
     enddo
     
     
@@ -190,6 +192,7 @@
      CLOSE(79)
      CLOSE(80)
      CLOSE(81)
+     CLOSE(82)
 ! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")

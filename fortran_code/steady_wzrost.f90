@@ -14,7 +14,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type,  rho, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
@@ -26,8 +26,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss, type_share_big_ss
     real(dp) :: check_pension_clearing
 	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
-    real*8, dimension(0:n_a) :: prob_ss_marg
-    real(dp), intent(in)  :: rho	
+    real*8, dimension(0:n_a) :: prob_ss_marg	
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
@@ -43,7 +42,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 nom1, denom1, nom2, denom2
      real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss
      real(dp), dimension(bigj,bigM) :: w_pom_ss_j, s_pom_ss_j, asset_pom_ss_j
-     real(dp) :: avg_wl, mult_ss, asset_pom_ss
+     real(dp) :: avg_wl, mult_ss, asset_pom_ss, rho
      
      real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j, lab_ss_j
      !real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
@@ -75,6 +74,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         g_share_ss = g_share_ss
         type_multiplier_ss =  type_multiplier_ss_old
         type_share_ss = type_share_ss_old
+        rho = rho_ss_old
         
     else 
         alpha = alpha_ss_new
@@ -100,6 +100,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         g_share_ss = g_share_ss_2
         type_multiplier_ss =  type_multiplier_ss_new
         type_share_ss = type_share_ss_new
+        rho = rho_ss_new
     endif
     
 

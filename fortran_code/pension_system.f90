@@ -23,7 +23,7 @@
         avg_wl(i) = 0d0
         do m = 1,bigM,1
         do j = 1, jbar_t(max(i-1,1)) -1
-            avg_wl(i) = avg_wl(i) + type_share_j_t(jbar_t(max(i-1,1)),m,max(i-j,1)) *w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
+            avg_wl(i) = avg_wl(i) + type_share_j_t(jbar_t(max(i-1,1)),m,max(i,1)) *w_j(jbar_t(max(i-1,1)) -j, m, max(i-j,1)) *l_j(jbar_t(max(i-1,1)) -j,m,max(i-j,1))    
         enddo
         enddo 
         avg_wl(i) = avg_wl(i)/real(jbar_t(max(i-1,1)) -1)
@@ -37,26 +37,10 @@
         b2_j(1:jbar_t(i)-1,m,i) = 0
             do j = jbar_t(i),bigJ,1
                 if (j == jbar_t(i)) then
-                    if (jbar_t(i) == jbar_t(i-1)+1) then
-                        b1_j(j,m,i) = valor_mult(i)*b1_j(j-1,m,i-1)
-                        b2_j(j,m,i) = 0
-                    else
-                        if( i< bigJ) then 
-                            b1_j(j,m,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
-                        else 
-                            b1_j(j,m,i) = rho_2*avg_wl(i) 
-                        endif
-                        b2_j(j,m,i) = 0
-                    endif
-                    
-                    
-                    else if (b1_j(j-1,m,i-1) == 0) then
-                        if( i< bigJ) then 
-                            b1_j(j,m,i) = ((bigJ-i)*rho_1+ i*rho_2)/float(bigJ)*avg_wl(i) 
-                        else 
-                            b1_j(j,m,i) = rho_2*avg_wl(i) 
-                        endif
-                        b2_j(j,m,i) = 0                                                
+
+                        b1_j(j,m,i) = rho_t(i)*avg_wl(i) 
+
+                        b2_j(j,m,i) = 0                                          
                     else
                         b1_j(j,m,i) = valor_mult(i)*b1_j(j-1,m,i-1)
                         b2_j(j,m,i) = 0

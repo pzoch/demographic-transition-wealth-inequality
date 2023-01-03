@@ -10,7 +10,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d, rho_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! pop summation
       real(dp), dimension(bigT)::  N_temp_vec ! pop summation
@@ -21,14 +21,14 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       real(dp), dimension(bigJ,bigT)::  pi_implied_d ! implied probabilities
       real(dp), dimension(bigM,bigT)::  bigl_type ! for calculating labor augmenting growth
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
-      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d, depr_d
+      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d, depr_d,  rho_d
      ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
       real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_big_weight_d, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
       integer, dimension(bigT), intent(out) :: jbar_d
       
       integer :: start_year ! first year for which we have data
-      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
+      integer :: last_data, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC, last_data_rho ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
 call chdir(cwd_r)
 
   
@@ -52,6 +52,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_t1 = 17 ! SS contrib
         last_data_tauC = 17 ! for tauC
         last_data_depr= 17 ! for depr
+        last_data_rho = 17 ! for rho
     elseif (switch_starting_year == 1) then
         start_year = 1960
         last_data = 28 ! for demography
@@ -66,6 +67,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_t1 = 12 ! SS contrib
         last_data_tauC = 12 ! for tauC
         last_data_depr= 12! for depr
+        last_data_rho = 17 ! for rho
      elseif (switch_starting_year == 2) then
         start_year = 1950
         last_data = 30 ! for demography
@@ -79,6 +81,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_t1 = 14 ! SS contrib
         last_data_tauC = 14 ! for tauC
         last_data_depr= 14 ! for depr
+        last_data_rho = 17 ! for rho
     elseif (switch_starting_year == 3) then
         start_year = 1935
         last_data = 33 ! for demography
@@ -95,6 +98,7 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
         last_data_t1 = 17 ! SS contrib
         last_data_tauC = 17 ! for tauC
         last_data_depr= 14 ! for depr
+        last_data_rho = 17 ! for rho
     endif
     
 
@@ -132,6 +136,23 @@ OPEN (unit=9, FILE = "_data_jbar.txt")
     elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 3) then   
         read(5,*) gy_factor_d(1)
         gy_factor_d(2:) = gy_factor_d(1)
+    endif
+
+    close(5)
+! -------------------------------- rho -------------------------------
+      
+        Open(unit = 5, FILE = "_data_rho_1935.txt")  
+
+        
+     if (switch_change_rho == 1) then 
+        do i = 1, last_data_rho, 1
+            read(5,*) rho_d(i)
+        enddo
+        rho_d(last_data_rho+1:) = rho_d(last_data_rho)
+            
+     else
+         rho_d(:) = rho_d(1)
+
     endif
 
     close(5)

@@ -15,7 +15,7 @@ subroutine globals
 
     
     
-    version = 'debt_' ! these three strings allow us to load a correct version
+    version = 'base_' ! these three strings allow us to load a correct version
     experiment = 'all_'
     closure = 'govt__'
 
@@ -40,12 +40,13 @@ call chdir(cwd_i)
         read(3,*) switch_change_gy 
         read(3,*) switch_change_depr 
         read(3,*) switch_change_contrib
+        read(3,*) switch_change_rho
         read(3,*) switch_keep_fixed 
         read(3,*) switch_residual_t 
         read(3,*) switch_residual_1 
         read(3,*) switch_residual_2 
         read(3,*) switch_no_debt
-        
+
         ! second, some debug switches/options
         read(3,*) switch_het_mortality
         read(3,*) switch_utility_function
@@ -157,7 +158,7 @@ call chdir(cwd_p)
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t)
+    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t)
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
@@ -242,6 +243,9 @@ call chdir(cwd_p)
     
     depr_ss_old = depr_t(1)
     depr_ss_new = depr_t(bigT)
+    
+    rho_ss_old = rho_t(1)
+    rho_ss_new = rho_t(bigT)
     
     type_multiplier_ss_old = type_multiplier_t(:,1)
     type_multiplier_ss_new = type_multiplier_t(:,bigT)
