@@ -104,15 +104,15 @@
          
          write(666,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss         
         write(666,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss 
-        write(666,'(A30,F10.3,A)') ' Pre-tax real interest rate = ', 100*((1 + r_bar_ss)**0.2_dp -1d0)
-        write(666,'(A30,F10.3,A)') ' After-tax real interest rate = ', 100*(r_ss**0.2_dp -1d0)
+        write(666,'(A30,F10.3,A)') ' Pre-tax real interest rate (1y) = ', 100*((1 + r_bar_ss)**0.2_dp -1d0)
+        write(666,'(A30,F10.3,A)') ' After-tax real interest rate (1y) = ', 100*(r_ss**0.2_dp -1d0)
         write(666,'(A25,F10.3,A)') ' investment rate (%) =  ', 100*(y_ss - consumption_ss_gross - g_ss)/y_ss 
         write(666,'(A20,F10.3,A)') ' Tax_C/y_ss = ',  100*tc_ss*consumption_ss_gross/y_ss 
         write(666,'(A20,F10.3,A)') ' Tax_K/y_ss = ',  100*tk_ss*(r_bar_ss + depr)*k_ss/y_ss
         write(666,'(A20,F10.3,A)') ' Tax_L/y_ss = ',  100*labor_tax_revenue_ss/bigl_ss/y_ss
         write(666,'(A20,F10.3,A)') 'r*debt/y = ', ((1 + r_bar_ss)*debt_ss/(gam_ss*nu_ss) - debt_ss)/y_ss
         write(666,'(A20,F10.3,A)') 'g/y = ',   g_ss/y_ss
-        write(666,'(A20,F10.3,A)') 'debt/y (%) = ',  100*zbar * debt_share_ss
+        write(666,'(A20,F10.3,A)') 'debt/y (%) (1y) = ',  100*zbar * debt_share_ss
         
         write(666,'(A20,F10.3,A)') 'subsidy/y = ',   subsidy_ss/y_ss
         write(666,'(A20,F10.3,A)') 'gam_ss*nu_ss = ',   gam_ss*nu_ss
@@ -124,7 +124,7 @@
         write(666,'(A30,F10.3,A)') ' y_ss = ', y_ss
         write(666,'(A30,F10.3,A)') ' K_ss = ', k_ss*bigl_ss/N_ss_j(1)
         write(666,'(A30,F10.3,A)') ' L_ss = ', bigl_ss/N_ss_j(1)
-        write(666,'(A30,F10.3,A)') ' capital output ratio = ', k_ss/(y_ss/zbar)
+        write(666,'(A30,F10.3,A)') ' capital output ratio (1y) = ', k_ss/(y_ss/zbar)
         write(666,'(A30,F10.3,A)') ' capital share = ', ((r_bar_ss + depr)*k_ss/y_ss)
         !write(666,'(A30,F10.7,A)') ' l_ss_pen_j(jbar-1) = ', l_ss_pen_j(jbar_ss-1)
         !write(666,'(A30,F10.7,A)') ' l_ss_j(jbar-1) = ', l_ss_j(jbar_ss-1)
@@ -167,14 +167,27 @@
          enddo
          write(666, '(A)')
          write(666, '(A)') 'population weights ...' 
-         do i = 1,bigJ,1
-            write(666,'(A30,F20.10 )') ' ', pi_weight_ss(i)
-            enddo
+         do m = 1,bigM,1
+             do i = 1,bigJ,1
+                write(666,'(A30,F20.10 )') ' ', pi_big_weight_ss(i,m)
+             enddo
+         enddo
          write(666, '(A)')
          write(666, '(A)') 'types income risk autocorrelation ...' 
          do m = 1,bigM,1
             write(666,'(A30,F20.10 )') ' ', zeta_p(m)
          enddo
+         CLOSE(666)
+        write(666, '(A)') 'types income risk variance ...' 
+        if (switch_run_1 == 1) then
+         do m = 1,bigM,1
+            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(m,1)
+         enddo
+        else 
+        do m = 1,bigM,1
+            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(m,bigT)
+        enddo
+        endif
          CLOSE(666)
 
  

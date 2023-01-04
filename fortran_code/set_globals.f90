@@ -141,6 +141,8 @@ call chdir(cwd_p)
         endif
   
 
+        call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t)
+            
         ! rescale to account for zbar
         zeta_p      = zeta_p**zbar  
         sigma_nu_d  = sigma_nu_d*(1-zeta_d**(2*zbar))/(1-zeta_d**2)
@@ -156,7 +158,7 @@ call chdir(cwd_p)
         phi  = 1.00_dp 
     endif
 
-    call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t)
+
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
