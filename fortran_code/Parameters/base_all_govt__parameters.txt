@@ -4,7 +4,7 @@
 1e-7 // err_ss_tol             
 1e-4 // err_tol
 1e-5 // err_prof_tol
-0.7d0 // up_ss
+0.6d0 // up_ss
 0.6d0 // up_t
 0.0d0 // up_debt_t
 0.6d0 // up_tc
@@ -48,3 +48,5 @@
 30// g_correction_last_period
 0.952505051046732// zeta_p(1)
 0.969092245452449d0//zeta_p(2)  
+0.001// sigma2_fix(1)
+0.001//sigma2_fix(2)  

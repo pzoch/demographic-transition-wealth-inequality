@@ -60,6 +60,7 @@ call chdir(cwd_i)
         read(3,*) switch_persistent_delta      
         read(3,*) switch_epsilon_corr                
         read(3,*) switch_income_risk 
+        read(3,*) switch_income_fixed_effect 
         read(3,*) switch_discount_risk 
         read(3,*) switch_return_risk 
         read(3,*) switch_initial_dispersion 
@@ -132,7 +133,9 @@ call chdir(cwd_p)
         do m = 1,bigM,1 
             read(3,*) zeta_p(m)
         enddo
-        
+         do m = 1,bigM,1 
+            read(3,*) sigma2_fix(m)
+        enddo
         CLOSE(3) 
         
         

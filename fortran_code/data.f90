@@ -47,7 +47,7 @@ call chdir(cwd_r)
         last_data_tauK = 17 ! for tauK
         last_data_gy = 17 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
-        last_data_debt           = 22 ! debt/gdp
+        last_data_debt           = 20 ! debt/gdp
         last_data_sl = 17 ! for sl
         last_data_type_multiplier= 17 ! type multip
         last_data_type_share= 17 ! type share
@@ -156,7 +156,7 @@ call chdir(cwd_r)
 ! -------------------------------- type multiplier --------------------
     
   
-        Open(unit = 8, FILE = "_data_type_mutliplier_1935.txt")  
+        Open(unit = 8, FILE = "_data_type_multiplier_1935.txt")  
 
     ! reading type_mutliplier
     
@@ -390,7 +390,7 @@ call chdir(cwd_r)
     
   !    -------------------------------- DEBT/GDP -------------------------------
  
-        Open(unit = 5, FILE = "_data_debt_1935fake.txt")  
+        Open(unit = 5, FILE = "_data_debt_1935.txt")  
         
      if (switch_change_debt == 1) then 
         do i = 1, last_data_debt, 1
@@ -427,7 +427,7 @@ call chdir(cwd_r)
  ! -------------------------------- LAMBDA -------------------------------
   
 
-        Open(unit = 6, FILE = "_data_lambda_1935.txt")      
+        Open(unit = 6, FILE = "_data_lambda_Luetticke_1935.txt")      
         
     
      if (switch_change_lambda == 1) then 
@@ -605,7 +605,7 @@ call chdir(cwd_r)
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
-        gam_d(last_data_gamma+1:) = 1.03
+        gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
     elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 1) then
         last_data_gamma= break_index
         do i = 1, last_data_gamma, 1
@@ -617,7 +617,8 @@ call chdir(cwd_r)
         read(4,*) gam_d(1)
         gam_d(2:) = gam_d(1)
     endif
-        
+    
+    gam_d = gam_d + 1.0d0
         
     close(4)
     

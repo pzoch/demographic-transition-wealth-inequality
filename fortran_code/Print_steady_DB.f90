@@ -181,11 +181,11 @@
         write(666, '(A)') 'types income risk variance ...' 
         if (switch_run_1 == 1) then
          do m = 1,bigM,1
-            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(m,1)
+            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(1,m)
          enddo
         else 
         do m = 1,bigM,1
-            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(m,bigT)
+            write(666,'(A30,F20.10 )') ' ', sigma2_epsilon_t_big(bigT,m)
         enddo
         endif
          CLOSE(666)

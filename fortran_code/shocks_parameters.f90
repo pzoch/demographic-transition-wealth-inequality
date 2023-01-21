@@ -1,11 +1,13 @@
 ! shocks    
 
+    
+    ! these need to be corrected to allow for unequal bequests
 ! definie initial distributions
-    n_sp_initial = int(n_sp/2)+1
+    n_sp_initial = int(n_sp_risk/2)+1
     n_sr_initial = int(n_sr/2)+1
     n_sd_initial = int(n_sd/2)+1
-if (n_sp>5) then
-    n_sp_initial = int((n_sp-2)/2)+1  ! do not allow for people to be born as superstars
+if (n_sp_risk>5) then
+    n_sp_initial = int((n_sp_risk-2)/2)+1  ! do not allow for people to be born as superstars
     endif
     
         
@@ -21,10 +23,10 @@ if (n_sp>5) then
         
 
 
-pi_ip = 0d0
+pi_ip_risk = 0d0
 pi_ir = 1d0
 pi_id = 1d0
-n_sp_value = 0d0
+n_sp_risk_value = 0d0
 n_sr_value = 0d0
 n_sd_value = 0d0
 
@@ -46,7 +48,7 @@ sigma2_epsilon_ss_new_big = sigma2_epsilon_t_big(bigT,:)
     
     enddo
     
-if (n_sp>5) then 
+if (n_sp_risk>5) then 
         do m = 1,bigM, 1
             epsilon_correction_t =  epsilon_correction_t_big(:,m)
             sigma2_epsilon_t     =  sigma2_epsilon_t_big(:,m)
@@ -56,7 +58,7 @@ if (n_sp>5) then
             sigma2_epsilon_ss_new     =  sigma2_epsilon_ss_new_big(m)
             
             do t = 1, bigT, 1
-                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_value_trans(1:n_sp-2,t), pi_ip_trans(1:n_sp-2,1:n_sp-2,t))
+                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_risk_value_trans(1:n_sp_risk-2,t), pi_ip_risk_trans(1:n_sp_risk-2,1:n_sp_risk-2,t))
           
 
             enddo
@@ -65,13 +67,13 @@ if (n_sp>5) then
         
         
             ! get steady state shock realizations and transition matrices
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_value_ss_old(1:n_sp-2), pi_ip_ss_old(1:n_sp-2,1:n_sp-2))
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_value_ss_new(1:n_sp-2), pi_ip_ss_new(1:n_sp-2,1:n_sp-2))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_risk_value_ss_old(1:n_sp_risk-2), pi_ip_ss_old(1:n_sp_risk-2,1:n_sp_risk-2))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_risk_value_ss_new(1:n_sp_risk-2), pi_ip_ss_new(1:n_sp_risk-2,1:n_sp_risk-2))
         
-            n_sp_value_ss_old = exp(n_sp_value_ss_old) 
-            n_sp_value_ss_new = exp(n_sp_value_ss_new)     
+            n_sp_risk_value_ss_old = exp(n_sp_risk_value_ss_old) 
+            n_sp_risk_value_ss_new = exp(n_sp_risk_value_ss_new)     
         
-            n_sp_value = exp(n_sp_value)  
+            n_sp_risk_value = exp(n_sp_risk_value)  
         
         
             !pi_i_6 = 5e-3
@@ -79,45 +81,45 @@ if (n_sp>5) then
             !pi_6_7 = 0.0025d0
             !pi_7_7 = 0.73d0
         
-            n_sp_value_trans(n_sp-1,:) = superstar_factor_1*n_sp_value_trans(n_sp-2,:)
-            n_sp_value_trans(n_sp,:) = superstar_factor_2*n_sp_value_trans(n_sp-1,:)
-            n_sp_value_ss_old(n_sp-1) = superstar_factor_1*n_sp_value_ss_old(n_sp-2)
-            n_sp_value_ss_old(n_sp) = superstar_factor_2*n_sp_value_ss_old(n_sp-1)
-            n_sp_value_ss_new(n_sp-1) = superstar_factor_1*n_sp_value_ss_new(n_sp-2)
-            n_sp_value_ss_new(n_sp) = superstar_factor_2*n_sp_value_ss_new(n_sp-1)
+            n_sp_risk_value_trans(n_sp_risk-1,:) = superstar_factor_1*n_sp_risk_value_trans(n_sp_risk-2,:)
+            n_sp_risk_value_trans(n_sp_risk,:) = superstar_factor_2*n_sp_risk_value_trans(n_sp_risk-1,:)
+            n_sp_risk_value_ss_old(n_sp_risk-1) = superstar_factor_1*n_sp_risk_value_ss_old(n_sp_risk-2)
+            n_sp_risk_value_ss_old(n_sp_risk) = superstar_factor_2*n_sp_risk_value_ss_old(n_sp_risk-1)
+            n_sp_risk_value_ss_new(n_sp_risk-1) = superstar_factor_1*n_sp_risk_value_ss_new(n_sp_risk-2)
+            n_sp_risk_value_ss_new(n_sp_risk) = superstar_factor_2*n_sp_value_ss_new(n_sp_risk-1)
         
         
         
         
         
         
-            pi_ip_trans = (1d0-pi_i_6)*pi_ip_trans
-            pi_ip_ss_old = (1d0-pi_i_6)*pi_ip_ss_old
-            pi_ip_ss_new = (1d0-pi_i_6)*pi_ip_ss_new
+            pi_ip_risk_trans = (1d0-pi_i_6)*pi_ip_risk_trans
+            pi_ip_risk_ss_old = (1d0-pi_i_6)*pi_ip_risk_ss_old
+            pi_ip_risk_ss_new = (1d0-pi_i_6)*pi_ip_risk_ss_new
         
-        do s=1, n_sp-2,1
-            pi_ip_trans(s,n_sp-1,:) = pi_i_6
-            pi_ip_ss_old(s,n_sp-1) = pi_i_6
-            pi_ip_ss_new(s,n_sp-1) = pi_i_6
+        do s=1, n_sp_risk-2,1
+            pi_ip_risk_trans(s,n_sp_risk-1,:) = pi_i_6
+            pi_ip_risk_ss_old(s,n_sp_risk-1) = pi_i_6
+            pi_ip_risk_ss_new(s,n_sp_risk-1) = pi_i_6
         enddo
         
-        pi_ip_trans(n_sp-1,n_sp-1,:)= pi_6_6
-        pi_ip_trans(n_sp-1,n_sp,:)  = pi_6_7
-        pi_ip_trans(n_sp-1,3,:)     = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
-        pi_ip_trans(n_sp,n_sp,:)    = pi_7_7  
-        pi_ip_trans(n_sp,n_sp-1,:)  = 1d0 - pi_7_7
+        pi_ip_risk_trans(n_sp_risk-1,n_sp_risk-1,:)= pi_6_6
+        pi_ip_risk_trans(n_sp_risk-1,n_sp_risk,:)  = pi_6_7
+        pi_ip_risk_trans(n_sp_risk-1,3,:)     = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
+        pi_ip_risk_trans(n_sp_risk,n_sp_risk,:)    = pi_7_7  
+        pi_ip_risk_trans(n_sp_risk,n_sp_risk-1,:)  = 1d0 - pi_7_7
         
-        pi_ip_ss_old(n_sp-1,n_sp-1) = pi_6_6
-        pi_ip_ss_old(n_sp-1,n_sp)   = pi_6_7
-        pi_ip_ss_old(n_sp-1,3)      = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
-        pi_ip_ss_old(n_sp,n_sp)     = pi_7_7  
-        pi_ip_ss_old(n_sp,n_sp-1)   = 1d0 - pi_7_7
+        pi_ip_risk_ss_old(n_sp_risk-1,n_sp_risk-1) = pi_6_6
+        pi_ip_risk_ss_old(n_sp_risk-1,n_sp_risk)   = pi_6_7
+        pi_ip_risk_ss_old(n_sp_risk-1,3)      = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
+        pi_ip_risk_ss_old(n_sp_risk,n_sp_risk)     = pi_7_7  
+        pi_ip_risk_ss_old(n_sp_risk,n_sp_risk-1)   = 1d0 - pi_7_7
         
-        pi_ip_ss_new(n_sp-1,n_sp-1) = pi_6_6
-        pi_ip_ss_new(n_sp-1,n_sp)   = pi_6_7
-        pi_ip_ss_new(n_sp-1,3)      = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
-        pi_ip_ss_new(n_sp,n_sp)      = pi_7_7  
-        pi_ip_ss_new(n_sp,n_sp-1)    = 1d0 - pi_7_7
+        pi_ip_risk_ss_new(n_sp_risk-1,n_sp_risk-1) = pi_6_6
+        pi_ip_risk_ss_new(n_sp_risk-1,n_sp_risk)   = pi_6_7
+        pi_ip_risk_ss_new(n_sp_risk-1,3)      = 1d0 - pi_6_7 -  pi_6_6 ! note it goes back to point = 3!
+        pi_ip_risk_ss_new(n_sp_risk,n_sp_risk)      = pi_7_7  
+        pi_ip_risk_ss_new(n_sp_risk,n_sp_risk-1)    = 1d0 - pi_7_7
         
         
         
@@ -125,24 +127,24 @@ if (n_sp>5) then
         
         if (switch_initial_dispersion == 1) then
             do t = 1, bigT, 1
-                do ip = 1 , n_sp, 1
-                        pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                do ip = 1 , n_sp_risk, 1
+                        pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
                 enddo
             enddo                
-            do ip = 1 , n_sp, 1
-                pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
-                pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
+            do ip = 1 , n_sp_risk, 1
+                pi_ip_risk_init_ss_old(ip) = pi_ip_risk_ss_old(n_sp_initial,ip)
+                pi_ip_risk_init_ss_new(ip) = pi_ip_risk_ss_new(n_sp_initial,ip)
             enddo
             
         elseif (switch_initial_dispersion == 0) then
             do t = 1, bigT, 1
-                        pi_ip_init_trans(:,t) = 0.0d0
-                        pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+                        pi_ip_risk_init_trans(:,t) = 0.0d0
+                        pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
             enddo        
-            pi_ip_init_ss_old(:) = 0.0d0
-            pi_ip_init_ss_new(:) = 0.0d0
-            pi_ip_init_ss_old(n_sp_initial) = 1.0d0
-            pi_ip_init_ss_new(n_sp_initial) = 1.0d0    
+            pi_ip_risk_init_ss_old(:) = 0.0d0
+            pi_ip_risk_init_ss_new(:) = 0.0d0
+            pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
+            pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0    
         endif
             
         
@@ -153,27 +155,27 @@ if (n_sp>5) then
         
         ! pack
         
-        pi_ip_init_ss_old_big(:,m)   = pi_ip_init_ss_old
-        pi_ip_init_ss_new_big(:,m)   = pi_ip_init_ss_new
+        pi_ip_risk_init_ss_old_big(:,m)   = pi_ip_risk_init_ss_old
+        pi_ip_risk_init_ss_new_big(:,m)   = pi_ip_risk_init_ss_new
         
-        pi_ip_init_trans_big(:,m,:)  = pi_ip_init_trans
+        pi_ip_risk_init_trans_big(:,m,:)  = pi_ip_risk_init_trans
         
-        n_sp_value_trans_big(:,m,:)  = n_sp_value_trans
+        n_sp_risk_value_trans_big(:,m,:)  = n_sp_risk_value_trans
         
-        n_sp_value_ss_old_big(:,m) = n_sp_value_ss_old
-        n_sp_value_ss_new_big(:,m) = n_sp_value_ss_new
+        n_sp_risk_value_ss_old_big(:,m) = n_sp_risk_value_ss_old
+        n_sp_risk_value_ss_new_big(:,m) = n_sp_risk_value_ss_new
         
-        pi_ip_trans_big(:,:,m,:) =  pi_ip_trans
+        pi_ip_risk_trans_big(:,:,m,:) =  pi_ip_risk_trans
         
-        pi_ip_ss_old_big(:,:,m)  =  pi_ip_ss_old
-        pi_ip_ss_new_big(:,:,m)  =  pi_ip_ss_new
+        pi_ip_risk_ss_old_big(:,:,m)  =  pi_ip_risk_ss_old
+        pi_ip_risk_ss_new_big(:,:,m)  =  pi_ip_risk_ss_new
         enddo
         
 
     
     
     
-elseif (n_sp>1)  then
+elseif (n_sp_risk>1)  then
 
     ! need to decide whether to do it here or later
     do m = 1,bigM,1
@@ -185,83 +187,83 @@ elseif (n_sp>1)  then
             sigma2_epsilon_ss_new     =  sigma2_epsilon_ss_new_big(m)
          
             do t = 1, bigT, 1
-                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_value_trans(1:n_sp,t), pi_ip_trans(1:n_sp,1:n_sp,t))
+                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_risk_value_trans(1:n_sp_risk,t), pi_ip_risk_trans(1:n_sp_risk,1:n_sp_risk,t))
           
-                    !pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+                    !pi_ip_risk_init_trans(n_sp_risk_initial,t) = 1.0d0
             enddo
         
-            n_sp_value_trans = exp(n_sp_value_trans)  
+            n_sp_risk_value_trans = exp(n_sp_risk_value_trans)  
 
         
             ! get steady state shock realizations and transition matrices
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_value_ss_old(1:n_sp), pi_ip_ss_old(1:n_sp,1:n_sp))
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_value_ss_new(1:n_sp), pi_ip_ss_new(1:n_sp,1:n_sp))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_risk_value_ss_old(1:n_sp_risk), pi_ip_risk_ss_old(1:n_sp_risk,1:n_sp_risk))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_risk_value_ss_new(1:n_sp_risk), pi_ip_risk_ss_new(1:n_sp_risk,1:n_sp_risk))
         
-            n_sp_value_ss_old = exp(n_sp_value_ss_old) 
-            n_sp_value_ss_new = exp(n_sp_value_ss_new)     
+            n_sp_risk_value_ss_old = exp(n_sp_risk_value_ss_old) 
+            n_sp_risk_value_ss_new = exp(n_sp_risk_value_ss_new)     
 
-            n_sp_value = exp(n_sp_value)  
+            n_sp_risk_value = exp(n_sp_risk_value)  
             
      
             
         ! now do initial things
         if (switch_initial_dispersion == 1) then
             do t = 1, bigT, 1
-                do ip = 1 , n_sp, 1
-                        pi_ip_init_trans(ip,t) = pi_ip_trans(n_sp_initial,ip,t)
+                do ip = 1 , n_sp_risk, 1
+                        pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
                 enddo
             enddo                
-            do ip = 1 , n_sp, 1
-                pi_ip_init_ss_old(ip) = pi_ip_ss_old(n_sp_initial,ip)
-                pi_ip_init_ss_new(ip) = pi_ip_ss_new(n_sp_initial,ip)
+            do ip = 1 , n_sp_risk, 1
+                pi_ip_risk_init_ss_old(ip) = pi_ip_risk_ss_old(n_sp_initial,ip)
+                pi_ip_risk_init_ss_new(ip) = pi_ip_risk_ss_new(n_sp_initial,ip)
             enddo
             
         elseif (switch_initial_dispersion == 0) then
             do t = 1, bigT, 1
-                        pi_ip_init_trans(:,t) = 0.0d0
-                        pi_ip_init_trans(n_sp_initial,t) = 1.0d0
+                        pi_ip_risk_init_trans(:,t) = 0.0d0
+                        pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
             enddo        
-            pi_ip_init_ss_old(:) = 0.0d0
-            pi_ip_init_ss_new(:) = 0.0d0
-            pi_ip_init_ss_old(n_sp_initial) = 1.0d0
-            pi_ip_init_ss_new(n_sp_initial) = 1.0d0    
+            pi_ip_risk_init_ss_old(:) = 0.0d0
+            pi_ip_risk_init_ss_new(:) = 0.0d0
+            pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
+            pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0    
         endif
 
         
             ! pack
         
-            pi_ip_init_ss_old_big(:,m)   = pi_ip_init_ss_old
-            pi_ip_init_ss_new_big(:,m)   = pi_ip_init_ss_new
-            pi_ip_init_trans_big(:,m,:)  = pi_ip_init_trans
+            pi_ip_risk_init_ss_old_big(:,m)   = pi_ip_risk_init_ss_old
+            pi_ip_risk_init_ss_new_big(:,m)   = pi_ip_risk_init_ss_new
+            pi_ip_risk_init_trans_big(:,m,:)  = pi_ip_risk_init_trans
         
-            n_sp_value_trans_big(:,m,:)  = n_sp_value_trans
-            n_sp_value_ss_old_big(:,m) = n_sp_value_ss_old
-            n_sp_value_ss_new_big(:,m) = n_sp_value_ss_new
+            n_sp_risk_value_trans_big(:,m,:)  = n_sp_risk_value_trans
+            n_sp_risk_value_ss_old_big(:,m) = n_sp_risk_value_ss_old
+            n_sp_risk_value_ss_new_big(:,m) = n_sp_risk_value_ss_new
         
-            pi_ip_trans_big(:,:,m,:) =  pi_ip_trans
-            pi_ip_ss_old_big(:,:,m)  =  pi_ip_ss_old
-            pi_ip_ss_new_big(:,:,m)  =  pi_ip_ss_new
+            pi_ip_risk_trans_big(:,:,m,:) =  pi_ip_risk_trans
+            pi_ip_risk_ss_old_big(:,:,m)  =  pi_ip_risk_ss_old
+            pi_ip_risk_ss_new_big(:,:,m)  =  pi_ip_risk_ss_new
         
     enddo
     
 
  
 else      
-    pi_ip = 1d0
-    n_sp_value = 1d0 
+    pi_ip_risk = 1d0
+    n_sp_risk_value = 1d0 
     
-    pi_ip_init_ss_old_big = 1d0 
-    pi_ip_init_ss_new_big = 1d0 
-    pi_ip_init_trans_big = 1d0 
-    pi_ip_ss_new = 1d0
-    pi_ip_ss_old = 1d0
-    n_sp_value_trans_big = 1d0 
-    n_sp_value_ss_old_big = 1d0 
-    n_sp_value_ss_new_big = 1d0 
+    pi_ip_risk_init_ss_old_big = 1d0 
+    pi_ip_risk_init_ss_new_big = 1d0 
+    pi_ip_risk_init_trans_big = 1d0 
+    pi_ip_risk_ss_new = 1d0
+    pi_ip_risk_ss_old = 1d0
+    n_sp_risk_value_trans_big = 1d0 
+    n_sp_risk_value_ss_old_big = 1d0 
+    n_sp_risk_value_ss_new_big = 1d0 
     
-    pi_ip_trans_big = 1d0 
-    pi_ip_ss_old_big = 1d0 
-    pi_ip_ss_new_big = 1d0 
+    pi_ip_risk_trans_big = 1d0 
+    pi_ip_risk_ss_old_big = 1d0 
+    pi_ip_risk_ss_new_big = 1d0 
     endif
   
     
@@ -269,24 +271,24 @@ else
         ! now do initial things
     do m=  1, bigM, 1
     do t = 1, bigT, 1
-        do ip = 1 , n_sp, 1
+        do ip = 1 , n_sp_risk, 1
                 if (switch_initial_dispersion == 1) then
-                    pi_ip_init_trans_big(ip,m,t) = pi_ip_trans_big(n_sp_initial,ip,m,t)
+                    pi_ip_risk_init_trans_big(ip,m,t) = pi_ip_risk_trans_big(n_sp_initial,ip,m,t)
                 elseif (switch_initial_dispersion == 0) then
-                    pi_ip_init_trans_big(:,m,t) = 0.0d0
-                    pi_ip_init_trans_big(n_sp_initial,m,t) = 1.0d0
+                    pi_ip_risk_init_trans_big(:,m,t) = 0.0d0
+                    pi_ip_risk_init_trans_big(n_sp_initial,m,t) = 1.0d0
                 endif
         enddo
     enddo             
     
      if (switch_initial_dispersion == 1) then
-        pi_ip_init_ss_old_big(:,m) = pi_ip_ss_old_big(n_sp_initial,:,m)
-        pi_ip_init_ss_new_big(:,m) = pi_ip_ss_new_big(n_sp_initial,:,m)
+        pi_ip_risk_init_ss_old_big(:,m) = pi_ip_risk_ss_old_big(n_sp_initial,:,m)
+        pi_ip_risk_init_ss_new_big(:,m) = pi_ip_risk_ss_new_big(n_sp_initial,:,m)
      elseif (switch_initial_dispersion == 0) then
-        pi_ip_init_ss_old_big(:,m) = 0.0d0
-        pi_ip_init_ss_new_big(:,m) = 0.0d0
-        pi_ip_init_ss_old_big(n_sp_initial,m) = 1.0d0
-        pi_ip_init_ss_new_big(n_sp_initial,m) = 1.0d0      
+        pi_ip_risk_init_ss_old_big(:,m) = 0.0d0
+        pi_ip_risk_init_ss_new_big(:,m) = 0.0d0
+        pi_ip_risk_init_ss_old_big(n_sp_initial,m) = 1.0d0
+        pi_ip_risk_init_ss_new_big(n_sp_initial,m) = 1.0d0      
     endif
     enddo
 
@@ -337,9 +339,9 @@ endif
 
 
          if (switch_income_risk == 0) then
-             n_sp_value_trans_big(:,:,:) = 1.0d0
-             n_sp_value_ss_old_big(:,:)  = 1.0d0
-             n_sp_value_ss_new_big(:,:)  = 1.0d0
+             n_sp_risk_value_trans_big(:,:,:) = 1.0d0
+             n_sp_risk_value_ss_old_big(:,:)  = 1.0d0
+             n_sp_risk_value_ss_new_big(:,:)  = 1.0d0
              sigma2_epsilon_t_big(:,:) = 0.d0
              epsilon_correction_t_big(:,:) = 0.0d0
 
@@ -360,4 +362,46 @@ endif
         if (switch_return_risk == 0) then
              n_sr_value(:) = 0.0d0
 
-        endif
+    endif
+    
+    
+    
+! income fixed effects added here
+    pi_ip_trans_big = 0.0d0
+    pi_ip_ss_old_big = 0.0d0
+    pi_ip_ss_new_big = 0.0d0
+    
+    pi_ip_init_ss_old_big = 0.0d0
+    pi_ip_init_ss_new_big = 0.0d0
+    pi_ip_init_trans_big  = 0.0d0
+    
+    do m = 1,bigM,1
+        
+        call normal_discrete_1(n_sp_fix_value(:,m), prob_norm_fix, 0d0, sigma2_fix(m))
+        
+        do i = 1,n_sp_fix,1
+    
+
+            pi_ip_init_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = pi_ip_risk_init_ss_old_big(:,m) * prob_norm_fix(i)
+            pi_ip_init_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = pi_ip_risk_init_ss_new_big(:,m) * prob_norm_fix(i)
+            pi_ip_init_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = pi_ip_risk_init_trans_big(:,m,:) * prob_norm_fix(i)
+
+            pi_ip_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m,:) =  pi_ip_risk_trans_big(:,:,m,:)
+            pi_ip_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_old_big(:,:,m)
+            pi_ip_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_new_big(:,:,m)
+         
+            if (switch_income_fixed_effect == 0) then 
+                n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = n_sp_risk_value_trans_big(:,m,:)
+                n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_old_big(:,m) 
+                n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_new_big(:,m)
+            else
+                n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = exp(log(n_sp_risk_value_trans_big(:,m,:) + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
+                n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = exp(log(n_sp_risk_value_ss_old_big(:,m)  + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
+                n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = exp(log(n_sp_risk_value_ss_new_big(:,m)  + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
+            endif
+        
+    enddo
+    enddo
+    
+    
+    

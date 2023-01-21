@@ -66,6 +66,7 @@ IMPLICIT NONE
     integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
     integer :: switch_change_premium                    ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
+    integer :: switch_income_fixed_effect               ! 0 = no income fixed effects, 1 = income fixed effects, group specific
     integer :: switch_discount_risk
     integer :: switch_return_risk
     integer :: switch_keep_fixed                      
@@ -132,29 +133,44 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 8, n_sp = 3, n_sd =1, n_sr = 1, n_beq = 5
-
+    integer, parameter :: n_a = 50, n_aime = 8, n_sp_risk = 3, n_sd =1, n_sr = 1, n_beq = 5, n_sp_fix = 2
+    integer, parameter            :: n_sp = n_sp_risk * n_sp_fix
     real*8, parameter  ::  zipf = 2.5d0     
     real*8, dimension(bigM) :: zeta_p
-    
+    real*8, dimension(bigM) :: sigma2_fix
         
+    
     real*8 :: a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ), sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, n_sp_initial,&
-               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr)
+               pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr), prob_norm_fix(n_sp_fix),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr)
     real*8 :: aime_cap, aime_cap_ge
     
+     real*8, dimension(n_sp_fix,bigM) :: n_sp_fix_value
+    
  ! cohort/time specific shock grids
+    real*8   ::  pi_ip_risk_trans(n_sp_risk,n_sp_risk,bigT), n_sp_risk_value_trans(n_sp_risk,bigT), pi_ip_risk_init_trans(n_sp_risk,bigT) ! these will be used to construct things used in pfi.90 
+    real*8   ::  pi_ip_risk_trans_big(n_sp_risk,n_sp_risk,bigM,bigT), n_sp_risk_value_trans_big(n_sp_risk,bigM,bigT), pi_ip_risk_init_trans_big(n_sp_risk,bigM, bigT) ! these are used in the outer routine and hold all the information
+    
     real*8   ::  pi_ip_trans(n_sp,n_sp,bigT), n_sp_value_trans(n_sp,bigT), pi_ip_init_trans(n_sp,bigT) ! these will be used in pfi.90 
     real*8   ::  pi_ip_trans_big(n_sp,n_sp,bigM,bigT), n_sp_value_trans_big(n_sp,bigM,bigT), pi_ip_init_trans_big(n_sp,bigM, bigT) ! these are used in the outer routine and hold all the information
     
     real(dp) :: sigma2_epsilon_ss_old_big(bigM), sigma2_epsilon_ss_new_big(bigM) ! these will be used in pfi.90 
     real(dp) :: sigma2_epsilon_ss_old, sigma2_epsilon_ss_new ! these are used in the outer routine and hold all the information
     
+    real*8   :: pi_ip_risk_ss_old_big(n_sp_risk,n_sp_risk,bigM), n_sp_risk_value_ss_old_big(n_sp_risk,bigM), pi_ip_risk_ss_new_big(n_sp_risk,n_sp_risk,bigM), n_sp_risk_value_ss_new_big(n_sp_risk,bigM), pi_ip_risk_init_ss_old_big(n_sp_risk,bigM), pi_ip_risk_init_ss_new_big(n_sp_risk,bigM) ! steady state shock 
+    
+    real*8   :: pi_ip_risk_ss_old(n_sp_risk,n_sp_risk), n_sp_risk_value_ss_old(n_sp_risk), pi_ip_risk_ss_new(n_sp_risk,n_sp_risk), n_sp_risk_value_ss_new(n_sp_risk), pi_ip_risk_init_ss_old(n_sp_risk), pi_ip_risk_init_ss_new(n_sp_risk) ! steady state shock realizations and transition probabilities
+    
     real*8   :: pi_ip_ss_old_big(n_sp,n_sp,bigM), n_sp_value_ss_old_big(n_sp,bigM), pi_ip_ss_new_big(n_sp,n_sp,bigM), n_sp_value_ss_new_big(n_sp,bigM), pi_ip_init_ss_old_big(n_sp,bigM), pi_ip_init_ss_new_big(n_sp,bigM) ! steady state shock 
     real*8   :: pi_ip_ss_old(n_sp,n_sp), n_sp_value_ss_old(n_sp), pi_ip_ss_new(n_sp,n_sp), n_sp_value_ss_new(n_sp), pi_ip_init_ss_old(n_sp), pi_ip_init_ss_new(n_sp) ! steady state shock realizations and transition probabilities
     
+    real*8   :: pi_ip_risk_big(n_sp_risk,n_sp_risk,bigM), n_sp_risk_value_big(n_sp_risk,bigM), pi_ip_risk_init_big(n_sp_risk,bigM) ! holder to make this code compatibile with older subroutines
+    real*8   :: pi_ip_risk(n_sp_risk,n_sp_risk), n_sp_risk_value(n_sp_risk), pi_ip_risk_init(n_sp_risk)! holder to make this code compatibile with older subroutines
+    
     real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM), pi_ip_init_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
     real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp), pi_ip_init(n_sp)! holder to make this code compatibile with older subroutines
+    
+    
     real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
