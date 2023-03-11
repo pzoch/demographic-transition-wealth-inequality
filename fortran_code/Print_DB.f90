@@ -314,7 +314,47 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
             enddo
         enddo
     enddo
-
+    close(108)
+    open(unit = 109, FILE = version//experiment//closure//"mass_trans_beq.csv")
     
-close(108)
+    if (switch_unequal_bequest == 2) then
+write(109, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;beq;asset;aime;inc_shock;ret_shock;disc_shock;type"
+    
+    do i = 1, bigT, 1
+        do j = 1, n_beq, 1
+            do m = 1, bigM, 1
+            do ia = 0, n_a, 1
+                do i_aime = 0, n_aime, 1
+                    do ip = 1, n_sp, 1
+                        do ir = 1, n_sr, 1
+                            do id = 1, n_sd, 1
+                            write(109, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+                            prob_trans_big(beq_age, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(beq_age,m,i)/sum(N_big_t_j(beq_age,:,i))*p_beq_trans(j,i), ";", & ! mass
+                            c_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !consumption
+                            l_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !hours
+                            lab_income_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
+                            lab_income_pretax_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
+                            tot_income_pretax_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !pretax income
+                            sv(ia) + beq_zipf_trans_big(j,m,i), ";", & !sav
+                            svplus_beq_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !sav
+                            i, ";", & !year
+                            j , ";",  & !beq point
+                            ia , ";",  & !asset
+                            i_aime , ";",  & !aime
+                            ip , ";",  & !income
+                            ir , ";",  & !return
+                            id , ";",  & !discount
+                            m   !type
+                            enddo        
+                        enddo
+                    enddo
+                enddo
+                enddo
+            enddo
+        enddo
+    enddo
+close(109)
+endif
+    
+
 

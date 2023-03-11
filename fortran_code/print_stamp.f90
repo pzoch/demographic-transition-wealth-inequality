@@ -50,6 +50,8 @@
         write(666,'(A30,I5.1)') 'switch_param_2 =', switch_param_2
         write(666,'(A30,I5.1)') 'switch_ss_write =', switch_ss_write
         write(666,'(A30,I5.1)') 'switch_profile =', switch_profile
+        write(666,'(A30,I5.1)') 'switch_wage_vs_income =', switch_wage_vs_income
+        write(666,'(A30,I5.1)') 'beq_age =', beq_age
         write(666, '(A)') '*********************************'
         write(666, '(A)') 'GRIDS ARE INITIALIZED AS' 
         write(666, '(A)') 
@@ -85,6 +87,7 @@
          write(666,'(A30,F9.5 )') 't1_ss_new =',     t1_ss_new  
          write(666,'(A30,F9.5 )') 't2_ss_old =',     t2_ss_old  
          write(666,'(A30,F9.5 )') 't2_ss_new =',     t2_ss_new  
+         write(666,'(A30,F9.5 )') 'delta_half_width =',     delta_half_width  
          write(666, '(A)') 'NOTE: ' 
          write(666, '(A)') 'THIS DOES NOT MEAN IT RUNS WITH THESE PARAMETERS ' 
          write(666, '(A)') 'THEY WERE POSSIBLY MODIFIED LATER ' 

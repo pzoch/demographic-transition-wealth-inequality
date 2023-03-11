@@ -20,6 +20,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigj) ::  u_init_old
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
+    real(dp), dimension(n_beq,bigM,bigT) :: beq_zipf_trans_big
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
@@ -31,7 +32,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
     integer, intent(in) :: param
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
-
+    
     
     
     real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j
@@ -265,7 +266,7 @@ enddo
 avg_aime_replacement_rate = 0.33d0
 !LabIncAVG_vfi = 0.33d0*w_bar
 !!!!!!!!!!!!!!!!! iterations start 
- include 'transition_iterations.f90' 
+include 'transition_iterations.f90' 
 
 !!!!!!!!!!!!!!!!! iterations end
 

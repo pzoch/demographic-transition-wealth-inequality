@@ -144,8 +144,8 @@ select case (switch_residual)
                 deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
                 
                         g(i) =   tc(i)*consumption_gross_new(i) - ( subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                         -labor_tax_revenue(i)/bigl(i))
+                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) & 
+                         -labor_tax_revenue(i)/bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
                 
                         g_share(i) = g(i)/y(i)
             enddo
@@ -162,7 +162,7 @@ select case (switch_residual)
                 deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
                          g(i) = tc(i) * consumption_gross_new(i)  - (subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
                          - tk(i)*(r_bar(i)+depr_t(i))*k(i) &
-                         - labor_tax_revenue(i)/ bigl(i))
+                         - labor_tax_revenue(i)/ bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
                          
                          
                          g_share(i) = g(i)/y(i)

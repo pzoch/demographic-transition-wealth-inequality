@@ -41,58 +41,71 @@ call chdir(cwd_r)
         break_index = 5 ! this corresponds to year 1955 
         
         last_data_demo = 33 ! for demography
-        last_data_gamma = 17 ! for tfp
-        last_data_lambda = 17 ! for lambda
-        last_data_tauL = 17 ! for tauL
-        last_data_tauK = 17 ! for tauK
-        last_data_gy = 17 ! for gy
+        last_data_gamma = 34 ! for tfp
+        last_data_lambda = 34 ! for lambda
+        last_data_tauL = 34 ! for tauL
+        last_data_tauK = 34 ! for tauK
+        last_data_gy = 34 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
-        last_data_debt           = 20 ! debt/gdp
-        last_data_sl = 17 ! for sl
-        last_data_type_multiplier= 17 ! type multip
+        last_data_debt           = 34 ! debt/gdp
+        
+        last_data_sl = 34 ! for sl
+        last_data_type_multiplier= 34 ! type multip
         last_data_type_share= 17 ! type share
-        last_data_t1 = 17 ! SS contrib
-        last_data_tauC = 17 ! for tauC
-        last_data_depr= 17 ! for depr
+        last_data_t1 = 34 ! SS contrib
+        last_data_tauC = 34 ! for tauC
+        last_data_depr= 34 ! for depr
         last_data_rho = 17 ! for rho
     
 
+        
+        
+        
+
 ! -------------------------------- OMEGA -------------------------------
-     OPEN (unit=3, FILE = "_data_omega_deaton.txt")    
+     if (switch_wage_vs_income == 0) then
+         
+        OPEN (unit=3, FILE = "_data_omega_deaton_avghourly.txt")    
+     
+     elseif (switch_wage_vs_income == 1) then
+         
+        OPEN (unit=3, FILE = "_data_omega_deaton_hdslabinc.txt")    
+     
+     endif
+     
      do m = 1, bigM, 1
        do j = 1, bigJ, 1
         read(3,*) omega_ss_d(j,m)
        end do
-    end do
+     end do
 
     close(3)
-    
     
 
 ! -------------------------------- gy -------------------------------
       
-        Open(unit = 5, FILE = "_data_gy_1935.txt")  
-
-        
-     if (switch_change_gy == 1) then 
-        do i = 1, last_data_gy, 1
-            read(5,*) gy_factor_d(i)
-        enddo
-        gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy)
-            
-     elseif (switch_change_gy == 0 .AND. switch_starting_year == 1) then
-         last_data_gy = break_index
-         do i = 1, last_data_gy, 1
-            read(5,*) gy_factor_d(i)
-        enddo
-        gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy) 
-        
-    elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) gy_factor_d(1)
-        gy_factor_d(2:) = gy_factor_d(1)
-    endif
-
-    close(5)
+    ! Open(unit = 5, FILE = "_data_gy_1935.txt")  
+    !
+    !    
+    ! if (switch_change_gy == 1) then 
+    !    do i = 1, last_data_gy, 1
+    !        read(5,*) gy_factor_d(i)
+    !    enddo
+    !    gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy)
+    !        
+    ! elseif (switch_change_gy == 0 .AND. switch_starting_year == 1) then
+    !     last_data_gy = break_index
+    !     do i = 1, last_data_gy, 1
+    !        read(5,*) gy_factor_d(i)
+    !    enddo
+    !    gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy) 
+    !    
+    !elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 1) then   
+    !    read(5,*) gy_factor_d(1)
+    !    gy_factor_d(2:) = gy_factor_d(1)
+    !endif
+    !
+    !close(5)
 ! -------------------------------- rho -------------------------------
       
         Open(unit = 5, FILE = "_data_rho_1935.txt")  
@@ -118,8 +131,17 @@ call chdir(cwd_r)
     !zeta_p(1)  =  0.9640d0
     !zeta_p(2)  =  0.9799d0
 
-    Open(unit = 8, FILE = "_data_sigma2eps_deaton_1935.txt")  
-
+    
+    if (switch_wage_vs_income == 0) then
+    
+        Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourly.txt")  
+    
+    elseif (switch_wage_vs_income == 1) then
+        
+        Open(unit = 8, FILE = "_data_sigma2eps_deaton_hdslabinc.txt")  
+        
+    endif
+    
     
     ! reading sigma2_epsilon_t
      if (switch_sigma2_epsilon_t == 1) then 
@@ -148,6 +170,7 @@ call chdir(cwd_r)
         
         endif
         close(8)
+        
 
     do m = 1,bigM,1
     sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**(2.0d0*zbar))/(1-zeta_p(m)**2.0d0) ! increased
@@ -155,8 +178,9 @@ call chdir(cwd_r)
 
 ! -------------------------------- type multiplier --------------------
     
+
   
-        Open(unit = 8, FILE = "_data_type_multiplier_1935.txt")  
+     Open(unit = 8, FILE = "_data_skill_premium.txt")  
 
     ! reading type_mutliplier
     
@@ -173,7 +197,7 @@ call chdir(cwd_r)
      if (switch_change_premium == 0.AND.switch_starting_year == 1) then   
 
         do m = 1,bigM,1
-    last_data_type_multiplier = break_index
+        last_data_type_multiplier = break_index
              type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
         enddo
              
@@ -234,7 +258,7 @@ call chdir(cwd_r)
      
     ! -------------------------------- LABOR SHARE -------------------------------
     
-        Open(unit = 5, FILE = "_data_sl_1935.txt")  
+        Open(unit = 5, FILE = "_data_labsh.txt")  
 
     if (switch_change_sl == 1) then 
         do i = 1, last_data_sl, 1
@@ -268,7 +292,7 @@ call chdir(cwd_r)
     
     ! -------------------------------- DEPRECIATION RATE -------------------------------
     
-        Open(unit = 5, FILE = "_data_depr_1935.txt")  
+        Open(unit = 5, FILE = "_data_depr.txt")  
     
         
     if (switch_change_depr == 1) then 
@@ -290,7 +314,7 @@ call chdir(cwd_r)
     endif
     
     ! -------------------------------- SOCIAL SECURITY CONTRIBUTIONS -------------------------------
-     OPEN (unit=5, FILE = "_data_contrib_1935.txt")    
+     OPEN (unit=5, FILE = "_data_contrib_to_gdp.txt")    
      if (switch_change_contrib == 1) then 
         do i = 1, last_data_t1, 1
             read(5,*) t1_d(i) 
@@ -315,7 +339,7 @@ call chdir(cwd_r)
     close(5)
     ! -------------------------------- TAU_K -------------------------------    
 
-        Open(unit = 7, FILE = "_data_tauK_1935.txt")  
+        Open(unit = 7, FILE = "_data_tauK.txt")  
         
      if (switch_change_tauK == 1) then 
         do i = 1, last_data_tauK, 1
@@ -338,7 +362,7 @@ call chdir(cwd_r)
 
 ! -------------------------------- TAU_L -------------------------------
     
-        Open(unit = 5, FILE = "_data_tauL_1935.txt")  
+        Open(unit = 5, FILE = "_data_tauL.txt")  
         
      if (switch_change_tauL == 1) then 
         do i = 1, last_data_tauL, 1
@@ -362,11 +386,12 @@ call chdir(cwd_r)
     ! adjust for social security contributions
     ! tau_L_data = tau_L_true * (1-tau_ss) + tau_ss 
     ! tauL_d = (tauL_d - t1_d)/(1-t1_d)
+    
     close(5)
     
 ! -------------------------------- TAU_C -------------------------------
   
-        Open(unit = 5, FILE = "_data_tauC_1935.txt")  
+        Open(unit = 5, FILE = "_data_tauC.txt")  
         
      if (switch_change_tauC == 1) then 
         do i = 1, last_data_tauC, 1
@@ -389,7 +414,13 @@ call chdir(cwd_r)
     close(5)
     
   !    -------------------------------- DEBT/GDP -------------------------------
- 
+        if (switch_no_debt == 1) then
+            !if there is switch_no_debt == 1 set debt to 0 in all periods
+            
+            debt_constr_d = 0.0d0
+        else
+    
+    
         Open(unit = 5, FILE = "_data_debt_1935.txt")  
         
      if (switch_change_debt == 1) then 
@@ -412,22 +443,25 @@ call chdir(cwd_r)
         debt_constr_d = debt_constr_d/100   / zbar
     close(5)
     
-    !if there is switch_no_debt == 1 set debt to 0 in all periods
-    
-    if (switch_no_debt == 1) then
-    debt_constr_d = 0.0d0
-    endif
-    
-    !if there is switch_no_debt == 2 shift debt so that it is 0 in the first period
-    if (switch_no_debt == 2) then
-    debt_constr_d = debt_constr_d - debt_constr_d(1)
-    endif
+        if (switch_no_debt == 2) then
+                !if there is switch_no_debt == 2 shift debt so that it is 0 in the first period
+        debt_constr_d = debt_constr_d - debt_constr_d(1)
+        endif
+        
+        endif
+        
 
+    
+
+    
+
+
+     
     
  ! -------------------------------- LAMBDA -------------------------------
   
 
-        Open(unit = 6, FILE = "_data_lambda_Luetticke_1935.txt")      
+        Open(unit = 6, FILE = "_data_lambda.txt")      
         
     
      if (switch_change_lambda == 1) then 
@@ -598,10 +632,10 @@ call chdir(cwd_r)
         
    ! --------------------------------calculate GAMMA now -------------------------------
  
-        Open(unit = 4, FILE = "_data_gamma_tfp_1935.txt") 
+        Open(unit = 4, FILE = "_data_gamma.txt") 
 
 
-    if (switch_go_to_lower_gamma == 1) then ! the name of this switch is a bit confusing - need to figure out a set of switches for experiments + a set of switches that control what we vary!
+    if (switch_go_to_lower_gamma == 1) then 
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
@@ -618,7 +652,7 @@ call chdir(cwd_r)
         gam_d(2:) = gam_d(1)
     endif
     
-    gam_d = gam_d + 1.0d0
+    gam_d = gam_d + 1.00d0
         
     close(4)
     
@@ -847,26 +881,28 @@ close(1)
 if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
-   !sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+   sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
    !sigma2_epsilon_t_big(1:,1) = sigma2_epsilon_t_big(1,1)  
    !sigma2_epsilon_t_big(1:,2) = sigma2_epsilon_t_big(1,1)  
      
-    !type_multiplier_d(m,:) = 1.0
+    type_multiplier_d(m,:) = 1.0
     !type_share_d(m,2:) = type_share_d(m,1)
     !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
-    !omega_ss_d(:,1) = omega_ss_d(:,1) 
-    !omega_ss_d(:,2) = omega_ss_d(:,1)
+    omega_ss_d(:,1) = omega_ss_d(1,1) 
+    omega_ss_d(:,2) = omega_ss_d(1,1)
     
     enddo
-    !tauK_d(2:) = tauK_d(1)
-    !tauL_d(2:) = tauL_d(1)
-    !tauC_d(2:) = taUC_d(1)
+    tauK_d(2:) = tauK_d(1)
+    tauL_d(2:) = tauL_d(1)
+    tauC_d(2:) = taUC_d(1)
     !alpha_d(2:) = alpha_d(1)
     debt_constr_d(2:) = debt_constr_d(1)
-    !lambda_d(2:) = lambda_d(1)
-    !gam_d(2:) = gam_d(1)
-    !depr_d(2:) = depr_d(1)
-    !t1_d(2:) = t1_d(1)
+    lambda_d(2:) = lambda_d(1)
+    gam_d(2:) = gam_d(1)
+    depr_d(2:) = depr_d(1)
+    t1_d(2:) = t1_d(1)
+    nu_ss_new = 1.00d0
+    rho_d(2:) = rho_d(1)
     do i = 2, bigT,1
         pi_d_big(1,:,i) = pi_d_big(1,:,1)
         Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1) * nu_ss_new
@@ -880,14 +916,14 @@ if (switch_keep_fixed == 1) then
     do i = 1,bigT,1
     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
      enddo
-    ! 
+     
      do i = 2,bigT,1
         pi_big_weight_d(:,:,i) = pi_big_weight_d(:,:,1)
      enddo
     
     !pi_weight_d = pi_d
-    !nu_ss_old = 1.0d0
-    !nu_ss_new = nu_ss_old
+    nu_ss_old = 1.0d0
+    nu_ss_new = nu_ss_old
 endif
 
 

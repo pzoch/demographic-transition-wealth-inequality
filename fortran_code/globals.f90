@@ -18,6 +18,7 @@ IMPLICIT NONE
     real(dp), parameter :: zbar = real(80/bigJ) ! 4 periods model scale parameter
     integer :: iter, i, j, s, m, cl
     character(5) :: version
+    character(1) :: beq_age_char
     character(6) :: closure
     character(12) :: variant
     character(4) :: experiment
@@ -63,7 +64,7 @@ IMPLICIT NONE
     integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
     integer :: switch_cohort_ps                             ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
     integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
-    integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth
+    integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
     integer :: switch_change_premium                    ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
     integer :: switch_income_fixed_effect               ! 0 = no income fixed effects, 1 = income fixed effects, group specific
@@ -79,8 +80,8 @@ IMPLICIT NONE
     integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
     integer :: switch_no_debt                               ! 0 - there is government debt, 1 - government debt set to 0 in all periods
     integer :: switch_change_rho
+    integer :: switch_wage_vs_income                        ! 0 - use process for wages, 1 - use process for income
     
-    ! Deklaracja zmiennych wczytywanych
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam
@@ -104,7 +105,7 @@ IMPLICIT NONE
 
 ! parameters
     real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
-    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, g_correction_factor_old, g_correction_factor_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new
+    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, g_correction_factor_old, g_correction_factor_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc, up_debt_t
@@ -112,6 +113,7 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_big_weight_ss_old, pi_big_weight_ss_new, N_big_ss_old, N_big_ss_new, pi_ss_cond_big
     real(dp) :: superstar_factor_1, superstar_factor_2
     integer :: g_correction_last_period
+    real(dp) :: delta_half_width, htm_shock_freq
 ! transition variables
     integer, dimension(bigT) :: jbar_t
 	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t, rho_t 
@@ -133,12 +135,16 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 8, n_sp_risk = 3, n_sd =1, n_sr = 1, n_beq = 5, n_sp_fix = 2
+    integer, parameter :: n_a = 50, n_aime = 11, n_sp_risk = 3, n_sd =1, n_sr = 1, n_beq = 3, n_sp_fix = 1
     integer, parameter            :: n_sp = n_sp_risk * n_sp_fix
-    real*8, parameter  ::  zipf = 2.5d0     
+    
+    real*8 :: const_zipf
+    
+    real*8 :: zipf
     real*8, dimension(bigM) :: zeta_p
     real*8, dimension(bigM) :: sigma2_fix
         
+
     
     real*8 :: a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ), sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, n_sp_initial,&
@@ -176,8 +182,14 @@ IMPLICIT NONE
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
     real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help, debt_trans, debt_trans_old
+    
 
-
+  ! bequests  
+    integer :: beq_age
+    real*8 :: beq_zipf_ss(n_beq), p_beq(n_beq)
+    real*8, dimension(n_beq,bigT) :: p_beq_trans
+    
+    
 ! implicit tax
     real(dp), dimension(bigJ) :: tau1_ss_1, tau1_a_ss_1, tau2_ss_1, &
                                  tau1_ss_2, tau1_a_ss_2, &

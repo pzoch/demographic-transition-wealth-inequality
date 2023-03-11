@@ -31,7 +31,7 @@ module pfi_trans
 implicit none
 
 !definition of variables
-integer :: ia, i_aime, ip, ir, id, ir_r, ip_p, id_d
+integer :: ia, i_aime, ip, ir, id, ir_r, ip_p, id_d, ibeq
 real*8 :: sv(0:n_a)
 real*8 :: aime(0:n_aime), aime_replacement_rate(0:n_aime)
 integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
@@ -41,8 +41,16 @@ integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_trans,  aime_plus_trans, l_trans, c_trans, labor_tax_trans, &
                                                   RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
+
+real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_beq_trans,  aime_plus_beq_trans, l_beq_trans, c_beq_trans, labor_tax_beq_trans, &
+                                                  RHS_beq_trans, prob_beq_trans, ERHS_beq_trans, sv_tempo_beq_trans, V_beq_trans, EV_beq_trans, lab_income_beq_trans, lab_income_pretax_beq_trans,  tot_income_beq_trans, tot_income_pretax_beq_trans, V_after_beq_trans, EV_after_beq_trans, RHS_after_beq_trans
+! big
+
 real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_trans_big,  aime_plus_trans_big, l_trans_big, lab_trans_big, c_trans_big, labor_tax_trans_big, &
                                                   RHS_trans_big, prob_trans_big, ERHS_trans_big, sv_tempo_trans_big, V_trans_big, EV_trans_big, lab_income_trans_big, lab_income_pretax_trans_big,  tot_income_trans_big, tot_income_pretax_trans_big, bequest_j_trans_big
+
+real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_beq_trans_big,  aime_plus_beq_trans_big, l_beq_trans_big, lab_beq_trans_big, c_beq_trans_big, labor_tax_beq_trans_big, &
+                                                   RHS_beq_trans_big, ERHS_beq_trans_big, sv_tempo_beq_trans_big, V_beq_trans_big, EV_beq_trans_big, lab_income_beq_trans_big, lab_income_pretax_beq_trans_big,  tot_income_beq_trans_big, tot_income_pretax_beq_trans_big, V_after_beq_trans_big, EV_after_beq_trans_big
 
 real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi,  w_pom_trans_implicit_vfi, &
                                  check_euler_trans, V_j_vfi_const_lambda, V_j_vfi_higher_lambda, V_j_vfi,&
@@ -50,15 +58,25 @@ real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_po
                                  c_j_vfi,  s_pom_j_vfi, l_j_vfi, labor_tax_j_vfi, lw_j_vfi, lw_lambda_j_vfi, l_pen_j_vfi
 
 real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, LabIncAVG_vfi, bequest_vfi, r_vfi_pretax, w_bar_vfi
+real*8, dimension(n_beq,bigT) :: beq_zipf_trans
+
 integer :: jbar_t_vfi(bigT)
 
 !steady state variables
 real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_ss, EV_ss, RHS_ss,  svplus_ss, l_ss, c_ss, lab_ss, srate_ss,lab_income_ss, lab_income_pretax_ss, tot_income_ss, tot_income_pretax_ss, sv_tempo, labor_tax, disposable_ss, prob_ss, &
  gini_weight_consumption,  aime_plus_ss, aime_tempo
 
+
+real*8, dimension(n_beq, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: V_beq_ss,  V_after_beq_ss,  EV_beq_ss, RHS_beq_ss, svplus_beq_ss, l_beq_ss, c_beq_ss, lab_beq_ss, srate_beq_ss,lab_income_beq_ss, lab_income_pretax_beq_ss, tot_income_beq_ss, tot_income_pretax_beq_ss, sv_tempo_beq, labor_tax_beq, aime_plus_beq_ss, disposable_beq_ss, RHS_after_beq_ss, EV_after_beq_ss
+
+
 !steady state variables - big
 real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_ss_big, EV_ss_big, RHS_ss_big,  svplus_ss_big, lab_ss_big, l_ss_big, c_ss_big, srate_ss_big, lab_income_ss_big, lab_income_pretax_ss_big, disposable_ss_big, tot_income_ss_big, tot_income_pretax_ss_big, sv_tempo_big, labor_tax_big, prob_ss_big, &
  gini_weight_consumption_big,  aime_plus_ss_big, aime_tempo_big
+
+real*8, dimension(n_beq, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: V_beq_ss_big,  V_after_beq_ss_big,  EV_beq_ss_big, RHS_beq_ss_big, svplus_beq_ss_big, l_beq_ss_big, c_beq_ss_big, lab_beq_ss_big, srate_beq_ss_big,lab_income_beq_ss_big, lab_income_pretax_beq_ss_big, tot_income_beq_ss_big, tot_income_pretax_beq_ss_big, sv_tempo_beq_big, labor_tax_beq_big, aime_plus_beq_ss_big, disposable_beq_ss_big, RHS_after_beq_ss_big, EV_after_beq_ss_big
+
+
 
 real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, lab_income_ss_j_vfi, lab_income_pretax_ss_j_vfi, tot_income_ss_j_vfi, tot_income_pretax_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi,  b_ss_j_vfi, &
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, s_pom_ss_j_vfi, pension_ss_j_vfi, &
@@ -693,13 +711,20 @@ function optimal_consumption_and_labor_new(RHS,phi, theta, tau, lambda,w, w_NT, 
     !!! Cobb-Douglas utility function
     if (switch_utility_function == 0) then
     
-    if (switch_fix_labor > 0d0 ) then 
+    if (switch_fix_labor > 0d0) then 
         optimal_consumption_and_labor_new(1) = max(RHS**(1d0/(-theta)),1d-15)
         optimal_consumption_and_labor_new(2) =  switch_fix_labor
     else
     
+        
+        
     nu = (1-phi*(1-theta))/(1-phi)/(1-theta)
-    eta = (RHS)**(1/(1-phi)/(1-theta))
+    
+    if (RHS < 1e-10) then
+        eta = 0
+        else
+        eta = (RHS)**(1/(1-phi)/(1-theta))
+    endif
     zeta = (1-phi)*tc/phi/(1-tau)/(1-lambda)/(w**(1-lambda))/LabIncAVG**(lambda)
     kappa = w_NT/(1-tau)/(1-lambda)/(w**(1-lambda))/LabIncAVG**(lambda)
     
@@ -708,7 +733,7 @@ function optimal_consumption_and_labor_new(RHS,phi, theta, tau, lambda,w, w_NT, 
     ! initial guess: 
     ! consumption should be lower than wages - agent use to save for retirement, 
     ! you may have problem here if pension system is very generous for some agent type 
-    ! thus we make shure in next lines that function is negative for our lower guess 
+    ! thus we make sure in next lines that function is negative for our lower guess 
     ! and positive for higher guessed value
 if (lambda == 0) then ! 
    c_rts = ((1d0-phi)*tc/eta/phi/((1-tau)*w+w_NT))**(1d0/(nu-1))     
@@ -812,4 +837,7 @@ endif
     endif
     
 endfunction 
+
+
+
 end module

@@ -13,8 +13,8 @@ subroutine globals
 
     
     
-    version = 'base_' ! these three strings allow us to load a correct version
-    experiment = 'all_'
+    version = 'dels_' ! these three strings allow us to load a correct version
+    experiment = 'ndm_'
     closure = 'govt__'
 
 call chdir(cwd_i)
@@ -39,6 +39,7 @@ call chdir(cwd_i)
         read(3,*) switch_change_depr 
         read(3,*) switch_change_contrib
         read(3,*) switch_change_rho
+        read(3,*) switch_wage_vs_income
         read(3,*) switch_keep_fixed 
         read(3,*) switch_residual_t 
         read(3,*) switch_residual_1 
@@ -129,7 +130,10 @@ call chdir(cwd_p)
         read(3,*) sigma_nu_r
         read(3,*) labor_constant
         read(3,*) g_correction_last_period
-        ! zeta_p loaded at the end to ensure the correct number is loaded
+        read(3,*) delta_half_width
+        read(3,*) htm_shock_freq
+        read(3,*) beq_age
+        read(3,*) zipf
         do m = 1,bigM,1 
             read(3,*) zeta_p(m)
         enddo
@@ -157,10 +161,26 @@ call chdir(cwd_p)
     tk = tK
     tc = tc_ss
    
+    
+    ! adjustments to switch off labor choice if we use income data
+    
+    if (switch_wage_vs_income == 1) then
+        switch_labor_choice = 0
+        switch_fix_labor = labor_constant
+    endif
+    
+    
     if (switch_labor_choice == 0) then
         phi  = 1.00_dp 
+        switch_fix_labor = labor_constant
     endif
 
+
+        const_zipf = 0.0d0
+        do ibeq=1,n_beq,1
+                    const_zipf = const_zipf + 1 / ibeq**(zipf)
+        enddo
+        
 
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
@@ -171,6 +191,9 @@ call chdir(cwd_p)
     ! THIS JUNK BELOW CAN BE AXED
     ! it is need for implicit tax subroutine
     ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
+    
+
+        
     new_ret_yob = -bigT
     new_ret_yob(1) = 1 - jbar_t(1) + 1
     last = new_ret_yob(1) 

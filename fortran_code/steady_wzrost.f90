@@ -49,7 +49,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      !                      bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
      !                      labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
      real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: prob_ss_big, aime_plus_ss_big
-    
+    real*8, dimension(n_beq, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd,bigM) :: aime_plus_beq_ss_big
     real(dp), dimension(bigj, n_a) :: V_ss_j
 
     if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
@@ -103,6 +103,9 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         rho = rho_ss_new
     endif
     
+    
+    !rho = 0.0d0
+ ! rho change
 
 ! force it to treat it as a 2nd steady state - for test purposes    
 !switch_run_1 = 0
@@ -218,7 +221,7 @@ do iter = 1,n_iter_ss,1
 if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also weird! need to check!!!! 
 
         if (switch_unequal_bequest==0) then
-            ! to be changes
+            
             do m = 1,bigM,1
                 do j = 2,bigJ,1
                     bequest_left_ss_j(j-1,m) = (N_ss_j(j-1) - N_ss_j(j))*(r_ss*s_ss_j(j-1,m))/gam_ss
@@ -268,26 +271,47 @@ else
                 bequest_ss_j(j,m) = up_ss*bequest_ss_j_old(j,m) + (1 - up_ss)*bequest_left_ss_j(j-1,m)/(pi_big_weight_ss(j,m) )  
             enddo  
             enddo
-        !elseif (switch_unequal_bequest==1) then
-        !    do m = 1,bigM,1
-        !    bequest_ss_j(1,m) = 0d0
-        !    
-        !    do j = 2,bigJ,1
-        !        bequest_ss_j(j,m) = 0d0
-        !        bequest_left_ss_j(j-1,m) =  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*s_ss_j(j-1,m) / nu_ss**(j-1)
-        !    enddo
-        !    
-        !    
-        !    bequest_left_ss_j(bigj,m) =   pi_big_weight_ss(bigJ,m) * s_ss_j(bigj,m)       * nu_ss**(-bigj-1)
-        !    bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) 
-        !
-        !    enddo
+        elseif (switch_unequal_bequest==1) then
+            do m = 1,bigM,1
+            bequest_ss_j(1,m) = 0d0
+            
+            do j = 2,bigJ,1
+                bequest_ss_j(j,m) = 0d0
+                bequest_left_ss_j(j-1,m) =  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*s_ss_j(j-1,m) / nu_ss**(j-1)
+            enddo
+            
+            
+            bequest_left_ss_j(bigj,m) =   pi_big_weight_ss(bigJ,m) * s_ss_j(bigj,m) * nu_ss**(-bigj-1)
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) / pi_big_weight_ss(1,m)
+        
+            enddo
+            
+        elseif  (switch_unequal_bequest==2) then
+            do m = 1,bigM,1
+            bequest_ss_j(1,m) = 0d0
+            
+            do j = 2,bigJ,1
+                bequest_ss_j(j,m) = 0d0
+                bequest_left_ss_j(j-1,m) =  (pi_big_weight_ss(j-1,m) -   pi_big_weight_ss(j,m))*r_ss*s_ss_j(j-1,m) / nu_ss**(j-beq_age) /gam_ss
+            enddo
+            
+            
+            bequest_left_ss_j(bigj,m) =   pi_big_weight_ss(bigJ,m) *r_ss* s_ss_j(bigj,m) * nu_ss**(-bigj-beq_age)/gam_ss
+            
+            
+            !bequest_ss(m) = 0.0d0 
+            
+            bequest_ss(m) = sum(bequest_left_ss_j(1:bigJ,m)) / pi_big_weight_ss(beq_age,m)
+        
+            enddo
         endif
     
 endif        
 
-
-
+! this has to go away after testing
+!bequest_ss = 0.0d0
+!bequest_ss_j = 0.0d0
+!b_ss_j = 0.0d0
 
         
         if (switch_tauK_gross == 0) then
@@ -347,12 +371,30 @@ endif
             upsilon_ss_vf = upsilon_ss
             upsilon_dif_ss = upsilon_ss - upsilon_old_ss
             aime_plus_ss  = aime_plus_ss_big(:, :, :, :, :, :,m)
+            aime_plus_beq_ss  = aime_plus_beq_ss_big(:, :, :, :, :, :,m)
             V_ss = V_ss_big(:, :, :, :, :, :,m)                
-            
-            
+            V_beq_ss = V_beq_ss_big(:, :, :, :, :, :,m)           
+            V_after_beq_ss = V_after_beq_ss_big(:, :, :, :, :, :,m)           
             call agent_vf()
+            
+            aime_plus_beq_ss_big(:, :, :, :, :, :, m)    = aime_plus_beq_ss
+            c_beq_ss_big(:, :, :, :, :, : ,m)            = c_beq_ss 
+            l_beq_ss_big(:, :, :, :, :, : ,m)            = l_beq_ss
+            lab_beq_ss_big(:, :, :, :, :, : ,m)          = lab_beq_ss
+            srate_beq_ss_big(:, :, :, :, :, : ,m)            = srate_beq_ss
+            lab_income_beq_ss_big(:, :, :, :, :, :,m)    = lab_income_beq_ss
+            lab_income_pretax_beq_ss_big(:, :, :, :, :, :,m) = lab_income_pretax_beq_ss
+            tot_income_beq_ss_big(:, :, :, :, :, :,m)        = tot_income_beq_ss
+            tot_income_pretax_beq_ss_big(:, :, :, :, :, :,m) = tot_income_pretax_beq_ss
+            disposable_beq_ss_big(:, :, :, :, :, :,m)       = disposable_beq_ss
+            labor_tax_beq_big(:, :, :, :, :, :,m)            = labor_tax_beq
+            svplus_beq_ss_big(:, :, :, :, :, :,m)            = svplus_beq_ss
+            
+            
+            
             prob_ss_big(:, :, :, :, :, :,m)          = prob_ss
             aime_plus_ss_big(:, :, :, :, :, :, m)    = aime_plus_ss
+            
             c_ss_big(:, :, :, :, :, : ,m)            = c_ss 
             l_ss_big(:, :, :, :, :, : ,m)            = l_ss
             lab_ss_big(:, :, :, :, :, : ,m)          = lab_ss
@@ -364,6 +406,8 @@ endif
             disposable_ss_big(:, :, :, :, :, :,m)       = disposable_ss
             labor_tax_big(:, :, :, :, :, :,m)            = labor_tax
             svplus_ss_big(:, :, :, :, :, :,m)            = svplus_ss
+            V_beq_ss_big(:, :, :, :, :, :,m)             = V_beq_ss
+            V_after_beq_ss_big(:, :, :, :, :, :,m)       = V_after_beq_ss
             V_ss_big(:, :, :, :, :, :,m)                 = V_ss
             l_ss_pen_j(:,m)                             = l_ss_j_vfi
             c_ss_j(:,m)                                 = c_ss_j_vfi
@@ -380,6 +424,8 @@ endif
         
         consumption_ss_gross_j = c_ss_j
         savings_ss_j           = s_ss_j
+        
+        
         ! aggregation
         bigl_ss         = 0d0
         bigl_type_ss    = 0d0
@@ -398,7 +444,7 @@ endif
             bigl_type_ss(m)         = sum(N_big_ss_j(:,m)  * l_ss_j(1:jbar_ss-1,m))
             bigl_ss                 = bigl_ss + type_multiplier_ss(m) * bigl_type_ss(m) ** rho_subst ! with CES production function this
             average_l_ss            = average_l_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
-            average_lab_ss            = average_lab_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
+            average_lab_ss          = average_lab_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  lab_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1)) 
             average_w_ss            = average_w_ss +  sum(N_big_ss_j(1:jbar_ss-1,m)  *  w_ss_j(1:jbar_ss-1,m) * l_ss_j(1:jbar_ss-1,m))/sum(N_ss_j(1:jbar_ss-1))
             consumption_ss_gross    = consumption_ss_gross +  sum(N_big_ss_j(:,m)  * consumption_ss_gross_j(:,m))
             asset_pom_ss            = asset_pom_ss +  sum(N_big_ss_j(:,m)  * asset_pom_ss_j(:,m))
@@ -564,6 +610,24 @@ endif
 
 !!!! THESE SEEMS TO BE SOMETHING WE NEED TO ADJUST IN THE STEADY STATE ROUTINE
             if (switch_run_1 == 1) then 
+                
+                c_beq_trans_big(:, :, :, :, :, :, :, 1) = c_beq_ss_big
+                l_beq_trans_big(:, :, :, :, :, :, :, 1) = l_beq_ss_big  
+                lab_beq_trans_big(:, :, :, :, :, :, :, 1) = lab_beq_ss_big  
+                
+                
+                lab_income_beq_trans_big(:, :, :, :, :, :, :, 1) = lab_income_beq_ss_big
+                lab_income_pretax_beq_trans_big(:, :, :, :, :, :, :, 1) = lab_income_pretax_beq_ss_big
+                tot_income_beq_trans_big(:, :, :, :, :, :, :, 1) = tot_income_beq_ss_big
+                tot_income_pretax_beq_trans_big(:, :, :, :, :, :, :, 1) = tot_income_pretax_beq_ss_big
+                labor_tax_beq_trans_big(:, :, :, :, :, :, :, 1) = labor_tax_beq_big
+                svplus_beq_trans_big(:, :, :, :, :, :, :, 1) = svplus_beq_ss_big
+                aime_plus_beq_trans_big(:, :, :, :, :, :, :, 1) = aime_plus_beq_ss_big
+                V_beq_trans_big(:, :, :, :, :, :, :,  1) = V_beq_ss_big
+                EV_beq_trans_big(:, :, :, :, :, :, :,  1) = EV_beq_ss_big
+                V_after_beq_trans_big(:, :, :, :, :, :, :,  1) = V_after_beq_ss_big
+                EV_after_beq_trans_big(:, :, :, :, :, :, :,  1) = EV_after_beq_ss_big
+                
                 avg_ef_l_supply_trans(1) = avg_ef_l_supply
                 c_trans_big(:, :, :, :, :, :, :, 1) = c_ss_big
                 l_trans_big(:, :, :, :, :, :, :, 1) = l_ss_Big  
@@ -581,8 +645,31 @@ endif
                 gini_weight_trans(:,:, 1) = gini_weight_sv
                 LabIncAVG_vfi(1) = LabIncAVG_ss_vfi
                 debt_trans(1) = debt_ss
+                
+                
             else
                 do i = 2,bigT,1            
+                    avg_ef_l_supply_trans(i) = avg_ef_l_supply
+                    
+                    
+                    
+                    c_beq_trans_big(:, :, :, :, :, :, :, i) = c_beq_ss_big
+                    l_beq_trans_big(:, :, :, :, :, :, :, i) = l_beq_ss_big  
+                    lab_beq_trans_big(:, :, :, :, :, :, :, i) = lab_beq_ss_big  
+                
+                
+                    lab_income_beq_trans_big(:, :, :, :, :, :, :, i) = lab_income_beq_ss_big
+                    lab_income_pretax_beq_trans_big(:, :, :, :, :, :, :, i) = lab_income_pretax_beq_ss_big
+                    tot_income_beq_trans_big(:, :, :, :, :, :, :, i) = tot_income_beq_ss_big
+                    tot_income_pretax_beq_trans_big(:, :, :, :, :, :, :, i) = tot_income_pretax_beq_ss_big
+                    labor_tax_beq_trans_big(:, :, :, :, :, :, :, i) = labor_tax_beq_big
+                    svplus_beq_trans_big(:, :, :, :, :, :, :, i) = svplus_beq_ss_big
+                    aime_plus_beq_trans_big(:, :, :, :, :, :, :, i) = aime_plus_beq_ss_big
+                    V_beq_trans_big(:, :, :, :, :, :, :,  i) = V_beq_ss_big
+                    EV_beq_trans_big(:, :, :, :, :, :, :,  i) = EV_beq_ss_big
+                    V_after_beq_trans_big(:, :, :, :, :, :, :,  i) = V_after_beq_ss_big
+                    EV_after_beq_trans_big(:, :, :, :, :, :, :,  i) = EV_after_beq_ss_big
+                    
                     avg_ef_l_supply_trans(i) = avg_ef_l_supply
                     c_trans_big(:, :, :, :, :, :, :, i) = c_ss_big
                     l_trans_big(:, :, :, :, :, :, :, i) = l_ss_big

@@ -149,6 +149,8 @@
          write(666,'(A30,I5.1 )') 'utility function =',     switch_utility_function  
          write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor
          write(666,'(A30,I5.1)') 'switch_unequal_bequest =', switch_unequal_bequest
+         write(666,'(A30,I5.1)') 'beq_age =', beq_age
+         write(666,'(A30,I5.1)') 'zipf =', zipf
          write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross              
          write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
          write(666,'(A30,I5.1)') 'switch_increase_ret_age =', switch_increase_ret_age      
@@ -177,7 +179,13 @@
          do m = 1,bigM,1
             write(666,'(A30,F20.10 )') ' ', zeta_p(m)
          enddo
-         CLOSE(666)
+         
+         write(666, '(A)')
+         write(666, '(A)') 'bequest probabilities was ...' 
+         do i = 1,n_beq,1
+            write(666,'(A30,F20.10 )') ' ', p_beq(i)
+         enddo
+        write(666, '(A)')
         write(666, '(A)') 'types income risk variance ...' 
         if (switch_run_1 == 1) then
          do m = 1,bigM,1

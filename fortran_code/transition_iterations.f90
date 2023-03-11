@@ -16,17 +16,14 @@ do iter = 1,n_iter_t,1
             if  (MOD(iter,1) == 0) then            
                 include 'print_iter.f90'            
             endif
-
-
-      endif
+     endif
   
     pillarI_old_j = pillarI_j
     pillarII_old_j = pillarII_j   
     bequest_j_old  = bequest_j 
     b_j_old    = b_j
     
-    
-    bigl_type = 0.0d0
+    bigl_type = 0d0
     bigl      = 0d0
     do m = 1,bigM,1
         bigl_type(m,:)         = sum(N_big_t_j(:,m,:) * l_j(:,m,:), dim = 1 )
@@ -135,6 +132,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             bequest_vfi = bequest(m,:)
             bequest_j_vfi =  bequest_j(:,m,:)
             bequest_j_vfi_dif = bequest_j(:,m,:) - bequest_j_old(:,m,:)
+            beq_zipf_trans = beq_zipf_trans_big(:,m,:)
             jbar_t_vfi = jbar_t !switch_fix_retirement_age
             upsilon_vfi = upsilon
             upsilon_dif = upsilon - upsilon_old
@@ -153,12 +151,24 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             enddo
 
             iter_com = iter
+            
             EV_trans = EV_trans_big(:, :, :, :, :, :,m,:)
             V_trans = V_trans_big(:, :, :, :, :, :,m,:)
+            
+            EV_beq_trans = EV_beq_trans_big(:, :, :, :, :, :,m,:)
+            V_beq_trans = V_beq_trans_big(:, :, :, :, :, :,m,:)
+            
+            EV_after_beq_trans = EV_after_beq_trans_big(:, :, :, :, :, :,m,:)
+            V_after_beq_trans = V_after_beq_trans_big(:, :, :, :, :, :,m,:)
+            
             labor_tax_trans = labor_tax_trans_big(:, :, :, :, :, : ,m,:)        
             c_trans = c_trans_big(:, :, :, :, :, : ,m,:) 
+            
+            c_beq_trans = c_beq_trans_big(:, :, :, :, :, : ,m,:)
             l_trans = l_trans_big(:, :, :, :, :, : ,m,:) 
             svplus_trans = svplus_trans_big(:, :, :, :, :, :,m,:) 
+            
+            svplus_beq_trans = svplus_beq_trans_big(:, :, :, :, :, :,m,:)  
             pi_ip_trans = pi_ip_trans_big(:,:,m,:)
             
             lab_income_trans    = lab_income_trans_big(:, :, :, :, :, :,m,:)
@@ -171,6 +181,9 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
 
 
 
+            aime_plus_beq_trans = aime_plus_beq_trans_big(:,:,:,:,:,:,m,:) 
+
+
 
             
             call agent_vf_trans()
@@ -181,6 +194,21 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             prob_trans_big(j,:,:,:,:,:,m,i)               =  prob_trans(j,:,:,:,:,:,i) 
             enddo
             enddo
+            
+            aime_plus_beq_trans_big(:,:,:,:,:,:,m,:)            = aime_plus_beq_trans(:,:,:,:,:,:,:) 
+            c_beq_trans_big(:, :, :, :, :, : ,m,:)              = c_beq_trans(:,:,:,:,:,:,:) 
+            l_beq_trans_big(:, :, :, :, :, : ,m,:)              = l_beq_trans(:,:,:,:,:,:,:) 
+            lab_income_beq_trans_big(:, :, :, :, :, :,m,:)      = lab_income_beq_trans(:,:,:,:,:,:,:) 
+            lab_income_pretax_beq_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_beq_trans(:,:,:,:,:,:,:) 
+            tot_income_beq_trans_big(:, :, :, :, :, :,m,:)        = tot_income_beq_trans(:,:,:,:,:,:,:) 
+            tot_income_pretax_beq_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_beq_trans(:,:,:,:,:,:,:) 
+            labor_tax_beq_trans_big(:, :, :, :, :, :,m,:)         = labor_tax_beq_trans(:,:,:,:,:,:,:) 
+            svplus_beq_trans_big(:, :, :, :, :, :,m,:)            = svplus_beq_trans(:,:,:,:,:,:,:) 
+            V_beq_trans_big(:, :, :, :, :, :,m,:)                 = V_beq_trans(:,:,:,:,:,:,:) 
+            EV_beq_trans_big(:, :, :, :, :, :,m,:)                = EV_beq_trans(:,:,:,:,:,:,:) 
+            V_after_beq_trans_big(:, :, :, :, :, :,m,:)           = V_after_beq_trans(:,:,:,:,:,:,:) 
+            EV_after_beq_trans_big(:, :, :, :, :, :,m,:)          = EV_after_beq_trans(:,:,:,:,:,:,:) 
+            
             aime_plus_trans_big(:,:,:,:,:,:,m,:)            = aime_plus_trans(:,:,:,:,:,:,:) 
             c_trans_big(:, :, :, :, :, : ,m,:)              = c_trans(:,:,:,:,:,:,:) 
             l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans(:,:,:,:,:,:,:) 
@@ -199,15 +227,17 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
             l_pen_j(:,m,:)  = l_pen_j_vfi(:,:)
-           placeholder =  c_trans(1,0,0,1,1,1,2)
-           placeholder =  c_trans(1,0,0,1,1,1,3)
-           placeholder =  c_trans(1,0,0,1,1,1,10)
+
             ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
             do i = 2,bigT
             sum_b_weight_trans_outer_mat(m,i) = sum_b_weight_trans(i)
+            !LabIncAVG_vfi(:) = sum(prob_trans_big(5,:,:,:,:,:,:,i)) 
             enddo
         enddo
+        avg_ef_l_supply_trans(2)     = maxval(abs(V_after_beq_trans(1,:,:,:,:,:,2) - V_after_beq_trans(1,:,:,:,:,:,1)))
+        avg_ef_l_supply_trans(3)     = maxval(abs(c_beq_trans(:,:,:,:,:,:,2) - c_beq_trans(:,:,:,:,:,:,1)))
+        avg_ef_l_supply_trans(4)     = maxval(abs(c_trans(6,:,:,:,:,:,2) - c_trans(6,:,:,:,:,:,1)))
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
       ! aggregation
@@ -282,7 +312,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
     enddo    
     
     cum_err(iter) = sum(err)
-
+!cum_err(iter) = sum(prob_trans(5,:,:,:,:,:,2)) 
     if (iter < n_iter_t+1) then         
         if (cum_err(iter) < err_tol) then 
             write (*,*) 'We`re leaving the iter loop.' 
@@ -305,3 +335,4 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
     
     
 enddo
+

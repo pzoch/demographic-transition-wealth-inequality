@@ -94,7 +94,7 @@
             deficit_ss =   (debt_ss * (1 - (r_ss) / (gam_ss * nu_ss)))       
 
             
-            g_ss =    tc_ss * consumption_ss_gross - (subsidy_ss  - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss -labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j))))
+            g_ss =    tc_ss * consumption_ss_gross - (subsidy_ss  - deficit_ss - tk_ss*(r_bar_ss + depr)*k_ss -labor_tax_revenue_ss/bigl_ss - upsilon_ss/(bigl_ss/(sum(N_ss_j)))) 
             g_per_capita_ss = g_ss*bigl_ss/N_ss       
             g_share_ss = g_ss/y_ss 
 

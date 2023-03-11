@@ -1,8 +1,11 @@
     write (*,*) 'We are performing base transition path' 
 
     !include 'switch_setting.f90'
+    call globals      
+
     call clear_globals
-    call globals         
+
+   
 
     ! this has to be examined
     priv_share = 0.0d0
