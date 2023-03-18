@@ -48,6 +48,8 @@
 30// g_correction_last_period
 0.1//delta_half_width
 0.0//htm_shock_freq
+2//beq_age
+2.5//zipf
 0.952505051046732// zeta_p(1)
 0.969092245452449d0//zeta_p(2)  
 0.001// sigma2_fix(1)

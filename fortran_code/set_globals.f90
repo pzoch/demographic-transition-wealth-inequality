@@ -13,8 +13,8 @@ subroutine globals
 
     
     
-    version = 'dels_' ! these three strings allow us to load a correct version
-    experiment = 'ndm_'
+    version = 'gam2_' ! these three strings allow us to load a correct version
+    experiment = 'all_'
     closure = 'govt__'
 
 call chdir(cwd_i)

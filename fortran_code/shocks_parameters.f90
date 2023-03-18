@@ -365,31 +365,31 @@ endif
     
          if (switch_discount_risk == 0) then
              n_sd_value(:) = 0.0d0
-    elseif (switch_discount_risk == 2) then
-            
-            delta_H = 1.6;
-            frac_pat = 0.02;
-            n_sd_value(1) = 1.0d0/((1.0d0-frac_pat)*(1.0d0-htm_shock_freq)) * (delta - frac_pat * (delta_H)) - delta
-            n_sd_value(2) = delta_H  - delta
-           !n_sd_value(:) = 0.0d0
-            n_sd_value(n_sd) =  - delta/1.00
-            !pi_id(:,1:(n_sd-1)) = (1.0d0 - htm_shock_freq)/float(n_sd-1)
-            pi_id(1,1) = 1.0d0 - htm_shock_freq
-            pi_id(1,2) = 0.0d0
-            pi_id(1,3) = htm_shock_freq
-            
-            pi_id(2,2) = 1.0d0
-            
-            pi_id(3,1) =  1.0d0 - htm_shock_freq
-            pi_id(3,2) =  0.0d0 
-            pi_id(3,3) = htm_shock_freq
-            pi_id(2,1) = 0.0d0
-            pi_id(2,3) = 0.0d0
-            !pi_id(:,n_sd) = htm_shock_freq
-            pi_id_init(:) = pi_id(1,:) 
-            pi_id_init(1) = (1.0d0 - frac_pat) * (1.0d0 - htm_shock_freq)
-            pi_id_init(2) = frac_pat
-            pi_id_init(3) = (1.0d0 - frac_pat) *  htm_shock_freq
+    !elseif (switch_discount_risk == 2) then
+    !        
+    !        delta_H = 1.6;
+    !        frac_pat = 0.02;
+    !        n_sd_value(1) = 1.0d0/((1.0d0-frac_pat)*(1.0d0-htm_shock_freq)) * (delta - frac_pat * (delta_H)) - delta
+    !        n_sd_value(2) = delta_H  - delta
+    !       !n_sd_value(:) = 0.0d0
+    !        n_sd_value(n_sd) =  - delta/1.00
+    !        !pi_id(:,1:(n_sd-1)) = (1.0d0 - htm_shock_freq)/float(n_sd-1)
+    !        pi_id(1,1) = 1.0d0 - htm_shock_freq
+    !        pi_id(1,2) = 0.0d0
+    !        pi_id(1,3) = htm_shock_freq
+    !        
+    !        pi_id(2,2) = 1.0d0
+    !        
+    !        pi_id(3,1) =  1.0d0 - htm_shock_freq
+    !        pi_id(3,2) =  0.0d0 
+    !        pi_id(3,3) = htm_shock_freq
+    !        pi_id(2,1) = 0.0d0
+    !        pi_id(2,3) = 0.0d0
+    !        !pi_id(:,n_sd) = htm_shock_freq
+    !        pi_id_init(:) = pi_id(1,:) 
+    !        pi_id_init(1) = (1.0d0 - frac_pat) * (1.0d0 - htm_shock_freq)
+    !        pi_id_init(2) = frac_pat
+    !        pi_id_init(3) = (1.0d0 - frac_pat) *  htm_shock_freq
         endif
     
         if (switch_return_risk == 0) then

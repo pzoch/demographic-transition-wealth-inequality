@@ -652,7 +652,7 @@ call chdir(cwd_r)
         gam_d(2:) = gam_d(1)
     endif
     
-    gam_d = gam_d + 1.00d0
+    gam_d = gam_d + 1.00d0 + 0.00d0
         
     close(4)
     
