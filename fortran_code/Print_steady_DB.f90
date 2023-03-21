@@ -205,7 +205,7 @@
         endif
          CLOSE(666)
     
-open(unit = 234, FILE = version//experiment//closure//variant//"mass_trans.csv")
+open(unit = 234, FILE = version//experiment//closure//variant//"mass_steady.csv")
 write(234, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc;totinc_pretax;sav;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
     do j = 1, bigJ, 1
         do m = 1, bigM, 1
