@@ -67,8 +67,8 @@ if (n_sp_risk>5) then
         
         
             ! get steady state shock realizations and transition matrices
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_risk_value_ss_old(1:n_sp_risk-2), pi_ip_ss_old(1:n_sp_risk-2,1:n_sp_risk-2))
-            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_risk_value_ss_new(1:n_sp_risk-2), pi_ip_ss_new(1:n_sp_risk-2,1:n_sp_risk-2))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_old, sigma2_epsilon_ss_old, n_sp_risk_value_ss_old(1:n_sp_risk-2), pi_ip_risk_ss_old(1:n_sp_risk-2,1:n_sp_risk-2))
+            call discretize_AR(zeta_p(m), epsilon_correction_ss_new, sigma2_epsilon_ss_new, n_sp_risk_value_ss_new(1:n_sp_risk-2), pi_ip_risk_ss_new(1:n_sp_risk-2,1:n_sp_risk-2))
         
             n_sp_risk_value_ss_old = exp(n_sp_risk_value_ss_old) 
             n_sp_risk_value_ss_new = exp(n_sp_risk_value_ss_new)     
@@ -88,7 +88,7 @@ if (n_sp_risk>5) then
             
             ! adjust to have the extreme state constant
             n_sp_risk_value_trans(n_sp_risk,:) =  superstar_factor_mat(m,2)*n_sp_risk_value_trans(n_sp_risk-1,:)
-            n_sp_risk_value_trans(n_sp_risk,:) = sum(n_sp_risk_value_trans(n_sp_risk,1:20)) / 20
+            n_sp_risk_value_trans(n_sp_risk,:) = sum(n_sp_risk_value_trans(n_sp_risk,1:20)) / 20! - switch it off for now
             
             ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
             n_sp_risk_value_trans(n_sp_risk,:) =  n_sp_risk_value_trans(n_sp_risk,:) / type_multiplier_t(m,:)

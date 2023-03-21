@@ -137,7 +137,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 11, n_sp_risk = 7, n_sd =1, n_sr = 1, n_beq = 3, n_sp_fix = 1
+    integer, parameter :: n_a = 50, n_aime = 11, n_sp_risk = 7, n_sd =1, n_sr = 1, n_beq = 2, n_sp_fix = 1
     integer, parameter            :: n_sp = n_sp_risk * n_sp_fix
     
     real*8 :: const_zipf

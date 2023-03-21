@@ -127,7 +127,7 @@
                                     if(ip>=6)then
                                         lab_high_ss_j_vfi(j) = lab_high_ss_j_vfi(j) + l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/(1d0-p_1_5(j))
                                     endif
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         l_ss_j_vfi(j) = l_ss_j_vfi(j) + n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
 
                                     else
@@ -248,7 +248,7 @@
                                 c_j_vfi(j,i) = c_j_vfi(j,i) + c_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
 
                                 
-                                 if ( mod(ip,n_sp_risk) == 0) then
+                                 if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     l_j_vfi(j,i) = l_j_vfi(j,i) + n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)    
                                 else
                                     l_j_vfi(j,i) = l_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)

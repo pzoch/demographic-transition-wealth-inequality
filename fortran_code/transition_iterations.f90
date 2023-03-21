@@ -237,7 +237,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
         enddo
         avg_ef_l_supply_trans(2)     = maxval(abs(V_after_beq_trans(1,:,:,:,:,:,2) - V_after_beq_trans(1,:,:,:,:,:,1)))
         avg_ef_l_supply_trans(3)     = maxval(abs(c_beq_trans(:,:,:,:,:,:,2) - c_beq_trans(:,:,:,:,:,:,1)))
-        avg_ef_l_supply_trans(4)     = maxval(abs(c_trans(6,:,:,:,:,:,2) - c_trans(6,:,:,:,:,:,1)))
+        avg_ef_l_supply_trans(4)     = maxval(abs(c_trans(:,:,:,:,:,:,2) - c_trans(:,:,:,:,:,:,1)))
         avg_ef_l_supply_trans(2:bigT)     = 0d0
         LabIncAVG_vfi(2:bigT)             = 0d0
       ! aggregation

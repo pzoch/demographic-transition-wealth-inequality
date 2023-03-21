@@ -146,7 +146,7 @@ do j = bigJ-1, 1, -1
                                 do ibeq = 1,n_beq,1
                                 l_beq_ss(ibeq, ia, i_aime, ip, ir, id) = 1d0 
                                 
-                                if ( mod(ip,n_sp_risk) == 0) then
+                                if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     lab_income = (1 - tL_ss)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
                                     lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =lab_income
                                     lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)  
@@ -175,7 +175,7 @@ do j = bigJ-1, 1, -1
                             elseif(((j .ne. beq_age) .or. (switch_unequal_bequest .ne. 2))) then
                             if (j<jbar_ss_vf) then
                                 l_ss(j, ia, i_aime, ip, ir, id) = 1d0 
-                                 if ( mod(ip,n_sp_risk) == 0) then
+                                 if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     lab_income = (1 - tL_ss)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi +n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
                                     lab_income_ss(j, ia, i_aime, ip, ir, id) =lab_income
                                     lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)  
@@ -246,7 +246,7 @@ do j = bigJ-1, 1, -1
                                                                   - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
                             else
                                     
-                                 if ( mod(ip,n_sp_risk) == 0) then
+                                 if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     wage            = n_sp_value(ip)*w_pom_ss_vfi(j)
                                     wage_non_tax    = n_sp_value(ip)*w_pom_ss_implicit_vfi(j)                                
                                 else
@@ -289,7 +289,7 @@ do j = bigJ-1, 1, -1
                                                  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                                     lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                                     else
                                         lab_income_pretax = omega_ss(j) * n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
@@ -346,7 +346,7 @@ do j = bigJ-1, 1, -1
                                                  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                                     lab_income_ss(j, ia, i_aime, ip, ir, id) = lab_income
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                                     else
                                         lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
@@ -461,7 +461,7 @@ do j = bigJ-1, 1, -1
                         else                     
                             
                             
-                             if ( mod(ip,n_sp_risk) == 0) then
+                             if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                 wage            = n_sp_value(ip)*w_pom_ss_vfi(j)
                                 wage_non_tax    = n_sp_value(ip)*w_pom_ss_implicit_vfi(j)                                
                             else
@@ -508,7 +508,7 @@ do j = bigJ-1, 1, -1
                                                  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                             lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id)  =lab_income
                             
-                             if ( mod(ip,n_sp_risk) == 0) then
+                             if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                 lab_income_pretax =  n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                                 aime_plus_beq_ss(ibeq, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*n_sp_value(ip)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
                             else
@@ -567,7 +567,7 @@ do j = bigJ-1, 1, -1
                                                  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                             
                             lab_income_ss(j, ia, i_aime, ip, ir, id)  =lab_income
-                             if ( mod(ip,n_sp_risk) == 0) then
+                             if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                 lab_income_pretax =  n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id) +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                                 aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
                             else
@@ -999,7 +999,7 @@ do j = bigJ-1, ij, -1
 
                                 
                                     l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = 1d0 
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     lab_income = (1-tL(it))*(n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
                                                  + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
                                     lab_income_pretax = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)                                        
@@ -1032,7 +1032,7 @@ do j = bigJ-1, ij, -1
                                 if(j < jbar_t_vfi(it))then  
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = 1d0 
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         lab_income = (1-tL(it))*(n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
                                                      + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
                                         lab_income_pretax = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
@@ -1091,7 +1091,7 @@ do j = bigJ-1, ij, -1
                                     c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = max(RHS_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, year(ii,ij,j+1)),1d-10)
                                     c_opt = tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) 
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
                                         wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
                                         l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
@@ -1131,8 +1131,8 @@ do j = bigJ-1, ij, -1
                                     c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1)),1d-10)
                                     c_opt = tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it) 
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
-                                     w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
+                                    w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
                                     wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
                                     lab_income = (1-tL(it))*(w_opt*l_trans(j, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
@@ -1191,11 +1191,11 @@ do j = bigJ-1, ij, -1
                                     
                                 else
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                    if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                     w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
                                     wage_non_tax = w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
                                     else
-                                    w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                    w_opt = n_sp_value_trans(ip,tp)*omega(j,it)*w_pom_trans_vfi(j, it) 
                                     wage_non_tax = w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)                                        
                                     endif
                                     
@@ -1213,7 +1213,7 @@ do j = bigJ-1, ij, -1
                                     endif
                                     
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
                                                      w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
                                         lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id,it)
@@ -1250,7 +1250,7 @@ do j = bigJ-1, ij, -1
                                     l_trans(j, ia, i_aime, ip, ir, id, it)  = optimal_choice(2)
                                     endif
                                     
-                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                                         lab_income = (1-tL(it))*(w_opt/LabIncAVG_vfi(it)*l_trans(j, ia, i_aime, ip, ir, id, it))**(1-lambda_trans(it))*LabIncAVG_vfi(it)+ &
                                                      w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
                                         lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
@@ -1349,7 +1349,7 @@ do j = bigJ-1, ij, -1
                                 svplus_trans(j, ia, i_aime, ip, ir, id, it) = a_l
                             endif  
                             
-                             if ( mod(ip,n_sp_risk) == 0) then
+                             if ( (mod(ip,n_sp_risk) == 0) .and. n_sp_risk > 5) then
                             wage = w_pom_trans_vfi(j,it)*n_sp_value_trans(ip,tp)
                             wage_non_tax = w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
                                 

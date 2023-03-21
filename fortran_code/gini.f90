@@ -18,8 +18,9 @@ module gini_calc
         real(8), intent(in) :: x_in(:), y_in(:)
         real(8) :: gini
         integer :: n, ic
-        real(8), allocatable :: xs(:), ys(:), xcum(:), ycum(:)
+        real(8), allocatable :: xs(:), ys(:), xcum(:), ycum(:), xcum_out(:)
         integer, allocatable :: iorder(:)
+        
 
         ! get array size
         n = size(x_in, 1)
@@ -30,6 +31,7 @@ module gini_calc
         if(allocated(xs))deallocate(xs)
         if(allocated(ys))deallocate(ys)
         if(allocated(xcum))deallocate(xcum)
+        if(allocated(xcum_out))deallocate(xcum_out)
         if(allocated(ycum))deallocate(ycum)
         if(allocated(iorder))deallocate(iorder)
         
@@ -37,6 +39,7 @@ module gini_calc
         allocate(xs(n))
         allocate(ys(n))
         allocate(xcum(0:n))
+        allocate(xcum_out(0:n))
         allocate(ycum(0:n))
         allocate(iorder(n))
         
@@ -63,13 +66,13 @@ module gini_calc
         enddo
         
         ! now normalize cumulated attributes
-        xcum = xcum/xcum(n)
-        
+        xcum_out = xcum/xcum(n)
+        deallocate(xcum)
         
         ! determine gini index
         gini = 0d0
         do ic = 1, n
-            gini = gini + ys(ic)*(xcum(ic-1) + xcum(ic))
+            gini = gini + ys(ic)*(xcum_out(ic-1) + xcum_out(ic))
         enddo
         gini = 1d0 - gini
         

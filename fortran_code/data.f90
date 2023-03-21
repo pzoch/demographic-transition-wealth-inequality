@@ -881,21 +881,21 @@ close(1)
 if (switch_keep_fixed == 1) then
     gy_factor_d(2:) = gy_factor_d(1)
     do m = 1,bigM,1
-   sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
-   !sigma2_epsilon_t_big(1:,1) = sigma2_epsilon_t_big(1,1)  
-   !sigma2_epsilon_t_big(1:,2) = sigma2_epsilon_t_big(1,1)  
+   !sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)  
+   sigma2_epsilon_t_big(1:,1) = sigma2_epsilon_t_big(1,1)  
+   !sigma2_epsilon_t_big(1:,2) = sigma2_epsilon_t_big(1,2)  
      
     type_multiplier_d(m,:) = 1.0
-    !type_share_d(m,2:) = type_share_d(m,1)
-    !type_multiplier_d(m,2:) = type_multiplier_d(m,1)
+    type_share_d(m,2:) = type_share_d(m,1)
+    type_multiplier_d(m,2:) = type_multiplier_d(m,1)
     omega_ss_d(:,1) = omega_ss_d(1,1) 
     omega_ss_d(:,2) = omega_ss_d(1,1)
     
     enddo
-    tauK_d(2:) = tauK_d(1)
+   tauK_d(2:) = tauK_d(1)
     tauL_d(2:) = tauL_d(1)
     tauC_d(2:) = taUC_d(1)
-    !alpha_d(2:) = alpha_d(1)
+    alpha_d(2:) = alpha_d(1)
     debt_constr_d(2:) = debt_constr_d(1)
     lambda_d(2:) = lambda_d(1)
     gam_d(2:) = gam_d(1)
