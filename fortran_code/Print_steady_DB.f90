@@ -204,8 +204,41 @@
         enddo
         endif
          CLOSE(666)
+    
+open(unit = 234, FILE = version//experiment//closure//variant//"mass_trans.csv")
+write(234, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc;totinc_pretax;sav;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
+    do j = 1, bigJ, 1
+        do m = 1, bigM, 1
+            do ia = 0, n_a, 1
+                do i_aime = 0, n_aime, 1
+                    do ip = 1, n_sp, 1
+                        do ir = 1, n_sr, 1
+                            do id = 1, n_sd, 1
+                            write(234, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+                            prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:)), ";", & ! mass
+                            c_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !consumption
+                            l_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !hours
+                            lab_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income
+                            lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income pretax
+                            tot_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot income
+                            tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot pretax income
+                            svplus_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !sav
+                            j , ";",  & !age
+                            ia , ";",  & !asset
+                            i_aime , ";",  & !aime
+                            ip , ";",  & !income
+                            ir , ";",  & !return
+                            id , ";",  & !discount
+                            m   !type
+                            enddo        
+                        enddo
+                    enddo
+                enddo
+            enddo
+        enddo
+    enddo
 
- 
+close(234) 
 
 !    write(666, '(A)') "Outcomes"
 !    write(666, '(A)') "y;k/y;c/y;i/y;bigl;r;tauC;tauK;tauL;lambda;beq/y;gam_ss;average hours;r-g;replacement;"
