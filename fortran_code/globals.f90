@@ -112,6 +112,8 @@ IMPLICIT NONE
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
     real(dp), dimension(bigJ,bigM) :: pi_big_ss_old, pi_big_ss_new, pi_big_weight_ss_old, pi_big_weight_ss_new, N_big_ss_old, N_big_ss_new, pi_ss_cond_big
     real(dp) :: superstar_factor_1, superstar_factor_2
+    real(dp), dimension(bigM,2) :: superstar_factor_mat
+    real(dp), dimension(bigM,4) :: superstar_pi_mat
     integer :: g_correction_last_period
     real(dp) :: delta_half_width, htm_shock_freq
 ! transition variables
@@ -135,7 +137,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 11, n_sp_risk = 3, n_sd =1, n_sr = 1, n_beq = 3, n_sp_fix = 1
+    integer, parameter :: n_a = 50, n_aime = 11, n_sp_risk = 7, n_sd =1, n_sr = 1, n_beq = 3, n_sp_fix = 1
     integer, parameter            :: n_sp = n_sp_risk * n_sp_fix
     
     real*8 :: const_zipf

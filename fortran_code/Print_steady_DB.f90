@@ -14,10 +14,13 @@
         write(*,*) '*********************************'
         write(*,*) 'Calibration:'
         write(*,*)
-        
-        
+             
+     
         ! most of it has to be removed, we do not care about these... 
-       
+        write(*,'(A25,F10.5,A)') 'Gini on sav =  ', gini_val_sav, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc, '  |  TARGET: ' 
+        write(*,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss,  '  |  TARGET: 33%', 100*labor_constant
         write(*,'(A30,F10.3,A)') ' Pre-tax real interest rate = ', 100*((1 + r_bar_ss)**0.2_dp -1d0), '  |  TARGET: '
@@ -101,8 +104,12 @@
          write(666, '(A)') '*********************************'
          write(666, '(A)') 'THIS STEADY STATE HAD THE FOLLOWING VALUES' 
          write(666, '(A)')
-         
-         write(666,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss         
+        
+        write(666,'(A25,F10.5,A)') 'Gini on sav =  ', gini_val_sav
+        write(666,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax
+        write(666,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc 
+        write(666,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss
+        write(666,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss         
         write(666,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss 
         write(666,'(A30,F10.3,A)') ' Pre-tax real interest rate (1y) = ', 100*((1 + r_bar_ss)**0.2_dp -1d0)
         write(666,'(A30,F10.3,A)') ' After-tax real interest rate (1y) = ', 100*(r_ss**0.2_dp -1d0)

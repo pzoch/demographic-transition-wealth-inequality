@@ -8,6 +8,9 @@ MODULE steady_state
 use global_vars
 !use individual_vf
 use pfi_trans
+use sorting
+use gini_calc
+
 
 
 IMPLICIT NONE
@@ -18,9 +21,12 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
-                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss
+                deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss, beq_sum_ss, &
+                gini_val_sav, gini_val_tinc_pretax, gini_val_tinc
     
     real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss, sum_b_weight_vec_ss
+    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob_Gini, vec_sav_Gini, vec_tot_pretax_Gini, vec_tot_Gini
+    
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
     real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss, type_share_big_ss
@@ -29,6 +35,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real*8, dimension(0:n_a) :: prob_ss_marg	
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
+    integer :: counter
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
     real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
@@ -460,8 +467,10 @@ endif
             bigl_ss                 =   bigl_ss ** (1.0d0/rho_subst)
             consumption_ss_gross    =   consumption_ss_gross/bigl_ss
             savings_ss              =   savings_ss/bigl_ss
+            beq_sum_ss              =   sum(N_big_ss_j(beq_age,:) * bequest_ss(:))/bigl_ss
             
-            
+
+        
         ! calculate pensions again
 
             b2_ss_j = 0  
@@ -539,6 +548,36 @@ check_pension_clearing = 0.0d0
 
     
 enddo 
+
+
+
+!Gini calculation
+counter = 1
+            
+do j = 1, bigJ, 1
+    do m = 1, bigM, 1
+        do ia = 0, n_a, 1
+            do i_aime = 0, n_aime, 1
+                do ip = 1, n_sp, 1
+                    do ir = 1, n_sr, 1
+                        do id = 1, n_sd, 1
+                        vec_prob_Gini(counter) = ceiling(prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:)) * 10e5) ! mass
+                        vec_sav_Gini(counter)  = svplus_ss_big(j, ia, i_aime, ip, ir, id,m) !sav
+                        vec_tot_pretax_Gini(counter)  = tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc pretax
+                        vec_tot_Gini(counter)  = tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc
+                        counter = counter+1
+                        enddo        
+                    enddo
+                enddo
+            enddo
+        enddo
+    enddo
+enddo
+
+gini_val_sav = gini(vec_sav_Gini,vec_prob_Gini)
+gini_val_tinc_pretax = gini(vec_tot_pretax_Gini,vec_prob_Gini)
+gini_val_tinc = gini(vec_tot_Gini,vec_prob_Gini)
+
 !close (121)
 
     !do j = 1,bigJ,1

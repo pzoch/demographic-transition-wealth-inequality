@@ -145,9 +145,17 @@ do j = bigJ-1, 1, -1
                                 
                                 do ibeq = 1,n_beq,1
                                 l_beq_ss(ibeq, ia, i_aime, ip, ir, id) = 1d0 
-                                lab_income = (1 - tL_ss)*omega_ss(j)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
-                                lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =lab_income
-                                lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)  
+                                
+                                if ( mod(ip,n_sp_risk) == 0) then
+                                    lab_income = (1 - tL_ss)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
+                                    lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =lab_income
+                                    lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)  
+                                else
+                                    lab_income = (1 - tL_ss)*omega_ss(j)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
+                                    lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =lab_income
+                                    lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)  
+                                endif
+                                
                                 lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) =lab_income_pretax
                                 tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi + beq_zipf_ss(ibeq)
                                 tot_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
@@ -167,9 +175,16 @@ do j = bigJ-1, 1, -1
                             elseif(((j .ne. beq_age) .or. (switch_unequal_bequest .ne. 2))) then
                             if (j<jbar_ss_vf) then
                                 l_ss(j, ia, i_aime, ip, ir, id) = 1d0 
-                                lab_income = (1 - tL_ss)*omega_ss(j)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
-                                lab_income_ss(j, ia, i_aime, ip, ir, id) =lab_income
-                                lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)  
+                                 if ( mod(ip,n_sp_risk) == 0) then
+                                    lab_income = (1 - tL_ss)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi +n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
+                                    lab_income_ss(j, ia, i_aime, ip, ir, id) =lab_income
+                                    lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)  
+                                else
+                                    lab_income = (1 - tL_ss)*omega_ss(j)*(n_sp_value(ip)*w_pom_ss_vfi(j)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi + omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)
+                                    lab_income_ss(j, ia, i_aime, ip, ir, id) =lab_income
+                                    lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)                                                           
+                                endif
+                                
                                 lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) =lab_income_pretax
                                 tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                 tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
@@ -230,10 +245,14 @@ do j = bigJ-1, 1, -1
                                                                   - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
                                                                   - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
                             else
-                                
+                                    
+                                 if ( mod(ip,n_sp_risk) == 0) then
+                                    wage            = n_sp_value(ip)*w_pom_ss_vfi(j)
+                                    wage_non_tax    = n_sp_value(ip)*w_pom_ss_implicit_vfi(j)                                
+                                else
                                     wage            = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)
                                     wage_non_tax    = omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)  
-                                    
+                                endif     
                                     if  (j == beq_age .and. switch_unequal_bequest == 2) then
                                         
                                     sv_tempo(j, ia, i_aime, ip, ir, id) = 0.0d0
@@ -269,7 +288,12 @@ do j = bigJ-1, 1, -1
                                     lab_income = (1d0 - tL_ss)*(wage*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi &
                                                  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                                     lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income
-                                    lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
+                                    
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
+                                    else
+                                        lab_income_pretax = omega_ss(j) * n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
+                                    endif
                                     lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income_pretax
                                     tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                     tot_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi  +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
@@ -321,8 +345,13 @@ do j = bigJ-1, 1, -1
                                     lab_income = (1d0 - tL_ss)*(wage*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi &
                                                  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
                                     lab_income_ss(j, ia, i_aime, ip, ir, id) = lab_income
-                                    lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
-                                    lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax
+                                    
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        lab_income_pretax = n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                                    else
+                                        lab_income_pretax = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id)  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                                    endif       
+                                    lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax                                    
                                     tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                                     tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi  +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                                     disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j)  + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
@@ -430,8 +459,15 @@ do j = bigJ-1, 1, -1
                             srate_ss(j, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_ss(j, ia, i_aime, ip, ir, id))  / ( tot_income_ss(j, ia, i_aime, ip, ir, id)   + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ bequest_ss_j_vfi(j) ) 
                             V_ss(j, ia, i_aime, ip, ir, id) = valuefunc(svplus_ss(j, ia, i_aime, ip, ir, id), aime_plus_ss(j, ia, i_aime, ip, ir, id), c_ss(j, ia, i_aime, ip, ir, id), l_ss(j, ia, i_aime, ip, ir, id), j,  ip, ir, id) 
                         else                     
-                            wage =  w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)
-                            wage_non_tax = w_pom_ss_implicit_vfi(j)*omega_ss(j)*n_sp_value(ip)
+                            
+                            
+                             if ( mod(ip,n_sp_risk) == 0) then
+                                wage            = n_sp_value(ip)*w_pom_ss_vfi(j)
+                                wage_non_tax    = n_sp_value(ip)*w_pom_ss_implicit_vfi(j)                                
+                            else
+                                wage            = omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)
+                                wage_non_tax    = omega_ss(j)*n_sp_value(ip)*w_pom_ss_implicit_vfi(j)  
+                            endif     
                             tl_com  = tl_ss
                             lambda_com = lambda
                             
@@ -471,12 +507,22 @@ do j = bigJ-1, 1, -1
                             lab_income = (1d0 - tL_ss)*(wage*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi &
                                                  +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                             lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id)  =lab_income
-                            lab_income_pretax =  omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
+                            
+                             if ( mod(ip,n_sp_risk) == 0) then
+                                lab_income_pretax =  n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)
+                                aime_plus_beq_ss(ibeq, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*n_sp_value(ip)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
+                            else
+                                lab_income_pretax =  omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  wage_non_tax*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)    
+                                aime_plus_beq_ss(ibeq, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
+                            endif
+                            
+
                             lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id)  = lab_income_pretax
                             tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             
-                            aime_plus_beq_ss(ibeq, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
+
+                            
                             disposable_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + beq_zipf_ss(ibeq) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             
                             srate_beq_ss(ibeq, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_beq_ss(ibeq, ia, i_aime, ip, ir, id)) / ( tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  aime_replacement_rate(i_aime)*b_ss_j_vfi(j) +  beq_zipf_ss(ibeq) ) 
@@ -519,12 +565,19 @@ do j = bigJ-1, 1, -1
                             labor_tax(j, ia, i_aime, ip, ir, id) = foc(3) 
                             lab_income = (1d0 - tL_ss)*(wage*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi &
                                                  +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                            
                             lab_income_ss(j, ia, i_aime, ip, ir, id)  =lab_income
-                            lab_income_pretax =  omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id) +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                             if ( mod(ip,n_sp_risk) == 0) then
+                                lab_income_pretax =  n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id) +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                                aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
+                            else
+                                lab_income_pretax =  omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip, ir, id) +  wage_non_tax*l_ss(j, ia, i_aime, ip, ir, id)
+                                aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
+                               endif
+                            
                             lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)  = lab_income_pretax
                             tot_income_ss(j, ia, i_aime, ip, ir, id) =  lab_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
-                            aime_plus_ss(j, ia, i_aime, ip, ir, id) =(float(j-1)* aime(i_aime) +  min(w_pom_ss_vfi(j)*omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi, aime_cap ))/float(j)
                             disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             srate_ss(j, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_ss(j, ia, i_aime, ip, ir, id)) / ( tot_income_ss(j, ia, i_aime, ip, ir, id) +  aime_replacement_rate(i_aime)*b_ss_j_vfi(j) +  bequest_ss_j_vfi(j) ) 
                             
@@ -946,9 +999,17 @@ do j = bigJ-1, ij, -1
 
                                 
                                     l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = 1d0 
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                    lab_income = (1-tL(it))*(n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
+                                                 + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
+                                    lab_income_pretax = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)                                        
+                                    else
                                     lab_income = (1-tL(it))*(omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
                                                  + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
-                                    lab_income_pretax = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp)
+                                    lab_income_pretax = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp)                                        
+                                    endif
+                                    
+
                                     lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income
                                     lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax
                                     tot_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it) + beq_zipf_trans(ibeq,it)
@@ -970,9 +1031,19 @@ do j = bigJ-1, ij, -1
                                     
                                 if(j < jbar_t_vfi(it))then  
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = 1d0 
-                                    lab_income = (1-tL(it))*(omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
-                                                 + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
-                                    lab_income_pretax = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp)
+                                    
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        lab_income = (1-tL(it))*(n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
+                                                     + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
+                                        lab_income_pretax = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
+                                    else
+                                        lab_income = (1-tL(it))*(omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it))*LabIncAVG_vfi(it) + &
+                                                     + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(1,tp)
+                                        lab_income_pretax = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp)
+
+                                    endif
+                                    
+                    
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax
@@ -1019,13 +1090,25 @@ do j = bigJ-1, ij, -1
                                     do ibeq = 1,n_beq
                                     c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = max(RHS_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, year(ii,ij,j+1)),1d-10)
                                     c_opt = tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) 
-                                    w_opt = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
-                                    wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
-                                    l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
-                                    lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
-                                                 w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
-                                    lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
                                     
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                        wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
+                                        l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
+                                        lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
+                                        
+                                    else
+                                        w_opt = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                        wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
+                                        l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
+                                        lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id,it)   
+                                    endif
+                                    
+                                                                       
                                     lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income
                                     lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax
                                     tot_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
@@ -1047,12 +1130,26 @@ do j = bigJ-1, ij, -1
                                         
                                     c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1)),1d-10)
                                     c_opt = tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it) 
-                                    w_opt = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                    
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                     w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                    wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
+                                    l_trans(j, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
+                                    lab_income = (1-tL(it))*(w_opt*l_trans(j, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
+                                                 w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                    lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                       
+                                    else
+                                     w_opt = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
                                     wage_non_tax =  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = optimal_labor(c_opt, w_opt, wage_non_tax, phi, tL(it), lambda_trans(it),LabIncAVG_vfi(it),tc_vfi(it))
                                     lab_income = (1-tL(it))*(w_opt*l_trans(j, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
                                                  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
                                     lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                       
+                                    endif
+                                    
+                                        
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax
@@ -1094,8 +1191,13 @@ do j = bigJ-1, ij, -1
                                     
                                 else
                                     
-                                    w_opt = omega(j,it)*n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
-                                    wage_non_tax = w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                    w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                    wage_non_tax = w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
+                                    else
+                                    w_opt = n_sp_value_trans(ip,tp)*w_pom_trans_vfi(j, it) 
+                                    wage_non_tax = w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)                                        
+                                    endif
                                     
                                     
                                     if (j == beq_age .and. switch_unequal_bequest == 2) then
@@ -1111,9 +1213,16 @@ do j = bigJ-1, ij, -1
                                     endif
                                     
                                     
-                                    lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
-                                                 w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
-                                    lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id,it)
+                                    else
+                                        lab_income = (1-tL(it))*(w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) +  w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_beq_trans(ibeq, ia, i_aime, ip, ir, id,it)
+                                        
+                                    endif
                                     
                                     lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income
                                     lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax
@@ -1141,11 +1250,19 @@ do j = bigJ-1, ij, -1
                                     l_trans(j, ia, i_aime, ip, ir, id, it)  = optimal_choice(2)
                                     endif
                                     
-                                    lab_income = (1-tL(it))*(w_opt/LabIncAVG_vfi(it)*l_trans(j, ia, i_aime, ip, ir, id, it))**(1-lambda_trans(it))*LabIncAVG_vfi(it)+ &
-                                                 w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        lab_income = (1-tL(it))*(w_opt/LabIncAVG_vfi(it)*l_trans(j, ia, i_aime, ip, ir, id, it))**(1-lambda_trans(it))*LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) + w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                   
+                                    else
+                                        lab_income = (1-tL(it))*(w_opt/LabIncAVG_vfi(it)*l_trans(j, ia, i_aime, ip, ir, id, it))**(1-lambda_trans(it))*LabIncAVG_vfi(it)+ &
+                                                     w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                        lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
+                                       
+                                    endif
                                     
-                                    lab_income_pretax = w_opt*l_trans(j, ia, i_aime, ip, ir, id, it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id, it)
-                                    labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax -lab_income 
+                                     labor_tax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax -lab_income 
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income
                                     bequest_j_trans(j, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(j,it)
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax
@@ -1231,8 +1348,17 @@ do j = bigJ-1, ij, -1
                             if(svplus_trans(j, ia, i_aime, ip, ir, id, it)<a_l)then
                                 svplus_trans(j, ia, i_aime, ip, ir, id, it) = a_l
                             endif  
+                            
+                             if ( mod(ip,n_sp_risk) == 0) then
+                            wage = w_pom_trans_vfi(j,it)*n_sp_value_trans(ip,tp)
+                            wage_non_tax = w_pom_trans_implicit_vfi(j, it)*n_sp_value_trans(ip,tp)
+                                
+                            else
                             wage = w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(ip,tp)
                             wage_non_tax = w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(ip,tp)
+                                
+                            endif
+                            
                             tl_com = tl(it)
                             lambda_com = lambda_trans(it)
                             

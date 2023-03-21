@@ -63,7 +63,7 @@ if (n_sp_risk>5) then
 
             enddo
         
-            n_sp_value_trans = exp(n_sp_value_trans)  
+            n_sp_risk_value_trans = exp(n_sp_risk_value_trans)  
         
         
             ! get steady state shock realizations and transition matrices
@@ -73,7 +73,7 @@ if (n_sp_risk>5) then
             n_sp_risk_value_ss_old = exp(n_sp_risk_value_ss_old) 
             n_sp_risk_value_ss_new = exp(n_sp_risk_value_ss_new)     
         
-            n_sp_risk_value = exp(n_sp_risk_value)  
+
         
         
             !pi_i_6 = 5e-3
@@ -81,17 +81,26 @@ if (n_sp_risk>5) then
             !pi_6_7 = 0.0025d0
             !pi_7_7 = 0.73d0
         
-            n_sp_risk_value_trans(n_sp_risk-1,:) = superstar_factor_1*n_sp_risk_value_trans(n_sp_risk-2,:)
-            n_sp_risk_value_trans(n_sp_risk,:) = superstar_factor_2*n_sp_risk_value_trans(n_sp_risk-1,:)
-            n_sp_risk_value_ss_old(n_sp_risk-1) = superstar_factor_1*n_sp_risk_value_ss_old(n_sp_risk-2)
-            n_sp_risk_value_ss_old(n_sp_risk) = superstar_factor_2*n_sp_risk_value_ss_old(n_sp_risk-1)
-            n_sp_risk_value_ss_new(n_sp_risk-1) = superstar_factor_1*n_sp_risk_value_ss_new(n_sp_risk-2)
-            n_sp_risk_value_ss_new(n_sp_risk) = superstar_factor_2*n_sp_value_ss_new(n_sp_risk-1)
+            n_sp_risk_value_trans(n_sp_risk-1,:) = superstar_factor_mat(m,1)*n_sp_risk_value_trans(n_sp_risk-2,:)
+            n_sp_risk_value_ss_old(n_sp_risk-1) = superstar_factor_mat(m,1)*n_sp_risk_value_ss_old(n_sp_risk-2)
+            n_sp_risk_value_ss_new(n_sp_risk-1) =superstar_factor_mat(m,1)*n_sp_risk_value_ss_new(n_sp_risk-2)
+            
+            
+            ! adjust to have the extreme state constant
+            n_sp_risk_value_trans(n_sp_risk,:) =  superstar_factor_mat(m,2)*n_sp_risk_value_trans(n_sp_risk-1,:)
+            n_sp_risk_value_trans(n_sp_risk,:) = sum(n_sp_risk_value_trans(n_sp_risk,1:20)) / 20
+            
+            ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
+            n_sp_risk_value_trans(n_sp_risk,:) =  n_sp_risk_value_trans(n_sp_risk,:) / type_multiplier_t(m,:)
+            n_sp_risk_value_ss_old(n_sp_risk) = n_sp_risk_value_trans(n_sp_risk,1)
+            n_sp_risk_value_ss_new(n_sp_risk) = n_sp_risk_value_trans(n_sp_risk,bigT)
+            
+
         
-        
-        
-        
-        
+            pi_i_6 = superstar_pi_mat(m,1)
+            pi_6_6 = superstar_pi_mat(m,2)
+            pi_6_7 = superstar_pi_mat(m,3)
+            pi_7_7 = superstar_pi_mat(m,4)
         
             pi_ip_risk_trans = (1d0-pi_i_6)*pi_ip_risk_trans
             pi_ip_risk_ss_old = (1d0-pi_i_6)*pi_ip_risk_ss_old
@@ -102,6 +111,8 @@ if (n_sp_risk>5) then
             pi_ip_risk_ss_old(s,n_sp_risk-1) = pi_i_6
             pi_ip_risk_ss_new(s,n_sp_risk-1) = pi_i_6
         enddo
+        
+        
         
         pi_ip_risk_trans(n_sp_risk-1,n_sp_risk-1,:)= pi_6_6
         pi_ip_risk_trans(n_sp_risk-1,n_sp_risk,:)  = pi_6_7
@@ -128,7 +139,7 @@ if (n_sp_risk>5) then
         if (switch_initial_dispersion == 1) then
             do t = 1, bigT, 1
                 do ip = 1 , n_sp_risk, 1
-                        pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
+                pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
                 enddo
             enddo                
             do ip = 1 , n_sp_risk, 1

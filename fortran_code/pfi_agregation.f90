@@ -127,7 +127,13 @@
                                     if(ip>=6)then
                                         lab_high_ss_j_vfi(j) = lab_high_ss_j_vfi(j) + l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)/(1d0-p_1_5(j))
                                     endif
-                                    l_ss_j_vfi(j) = l_ss_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                     if ( mod(ip,n_sp_risk) == 0) then
+                                        l_ss_j_vfi(j) = l_ss_j_vfi(j) + n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+
+                                    else
+                                        l_ss_j_vfi(j) = l_ss_j_vfi(j) + omega_ss(j)*n_sp_value(ip)*l_ss(j, ia, i_aime, ip,ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+
+                                    endif                                
                                     lab_ss_j_vfi(j) = lab_ss_j_vfi(j) + l_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id) 
                                     labor_tax_ss_j_vfi(j) = labor_tax_ss_j_vfi(j) + labor_tax(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip, ir, id)
                                     lw_lambda_ss_j_vfi(j) = lw_lambda_ss_j_vfi(j) + (omega_ss(j)*n_sp_value(ip)*w_pom_ss_vfi(j)*l_ss(j, ia, i_aime, ip,ir, id))**(1-lambda)*prob_ss(j, ia, i_aime, ip,ir, id)
@@ -240,7 +246,14 @@
                         do ir=1, n_sr, 1
                             do id =1, n_sd, 1
                                 c_j_vfi(j,i) = c_j_vfi(j,i) + c_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
-                                l_j_vfi(j,i) = l_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
+
+                                
+                                 if ( mod(ip,n_sp_risk) == 0) then
+                                    l_j_vfi(j,i) = l_j_vfi(j,i) + n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)    
+                                else
+                                    l_j_vfi(j,i) = l_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
+                                endif
+                                
                                 lab_j_vfi(j,i) = lab_j_vfi(j,i) + l_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)  
                                 labor_tax_j_vfi(j,i) = labor_tax_j_vfi(j,i) + labor_tax_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)  
                             

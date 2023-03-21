@@ -13,7 +13,7 @@ subroutine globals
 
     
     
-    version = 'gam2_' ! these three strings allow us to load a correct version
+    version = 'star_' ! these three strings allow us to load a correct version
     experiment = 'all_'
     closure = 'govt__'
 
@@ -111,13 +111,17 @@ call chdir(cwd_p)
         read(3,*) t2_ss_old 
         read(3,*) t2_ss_new 
         read(3,*) valor_share 
-        read(3,*) switch_fix_retirement_age 
-        read(3,*) superstar_factor_1 
-        read(3,*) superstar_factor_2 
-        read(3,*)  pi_i_6 != 5e-3
-        read(3,*)  pi_6_6 != 0.95d0
-        read(3,*)  pi_6_7 != 0.0025d0
-        read(3,*)  pi_7_7  != 0.73d0
+        read(3,*) switch_fix_retirement_age
+        do m = 1,bigM,1 
+            do i = 1,2,1
+                read(3,*) superstar_factor_mat(m,i) 
+            enddo
+        enddo
+        do m = 1,bigM,1 
+            do i = 1,4,1
+                read(3,*) superstar_pi_mat(m,i) 
+            enddo
+        enddo
         read(3,*)  a_l  
         read(3,*)  a_u  
         read(3,*)  a_grow  
@@ -181,7 +185,9 @@ call chdir(cwd_p)
                     const_zipf = const_zipf + 1 / ibeq**(zipf)
         enddo
         
-
+    type_multiplier_ss_old = type_multiplier_t(:,1)
+    type_multiplier_ss_new = type_multiplier_t(:,bigT)
+    
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
@@ -273,8 +279,7 @@ call chdir(cwd_p)
     rho_ss_old = rho_t(1)
     rho_ss_new = rho_t(bigT)
     
-    type_multiplier_ss_old = type_multiplier_t(:,1)
-    type_multiplier_ss_new = type_multiplier_t(:,bigT)
+
     
     type_share_ss_old = type_share_t(:,1)
     type_share_ss_new = type_share_t(:,bigT)

@@ -55,6 +55,7 @@
 		<File RelativePath=".\errwarn.f90"/>
 		<File RelativePath=".\gaussian_int.f90"/>
 		<File RelativePath=".\geompack3.f90"/>
+		<File RelativePath=".\gini.f90"/>
 		<File RelativePath=".\linint.f90"/>
 		<File RelativePath=".\matrixtools.f90"/>
 		<File RelativePath=".\minimization.f90"/>
@@ -62,6 +63,7 @@
 		<File RelativePath=".\polynomial.f90"/>
 		<File RelativePath=".\rootfinding.f90"/>
 		<File RelativePath=".\simplex.f90"/>
+		<File RelativePath=".\sort.f90"/>
 		<File RelativePath=".\splines.f90"/></Filter>
 		<Filter Name="OLG">
 		<Filter Name="closures">
