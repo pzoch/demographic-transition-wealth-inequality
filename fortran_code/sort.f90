@@ -353,7 +353,8 @@ contains
         real*8, intent(inout) :: x(:)
 
         ! an array that will contain the new sorting order
-        integer, intent(out) :: iorder(size(x, 1))
+        
+        integer, allocatable, intent(out) :: iorder(:)
 
 
         !##### OTHER VARIABLES ####################################################
@@ -374,7 +375,13 @@ contains
         !##### ROUTINE CODE #######################################################
 
         ! initialize the sorting order array
-        iorder = (/(ii, ii = 1, size(x, 1))/)
+         if(allocated(iorder))deallocate(iorder)
+        allocate(iorder(size(x,1)))
+        do ii = 1,size(x,1)
+            
+        iorder(ii) = ii
+        enddo
+        
 
         allocate(Stack(Size(X)*2)) 
     
@@ -409,8 +416,9 @@ contains
         enddo
 
         ! deallocate all arrays
-        deallocate(Stack)
         
+        deallocate(Stack)
+
     
     !##### SUBROUTINES AND FUNCTIONS ##########################################
 
@@ -669,6 +677,7 @@ contains
             X(J) = Xtmp
         
         end subroutine Swap_IN
+        
    
     end subroutine sort_r2
 

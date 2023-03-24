@@ -65,7 +65,7 @@ call chdir(cwd_r)
 ! -------------------------------- OMEGA -------------------------------
      if (switch_wage_vs_income == 0) then
          
-        OPEN (unit=3, FILE = "_data_omega_deaton_avghourly.txt")    
+        OPEN (unit=3, FILE = "_data_omega_deaton_avghourlyhh.txt")    
      
      elseif (switch_wage_vs_income == 1) then
          
@@ -134,7 +134,7 @@ call chdir(cwd_r)
     
     if (switch_wage_vs_income == 0) then
     
-        Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourly.txt")  
+        Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourlyhh.txt")  
     
     elseif (switch_wage_vs_income == 1) then
         
