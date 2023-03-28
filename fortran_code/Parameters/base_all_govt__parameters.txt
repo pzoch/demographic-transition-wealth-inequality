@@ -28,29 +28,29 @@
 0.00d0 // t2_ss_new 
 1.0d0  // valor_share 
 10 // switch_fix_retirement_age 
-2.0d0 // superstar_factor_1 
-25.0d0 // superstar_factor_2 
-5e-3 //  pi_i_6 != 5e-3
-0.95d0 //  pi_6_6 != 0.95d0
-0.0025d0 //  pi_6_7 != 0.0025d0
-0.73d0 //  pi_7_7  != 0.73d0
+4.23d0 // superstar_factor(m,1)
+4.23d0 // superstar_factor(m+1,1)
+0.009686 //  move from regular to 1st superstar state (m)
+0.949922 //  stay at the top (m)
+0.009686 //  move from regular to 1st superstar state (m+1) 
+0.949922 //  stay at the top (m+1)
 0.0d0 //  a_l  
 80d0  //  a_u  
 0.04d0  //  a_grow  
 0.001d0 // aime_l !=0.001d0
 2.3374d0 // aime_u !=9165d0/3921d0
 2.3374d0 // aime_cap !=9165d0/3921d0
-0.95d0 // zeta_d
-0.0001d0 ** 2.0d0 // sigma_nu_d
+0.99d0 // zeta_d
+0.001d0 ** 2.0d0 // sigma_nu_d
 0.00 // zeta_r
-0.008d0 ** 2.0d0 // sigma_nu_r
+0.015125 // sigma_nu_r
 0.33// labor_constant
 30// g_correction_last_period
 0.1//delta_half_width
-0.0//htm_shock_freq
+0.1//htm_shock_freq
 2//beq_age
 2.5//zipf
-0.952505051046732// zeta_p(1)
-0.969092245452449d0//zeta_p(2)  
+0.992813677020362// zeta_p(1)
+0.985927504866122//zeta_p(2)  
 0.001// sigma2_fix(1)
 0.001//sigma2_fix(2)  

@@ -7,7 +7,11 @@
     n_sp_risk_ordinary = n_sp_risk - n_superstar
     n_sp_initial = int(n_sp_risk/2)+1
     n_sr_initial = int(n_sr/2)+1
-    n_sd_initial = int(n_sd/2)+1
+    n_sd_initial = int((n_sd)/2)+1
+if (switch_discount_risk == 2)    then
+    n_sd_initial = int((n_sd-1)/2)+1
+    endif
+    
 if (n_superstar>0) then
     n_sp_initial = int((n_sp_risk_ordinary)/2)+1  ! do not allow for people to be born as superstars
     endif
@@ -60,7 +64,7 @@ if (n_superstar>0) then
             sigma2_epsilon_ss_new     =  sigma2_epsilon_ss_new_big(m)
             
             do t = 1, bigT, 1
-                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_risk_value_trans(1:n_sp_risk_ordinary,t), pi_ip_risk_trans(1:n_sp_risk-2,1:n_sp_risk-2,t))
+                call discretize_AR(zeta_p(m), epsilon_correction_t(t), sigma2_epsilon_t(t), n_sp_risk_value_trans(1:n_sp_risk_ordinary,t), pi_ip_risk_trans(1:n_sp_risk_ordinary,1:n_sp_risk_ordinary,t))
           
 
             enddo
@@ -341,10 +345,19 @@ else
     
     
 !call discretize_AR(zeta_r, 1d0, sigma_nu_r, n_sr_value, pi_ir)
+    
  if (n_sd> 1) then 
+          pi_id_init(:) = 0.0d0
+    if (switch_discount_risk == 2) then
+    call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value(1:n_sd-1), pi_id(1:n_sd-1,1:n_sd-1))
+         pi_id_init(n_sd_initial) = 1.0d0 * (1 - htm_shock_freq)
+         pi_id_init(n_sd) = htm_shock_freq
+    else
     call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value, pi_id)
-     pi_id_init(:) = 0.0d0
-     pi_id_init(n_sd_initial) = 1.0d0
+     pi_id_init(n_sd_initial) = 1.0d0 
+         endif
+
+
 
 
  endif
@@ -406,19 +419,22 @@ endif
     
          if (switch_discount_risk == 0) then
              n_sd_value(:) = 0.0d0
-    !elseif (switch_discount_risk == 2) then
+    elseif (switch_discount_risk == 2) then
     !        
     !        delta_H = 1.6;
     !        frac_pat = 0.02;
     !        n_sd_value(1) = 1.0d0/((1.0d0-frac_pat)*(1.0d0-htm_shock_freq)) * (delta - frac_pat * (delta_H)) - delta
     !        n_sd_value(2) = delta_H  - delta
-    !       !n_sd_value(:) = 0.0d0
-    !        n_sd_value(n_sd) =  - delta/1.00
+            
+            n_sd_value(n_sd) =  - delta/1.00
     !        !pi_id(:,1:(n_sd-1)) = (1.0d0 - htm_shock_freq)/float(n_sd-1)
-    !        pi_id(1,1) = 1.0d0 - htm_shock_freq
-    !        pi_id(1,2) = 0.0d0
-    !        pi_id(1,3) = htm_shock_freq
-    !        
+            pi_id(:,n_sd) = htm_shock_freq
+            pi_id(:,1:(n_sd-1)) = (1 -  htm_shock_freq) * pi_id(:,1:(n_sd-1))
+            pi_id(n_sd,:) = 0.0d0
+            pi_id(n_sd,n_sd) = htm_shock_freq
+            pi_id(n_sd,n_sd_initial) = 1-htm_shock_freq
+            !pi_id(2,1) = 1.0d0 - htm_shock_freq
+            !pi_id(2,2) = htm_shock_freq        
     !        pi_id(2,2) = 1.0d0
     !        
     !        pi_id(3,1) =  1.0d0 - htm_shock_freq
@@ -427,7 +443,7 @@ endif
     !        pi_id(2,1) = 0.0d0
     !        pi_id(2,3) = 0.0d0
     !        !pi_id(:,n_sd) = htm_shock_freq
-    !        pi_id_init(:) = pi_id(1,:) 
+            !pi_id_init(:) = pi_id(1,:) 
     !        pi_id_init(1) = (1.0d0 - frac_pat) * (1.0d0 - htm_shock_freq)
     !        pi_id_init(2) = frac_pat
     !        pi_id_init(3) = (1.0d0 - frac_pat) *  htm_shock_freq

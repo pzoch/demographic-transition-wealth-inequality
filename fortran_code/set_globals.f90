@@ -13,7 +13,7 @@ subroutine globals
 
     
     
-    version = 'star_' ! these three strings allow us to load a correct version
+    version = 'base_' ! these three strings allow us to load a correct version
     experiment = 'all_'
     closure = 'govt__'
 
@@ -112,6 +112,7 @@ call chdir(cwd_p)
         read(3,*) t2_ss_new 
         read(3,*) valor_share 
         read(3,*) switch_fix_retirement_age
+        if (n_superstar > 0) then
         do m = 1,bigM,1 
             do i = 1,n_superstar,1
                 read(3,*) superstar_factor_mat(m,i) !load all superstar factors for a type
@@ -122,6 +123,7 @@ call chdir(cwd_p)
                 read(3,*) superstar_pi_mat(m,i)  !load transition probabilities in the following order: move from regular to the 1st superstar state, stay at the top, stay in the 1st superstar state (if n_superstar >1), move up from the 1st superstar state(if n_superstar >1), stay in the 2nd superstar state (if n_superstar >1), move up from the 2nd superstar state(if n_superstar >1)...    
             enddo
         enddo
+        endif
         read(3,*)  a_l  
         read(3,*)  a_u  
         read(3,*)  a_grow  

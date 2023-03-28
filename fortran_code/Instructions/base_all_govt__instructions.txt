@@ -36,8 +36,8 @@
 1 // switch_epsilon_corr                
 1 // switch_income_risk 
 0 // switch_income_fixed_effect
-0 // switch_discount_risk 
-0 // switch_return_risk 
+2 // switch_discount_risk 
+1 // switch_return_risk 
 0 // switch_initial_dispersion 
 1 // switch_starting_year
 1 // switch_run_1
