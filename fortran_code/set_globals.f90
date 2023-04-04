@@ -14,7 +14,7 @@ subroutine globals
     
     
     version = 'base_' ! these three strings allow us to load a correct version
-    experiment = 'all_'
+    experiment = 'non_'
     closure = 'govt__'
 
 call chdir(cwd_i)
@@ -75,6 +75,7 @@ call chdir(cwd_i)
         read(3,*) switch_param_2
         read(3,*) switch_ss_write
         read(3,*) switch_profile 
+        read(3,*) switch_small_write 
         CLOSE(3) 
 
 

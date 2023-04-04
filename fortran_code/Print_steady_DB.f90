@@ -18,10 +18,12 @@
      
         ! most of it has to be removed, we do not care about these... 
         write(*,'(A25,F10.5,A)') 'Gini on sav =  ', gini_val_sav, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Gini on pretax lab_in =  ', gini_val_linc_pretax, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'superstar labinc share =  ', superstar_labinc_share, '  |  TARGET: ' 
+        !write(*,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax, '  |  TARGET: ' 
+        !write(*,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'Gini on pretax lab inc =  ', gini_val_lab_pret, '  |  TARGET: ' 
+        !write(*,'(A25,F10.5,A)') 'Gini on lab inc =  ', gini_val_lab, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'Superstar labor income share=  ', superstar_labinc_share, '  |  TARGET: ' 
+       write(*,'(A25,F10.5,A)') 'Superstar pop share / work. pop =  ', superstar_pop_share, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss,  '  |  TARGET: 33%', 100*labor_constant
@@ -207,40 +209,40 @@
         endif
          CLOSE(666)
     
-open(unit = 234, FILE = version//experiment//closure//variant//"mass_steady.csv")
-write(234, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc;totinc_pretax;sav;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
-    do j = 1, bigJ, 1
-        do m = 1, bigM, 1
-            do ia = 0, n_a, 1
-                do i_aime = 0, n_aime, 1
-                    do ip = 1, n_sp, 1
-                        do ir = 1, n_sr, 1
-                            do id = 1, n_sd, 1
-                            write(234, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
-                            prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:)), ";", & ! mass
-                            c_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !consumption
-                            l_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !hours
-                            lab_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income
-                            lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income pretax
-                            tot_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot income
-                            tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot pretax income
-                            svplus_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !sav
-                            j , ";",  & !age
-                            ia , ";",  & !asset
-                            i_aime , ";",  & !aime
-                            ip , ";",  & !income
-                            ir , ";",  & !return
-                            id , ";",  & !discount
-                            m   !type
-                            enddo        
-                        enddo
-                    enddo
-                enddo
-            enddo
-        enddo
-    enddo
-
-close(234) 
+!open(unit = 234, FILE = version//experiment//closure//variant//"mass_trans.csv")
+!write(234, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc;totinc_pretax;sav;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
+!    do j = 1, bigJ, 1
+!        do m = 1, bigM, 1
+!            do ia = 0, n_a, 1
+!                do i_aime = 0, n_aime, 1
+!                    do ip = 1, n_sp, 1
+!                        do ir = 1, n_sr, 1
+!                            do id = 1, n_sd, 1
+!                            write(234, '(F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+!                            prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:)), ";", & ! mass
+!                            c_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !consumption
+!                            l_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !hours
+!                            lab_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income
+!                            lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !lab income pretax
+!                            tot_income_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot income
+!                            tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !tot pretax income
+!                            svplus_ss_big(j, ia, i_aime, ip, ir, id,m), ";", & !sav
+!                            j , ";",  & !age
+!                            ia , ";",  & !asset
+!                            i_aime , ";",  & !aime
+!                            ip , ";",  & !income
+!                            ir , ";",  & !return
+!                            id , ";",  & !discount
+!                            m   !type
+!                            enddo        
+!                        enddo
+!                    enddo
+!                enddo
+!            enddo
+!        enddo
+!    enddo
+!
+!close(234) 
 
 !    write(666, '(A)') "Outcomes"
 !    write(666, '(A)') "y;k/y;c/y;i/y;bigl;r;tauC;tauK;tauL;lambda;beq/y;gam_ss;average hours;r-g;replacement;"

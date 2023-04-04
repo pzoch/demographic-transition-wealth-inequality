@@ -81,7 +81,7 @@ IMPLICIT NONE
     integer :: switch_no_debt                               ! 0 - there is government debt, 1 - government debt set to 0 in all periods
     integer :: switch_change_rho
     integer :: switch_wage_vs_income                        ! 0 - use process for wages, 1 - use process for income
-    
+    integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam

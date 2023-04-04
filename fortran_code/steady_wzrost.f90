@@ -22,11 +22,16 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss, beq_sum_ss, &
-                gini_val_sav, gini_val_tinc_pretax, gini_val_tinc, gini_val_linc_pretax, superstar_labinc_share, labinc_aggregate, labinc_superstar
-    
+                gini_val_sav, labinc_aggregate, labinc_superstar,pop_superstar, superstar_labinc_share, superstar_pop_share, gini_val_tinc, gini_val_tinc_pretax, gini_val_lab_pret, gini_val_lab, prc_count_sav, prc_count_pretax, prc_count_tot, prc_count_lab_pretax_inc, &
+                prc_count_lab_inc,  share_lab_inc,desired_pctile
+    real(dp), dimension(3) :: desired_pctiles
+    real(dp), dimension(3) :: share_sav, share_tot_pretax, share_tot, share_lab_pretax_inc
     real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss, sum_b_weight_vec_ss
-    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob_Gini, vec_sav_Gini, vec_tot_pretax_Gini, vec_tot_Gini, vec_lab_pretax_Gini
+    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav, vec_tot_pretax, vec_tot, vec_lab_inc,vec_lab_pretax_inc,vec_help_sav,vec_help_tot_pretax,vec_help_tot,vec_help_lab_pretax_inc,vec_help_lab_inc
+    integer,  allocatable :: iorder_sav(:), iorder_tot_pretax(:),iorder_tot(:),iorder_lab_pretax_inc(:),iorder_lab_inc(:)
     
+    
+
     real(dp), dimension(bigj) :: pi_ss, life_exp, pi_weight_ss
     real(dp), dimension(bigj) :: lti_ss_j, N_ss_j,  income_ss_j, savings_ss_rate_j
     real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss, type_share_big_ss
@@ -35,7 +40,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     real*8, dimension(0:n_a) :: prob_ss_marg	
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
-    integer :: counter
+    integer :: counter, n, remember
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
     real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
@@ -553,53 +558,33 @@ enddo
 
 !Gini calculation
 counter = 1
-            
+superstar_labinc_share = 0.0d0
+superstar_pop_share = 0.0d0        
+labinc_superstar = 0.0d0
+pop_superstar = 0.0d0
+labinc_aggregate = 0d0
 do j = 1, bigJ, 1
+
     do m = 1, bigM, 1
         do ia = 0, n_a, 1
             do i_aime = 0, n_aime, 1
                 do ip = 1, n_sp, 1
                     do ir = 1, n_sr, 1
                         do id = 1, n_sd, 1
-                        vec_prob_Gini(counter) = (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) ! mass
-                        vec_sav_Gini(counter)  = svplus_ss_big(j, ia, i_aime, ip, ir, id,m) !sav
-                        vec_tot_pretax_Gini(counter)  = tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc pretax
-                          vec_lab_pretax_Gini(counter)  =lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) !labt inc pretax
-                        vec_tot_Gini(counter)  = tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc
+                        vec_prob(counter) = (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) ! mass
+                        vec_sav(counter)  = svplus_ss_big(j, ia, i_aime, ip, ir, id,m) !sav
+                        !vec_tot_pretax(counter)  = tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc pretax
+                        !vec_tot(counter)  = tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc
+                        !vec_lab_inc(counter)  = lab_income_ss_big(j, ia, i_aime, ip, ir, id,m) !lab income
+                        vec_lab_pretax_inc(counter)  = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m)  !lab income pretax
                         counter = counter+1
-                        enddo        
-                    enddo
-                enddo
-            enddo
-        enddo
-    enddo
-enddo
-
-gini_val_sav = gini(vec_sav_Gini,vec_prob_Gini)
-
-gini_val_tinc_pretax = gini(vec_tot_pretax_Gini,vec_prob_Gini)
-gini_val_tinc = gini(vec_tot_Gini,vec_prob_Gini)
-gini_val_linc_pretax = gini(vec_lab_pretax_Gini,vec_prob_Gini)
-
-
-superstar_labinc_share =  0
-labinc_aggregate = 0
-labinc_superstar = 0
-do j = 1, bigJ, 1
-    do m = 1, bigM, 1
-        do ia = 0, n_a, 1
-            do i_aime = 0, n_aime, 1
-                do ip = 1, n_sp, 1
-                    do ir = 1, n_sr, 1
-                        do id = 1, n_sd, 1
-                        if (ip .ge. (n_sp - n_superstar + 1)) then
-                         labinc_superstar = labinc_superstar + lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)
-
-                            else
-                             labinc_superstar = labinc_superstar
-                            endif
-                            
-                     labinc_aggregate =   labinc_aggregate + lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)
+                        if (ip > n_sp_risk - n_superstar) then
+                        labinc_superstar =  lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + labinc_superstar
+                        if (j<jbar_ss) then
+                        pop_superstar = prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)  + pop_superstar
+                        endif 
+                        endif
+                        labinc_aggregate = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + labinc_aggregate
                         enddo        
                     enddo
                 enddo
@@ -608,7 +593,85 @@ do j = 1, bigJ, 1
     enddo
 enddo
 superstar_labinc_share = labinc_superstar / labinc_aggregate
-!close (121)
+superstar_pop_share = pop_superstar / sum(N_big_ss_j(1:(jbar_ss-1),:))
+
+gini_val_sav            = gini(vec_sav,vec_prob)
+!gini_val_tinc_pretax    = gini(vec_tot_pretax,vec_prob)
+!gini_val_tinc           = gini(vec_tot,vec_prob)
+gini_val_lab_pret       = gini(vec_lab_pretax_inc,vec_prob)
+!gini_val_lab            = gini(vec_lab_inc,vec_prob)
+
+!n = bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd
+!vec_prob= vec_prob/sum(vec_prob)
+!
+!
+!
+!call sort(vec_sav, iorder_sav)
+!call sort(vec_tot_pretax, iorder_tot_pretax)
+!call sort(vec_tot, iorder_tot)
+!call sort(vec_lab_pretax_inc, iorder_lab_pretax_inc)
+!call sort(vec_lab_inc, iorder_lab_inc)
+!
+!do counter = 1,n,1
+!    vec_help_sav(counter)               = vec_prob(iorder_sav(counter))
+!    vec_help_tot_pretax(counter)        = vec_prob(iorder_tot_pretax(counter))
+!    vec_help_tot(counter)               = vec_prob(iorder_tot(counter))
+!    vec_help_lab_pretax_inc(counter)    = vec_prob(iorder_lab_pretax_inc(counter))
+!    vec_help_lab_inc(counter)           = vec_prob(iorder_lab_inc(counter))
+!enddo
+!
+!vec_sav             = vec_sav*vec_help_sav
+!vec_tot_pretax      = vec_tot_pretax*vec_help_tot_pretax
+!vec_tot             = vec_tot*vec_help_tot
+!vec_lab_pretax_inc  = vec_lab_pretax_inc*vec_help_lab_pretax_inc
+!vec_lab_inc         = vec_lab_inc*vec_help_lab_inc
+!
+!share_sav               = 0.0d0
+!share_tot_pretax        = 0.0d0
+!share_tot               = 0.0d0
+!share_lab_pretax_inc    = 0.0d0
+!share_lab_inc           = 0.0d0
+!
+!desired_pctiles(1) = 0.50d0
+!desired_pctiles(2) = 0.90d0
+!desired_pctiles(3) = 0.99d0
+!do counter = 1,n,1
+!    prc_count_sav               = sum(vec_help_sav(1:counter))
+!    prc_count_pretax            = sum(vec_help_tot_pretax(1:counter))
+!    prc_count_tot               = sum(vec_help_tot(1:counter))
+!    prc_count_lab_pretax_inc    = sum(vec_help_lab_pretax_inc(1:counter))
+!    prc_count_lab_inc           = sum(vec_help_lab_inc(1:counter))
+!    
+!    if (prc_count_sav > desired_pctiles(1) .and. share_sav(1) == 0.0d0) then 
+!        if (prc_count_sav > desired_pctiles(2) .and. share_sav == 0.0d0) then
+!           if (prc_count_sav > desired_pctiles(3) .and. share_sav == 0.0d0) then
+!            share_sav(3) = sum(vec_sav(counter:n))/sum(vec_sav)
+!           endif
+!        else
+!        share_sav(2) = sum(vec_sav(counter:n))/sum(vec_sav)    
+!        endif
+!    else
+!        
+!    endif
+!    
+!    if (prc_count_pretax > desired_pctile .and. share_tot_pretax == 0.0d0) then
+!        share_tot_pretax = sum(vec_tot_pretax(counter:n))/sum(vec_tot_pretax)
+!    endif
+!
+!    if (prc_count_tot > desired_pctile .and. share_tot == 0.0d0) then
+!        share_tot = sum(vec_tot(counter:n))/sum(vec_tot)
+!    endif
+!
+!    if (prc_count_lab_pretax_inc >= desired_pctile .and. share_lab_pretax_inc == 0.0d0) then
+!        share_lab_pretax_inc = sum(vec_lab_pretax_inc(counter:n))/sum(vec_lab_pretax_inc)
+!    endif
+!
+!    if (prc_count_lab_inc >= desired_pctile .and. share_lab_inc == 0.0d0) then
+!        share_lab_inc = sum(vec_lab_inc(counter:n))/sum(vec_lab_inc)
+!    endif
+!
+!enddo
+    
 
 !close (121)
 

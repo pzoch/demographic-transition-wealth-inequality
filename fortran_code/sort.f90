@@ -375,7 +375,7 @@ contains
         !##### ROUTINE CODE #######################################################
 
         ! initialize the sorting order array
-         if(allocated(iorder))deallocate(iorder)
+        if(allocated(iorder))deallocate(iorder)
         allocate(iorder(size(x,1)))
         do ii = 1,size(x,1)
             

@@ -349,12 +349,11 @@ else
  if (n_sd> 1) then 
           pi_id_init(:) = 0.0d0
     if (switch_discount_risk == 2) then
-    call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value(1:n_sd-1), pi_id(1:n_sd-1,1:n_sd-1))
-         pi_id_init(n_sd_initial) = 1.0d0 * (1 - htm_shock_freq)
+    call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value(1:n_sd-1), pi_id(1:n_sd-1,1:n_sd-1),pi_id_init(1:n_sd-1))
+         pi_id_init(1:n_sd-1) = pi_id_init(1:n_sd-1) * (1 - htm_shock_freq)
          pi_id_init(n_sd) = htm_shock_freq
     else
-    call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value, pi_id)
-     pi_id_init(n_sd_initial) = 1.0d0 
+    call discretize_AR(zeta_d, 0d0, sigma_nu_d, n_sd_value, pi_id,pi_id_init)
          endif
 
 

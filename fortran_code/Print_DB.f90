@@ -278,7 +278,7 @@ write(107, '(A)') "prob;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
 
     
 close(107)
-
+if (switch_small_write == 0) then
 open(unit = 108, FILE = version//experiment//closure//"mass_trans.csv")
 write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
     do i = 1, bigT, 1
@@ -315,6 +315,42 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
         enddo
     enddo
     close(108)
+    
+    else
+open(unit = 108, FILE = version//experiment//closure//"mass_trans_small.csv")
+write(108, '(A)') "mass;labinc_pretax;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
+    do i = 1, bigT, 1
+        do j = 1, bigJ, 1
+            do m = 1, bigM, 1
+            do ia = 0, n_a, 1
+                do i_aime = 0, n_aime, 1
+                    do ip = 1, n_sp, 1
+                        do ir = 1, n_sr, 1
+                            do id = 1, n_sd, 1
+                            write(108, '(F20.10,A,F20.10,A,F20.10,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)') &
+                            prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i)), ";", & ! mass
+                            lab_income_pretax_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !lab income
+                            svplus_trans_big(j, ia, i_aime, ip, ir, id,m,i), ";", & !sav
+                            i, ";", & !year
+                            j , ";",  & !age
+                            ia , ";",  & !asset
+                            i_aime , ";",  & !aime
+                            ip , ";",  & !income
+                            ir , ";",  & !return
+                            id , ";",  & !discount
+                            m   !type
+                            enddo        
+                        enddo
+                    enddo
+                enddo
+                enddo
+            enddo
+        enddo
+    enddo        
+        
+        
+    endif
+    
     open(unit = 109, FILE = version//experiment//closure//"mass_trans_beq.csv")
     
     if (switch_unequal_bequest == 2) then
