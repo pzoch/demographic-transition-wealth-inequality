@@ -833,11 +833,14 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this change
     
   elseif (switch_mortality == 7 .AND. switch_starting_year ==1) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
         
-
-    N_temp_vec = sum(sum(Nn_d_big, dim=1),dim=1)
-    nu_ss_new = N_temp_vec(break_index)/N_temp_vec(break_index-1)
+    do i = 1,bigT,1
+    N_temp_vec(i) = sum(Nn_d_big(:,:,i))
+    enddo
+    nu_ss_new = (N_temp_vec(break_index)/N_temp_vec(break_index-1))
     
-    
+    do i = 1,bigT,1
+    N_temp_vec(i) = sum(Nn_d_big(1,:,i))
+    enddo
     do i = (break_index+1), bigT,1
 
         do m = 1, bigM, 1
@@ -862,6 +865,12 @@ endif
 CLOSE(3)
 CLOSE(4)
 CLOSE(9)
+do i = 1,bigT,1
+    do j =1,bigJ,1
+        Nn_d(j,i) = sum(Nn_d_big(j,:,i))
+    enddo
+    enddo
+        
 
 call chdir(cwd_w)
 open(unit = 1, file= version//experiment//closure//"population.csv")
