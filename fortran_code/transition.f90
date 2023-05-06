@@ -22,7 +22,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
     real(dp), dimension(n_beq,bigM,bigT) :: beq_zipf_trans_big
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
-	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing
+	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing, superstar_labinc_share_trans, superstar_pop_share_trans, superstar_totinc_share_trans, labinc_superstar_trans, totinc_superstar_trans, pop_superstar_trans, labinc_aggregate_trans, totinc_aggregate_trans
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: N_big_t_j
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
@@ -314,6 +314,55 @@ tax_c = tc
      !       enddo
      !enddo
      !
+
+
+!share calculation
+
+superstar_labinc_share_trans(:) = 0.0d0
+superstar_pop_share_trans(:) = 0.0d0        
+labinc_superstar_trans(:) = 0.0d0
+pop_superstar_trans(:) = 0.0d0
+labinc_aggregate_trans(:) = 0d0
+totinc_aggregate_trans(:) = 0d0
+totinc_superstar_trans(:) = 0d0
+
+do i = 1,bigT,1    
+do j = 1, bigJ, 1
+
+    do m = 1, bigM, 1
+        do ia = 0, n_a, 1
+            do i_aime = 0, n_aime, 1
+                do ip = 1, n_sp, 1
+                    do ir = 1, n_sr, 1
+                        do id = 1, n_sd, 1
+                        
+                        if (ip > n_sp_risk - n_superstar) then
+                            if (j < jbar_t_vfi(i)) then
+                        labinc_superstar_trans(i) =  lab_income_pretax_trans_big(j, ia, i_aime, ip, ir, id,m,i) * (prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i))) + labinc_superstar_trans(i)
+                        totinc_superstar_trans(i) =  tot_income_trans_big(j, ia, i_aime, ip, ir, id,m,i) * (prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i))) + totinc_superstar_trans(i)
+                        endif
+                        if (j<jbar_t_vfi(i)) then
+                        pop_superstar_trans(i) = prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)  + pop_superstar_trans(i)
+                        endif 
+                        endif
+                        labinc_aggregate_trans(i) = lab_income_pretax_trans_big(j, ia, i_aime, ip, ir, id,m,i) * (prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i))) + labinc_superstar_trans(i)
+                        totinc_aggregate_trans(i) = tot_income_trans_big(j, ia, i_aime, ip, ir, id,m,i) * (prob_trans_big(j, ia, i_aime, ip, ir, id,m,i)*N_big_t_j(j,m,i)/sum(N_big_t_j(:,:,i))) + totinc_aggregate_trans(i)
+                        enddo        
+                    enddo
+                enddo
+            enddo
+        enddo
+    enddo
+enddo
+enddo
+superstar_labinc_share_trans = labinc_superstar_trans / labinc_aggregate_trans
+do i =1,bigT,1
+    superstar_labinc_share_trans(i) = labinc_superstar_trans(i) / labinc_aggregate_trans(i)
+superstar_totinc_share_trans(i) = totinc_superstar_trans(i) / totinc_aggregate_trans(i)
+superstar_pop_share_trans(i) = pop_superstar_trans(i) / sum(N_big_t_j(1:(jbar_t_vfi(i)-1),:,i))
+enddo
+
+
 
 
 if (switch_print == 1) then

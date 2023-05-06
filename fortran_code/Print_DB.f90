@@ -59,6 +59,9 @@
     OPEN (unit=80,  FILE = version//experiment//closure//"irr_trans_1y.txt")
     OPEN (unit=81,  FILE = version//experiment//closure//"iy_ratio_trans.txt")
     OPEN (unit=82,  FILE = version//experiment//closure//"gdp_pc_trans.txt")
+    OPEN (unit=83,  FILE = version//experiment//closure//"star_tinc_trans.txt")
+    OPEN (unit=84,  FILE = version//experiment//closure//"star_linc_trans.txt")
+    OPEN (unit=85,  FILE = version//experiment//closure//"star_pop_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -120,6 +123,9 @@
         write(80,  '(F20.10)') 100*((1 + r_bar(i))**0.2_dp -1d0)
         write(81,  '(F20.10)') (y(i)-consumption_gross(i)-g(i))/y(i) 
         write(82,  '(F20.10)') zet(i) * bigY(i) / N_t(i) 
+        write(83,  '(F20.10)') superstar_totinc_share_trans
+        write(84,  '(F20.10)') superstar_labinc_share_trans
+        write(85,  '(F20.10)') superstar_pop_share_trans
     enddo
     
     
@@ -193,6 +199,10 @@
      CLOSE(80)
      CLOSE(81)
      CLOSE(82)
+     CLOSE(83)
+     CLOSE(84)
+     CLOSE(85)
+     
 ! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")

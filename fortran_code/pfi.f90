@@ -96,7 +96,7 @@ real*8, dimension(bigJ, 0:n_a, 0:n_aime, n_sp, n_sr,n_sd) :: gini_income
 real*8 :: savings_top_ten(10), top_ten(10), savings_cohort_ten(3,bigJ), &
           consumption_top_ten(3, bigJ), top_100(100),  savings_top_100(100), &
           top_ten_trans(10,bigT), savings_top_ten_trans(10, bigT), wspl(bigT), l_pen_j(bigJ,bigM,bigT), asset_trans(bigJ,bigT) , &
-          gini_weight_trans(bigJ,0:n_a, bigT), share_neg, share_nonpos
+          gini_weight_trans(bigJ,0:n_a, bigT), share_neg, share_nonpos, share_0_sav
           
 integer :: t
 contains 

@@ -22,7 +22,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss, beq_sum_ss, &
-                gini_val_sav, labinc_aggregate, labinc_superstar,pop_superstar, superstar_labinc_share, superstar_pop_share, gini_val_tinc, gini_val_tinc_pretax, gini_val_lab_pret, gini_val_lab, prc_count_sav, prc_count_pretax, prc_count_tot, prc_count_lab_pretax_inc, &
+                gini_val_sav, labinc_aggregate, totinc_aggregate, totinc_superstar, labinc_superstar,pop_superstar, superstar_labinc_share, superstar_totinc_share, superstar_pop_share, gini_val_tinc, gini_val_tinc_pretax, gini_val_lab_pret, gini_val_lab, prc_count_sav, prc_count_pretax, prc_count_tot, prc_count_lab_pretax_inc, &
                 prc_count_lab_inc,  share_lab_inc,desired_pctile
     real(dp), dimension(3) :: desired_pctiles
     real(dp), dimension(3) :: share_sav, share_tot_pretax, share_tot, share_lab_pretax_inc
@@ -563,6 +563,8 @@ superstar_pop_share = 0.0d0
 labinc_superstar = 0.0d0
 pop_superstar = 0.0d0
 labinc_aggregate = 0d0
+totinc_aggregate = 0d0
+totinc_superstar = 0d0
 do j = 1, bigJ, 1
 
     do m = 1, bigM, 1
@@ -579,12 +581,15 @@ do j = 1, bigJ, 1
                         vec_lab_pretax_inc(counter)  = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m)  !lab income pretax
                         counter = counter+1
                         if (ip > n_sp_risk - n_superstar) then
+                            if (j < jbar_ss) then
                         labinc_superstar =  lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + labinc_superstar
-                        if (j<jbar_ss) then
+                        totinc_superstar =  tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + totinc_superstar
+                        
                         pop_superstar = prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)  + pop_superstar
                         endif 
                         endif
                         labinc_aggregate = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + labinc_aggregate
+                        totinc_aggregate = tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + totinc_aggregate
                         enddo        
                     enddo
                 enddo
@@ -594,7 +599,7 @@ do j = 1, bigJ, 1
 enddo
 superstar_labinc_share = labinc_superstar / labinc_aggregate
 superstar_pop_share = pop_superstar / sum(N_big_ss_j(1:(jbar_ss-1),:))
-
+superstar_totinc_share = totinc_superstar / totinc_aggregate
 gini_val_sav            = gini(vec_sav,vec_prob)
 !gini_val_tinc_pretax    = gini(vec_tot_pretax,vec_prob)
 !gini_val_tinc           = gini(vec_tot,vec_prob)

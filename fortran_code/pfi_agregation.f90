@@ -33,7 +33,7 @@
         gini_weight_sv = 0d0
         gini_weight_consumption = 0d0
         pension_ss_j_vfi(:) = 0d0
-        
+        share_0_sav = 0d0
         share_neg = 0d0
         share_nonpos = 0d0
         sum_b_weight_ss_vfi = 0d0
@@ -78,6 +78,13 @@
                                         savings_top_ten(t) = savings_top_ten(t) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id)*N_ss_j_vfi(j)
                                     endif
                                     
+                                    !if (ia == ial .and. (j > 2 ) .and. (j < 8)) then
+                                    !    share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(3:7))
+                                    !endif
+                                    
+                                    if ((svplus_ss(j, ia, i_aime, ip, ir, id) == a_l) .and. (j > 2 ) .and. (j < 8)) then
+                                        share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(3:7))
+                                    endif
                                         
                                     if (ia < ial) then
                                         share_neg = share_neg +  prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi)

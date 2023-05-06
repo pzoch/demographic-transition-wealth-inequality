@@ -23,7 +23,10 @@
         write(*,'(A25,F10.5,A)') 'Gini on pretax lab inc =  ', gini_val_lab_pret, '  |  TARGET: ' 
         !write(*,'(A25,F10.5,A)') 'Gini on lab inc =  ', gini_val_lab, '  |  TARGET: ' 
         write(*,'(A25,F10.5,A)') 'Superstar labor income share=  ', superstar_labinc_share, '  |  TARGET: ' 
-       write(*,'(A25,F10.5,A)') 'Superstar pop share / work. pop =  ', superstar_pop_share, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'Superstar tot income share=  ', superstar_totinc_share, '  |  TARGET: ' 
+
+        write(*,'(A25,F10.5,A)') 'Superstar pop share / work. pop =  ', superstar_pop_share, '  |  TARGET: ' 
+        write(*,'(A25,F10.5,A)') 'share zero assets (30-55) =  ', share_0_sav, '  |  TARGET: '
         write(*,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss, '  |  TARGET: ' 
         write(*,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss,  '  |  TARGET: 33%', 100*labor_constant
