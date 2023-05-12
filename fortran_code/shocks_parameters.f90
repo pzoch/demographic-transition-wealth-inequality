@@ -100,9 +100,16 @@ if (n_superstar>0) then
             ! adjust to have the extreme state constant
             n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) =  superstar_factor_mat(m,i)*n_sp_risk_value_trans(n_sp_risk_ordinary+i-1,:)
             n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = sum(n_sp_risk_value_trans(n_sp_risk_ordinary+i,1:20)) / 20! - switch it off for now
-            
+            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = sum(n_sp_risk_value_trans(n_sp_risk_ordinary+i,1:20)) / 20! - switch it off for now
             ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
-            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) =  n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) !/ type_multiplier_t(m,:)
+            
+            ! make this better than this - tomorrow
+            if (m == 1) then
+            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 7.45639185640704
+            else
+            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 6.77562773946087
+            endif
+            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) =  n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) !/ type_multiplier_t(m,:)
             n_sp_risk_value_ss_old(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,1)
             n_sp_risk_value_ss_new(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,bigT)
             endif

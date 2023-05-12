@@ -51,7 +51,7 @@ call chdir(cwd_r)
         
         last_data_sl = 34 ! for sl
         last_data_type_multiplier= 34 ! type multip
-        last_data_type_share= 17 ! type share
+        last_data_type_share= 34 ! type share
         last_data_t1 = 34 ! SS contrib
         last_data_tauC = 34 ! for tauC
         last_data_depr= 34 ! for depr
@@ -214,7 +214,7 @@ call chdir(cwd_r)
     ! -------------------------------- type share --------------------
     
     
-        Open(unit = 8, FILE = "_data_type_share_1935.txt")  
+        Open(unit = 8, FILE = "_data_college_share.txt")  
 
     ! reading type_share
     
@@ -524,7 +524,7 @@ call chdir(cwd_r)
     elseif (switch_het_mortality == 1) then
         
  
-        Open(unit = 121, FILE = "_data_pi_cond_het_US_since1935.txt")  
+        Open(unit = 121, FILE = "_data_het_pi_US_since1935_all.txt")  
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
         Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
   
