@@ -489,6 +489,7 @@ call chdir(cwd_r)
  ! -------------------------------- BIGJ = 16 - US
 
         
+    
     if (switch_het_mortality == 0) then
     
     ! NEED TO MAKE THIS MORE AUTOMATIC!    

@@ -35,7 +35,7 @@
 0.02 ** 5 //  move from regular to 1st superstar state (m+1) 
 0.90 ** 5 //  stay at the top (m+1)
 0.0d0 //  a_l  
-120d0  //  a_u  
+180d0  //  a_u  
 0.04d0  //  a_grow  
 0.001d0 // aime_l !=0.001d0
 2.3374d0 // aime_u !=9165d0/3921d0
