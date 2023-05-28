@@ -38,7 +38,9 @@ call chdir(cwd_r)
 ! -------------------------------- FIRST YEAR? -------------------------
 
         start_year = 1935
-        break_index = 5 ! this corresponds to year 1955 
+        break_index = 5 ! this corresponds to year 1955
+        !break_index = 9 !use this for tax scenarios 
+        
         
         last_data_demo = 33 ! for demography
         last_data_gamma = 34 ! for tfp
@@ -904,7 +906,7 @@ if (switch_keep_fixed == 1) then
     enddo
    tauK_d(2:) = tauK_d(1)
     tauL_d(2:) = tauL_d(1)
-    tauC_d(2:) = taUC_d(1)
+    tauC_d(2:) = tauC_d(1)
     alpha_d(2:) = alpha_d(1)
     debt_constr_d(2:) = debt_constr_d(1)
     lambda_d(2:) = lambda_d(1)

@@ -439,6 +439,9 @@ endif
             pi_id(n_sd,:) = 0.0d0
             pi_id(n_sd,n_sd) = htm_shock_freq
             pi_id(n_sd,n_sd_initial) = 1-htm_shock_freq
+            
+            ! this is a new one, verify it it works!
+            pi_id(n_sd,:) = pi_id_init
             !pi_id(2,1) = 1.0d0 - htm_shock_freq
             !pi_id(2,2) = htm_shock_freq        
     !        pi_id(2,2) = 1.0d0

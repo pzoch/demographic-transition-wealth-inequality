@@ -137,7 +137,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM) :: type_multiplier
  ! pfi 
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 100, n_aime = 7, n_sp_risk = 6, n_sd =4, n_sr = 3, n_beq =1, n_sp_fix = 1, n_superstar = 1 ! convention here is that there are (n_sp_risk - n_superstar) ordinary income grid points
+    integer, parameter :: n_a = 50, n_aime = 7, n_sp_risk = 6, n_sd =4, n_sr = 3, n_beq =1, n_sp_fix = 1, n_superstar = 1 ! convention here is that there are (n_sp_risk - n_superstar) ordinary income grid points
     integer, parameter            :: n_sp = (n_sp_risk) * n_sp_fix
     integer :: n_sp_risk_ordinary
     real*8 :: const_zipf

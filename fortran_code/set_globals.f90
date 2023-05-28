@@ -14,7 +14,7 @@ subroutine globals
     
     
     version = 'base_' ! these three strings allow us to load a correct version
-    experiment = 'ndm_'
+    experiment = 'nsh_'
     closure = 'govt__'
 
 call chdir(cwd_i)
