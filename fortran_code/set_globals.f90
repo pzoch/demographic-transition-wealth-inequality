@@ -12,10 +12,7 @@ subroutine globals
     real, dimension(bigJ, bigT) :: ones
 
     
-    
-    version = 'base_' ! these three strings allow us to load a correct version
-    experiment = 'nsh_'
-    closure = 'govt__'
+
 
 call chdir(cwd_i)
 

@@ -40,8 +40,8 @@
 0.001d0 // aime_l !=0.001d0
 2.3374d0 // aime_u !=9165d0/3921d0
 2.3374d0 // aime_cap !=9165d0/3921d0
-0.99d0 // zeta_d
-0.0005d0 ** 2.0d0 // sigma_nu_d
+0.992d0 // zeta_d
+0.0006d0 ** 2.0d0 // sigma_nu_d
 0.00 // zeta_r
 0.015125 // sigma_nu_r
 0.33// labor_constant
@@ -50,7 +50,7 @@
 0.05//htm_shock_freq
 2//beq_age
 2.5//zipf
-0.980708071767827// zeta_p(1)
-0.977836311654529/zeta_p(2)  
+0.985723661545981// zeta_p(1)
+0.973416728429902/zeta_p(2)  
 0.1// sigma2_fix(1)
 0.1//sigma2_fix(2)  

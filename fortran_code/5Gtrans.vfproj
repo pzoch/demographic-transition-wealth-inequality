@@ -63,7 +63,6 @@
 		<File RelativePath=".\polynomial.f90"/>
 		<File RelativePath=".\rootfinding.f90"/>
 		<File RelativePath=".\simplex.f90"/>
-		<File RelativePath=".\sort.f90"/>
 		<File RelativePath=".\splines.f90"/></Filter>
 		<Filter Name="OLG">
 		<Filter Name="closures">
@@ -94,6 +93,7 @@
 		<File RelativePath=".\get_profile_steady.f90"/>
 		<File RelativePath=".\main.f90"/>
 		<File RelativePath=".\main_base_transition.f90"/>
+		<File RelativePath=".\sort.f90"/>
 		<File RelativePath=".\steady_wzrost.f90"/>
 		<File RelativePath=".\transition.f90"/>
 		<File RelativePath=".\transition_iterations.f90"/></Filter></Filter></Files>

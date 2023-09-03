@@ -19,6 +19,12 @@ program olg2
     cwd_p = trim(cwd)//"/Parameters"
     
 
+        
+    version = 'ssdc_' ! these three strings allow us to load a correct version
+    experiment = 'ntp_'
+    
+    closure = 'govt__'
+    
     call globals         ! globals is a subroutine in global_vars2 module             
     call clear_globals
                                                    

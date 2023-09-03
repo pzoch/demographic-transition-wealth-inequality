@@ -178,7 +178,7 @@ call chdir(cwd_r)
     sigma2_epsilon_t_big(:,m) =  sigma2_epsilon_t_big(:,m) * (1-zeta_p(m)**(2.0d0*zbar))/(1-zeta_p(m)**2.0d0) ! increased
     enddo
 
-! -------------------------------- type multiplier --------------------
+! -------------------------------- type multiplier - load --------------------
     
 
   
@@ -193,27 +193,10 @@ call chdir(cwd_r)
             enddo
             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)
         enddo
-        
 
-
-     if (switch_change_premium == 0.AND.switch_starting_year == 1) then   
-
-        do m = 1,bigM,1
-        last_data_type_multiplier = break_index
-             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
-        enddo
-             
-     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 1) then
-        do m = 1,bigM,1 
-            last_data_type_multiplier = 1
-            
-             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier) 
-        enddo
-        
-    endif
     close(8)
 
-    ! -------------------------------- type share --------------------
+    ! -------------------------------- type share - load --------------------
     
     
         Open(unit = 8, FILE = "_data_college_share.txt")  
@@ -227,24 +210,10 @@ call chdir(cwd_r)
             enddo
             type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)
         enddo
-    
-        if (switch_change_type_share == 0.AND.switch_starting_year == 1) then   
-            last_data_type_share = break_index
-            do m = 1,bigM,1
-                type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
-            enddo
-        
-       
-       
-       
-     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 1) then
-        last_data_type_share = 1
-        do m = 1,bigM,1 
-            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
-        enddo
-        
-     endif
+
      
+
+        
   ! ensure it sums up to 1
      do i = 1,bigT,1
      type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
@@ -258,39 +227,24 @@ call chdir(cwd_r)
       jbar_d = switch_fix_retirement_age
 
      
-    ! -------------------------------- LABOR SHARE -------------------------------
+ ! -------------------------------- LABOR SHARE -------------------------------
     
         Open(unit = 5, FILE = "_data_labsh.txt")  
 
-    if (switch_change_sl == 1) then 
-        do i = 1, last_data_sl, 1
-            read(5,*) alpha_d(i)
-        enddo
-        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
-            
-     elseif (switch_change_sl == 0 .AND. switch_starting_year == 1) then
-         last_data_sl = break_index
          do i = 1, last_data_sl, 1
             read(5,*) alpha_d(i)
-        enddo
-        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
-        
-    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) alpha_d(1)
-        alpha_d(2:) = alpha_d(1)
-    endif
-    
-
+         enddo
+         
+         alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
+        close(5)
+     
     
     alpha_d = 1.0d0 - alpha_d / 100.0d0
     
     
-    close(5)
+
     
-    if (switch_change_sl == -1) then
-        alpha_d(1:) = 0.35d0
-        
-    endif
+
     
     ! -------------------------------- DEPRECIATION RATE -------------------------------
     
@@ -315,30 +269,7 @@ call chdir(cwd_r)
         depr_d(2:) = depr_d(1)
     endif
     
-    ! -------------------------------- SOCIAL SECURITY CONTRIBUTIONS -------------------------------
-     OPEN (unit=5, FILE = "_data_contrib_to_gdp.txt")    
-     if (switch_change_contrib == 1) then 
-        do i = 1, last_data_t1, 1
-            read(5,*) t1_d(i) 
-        enddo
-        t1_d(last_data_t1+1:) = t1_d(last_data_t1)
-            
-     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 1) then
-         last_data_t1 = break_index
-         do i = 1, last_data_t1, 1
-            read(5,*) t1_d(i)
-        enddo
-        t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
-        
-    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) t1_d(1)
-        t1_d(2:) = t1_d(1)
-    endif
-    
-    ! the above were contributions to gdp, now obtain contrib. rates:
-    t1_d = t1_d / (1-alpha_d)
 
-    close(5)
     ! -------------------------------- TAU_K -------------------------------    
 
         Open(unit = 7, FILE = "_data_tauK.txt")  
@@ -401,12 +332,12 @@ call chdir(cwd_r)
         enddo
         tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC)
             
-     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 1) then
+     elseif (switch_change_tauC == 0 .AND. switch_starting_year == 1) then
          last_data_tauC = break_index
          do i = 1, last_data_tauC, 1
             read(5,*) tauC_d(i)
         enddo
-        tauL_d(last_data_tauC+1:) = tauL_d(last_data_tauC) 
+        tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC) 
         
     elseif (switch_change_tauC == 0.AND.switch_starting_year.NE. 1) then   
         read(5,*) tauC_d(1)
@@ -491,7 +422,6 @@ call chdir(cwd_r)
  ! -------------------------------- BIGJ = 16 - US
 
         
-    
     if (switch_het_mortality == 0) then
     
     ! NEED TO MAKE THIS MORE AUTOMATIC!    
@@ -531,7 +461,7 @@ call chdir(cwd_r)
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
         Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
   
-        
+    
     do i = 1,last_data_demo ,1 
         read(122,*) Nn_d(1,i)
     enddo
@@ -555,7 +485,9 @@ call chdir(cwd_r)
     
     endif
     
-
+    close(121)
+    close(122)
+    close(123)
 
     
 
@@ -600,10 +532,7 @@ call chdir(cwd_r)
     Nn_d(j,1) = sum(Nn_d_big(j,:,1))
     enddo
 
-    close(121) 
-    close(122)
-    close(123)
-   
+
 
     do i = last_data_demo+1, bigT, 1
         Nn_d(1,i) = Nn_d(1,i-1)*nu_ss_new
@@ -638,7 +567,7 @@ call chdir(cwd_r)
         Open(unit = 4, FILE = "_data_gamma.txt") 
 
 
-    if (switch_go_to_lower_gamma == 1) then 
+    if (switch_go_to_lower_gamma .ne. 0) then 
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
@@ -702,11 +631,236 @@ call chdir(cwd_r)
     do i = 2,bigT,1
         gam_cum_d(i) = gam_cum_d(i-1)*gam_d(i)
     enddo
+    
+    if (switch_go_to_lower_gamma == 2) then !this one sets growth rate used in the model to a constant
+        last_data_gamma= break_index
+      gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)  
+    endif
+    
+    
 ! --------------------------------end calculating GAMMA  -------------------------------
     
     
+         
+
+! -------------------------------- fix type multiplier
+     if (switch_change_premium == 0.AND.switch_starting_year == 1) then   
+
+        do m = 1,bigM,1
+        last_data_type_multiplier = break_index
+             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
+        enddo
+             
+     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 1) then
+        do m = 1,bigM,1 
+            last_data_type_multiplier = 1
+            
+             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier) 
+        enddo
+        
+     endif
+    
+! -------------------------------- fix type share
+     
+     
+    if (switch_change_type_share == 0.AND.switch_starting_year == 1) then   
+            last_data_type_share = break_index
+            do m = 1,bigM,1
+                type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
+            enddo
+        
+  
+     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 1) then
+        last_data_type_share = 1
+        do m = 1,bigM,1 
+            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
+        enddo
+        
+     endif
+     
+  ! ensure it sums up to 1
+     do i = 1,bigT,1
+     type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
+     enddo
+ 
+  
+! recalculate population to adjust to fixed type shares
+      ! -------------------------------- BIGJ = 16 - US
+
+        
+    if (switch_het_mortality == 0) then
+    
+    ! NEED TO MAKE THIS MORE AUTOMATIC!    
+
+        Open(unit = 121, FILE = "_data_pi_cond_US_since1935.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")
+
+    
+    do i = 1,last_data_demo ,1 
+            do j = 1, bigJ
+                read(121,*) pi_d_big(j,1,i)
+            enddo 
+        read(122,*) Nn_d(1,i)
+    enddo
+    
+    do i = last_data_demo+1, bigT, 1 
+         pi_d_big(:,:,i)=  pi_d_big(:,:,last_data_demo)    
+    enddo
+    
+    do m = 1, bigM, 1
+        pi_d_big(:,m,:) =  pi_d_big(:,1,:)
+    enddo
+
+   do i = 1,last_data_demo ,1 
+        
+        do m = 1,bigM,1
+
+            Nn_d_big(1,m,i) = type_share_d(m,i) * Nn_d(1,i)
+        enddo
+    enddo
+
+elseif (switch_het_mortality == 1) then
+        
+         
+        Open(unit = 121, FILE = "_data_het_pi_US_since1935_all.txt")  
+        Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
+        Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")     
+  
+        
+    do i = 1,last_data_demo ,1 
+        read(122,*) Nn_d(1,i)
+    enddo    
+     do m = 1,bigM,1
+         do i = 1,last_data_demo,1
+            do j = 1, bigJ
+                read(121,*) pi_d_big(j,m,i)
+            enddo 
+            Nn_d_big(1,m,i) = type_share_d(m,i) * Nn_d(1,i)
+        enddo
+    enddo
+    
+    do i = last_data_demo+1, bigT, 1
+        do m = 1,bigM,1
+            do j = 1, bigJ
+            pi_d_big(j,m,i)=  pi_d_big(j,m,last_data_demo)
+            enddo
+        enddo
+    enddo
+    
+endif
+    
+close(121)
+close(122)
+close(123)
+
+    ! -------------------------------- unstable demography
+    if (switch_unstable_dem_ss == 1) then 
+
+    !THESE THINGS DO NOT WORK IF NU_SS_OLD IS ~= 1, unless we switch_steady_demo == 1
+    nu_ss_old =  1.055_dp!1.032998466_dp
+    nu_ss_new =  1.003210472_dp  ! base on UN leads 
+    
+    elseif (switch_unstable_dem_ss == 0) then 
+    nu_ss_old = 1.0_dp
+    nu_ss_new = 1.0_dp  
+
+    elseif (switch_unstable_dem_ss == -1) then 
+    nu_ss_old =  1.055_dp!1.032998466_dp ! this gives us a good fit
+    nu_ss_new =  1.055_dp   ! assume it remained constant
+    endif
+    
+     
+    ! calculate conditional probabilities
+
+    do i = 1,bigT, 1
+        do m = 1,bigM,1
+            pi_d_big(1,m,i) = 1.0_dp
+            do j = 2, bigJ
+                pi_d_big(j,m,i) = pi_d_big(j-1,m,max(i-1,1))*pi_d_big(j,m,i)
+            enddo
+        enddo      
+    enddo
     
     
+    do j = 1, bigJ, 1
+        do m = 1, bigM, 1
+        if (switch_steady_demo == 1)  then !if this switch is set to 1 replace initial population from the data with something calculated by assuming that birth rate and mortality was always the same in the past
+            !=Nn_d(1,1) = 1.0_dp ! temporary
+            Nn_d_big(j,m,1) = nu_ss_old**(-j+1)*pi_d_big(j,m,1)/pi_d_big(1,m,1) * Nn_d_big(1,m,1)
+             
+        endif
+        enddo
+    Nn_d(j,1) = sum(Nn_d_big(j,:,1))
+    enddo
+
+
+
+    do i = last_data_demo+1, bigT, 1
+        Nn_d(1,i) = Nn_d(1,i-1)*nu_ss_new
+        Nn_d_big(1,:,i) = Nn_d_big(1,:,i-1)*nu_ss_new
+    enddo
+    
+    
+    
+    do i = 2,bigT, 1
+        do j = 2, bigJ
+            do m = 1, bigM, 1
+                Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1)
+            enddo
+            Nn_d(j,i) = sum(Nn_d_big(j,:,i))
+        enddo
+    enddo
+
+
+
+    ! pi_weight seems to be needed to calculate relative masses in steady states
+    ! along the transition path these masses are handled by N
+    pi_big_weight_d = pi_d_big
+    !pi_weight_d = pi_d
+    
+! -------------------------------- fix labor share    
+    
+    Open(unit = 5, FILE = "_data_labsh.txt")    
+    if (switch_change_sl == 0 .AND. switch_starting_year == 1) then
+         last_data_sl = break_index
+         do i = 1, last_data_sl, 1
+            read(5,*) alpha_d(i)
+        enddo
+        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
+        alpha_d = 1.0d0 - alpha_d / 100.0d0
+        
+    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 1) then   
+        read(5,*) alpha_d(1)
+        alpha_d(2:) = alpha_d(1)
+        alpha_d = 1.0d0 - alpha_d / 100.0d0
+    endif
+     
+    
+ ! -------------------------------- SOCIAL SECURITY CONTRIBUTIONS -------------------------------
+     OPEN (unit=5, FILE = "_data_contrib_to_gdp.txt")    
+     if (switch_change_contrib == 1) then 
+        do i = 1, last_data_t1, 1
+            read(5,*) t1_d(i) 
+        enddo
+        t1_d(last_data_t1+1:) = t1_d(last_data_t1)
+            
+     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 1) then
+         last_data_t1 = break_index
+         do i = 1, last_data_t1, 1
+            read(5,*) t1_d(i)
+        enddo
+        t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
+        
+    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 1) then   
+        read(5,*) t1_d(1)
+        t1_d(2:) = t1_d(1)
+    endif
+    
+    ! the above were contributions to gdp, now obtain contrib. rates:
+    t1_d = t1_d / (1-alpha_d)
+
+    close(5)
     
     
 ! -------------------------------- there is no mortality
@@ -864,6 +1018,30 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this change
         enddo    
     enddo 
     
+    elseif (switch_mortality == 8.AND. switch_starting_year .NE.1) then !this keep mortality at the fixed level, but subjective probabilities are as in the data
+       
+    do i = 2, bigT,1
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_big_weight_d(j,m,i) = pi_big_weight_d(j,m,break_index)
+                Nn_d_big(j,m,i) = pi_big_weight_d(j,m,i)/pi_big_weight_d(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
+            enddo
+        enddo
+    enddo
+    
+   elseif (switch_mortality == 8.AND. switch_starting_year ==1) then !this keep mortality at the fixed level, but subjective probabilities are as in the data to the data
+       
+    do i = 2, bigT,1
+        do m = 1, bigM, 1
+            do j = 2, bigJ, 1   
+                pi_big_weight_d(j,m,i) = pi_big_weight_d(j,m,break_index)
+                Nn_d_big(j,m,i) = pi_big_weight_d(j,m,i)/pi_big_weight_d(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
+            enddo
+        enddo
+    enddo
+
+    
+    
 endif
 CLOSE(3)
 CLOSE(4)
@@ -872,8 +1050,10 @@ do i = 1,bigT,1
     do j =1,bigJ,1
         Nn_d(j,i) = sum(Nn_d_big(j,:,i))
     enddo
-    enddo
-        
+enddo
+
+  !!!!PZ: HACK 
+      type_share_d(1,:) = 0.0d0  
 
 call chdir(cwd_w)
 open(unit = 1, file= version//experiment//closure//"population.csv")
