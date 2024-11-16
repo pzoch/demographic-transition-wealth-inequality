@@ -40,14 +40,14 @@ integer ::  n_a_1, n_a_2, iter_com, iaimel, iaimer
 
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_trans,  aime_plus_trans, l_trans, c_trans, labor_tax_trans, &
-                                                  RHS_trans, prob_trans, ERHS_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
+                                                  RHS_trans, prob_trans, sv_tempo_trans, V_trans, EV_trans, lab_income_trans, lab_income_pretax_trans,  tot_income_trans, tot_income_pretax_trans, bequest_j_trans
 
 real*8, dimension(:,:,:,:,:,:,:), allocatable ::  svplus_beq_trans,  aime_plus_beq_trans, l_beq_trans, c_beq_trans, labor_tax_beq_trans, &
                                                   RHS_beq_trans, prob_beq_trans, ERHS_beq_trans, sv_tempo_beq_trans, V_beq_trans, EV_beq_trans, lab_income_beq_trans, lab_income_pretax_beq_trans,  tot_income_beq_trans, tot_income_pretax_beq_trans, V_after_beq_trans, EV_after_beq_trans, RHS_after_beq_trans
 ! big
 
 real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_trans_big,  aime_plus_trans_big, l_trans_big, lab_trans_big, c_trans_big, labor_tax_trans_big, &
-                                                  RHS_trans_big, prob_trans_big, ERHS_trans_big, sv_tempo_trans_big, V_trans_big, EV_trans_big, lab_income_trans_big, lab_income_pretax_trans_big,  tot_income_trans_big, tot_income_pretax_trans_big, bequest_j_trans_big
+                                                  RHS_trans_big, prob_trans_big, sv_tempo_trans_big, V_trans_big, EV_trans_big, lab_income_trans_big, lab_income_pretax_trans_big,  tot_income_trans_big, tot_income_pretax_trans_big, bequest_j_trans_big
 
 real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_beq_trans_big,  aime_plus_beq_trans_big, l_beq_trans_big, lab_beq_trans_big, c_beq_trans_big, labor_tax_beq_trans_big, &
                                                    RHS_beq_trans_big, ERHS_beq_trans_big, sv_tempo_beq_trans_big, V_beq_trans_big, EV_beq_trans_big, lab_income_beq_trans_big, lab_income_pretax_beq_trans_big,  tot_income_beq_trans_big, tot_income_pretax_beq_trans_big, V_after_beq_trans_big, EV_after_beq_trans_big

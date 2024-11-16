@@ -1,7 +1,7 @@
 ! shocks    
 
     
-    ! these need to be corrected to allow for unequal bequests
+
 ! definie initial distributions
     
     n_sp_risk_ordinary = n_sp_risk - n_superstar
@@ -18,7 +18,6 @@ if (n_superstar>0) then
     
         
 ! temporary
-
         do ir = 1 , n_sr, 1
                 pi_ir_init(ir) = 1.0d0 / n_sr
         enddo 
@@ -40,22 +39,20 @@ n_sd_value = 0d0
 sigma2_epsilon_ss_old_big = sigma2_epsilon_t_big(1,:)
 sigma2_epsilon_ss_new_big = sigma2_epsilon_t_big(bigT,:)
 
-! implement correction of epsilons
-    do m = 1,bigM,1
+! implement correction of epsilons - this is to ensure that the mean is zero
+do m = 1,bigM,1
         if (switch_epsilon_corr == 1) then
             epsilon_correction_t_big(:,m) = - (sigma2_epsilon_t_big(:,m)/(1.0d0 - zeta_p(m) ** 2d0)) / 2.0d0
-
         else
              epsilon_correction_t_big(:,m) = 0.0d0
         endif
-    
         epsilon_correction_ss_old_big(m) = epsilon_correction_t_big(1,m)
         epsilon_correction_ss_new_big(m) = epsilon_correction_t_big(bigT,m)
-    
-    enddo
+enddo
     
 if (n_superstar>0) then 
         do m = 1,bigM, 1
+            
             epsilon_correction_t =  epsilon_correction_t_big(:,m)
             sigma2_epsilon_t     =  sigma2_epsilon_t_big(:,m)
             epsilon_correction_ss_old =  epsilon_correction_ss_old_big(m)
@@ -80,36 +77,30 @@ if (n_superstar>0) then
             n_sp_risk_value_ss_new = exp(n_sp_risk_value_ss_new)     
         
 
-        
-        
-            !pi_i_6 = 5e-3
-            !pi_6_6 = 0.95d0
-            !pi_6_7 = 0.0025d0
-            !pi_7_7 = 0.73d0
+
             
             do i = 1,n_superstar
             
                 
-            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = superstar_factor_mat(m,i)*n_sp_risk_value_trans(n_sp_risk_ordinary+i-1,:)
-            n_sp_risk_value_ss_old(n_sp_risk_ordinary+i) =superstar_factor_mat(m,i)*n_sp_risk_value_ss_old(n_sp_risk_ordinary+i-1)
-            n_sp_risk_value_ss_new(n_sp_risk_ordinary+i) =superstar_factor_mat(m,i)*n_sp_risk_value_ss_new(n_sp_risk_ordinary+i-1)
+            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:)   =superstar_factor_mat(m,i)*n_sp_risk_value_trans(n_sp_risk_ordinary+i-1,:)
+            n_sp_risk_value_ss_old(n_sp_risk_ordinary+i)    =superstar_factor_mat(m,i)*n_sp_risk_value_ss_old(n_sp_risk_ordinary+i-1)
+            n_sp_risk_value_ss_new(n_sp_risk_ordinary+i)    =superstar_factor_mat(m,i)*n_sp_risk_value_ss_new(n_sp_risk_ordinary+i-1)
             
             
             if (i == n_superstar) then
                 
             ! adjust to have the extreme state constant
             n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) =  superstar_factor_mat(m,i)*n_sp_risk_value_trans(n_sp_risk_ordinary+i-1,:)
-            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = sum(n_sp_risk_value_trans(n_sp_risk_ordinary+i,1:20)) / 20! - switch it off for now
-            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = sum(n_sp_risk_value_trans(n_sp_risk_ordinary+i,1:20)) / 20! - switch it off for now
+            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = sum(n_sp_risk_value_trans(n_sp_risk_ordinary+i,1:20)) / 20! - division by 20 because there are 20 periods
+            
             ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
             
-            ! make this better than this - tomorrow
+            ! these numbers are hard coded - need to modify it
             if (m == 1) then
             n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 7.45639185640704
             else
             n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 6.77562773946087
             endif
-            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) =  n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) !/ type_multiplier_t(m,:)
             n_sp_risk_value_ss_old(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,1)
             n_sp_risk_value_ss_new(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,bigT)
             endif
@@ -122,55 +113,50 @@ if (n_superstar>0) then
         
         
         ! probabilities 
-        
-            !pi_i_6 = superstar_pi_mat(m,1)
-            !pi_7_7 = superstar_pi_mat(m,2)
-            !pi_6_6 = superstar_pi_mat(m,3)
-            !pi_6_7 = superstar_pi_mat(m,4)
-
                         
-            pi_ip_risk_trans = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_trans
-            pi_ip_risk_ss_old = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_ss_old
-            pi_ip_risk_ss_new = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_ss_new
+        pi_ip_risk_trans = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_trans
+        pi_ip_risk_ss_old = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_ss_old
+        pi_ip_risk_ss_new = (1d0-superstar_pi_mat(m,1))*pi_ip_risk_ss_new
             
-            do s=1, n_sp_risk_ordinary,1
-            pi_ip_risk_trans(s,n_sp_risk_ordinary+1,:) = superstar_pi_mat(m,1)
-            pi_ip_risk_ss_old(s,n_sp_risk_ordinary+1) = superstar_pi_mat(m,1)
-            pi_ip_risk_ss_new(s,n_sp_risk_ordinary+1) = superstar_pi_mat(m,1)
-            enddo
+        do s=1, n_sp_risk_ordinary,1
+        pi_ip_risk_trans(s,n_sp_risk_ordinary+1,:) = superstar_pi_mat(m,1)
+        pi_ip_risk_ss_old(s,n_sp_risk_ordinary+1) = superstar_pi_mat(m,1)
+        pi_ip_risk_ss_new(s,n_sp_risk_ordinary+1) = superstar_pi_mat(m,1)
+        enddo
             
             
         
         ! stay at the top
-        pi_ip_risk_trans(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar,:) = superstar_pi_mat(m,2)
-        pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar) = superstar_pi_mat(m,2)
-        pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar) = superstar_pi_mat(m,2)
+        pi_ip_risk_trans(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar,:)   = superstar_pi_mat(m,2)
+        pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar)    = superstar_pi_mat(m,2)
+        pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar)    = superstar_pi_mat(m,2)
+        
         if (n_superstar > 1) then
             pi_ip_risk_trans(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar-1,:) = 1.0 -  superstar_pi_mat(m,2)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar-1) = 1.0 -  superstar_pi_mat(m,2)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar-1) = 1.0 -  superstar_pi_mat(m,2)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar-1)  = 1.0 -  superstar_pi_mat(m,2)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_risk_ordinary+n_superstar-1)  = 1.0 -  superstar_pi_mat(m,2)
         else
             pi_ip_risk_trans(n_sp_risk_ordinary+n_superstar,n_sp_initial,:) = 1.0 -  superstar_pi_mat(m,2)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_initial) = 1.0 -  superstar_pi_mat(m,2)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_initial) = 1.0 -  superstar_pi_mat(m,2)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+n_superstar,n_sp_initial)  = 1.0 -  superstar_pi_mat(m,2)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+n_superstar,n_sp_initial)  = 1.0 -  superstar_pi_mat(m,2)
         endif
         
         if (n_superstar > 1) then
         do i = 1, (n_superstar-1)
-            pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i,:) = superstar_pi_mat(m,2+i)
+            pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i,:)   = superstar_pi_mat(m,2+i)
             pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i+1,:) = superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i) = superstar_pi_mat(m,2+i)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i+1) = superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i) = superstar_pi_mat(m,2+i)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i+1) = superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i)    = superstar_pi_mat(m,2+i)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i+1)  = superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i)    = superstar_pi_mat(m,2+i)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i+1)  = superstar_pi_mat(m,2+i+1)
             if (i == 1) then
-            pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_initial,:)           = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_initial)           = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_initial)           = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_initial,:)       = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_initial)        = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_initial)        = 1 -superstar_pi_mat(m,2+i) -superstar_pi_mat(m,2+i+1)
             else
             pi_ip_risk_trans(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i-1,:) = 1- superstar_pi_mat(m,2+i) - superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i-1) = 1- superstar_pi_mat(m,2+i) - superstar_pi_mat(m,2+i+1)
-            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i-1) = 1- superstar_pi_mat(m,2+i) - superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_old(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i-1)  = 1- superstar_pi_mat(m,2+i) - superstar_pi_mat(m,2+i+1)
+            pi_ip_risk_ss_new(n_sp_risk_ordinary+i,n_sp_risk_ordinary+i-1)  = 1- superstar_pi_mat(m,2+i) - superstar_pi_mat(m,2+i+1)
             endif
         enddo
         endif

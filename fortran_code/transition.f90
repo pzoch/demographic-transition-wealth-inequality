@@ -37,13 +37,6 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j
     
-    ! partial equilibrum stohastic vs deterministic model 
-    ! this is probably not needed for anything
-    !real(dp), dimension(bigj) ::  u_init_old_higher_lambda, u_init_old_const_lambda
-    !real(dp), dimension(bigT) ::  u_higher_lambda, u_const_lambda, x_c_higher_lambda, c_higher_lambda_tot, disc_higher_lambda
-    !real(dp), dimension(bigj, bigT) :: u_j_higher_lambda, mult_partial, x_j_higher_lambda, x_c_j_higher_lambda, sum_eq_higher_lambda
-    !real(dp) ::  LS_higher_lambda, S_C_higher_lambda, unif_higher_lambda 
-    !real(dp), dimension(bigJ, bigT) :: c_j_higher_lambda, l_j_higher_lambda, sv_j_higher_lambda, sv_pom_j_higher_lambda
     
     
     real(dp), dimension(bigJ, bigM, bigT) :: b1_j, b2_j
@@ -102,15 +95,6 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 
 t2 = t2_ss_new
  
-!do i = 1,n_p,1
-!    do j =1, bigj, 1
-!        if (j-i+3 > ofe_u) then 
-!            t1(j,i) = t1_ss_old
-!            t2(j,i) = t2_ss_old  
-!        endif
-!    enddo
-!enddo 
-
 t2(:,1) = t2_ss_old
 t1_contrib = t1
 

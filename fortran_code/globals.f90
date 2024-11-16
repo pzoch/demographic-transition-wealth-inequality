@@ -11,10 +11,9 @@ IMPLICIT NONE
     integer, parameter :: dp = kind(1.0d0)
     integer, parameter :: bigJ = 16
     integer, parameter :: bigM = 2 ! number of permanent types
-    integer, parameter :: n_p = 140, n_debt  = 60, forward = 1 ! id does not work :( 
-    real(dp), parameter :: forward_smoothing = 1d0/real(forward)
+    integer, parameter :: n_p = 140 ! periods for transition
 	integer, parameter :: bigT = n_p+bigJ+1
-    integer, parameter :: ofe_u = 0  
+
     real(dp), parameter :: zbar = real(80/bigJ) ! 4 periods model scale parameter
     integer :: iter, i, j, s, m, cl
     character(5) :: version
@@ -62,10 +61,10 @@ IMPLICIT NONE
     integer :: switch_mortality                            ! 0 = no mortality on transition, 1 mortality according to data 
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
     integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
-    integer :: switch_cohort_ps                             ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
+    integer :: switch_cohort_ps                            ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
     integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
-    integer :: switch_persistent_delta                  ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
-    integer :: switch_change_premium                    ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
+    integer :: switch_persistent_delta                     ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
+    integer :: switch_change_premium                       ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
     integer :: switch_income_fixed_effect               ! 0 = no income fixed effects, 1 = income fixed effects, group specific
     integer :: switch_discount_risk
@@ -73,7 +72,7 @@ IMPLICIT NONE
     integer :: switch_keep_fixed                      
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
     integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-    integer ::switch_change_type_share                            
+    integer :: switch_change_type_share                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
     integer :: switch_increase_ret_age
@@ -92,7 +91,7 @@ IMPLICIT NONE
 
     real(dp) :: debt_constr
     real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
-! Deklaracje zmiennych, ktore nam zostaja po steady state'ach
+
     real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
     real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
     
@@ -116,6 +115,7 @@ IMPLICIT NONE
     real(dp), dimension(bigM,4) :: superstar_pi_mat
     integer :: g_correction_last_period
     real(dp) :: delta_half_width, htm_shock_freq
+    
 ! transition variables
     integer, dimension(bigT) :: jbar_t
 	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t, rho_t 
@@ -125,19 +125,21 @@ IMPLICIT NONE
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight
     real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_big_weight, Nn_big, pi_trans_cond_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
+    
 ! LSRA
     real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db !  c_base, l_base,  c_ref, l_ref
     real(dp), dimension(- bigJ: bigT) ::  V_20_years_old_db !  V_20_years_old_base, V_20_years_old_ref
     real(dp), dimension(bigT) :: r_db, tax_c_db, g_per_capita_db, better !  r_base, tax_c_base, g_per_capita_base, r_ref, tax_c_ref, g_per_capita_ref
     real(dp), dimension(bigJ, bigT) :: x_j_pro,  x_unif_pro, sum_x_pro, x_c_j_pro, eq_unif_pro, sum_eq_pro
-    real(dp) :: LS_pro , g_trans(bigT), g_ss_2, upsilon_r_ss_nr
+    real(dp) :: upsilon_r_ss_nr
 
 ! multiple types
     real(dp), dimension(bigM) :: bigM_share_ss
     real(dp), dimension(bigM) :: type_multiplier
- ! pfi 
+    
+ ! pfi
     real*8, parameter  :: fi = (5d0**(1d0/2d0)-1d0)/2d0
-    integer, parameter :: n_a = 50, n_aime = 7, n_sp_risk = 6, n_sd =4, n_sr = 3, n_beq =2, n_sp_fix = 1, n_superstar = 1 ! convention here is that there are (n_sp_risk - n_superstar) ordinary income grid points
+    integer, parameter :: n_a = 50, n_aime = 3, n_sp_risk = 4, n_sd =4, n_sr = 1, n_beq =2, n_sp_fix = 1, n_superstar = 1 ! convention here is that there are (n_sp_risk - n_superstar) ordinary income grid points
     integer, parameter            :: n_sp = (n_sp_risk) * n_sp_fix
     integer :: n_sp_risk_ordinary
     real*8 :: const_zipf
@@ -156,6 +158,7 @@ IMPLICIT NONE
      real*8, dimension(n_sp_fix,bigM) :: n_sp_fix_value
     
  ! cohort/time specific shock grids
+     
     real*8   ::  pi_ip_risk_trans(n_sp_risk,n_sp_risk,bigT), n_sp_risk_value_trans(n_sp_risk,bigT), pi_ip_risk_init_trans(n_sp_risk,bigT) ! these will be used to construct things used in pfi.90 
     real*8   ::  pi_ip_risk_trans_big(n_sp_risk,n_sp_risk,bigM,bigT), n_sp_risk_value_trans_big(n_sp_risk,bigM,bigT), pi_ip_risk_init_trans_big(n_sp_risk,bigM, bigT) ! these are used in the outer routine and hold all the information
     
@@ -180,6 +183,7 @@ IMPLICIT NONE
     
     
     real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
+    
  ! pension system 
     real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
@@ -188,19 +192,19 @@ IMPLICIT NONE
 
   ! bequests  
     integer :: beq_age
-    real*8 :: beq_zipf_ss(n_beq), p_beq(n_beq)
+    real*8  :: beq_zipf_ss(n_beq), p_beq(n_beq)
     real*8, dimension(n_beq,bigT) :: p_beq_trans
     
     
-! implicit tax
+    ! implicit tax
     real(dp), dimension(bigJ) :: tau1_ss_1, tau1_a_ss_1, tau2_ss_1, &
                                  tau1_ss_2, tau1_a_ss_2, &
                                  tau2_ss_2,&
                                  transfer_pfi
     
-     real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2, s_pom_ss_j_1, s_pom_ss_j_2, w_pom_ss_j_1, w_pom_ss_j_2
-     real(dp), dimension(bigJ,bigM) :: labor_tax_j_ss_1, labor_tax_j_ss_2
-     real(dp), dimension(bigJ,bigM) :: bequest_ss_j_1, bequest_ss_j_2
+    real(dp), dimension(bigJ,bigM) :: bequest_left_ss_j_1, bequest_left_ss_j_2, s_pom_ss_j_1, s_pom_ss_j_2, w_pom_ss_j_1, w_pom_ss_j_2
+    real(dp), dimension(bigJ,bigM) :: labor_tax_j_ss_1, labor_tax_j_ss_2
+    real(dp), dimension(bigJ,bigM) :: bequest_ss_j_1, bequest_ss_j_2
     real(dp), dimension(bigM) :: bequest_ss_1, bequest_ss_2
                                  
     
@@ -208,10 +212,12 @@ IMPLICIT NONE
     real(dp) :: ret1_help, ret2_help, savings_ss_pom, pom2
     
  ! progression
+    
     real*8  :: tau, lambda, lambda_trans(bigT),  debt_constr_trans(bigT)
     integer :: i_temp
     real*8  :: tl_com, lambda_com
     !real*8  :: lambda_old = 0.15d0, lambda_new = 0.15d0, progression_param= 0.15d0
+    
 ! partial 
     real*8  :: avg_aime_replacement_rate(bigJ, bigT)
     integer :: switch_partial_efficiency = 0d0 , iter_theta, if_border, time_iter
@@ -219,12 +225,8 @@ IMPLICIT NONE
 ! elasticity
     real(dp), dimension(bigT) ::  savings_el, k_el, elasticity, savings_base, savings_rel_dif, r_rel_diff
     real(dp), dimension(bigJ, bigT) :: sv_j_el
-    real(dp) :: temp_test
+
     
-    real(dp), dimension(bigT) :: delta_K, K_semi_elasticity_reform, K_semi_elasticity_base, delta_proc_r
-    real(dp), dimension(bigT) :: r_semi_elasticity_reform, r_semi_elasticity_base, semi_elasticity, tk_reform, tk_base
-    real(dp) :: pop_denom
-    integer :: switch_partial_semi = 0
     
     ! retirement age 
     integer, dimension(-bigJ:bigT) :: jbar_t_yob ! retirement age of cohort which is j years old at time i

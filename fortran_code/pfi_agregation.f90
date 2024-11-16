@@ -10,6 +10,7 @@
         real*8 :: sum_help, p_1_5(bigJ)
     
        ! write(*,*) c_ss(1,0,3)
+        
         ! calculate cohort aggregates
         savings_cohort_ten = 0d0
         c_ss_j_vfi(:) = 0d0
@@ -77,11 +78,7 @@
                                         top_ten(t) =  top_ten(t) + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi)
                                         savings_top_ten(t) = savings_top_ten(t) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id)*N_ss_j_vfi(j)
                                     endif
-                                    
-                                    !if (ia == ial .and. (j > 2 ) .and. (j < 8)) then
-                                    !    share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(3:7))
-                                    !endif
-                                    
+                                                           
                                     if ((svplus_ss(j, ia, i_aime, ip, ir, id) == a_l) .and. (j > 2 ) .and. (j < 8)) then
                                         share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(3:7))
                                     endif
@@ -221,7 +218,6 @@
         savings_top_ten_trans(:,i) = 0d0
         sum_n= sum(N_t_j_vfi(:,i))
         w_sum(0) = 0d0
-        ERHS_trans(:,:,:,:,:,:,i) = 0d0
         sum_b_weight_trans(i) = 0d0
         if (n_sp>5) then 
             do j=1,bigJ,1
@@ -273,14 +269,9 @@
                                 !endif 
                                 gini_weight_trans(j,ia, i) = gini_weight_trans(j,ia,i) + prob_trans(j, ia, i_aime, ip,ir, id, i)*N_t_j_vfi(j,i)/sum_n
                                 asset_trans(j,i) = asset_trans(j,i) + sv(ia)*prob_trans(j, ia, i_aime, ip, ir, id,i)    
-                                !if (top_ten_trans(t,i) >= 0.1d0) then ! todotodotodot
-                                !    t = t-1
-                                !    top_ten_trans(t,i) =  top_ten_trans(t,i) + prob_trans(j, ia, i_aime, ip,ir, id,i)*N_t_j_vfi(j,i)/sum_n
-                                !    savings_top_ten_trans(t,i) = savings_top_ten_trans(t,i) + sv(ia)*prob_trans(j, ia, i_aime, ip,ir, id,i)*N_t_j_vfi(j,i)
-                                !else
-                                !    top_ten_trans(t,i) =  top_ten_trans(t,i) + prob_trans(j, ia, i_aime, ip,ir, id,i)*N_t_j_vfi(j,i)/sum_n
-                                !    savings_top_ten_trans(t,i) = savings_top_ten_trans(t,i) + sv(ia)*prob_trans(j, ia, i_aime, ip,ir, id,i)*N_t_j_vfi(j,i)
-                                !endif                                                   
+
+                                
+                                
                                 if(ip<6)then
                                     l_pen_j_vfi(j,i) = l_pen_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)/p_1_5_trans(j,i)
                                 endif
@@ -297,8 +288,7 @@
                                             enddo
                                         enddo
                                     enddo
-                                    ! this is not correct!!!
-                                    ERHS_trans(j, ia, i_aime, ip, ir, id,i) = abs(margu(c_trans(j, ia, i_aime, ip, ir, id, i),l_trans(j, ia, i_aime, ip, ir, id,i), tc_vfi(i)) - sum_help*beta*r_vfi(min(i+1, bigT))*n_sr_value(ir)/gam_vfi(min(i+1, bigT))*pi_trans_vfi_cond(j+1,min(i+1, bigT)))
+
                                 endif
                               
                                 avg_aime_replacement_rate(j,i) = aime_replacement_rate(i_aime)*prob_trans(j, ia, i_aime, ip, ir, id,i)
@@ -308,14 +298,12 @@
                 enddo
             enddo
         enddo
-        do j =1,bigJ-1,1
-            check_euler_trans(j,i) = sum(ERHS_trans(j,:,:,:,:,:,i))
-        enddo
-        if ((switch_partial_efficiency == 0) .and. ( switch_partial_semi == 0)) then 
+        
+        
             do i_aime = 0, n_aime   
                 sum_b_weight_trans(i) = sum_b_weight_trans(i) + aime_replacement_rate(i_aime)*sum(prob_trans(jbar_t_vfi(i), :, i_aime, :, :, :, i))
             enddo
-        endif
+
 
     end subroutine
 

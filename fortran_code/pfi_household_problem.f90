@@ -33,10 +33,6 @@ real*8 :: EV_prim_after_beq
                     V_beq_ss=0d0
                     l_beq_ss = 0.001d0
                     V_after_beq_ss=0d0
-                    !do ia = 0, n_a, 1 
-                    !c_ss(:, ia, :, :, :, :) = sv(ia) + 0.01d0
-                    !V_ss(:, ia, :, :, :, :) = log(c_ss(:, ia, :, :, :, :))
-                    !nddo
                     
                 if((switch_unequal_bequest==2))then
 
@@ -266,8 +262,6 @@ do j = bigJ-1, 1, -1
                                     else
                                             
                                             if ((switch_discount_risk .ne. 2) .or. (id .ne. n_sd)) then
-                                    
-                                            !optimal_choice = optimal_consumption_and_labor_new(RHS_after_beq_ss(ibeq, ia, i_aime, ip, ir, id), phi, theta, tL_ss, lambda, wage,     wage_non_tax, tc_ss_vfi, LabIncAVG_ss_vfi)
                                             optimal_choice = optimal_consumption_and_labor_new(RHS_after_beq_ss(ibeq, ia, i_aime, ip, ir, id), phi, theta, tL_ss, lambda, wage,     wage_non_tax, tc_ss_vfi, LabIncAVG_ss_vfi)
                                             c_beq_ss(ibeq, ia, i_aime, ip, ir, id)  = optimal_choice(1)
                                             l_beq_ss(ibeq, ia, i_aime, ip, ir, id)  = optimal_choice(2)
@@ -276,13 +270,7 @@ do j = bigJ-1, 1, -1
                                             
                                             endif
                                             
-                                            !if (optimal_choice(1) .ne. optimal_choice(1)) then 
-                                            !   optimal_choice = optimal_consumption_and_labor_new(RHS_ss(j+1, ia, i_aime, ip, ir, id), phi, theta, tL_ss, lambda, w_opt, wage_non_tax, tc_ss_vfi)
-                                            !endif
-                                            ! for theta = 1 we gent c = rhs^-1 so ww want to check if there is some patternt for mistake at this stage
-                                            !if ((i_aime == 1) .and. (ip == 1) .and. (ir == 1) .and. (id == 1)) then 
-                                            !   write (*,*) j, ia, optimal_choice(1)*max(RHS_ss(j+1, ia, i_aime, ip, ir, id),1d-15)
-                                            !endif
+
                                     endif
                                     
                                     lab_income = (1d0 - tL_ss)*(wage*l_beq_ss(ibeq, ia, i_aime, ip, ir, id)/LabIncAVG_ss_vfi)**(1-lambda)*LabIncAVG_ss_vfi &
@@ -330,14 +318,6 @@ do j = bigJ-1, 1, -1
                                             l_ss(j, ia, i_aime, ip, ir, id)  = optimal_choice(2)
                                             
                                             endif
-                                            
-                                            !if (optimal_choice(1) .ne. optimal_choice(1)) then 
-                                            !   optimal_choice = optimal_consumption_and_labor_new(RHS_ss(j+1, ia, i_aime, ip, ir, id), phi, theta, tL_ss, lambda, w_opt, wage_non_tax, tc_ss_vfi)
-                                            !endif
-                                            ! for theta = 1 we gent c = rhs^-1 so ww want to check if there is some patternt for mistake at this stage
-                                            !if ((i_aime == 1) .and. (ip == 1) .and. (ir == 1) .and. (id == 1)) then 
-                                            !   write (*,*) j, ia, optimal_choice(1)*max(RHS_ss(j+1, ia, i_aime, ip, ir, id),1d-15)
-                                            !endif
                                     endif
                                     
 
@@ -388,24 +368,16 @@ do j = bigJ-1, 1, -1
                     if ((switch_discount_risk .ne. 2) .or. (id .ne. n_sd)) then
                         
                         if (j == beq_age .and. switch_unequal_bequest == 2) then 
-                            
                             svplus_ss(j,:, i_aime, ip,ir, id) = 0.0d0
                             do ibeq = 1, n_beq
                             call change_grid_piecewise_lin_spline(sv_tempo_beq(ibeq,:, i_aime, ip, ir, id), sv,   sv, svplus_beq_ss(ibeq,:, i_aime, ip,ir, id))
 
                             enddo
-                            
                         else
-                        call change_grid_piecewise_lin_spline(sv_tempo(j,:, i_aime, ip, ir, id), sv,   sv, svplus_ss(j,:, i_aime, ip,ir, id))   
+                            call change_grid_piecewise_lin_spline(sv_tempo(j,:, i_aime, ip, ir, id), sv,   sv, svplus_ss(j,:, i_aime, ip,ir, id))   
                         endif
-                        
-                        
                     else
-                        
-                        
                         svplus_ss(j,:, i_aime, ip,ir, id) = 0.0d0
-                        
-                        
                     endif
                 enddo
             enddo  
@@ -425,21 +397,15 @@ do j = bigJ-1, 1, -1
                                 svplus_beq_ss(ibeq, ia, i_aime, ip, ir, id) = a_l
                                 
                             endif
-                            
                                 svplus_ss(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) *  svplus_beq_ss(ibeq, ia, i_aime, ip, ir, id) + svplus_ss(j, ia, i_aime, ip, ir, id) 
                             enddo
                             
                         else
-                            
                             if(svplus_ss(j, ia, i_aime, ip, ir, id)<a_l)then
                                 svplus_ss(j, ia, i_aime, ip, ir, id) = a_l
                             endif
                         endif
                         
-                        
-                        
-                        
-
                         if(j>=jbar_ss_vf) then
                             
                            available = (1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ bequest_ss_j_vfi(j) &
@@ -472,7 +438,6 @@ do j = bigJ-1, 1, -1
                             lambda_com = lambda
                             
                             if(j == beq_age .and. switch_unequal_bequest == 2) then                             
-                            
                                 c_ss(j, ia, i_aime, ip, ir, id) = 0.0d0
                                 l_ss(j, ia, i_aime, ip, ir, id) = 0.0d0
                                 labor_tax(j, ia, i_aime, ip, ir, id) = 0.0d0
@@ -484,8 +449,6 @@ do j = bigJ-1, 1, -1
                                 disposable_ss(j, ia, i_aime, ip, ir, id) = 0.0d0
                                 srate_ss(j, ia, i_aime, ip, ir, id)  = 0.0d0
                                 V_ss(j, ia, i_aime, ip, ir, id) = 0.0d0
-                                
-                                
                             do ibeq = 1,n_beq,1
                                 
                                 
@@ -494,7 +457,6 @@ do j = bigJ-1, 1, -1
                                 
                             available = (1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ beq_zipf_ss(ibeq) &
                                         - upsilon_ss_vf- svplus_beq_ss(ibeq, ia, i_aime, ip, ir, id)    
-                                
                             if (switch_fix_labor == 0) then 
                                 foc = foc_intratemp(available, wage, wage_non_tax, tc_ss_vfi, l_beq_ss(ibeq, ia, i_aime, ip, ir, id), LabIncAVG_ss_vfi)
                             else
@@ -520,9 +482,7 @@ do j = bigJ-1, 1, -1
                             lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id)  = lab_income_pretax
                             tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*((1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi
                             tot_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) = lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
-                            
 
-                            
                             disposable_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + beq_zipf_ss(ibeq) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             
                             srate_beq_ss(ibeq, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_beq_ss(ibeq, ia, i_aime, ip, ir, id)) / ( tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  aime_replacement_rate(i_aime)*b_ss_j_vfi(j) +  beq_zipf_ss(ibeq) ) 
@@ -534,16 +494,11 @@ do j = bigJ-1, 1, -1
                             l_ss(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) * l_beq_ss(ibeq, ia, i_aime, ip, ir, id) + l_ss(j, ia, i_aime, ip, ir, id)
                             labor_tax(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) * labor_tax_beq(ibeq, ia, i_aime, ip, ir, id)  +  labor_tax(j, ia, i_aime, ip, ir, id)
                             lab_income_ss(j, ia, i_aime, ip, ir, id)  =  p_beq(ibeq) * lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) +  lab_income_ss(j, ia, i_aime, ip, ir, id)
-                            
                             lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)  = p_beq(ibeq) * lab_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)
-                            
                             tot_income_ss(j, ia, i_aime, ip, ir, id) =  p_beq(ibeq) * tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + tot_income_ss(j, ia, i_aime, ip, ir, id)
-                            
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) *  tot_income_pretax_beq_ss(ibeq, ia, i_aime, ip, ir, id) + tot_income_pretax_ss(j, ia, i_aime, ip, ir, id)
                             aime_plus_ss(j, ia, i_aime, ip, ir, id)  =  p_beq(ibeq) * aime_plus_beq_ss(ibeq, ia, i_aime, ip, ir, id) + aime_plus_ss(j, ia, i_aime, ip, ir, id)
-                            
                             disposable_ss(j, ia, i_aime, ip, ir, id) =  p_beq(ibeq) * disposable_beq_ss(ibeq, ia, i_aime, ip, ir, id) + disposable_ss(j, ia, i_aime, ip, ir, id)
-                            
                             srate_ss(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) *  srate_beq_ss(ibeq, ia, i_aime, ip, ir, id) + srate_ss(j, ia, i_aime, ip, ir, id) 
                             V_ss(j, ia, i_aime, ip, ir, id)     = p_beq(ibeq) *  V_beq_ss(ibeq,ia,i_aime, ip, ir, id)  + V_ss(j, ia, i_aime, ip, ir, id)
                             
@@ -580,7 +535,6 @@ do j = bigJ-1, 1, -1
                             tot_income_pretax_ss(j, ia, i_aime, ip, ir, id) = lab_income_pretax_ss(j, ia, i_aime, ip, ir, id) + sv(ia)*(n_sr_value(ir)+r_ss_pretax_vfi)/gam_ss_vfi   +aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             disposable_ss(j, ia, i_aime, ip, ir, id) =  tot_income_ss(j, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + bequest_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                             srate_ss(j, ia, i_aime, ip, ir, id) = 1 - (tc_ss_vfi *  c_ss(j, ia, i_aime, ip, ir, id)) / ( tot_income_ss(j, ia, i_aime, ip, ir, id) +  aime_replacement_rate(i_aime)*b_ss_j_vfi(j) +  bequest_ss_j_vfi(j) ) 
-                            
                             pi_com = pi_ss_vfi_cond(j)
                             V_ss(j, ia, i_aime, ip, ir, id) = valuefunc(svplus_ss(j, ia, i_aime, ip, ir, id), aime_plus_ss(j, ia, i_aime, ip, ir, id), c_ss(j, ia, i_aime, ip, ir, id), l_ss(j, ia, i_aime, ip, ir, id), j,  ip, ir, id) 
                             
@@ -623,7 +577,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
                                             
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq) &
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
                                             else
@@ -633,7 +587,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
                                                
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
                                                                     *c_help**(-theta)
                                             else
@@ -643,7 +597,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
                                                
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then 
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
                                                                     *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
                                             else
@@ -708,7 +662,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
                                             
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then 
                                                 EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
                                             else
@@ -717,7 +671,7 @@ do j = bigJ-1, 1, -1
                                             endif
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
                                                
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then 
                                                 EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *c_help**(-theta)
                                             else
@@ -727,7 +681,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
                                                
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then
                                                 EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
                                             else
@@ -790,7 +744,7 @@ do j = bigJ-1, 1, -1
                                             
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
                                             
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then 
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
                                             else
@@ -799,7 +753,7 @@ do j = bigJ-1, 1, -1
                                             endif
                                         elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
                                                
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
+                                            if(j<jbar_ss_vf)then 
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                     *c_help**(-theta)
                                             else
@@ -855,13 +809,11 @@ end subroutine
 
     
 !*******************************************************************************************
-!find futur assets for every age, assets grid point, state  
+!find future assets for every age, assets grid point, state  
 !  trans
 subroutine household_trans_endo(ij,ii)
 
-! ij age
-! ii period
-! so fo example ij = 4 and ii = 7 means people of age 4 in period 7, i.e. it is for people who were born in 4; year of birth is ii - ij + 1
+
 
 implicit none
 real*8 :: available, EV_prim, c_opt, w_opt, av, wage, wage_non_tax, foc(3), lab_income, lab_income_pretax, optimal_choice(2), c_help, l_help, dist
@@ -900,7 +852,6 @@ do ia = 0, n_a, 1
                     svplus_trans(bigj, ia, i_aime, ip, ir, id, it)=0d0
                     aime_plus_trans(bigJ, ia, i_aime, ip, ir, id, it) = aime(i_aime)
 
-                    ! most likely need to adjust valuefunc_trans 
                     V_trans(bigj, ia, i_aime, ip, ir, id, it) = valuefunc_trans(0d0, aime(i_aime), c_trans(bigj, ia, i_aime, ip, ir, id, it),l_trans(bigJ,ia, i_aime, ip, ir, id,it), bigJ, ip, ir, id, it)
                 enddo
             enddo
@@ -1384,8 +1335,8 @@ do j = bigJ-1, ij, -1
                                 else
                                     foc = foc_intratemp(av, wage, wage_non_tax,  tc_vfi(it), switch_fix_labor, LabIncAVG_vfi(it))
                                 endif                                
-                                c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)  = foc(1)  ! max( (available - w_pom_ss_vfi(j)*omega(j,it)*n_sp_value(ip)*(1d0 -  l_ss(j, ia, i_aime, ip, ir, id)) - svplus_ss(j, ia, i_aime, ip, ir, id))/tc_ss_vfi, 1e-10)
-                                l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)  = foc(2)  ! 1d0 - min( max( (1d0-phi)*(available - svplus_ss(j, ia, i_aime, ip, ir, id))/(w_pom_ss_vfi(j)*omega(j,it)*n_sp_value(ip)) , 0d0) , 1d0)
+                                c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)  = foc(1) 
+                                l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)  = foc(2)  
                                 labor_tax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = foc(3)
                                 
                                 lab_income = (1-tL(it))*(wage*l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)/LabIncAVG_vfi(it))**(1-lambda_trans(it)) *LabIncAVG_vfi(it)+ &
