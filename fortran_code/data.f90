@@ -934,7 +934,7 @@ elseif (switch_mortality == 5.AND. switch_starting_year .NE.1) then  !this chang
   
 elseif (switch_mortality == 5.AND. switch_starting_year ==1) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
     pi_big_weight_d = pi_d_big
-    do i = (break_index+1), bigT,1
+    do i = 2, bigT,1
         do j = 2, bigJ, 1   
             pi_d_big(j,:,i) = pi_d_big(j,:,break_index)
         enddo    
