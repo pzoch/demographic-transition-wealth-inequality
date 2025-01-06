@@ -10,7 +10,7 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d, rho_d)
+subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d, rho_d, exog_rate_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! pop summation
       real(dp), dimension(bigT)::  N_temp_vec ! pop summation
@@ -21,7 +21,7 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       real(dp), dimension(bigJ,bigT)::  pi_implied_d ! implied probabilities
       real(dp), dimension(bigM,bigT)::  bigl_type ! for calculating labor augmenting growth
       real(dp), dimension(bigJ,bigM), intent(out) :: omega_ss_d
-      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d, depr_d,  rho_d
+      real(dp), dimension(bigT), intent(out) :: gam_d, gam_cum_d, zet_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, gy_factor_d, depr_d,  rho_d, exog_rate_d
      ! real(dp), dimension(bigJ, bigT), intent(out) :: Nn_d! pi_d, pi_weight_d
       real(dp), dimension(bigJ,bigM, bigT), intent(out) :: pi_d_big, pi_big_weight_d, Nn_d_big
       real(dp), dimension(bigM,bigT),  intent(out) :: type_multiplier_d, type_share_d
@@ -29,7 +29,7 @@ subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weigh
       
       integer :: start_year ! first year for which we have data
       integer :: break_index ! last period for which we take data
-      integer :: last_data_demo, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC, last_data_rho ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
+      integer :: last_data_demo, last_data_gamma, last_data_tauL, last_data_tauK, last_data_lambda, last_data_sigma2_epsilon, last_data_debt, last_data_sl, last_data_depr, last_data_gy, last_data_type_multiplier, last_data_type_share, last_data_t1, last_data_tauC, last_data_rho, last_data_exog_rate ! number of years for which we have data --- at least for mortality, NEED to make it consistent with other datasets! THIS WORKS ONLY for J = 16!
 call chdir(cwd_r)
 
   
@@ -50,6 +50,8 @@ call chdir(cwd_r)
         last_data_gy = 34 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
         last_data_debt           = 34 ! debt/gdp
+        last_data_exog_rate          = 17 ! debt/gdp
+        
         
         last_data_sl = 34 ! for sl
         last_data_type_multiplier= 34 ! type multip
@@ -126,7 +128,22 @@ call chdir(cwd_r)
 
     close(5)
 
+
+! -------------------------------- rate -------------------------------
       
+        Open(unit = 5, FILE = "_data_exog_rate_1935.txt")  
+
+        
+
+        do i = 1, last_data_exog_rate, 1
+            read(5,*) exog_rate_d(i)
+        enddo
+        exog_rate_d(last_data_exog_rate+1:) = exog_rate_d(last_data_exog_rate)
+            
+
+
+    close(5)
+    
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
     !zeta_p = 0.985d0

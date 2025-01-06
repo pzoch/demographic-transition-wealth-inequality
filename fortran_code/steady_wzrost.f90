@@ -23,7 +23,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
                 deficit_ss, debt_ss, Tax_ss, g_ss, sum_b_ss, sum_priv_sv_ss, valor_mult_ss, debt_constr, replacement_ss, labor_tax_revenue_ss, multiplier_ces_ss, beq_sum_ss, &
                 gini_val_sav, labinc_aggregate, totinc_aggregate, totinc_superstar, labinc_superstar,pop_superstar, superstar_labinc_share, superstar_totinc_share, superstar_pop_share, gini_val_tinc, gini_val_tinc_pretax, gini_val_lab_pret, gini_val_lab, prc_count_sav, prc_count_pretax, prc_count_tot, prc_count_lab_pretax_inc, &
-                prc_count_lab_inc,  share_lab_inc,desired_pctile
+                prc_count_lab_inc,  share_lab_inc,desired_pctile, exog_rate_ss
     real(dp), dimension(3) :: desired_pctiles
     real(dp), dimension(3) :: share_sav, share_tot_pretax, share_tot, share_lab_pretax_inc
     real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss, sum_b_weight_vec_ss
@@ -54,7 +54,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
                 nom1, denom1, nom2, denom2
      real(dp), dimension(bigj) :: tau1_ss, tau1_a_ss, tau2_ss
      real(dp), dimension(bigj,bigM) :: w_pom_ss_j, s_pom_ss_j, asset_pom_ss_j
-     real(dp) :: avg_wl, mult_ss, asset_pom_ss, rho
+     real(dp) :: avg_wl, mult_ss, asset_pom_ss, rho, exog_rate
      
      real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j, lab_ss_j
      !real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
@@ -87,7 +87,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         type_multiplier_ss =  type_multiplier_ss_old
         type_share_ss = type_share_ss_old
         rho = rho_ss_old
-        
+        exog_rate_ss = exog_rate_ss_old
     else 
         alpha = alpha_ss_new
         depr =depr_ss_new
@@ -113,6 +113,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         type_multiplier_ss =  type_multiplier_ss_new
         type_share_ss = type_share_ss_new
         rho = rho_ss_new
+        exog_rate_ss = exog_rate_ss_old
     endif
     
     
@@ -206,8 +207,21 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
 do iter = 1,n_iter_ss,1
         
     
-    r_bar_ss = zbar*alpha*k_ss**(alpha - 1) - depr
-    y_ss     = zbar* k_ss**(alpha)
+    ! if using exog rate back out capital first     
+        if (switch_exog_rate == 1) then
+
+        r_bar_ss = (exog_rate_ss/100 + 1d0)**(zbar) - 1
+        k_ss     = ((r_bar_ss + depr)/(alpha*zbar))**(1/(alpha - 1))
+        y_ss     = zbar* k_ss**(alpha)
+
+        else
+            
+        r_bar_ss = zbar*alpha*k_ss**(alpha - 1) - depr
+        y_ss     = zbar* k_ss**(alpha)
+        
+        endif
+    
+
     
     include 'ces_production_ss.f90'
     
@@ -537,18 +551,34 @@ check_pension_clearing = 0.0d0
     include 'closure_ss.f90'
     debt_share_ss = debt_ss / y_ss
     !k_ss_new = (savings_ss - debt_ss)/(gam_ss*nu_ss)
+    
+    if (switch_exog_rate == 1) then
+   
+     k_ss_new = k_ss
+     err_ss = 0.0d0
+        
+    else
+    
     k_ss_new = max((savings_ss - debt_ss)/(gam_ss*nu_ss),0.0001)
     err_ss = abs(k_ss_new - k_ss)
     k_ss = up_ss*k_ss + (1 - up_ss)*k_ss_new
     
+    endif
     
         if (mod(iter,1) == 0) then
             !print*, iter, 'err_ss:', err_ss, 'feas_ss:', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss)
             print*, iter, 'err_ss:', err_ss, 'feas_ss:', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss)
            ! write(121, '(F20.15)') k_ss_new
         endif
-        if (err_ss < err_ss_tol ) then
-            exit
+        if (switch_exog_rate == 0) then
+            if (err_ss < err_ss_tol ) then
+                exit
+            endif
+        elseif (switch_exog_rate == 1) then
+            if (iter > 10) then
+                exit
+            endif
+            
         endif
 
     

@@ -73,6 +73,7 @@ call chdir(cwd_i)
         read(3,*) switch_ss_write
         read(3,*) switch_profile 
         read(3,*) switch_small_write 
+        read(3,*) switch_exog_rate
         CLOSE(3) 
 
 
@@ -152,7 +153,7 @@ call chdir(cwd_p)
         endif
   
 
-        call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t)
+        call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t, exog_rate_t)
             
         ! rescale to account for zbar
         zeta_p      = zeta_p**zbar  
@@ -279,7 +280,8 @@ call chdir(cwd_p)
     rho_ss_old = rho_t(1)
     rho_ss_new = rho_t(bigT)
     
-
+    exog_rate_ss_old = exog_rate_t(1)
+    exog_rate_ss_new = exog_rate_t(bigT)
     
     type_share_ss_old = type_share_t(:,1)
     type_share_ss_new = type_share_t(:,bigT)

@@ -46,6 +46,17 @@ do iter = 1,n_iter_t,1
     tau2_s_t_old = tau2_s_t
 
 
+        if (switch_exog_rate == 1) then
+        r_bar     = (exog_rate_t/100 + 1d0)**(zbar) - 1
+        k         = ((r_bar + depr_t)/(alpha_t*zbar))**(1/(alpha_t - 1))
+
+        else
+            
+        r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr_t
+
+        endif
+    
+    
         r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr_t
         include 'ces_production.f90'
         y = zbar*k**(alpha_t)
@@ -303,20 +314,39 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
     include 'bequest.f90'
     
     k_new(1) = k(1)
-    k_new(n_p+1) = (savings(n_p+1) - debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
-    do i = 2,n_p+1,1
-        k_new(i) = max(0.0001,(savings(i-1) - debt(i-1))/(nu(i)*gam_t(i)))
-        err(i) = abs(k_new(i) - k(i))
-        k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
-        l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
-    enddo    
     
+    if (switch_exog_rate == 1) then
+   
+        k_new(n_p+1) = k(n_p+1)   
+        do i = 2,n_p+1,1
+            k_new(i) = k(i)
+            err(i) = 0.0d0
+            l_j(:,:,i) =l_new_j(:,:,i)    
+        enddo
+        
+    else
+    
+        k_new(n_p+1) = (savings(n_p+1) - debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
+        do i = 2,n_p+1,1
+            k_new(i) = max(0.0001,(savings(i-1) - debt(i-1))/(nu(i)*gam_t(i)))
+            err(i) = abs(k_new(i) - k(i))
+            k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
+            l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
+        enddo    
+        
+    endif
     cum_err(iter) = sum(err)
 !cum_err(iter) = sum(prob_trans(5,:,:,:,:,:,2)) 
-    if (iter < n_iter_t+1) then         
-        if (cum_err(iter) < err_tol) then 
-            write (*,*) 'We`re leaving the iter loop.' 
-            exit ! iterations end
+    if (switch_exog_rate == 1) then
+            if (iter > 10) then
+                exit
+            endif
+    elseif (switch_exog_rate == 0) then
+        if (iter < n_iter_t+1) then         
+            if (cum_err(iter) < err_tol) then 
+                write (*,*) 'We`re leaving the iter loop.' 
+                exit ! iterations end
+            endif
         endif
     endif
 

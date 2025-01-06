@@ -81,6 +81,7 @@ IMPLICIT NONE
     integer :: switch_change_rho
     integer :: switch_wage_vs_income                        ! 0 - use process for wages, 1 - use process for income
     integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
+    integer :: switch_exog_rate                             ! 0 - GE model, 1 - use exog. path of returns
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam
@@ -105,7 +106,7 @@ IMPLICIT NONE
 ! parameters
     real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
     real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, g_correction_factor_old, g_correction_factor_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
-    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new
+    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new, exog_rate_ss_old, exog_rate_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc, up_debt_t
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
@@ -118,7 +119,7 @@ IMPLICIT NONE
     
 ! transition variables
     integer, dimension(bigT) :: jbar_t
-	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t, rho_t 
+	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t, rho_t, exog_rate_t
     real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t, g_correction_factor_t
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t,sum_b_weight_trans_outer_mat

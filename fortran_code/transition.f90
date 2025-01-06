@@ -84,6 +84,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
             depr_t(i)       = depr_ss_old
             debt_constr_t(i) = debt_constr_ss_old
             g_share(i)      = g_share_ss
+            exog_rate_t(i)    = exog_rate_ss_old
 	    enddo
         gam_cum(1) = gam_t(1)
         do i=2,bigT,1
@@ -177,7 +178,17 @@ enddo
     enddo 
 
 
+    if (switch_exog_rate == 1) then
+    r_bar     = (exog_rate_t/100 + 1d0)**(zbar) - 1
+    k         = ((r_bar + depr_t)/(alpha_t*zbar))**(1/(alpha_t - 1))
+
+    else
+            
     r_bar = zbar*alpha_t*k**(alpha_t - 1) - depr_t
+
+    endif
+    
+
     y = zbar*k**(alpha_t)
 
     include 'ces_production.f90'
