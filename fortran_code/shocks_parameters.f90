@@ -96,11 +96,11 @@ if (n_superstar>0) then
             ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
             
             ! these numbers are hard coded - need to modify it
-            if (m == 1) then
-            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 7.45639185640704
-            else
-            n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = 6.77562773946087
-            endif
+            !if (m == 1) then
+            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) * superstar_factor_mat(m,1)
+            !else
+            !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) * superstar_factor_mat(m,1)
+            !endif
             n_sp_risk_value_ss_old(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,1)
             n_sp_risk_value_ss_new(n_sp_risk_ordinary+i) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,bigT)
             endif

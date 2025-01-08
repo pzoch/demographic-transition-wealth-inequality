@@ -79,8 +79,8 @@
                                         savings_top_ten(t) = savings_top_ten(t) + sv(ia)*prob_ss(j, ia, i_aime, ip, ir, id)*N_ss_j_vfi(j)
                                     endif
                                                            
-                                    if ((svplus_ss(j, ia, i_aime, ip, ir, id) == a_l) .and. (j > 2 ) .and. (j < 8)) then
-                                        share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(3:7))
+                                    if ((svplus_ss(j, ia, i_aime, ip, ir, id) == a_l) .and. (j > 1 ) .and. (j < 10)) then
+                                        share_0_sav = share_0_sav + prob_ss(j, ia, i_aime, ip,ir, id)*N_ss_j_vfi(j)/sum(N_ss_j_vfi(2:9))
                                     endif
                                         
                                     if (ia < ial) then

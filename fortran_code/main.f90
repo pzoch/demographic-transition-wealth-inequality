@@ -20,8 +20,8 @@ program olg2
     
 
         
-    version = 'exor_' ! these three strings allow us to load a correct version
-    experiment = 'all_'
+    version = 'psid_' ! these three strings allow us to load a correct version
+    experiment = 'ndo_'
     
     closure = 'govt__'
     

@@ -48,3 +48,4 @@
 1 // switch_ss_write
 0 // switch_profile
 1 // switch_small_write
+0 // switch_exog_rate
