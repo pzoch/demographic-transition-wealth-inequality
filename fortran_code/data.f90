@@ -278,7 +278,7 @@ call chdir(cwd_r)
         depr_d(last_data_depr+1:) = depr_d(last_data_depr)
             
      elseif (switch_change_depr == 0 .AND. switch_starting_year == 1) then
-         last_data_sl = break_index
+         last_data_depr = break_index
          do i = 1, last_data_depr, 1
             read(5,*) depr_d(i)
         enddo

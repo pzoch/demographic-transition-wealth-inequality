@@ -21,7 +21,7 @@ program olg2
 
         
     version = 'psid_' ! these three strings allow us to load a correct version
-    experiment = 'nls_'
+    experiment = 'ndp_'
     closure = 'govt__'
     
     call globals         ! globals is a subroutine in global_vars2 module             
