@@ -50,7 +50,7 @@ call chdir(cwd_r)
         last_data_gy = 34 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
         last_data_debt           = 34 ! debt/gdp
-        last_data_exog_rate          = 17 ! debt/gdp
+        last_data_exog_rate          = 34 ! rate
         
         
         last_data_sl = 34 ! for sl
