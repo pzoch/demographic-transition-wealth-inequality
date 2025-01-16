@@ -55,7 +55,7 @@ real*8, dimension(:,:,:,:,:,:,:,:), allocatable ::  svplus_beq_trans_big,  aime_
 real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_pom_trans_vfi,  w_pom_trans_implicit_vfi, &
                                  check_euler_trans, V_j_vfi_const_lambda, V_j_vfi_higher_lambda, V_j_vfi,&
                                  pi_trans_vfi_cond,  b_j_vfi, b_pom_j_dif,  N_t_j_vfi, pi_vfi, &
-                                 c_j_vfi,  s_pom_j_vfi, l_j_vfi, labor_tax_j_vfi, lw_j_vfi, lw_lambda_j_vfi, l_pen_j_vfi
+                                 c_j_vfi,  s_pom_j_vfi, l_j_vfi, labor_tax_j_vfi, lw_j_vfi, lw_lambda_j_vfi, l_pen_j_vfi, lab_j_vfi
 
 real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, LabIncAVG_vfi, bequest_vfi, r_vfi_pretax, w_bar_vfi
 real*8, dimension(n_beq,bigT) :: beq_zipf_trans

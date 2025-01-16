@@ -298,6 +298,7 @@ subroutine clear_globals
     w_bar_ss_1 = 0
     upsilon_r_ss_1 = 0
     l_ss_j_1 = 0
+    lab_ss_j_1 = 0
     w_ss_j_1 = 0
     s_ss_j_1 = 0
     c_ss_j_1 = 0
@@ -309,6 +310,7 @@ subroutine clear_globals
     w_bar_ss_2 = 0
     upsilon_r_ss_2 = 0
     l_ss_j_2 = 0
+    lab_ss_j_2 = 0
     w_ss_j_2 = 0
     s_ss_j_2 = 0
     c_ss_j_2 = 0
@@ -331,96 +333,5 @@ end subroutine clear_globals
     
     
     
-    !!! CLUTTER TO BE REMOVED
-    
-    !         !!! DEBUG_SWITCH
-       !switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
-       !switch_cohort_ps         = 1         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
-       !switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
-       !switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-       !switch_fix_labor         = 0        ! if labor is fixed it is fixed to this number
-       !switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
-       !switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
-       !switch_reduce_pension    = 0
-       !switch_increase_ret_age  = 0                                
-       !switch_calibration       = 0
-       !switch_persistent_delta  = 0
-       !switch_epsilon_corr      = 1
-       !switch_utility_function  = 1        ! 0 - Cobb-Douglas in leisure and consumption, 1 - separable with constant Frisch, 2 - Uhlig
-       !
-       ! 
-       ! 
-       ! 
-       ! 
-       !
-       !
-       ! 
 
-! switches related to income processes
-
-    !switch_sigma2_epsilon_t    =  1        ! transition path;  0 = sigma2_epsilon is constant; 1 = sigma2_epsilon is cohort specific; 2 = sigma2_epsilon is time specific
-    !switch_initial_dispersion   = 1        ! 0 = everybody is born the same; 1 = initial productivity is drawn from some distribution
-  
-      !switch_mortality         = 1         ! 0 = no mortality on transition, 1 mortality according to data, 3 N according to data, pi as in first steady state, there would be baby boomers, 4 N1 == 1, pi as in the first steady state, 5, 6, 7 mortality and growth rate of young populaton set at the initial level 
-    !switch_unstable_dem_ss   = 1         ! 0 = demography  in steady state is stable (fertility rate = 2), 1 unstable demography in steady state (based on UN), -1 unstable (set growth to its initial value)
-    !switch_go_to_lower_gamma = 0         ! 0 = gamma = const = 2%, 1 empirical
-    !switch_change_tauL       = 0         ! 0 = const,  1 = empirical -- warning: how will it interact with various closures?  
-    !switch_change_lambda     = 0         ! 0 = const,  1 = empirical -- warning: how will it interact with various closures?     
-    !switch_change_tauK       = 0         ! 0 = const,  1 = empirical -- warning: how will it interact with various closures?
-    
-    
-!!!! DEBUG_SWITCH
-!       switch_labor_choice      = 1        ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
-!       switch_cohort_ps         = 1         ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts  
-!       switch_see_ret           = 0         ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
-!       switch_g_const           = 0         ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
-!       switch_fix_labor         = 0        ! if labor is fixed it is fixed to this number
-!       switch_tauK_gross        = 1         ! 0 = net return on capital is taxed, 1 = gross return on capital is taxed 
-!       switch_unequal_bequest   = 0         ! 0 - bequests given by people of age j to people with age j-1, distributed equally; 1 - bequests given by all people to j=1, unequal distribution
-!       switch_reduce_pension    = 0
-!       switch_increase_ret_age  = 0                                
-!       switch_calibration       = 0
-!       switch_persistent_delta  = 0
-!       switch_epsilon_corr      = 1
-!       switch_utility_function  = 1        ! 0 - Cobb-Douglas in leisure and consumption, 1 - separable with constant Frisch, 2 - Uhlig
-!     
-
-!     
-!        switch_mortality         = 5     
-!        switch_unstable_dem_ss   = 1       
-!        switch_go_to_lower_gamma = 1         
-!        switch_change_tauL       = 1
-!        switch_change_lambda     = 1      
-!        switch_change_tauK       = 1
-!        switch_steady_demo       = 1
-!        switch_sigma2_epsilon_t  = 1
-!        switch_change_premium    = 1
-!        switch_change_type_share = 1
-!        switch_change_debt       = 1
-!        switch_change_sl         = 1
-!        switch_income_risk       = 1
-!        switch_discount_risk     = 0
-!        switch_return_risk       = 0
-!        switch_change_gy         = 1
-!        switch_keep_fixed        = 1
-!    
-!    version = 'xxxx_' ! this is just to organize some versions, does not change anything in the code
-!    experiment = 'all_'
-!    switch_starting_year = 3    ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 (if data not available, assume it is equal to the 1st available period) this matters for filling matrices with data, 3 - start fron 1935 and assume the same path until 1960
-!    
-!    
-!    
-!
-!    switch_ss_write = 1        ! 0 - do not save big csv files with steady state, 1 save
-!    switch_profile = 1        
-!    switch_run_1 = 1            ! 0 = don't run old steady state; 1 = run old steady state
-!    switch_run_2 = 1            ! 0 = don't run new steady state; 1 = run new steady state
-!    switch_run_t = 0            ! 0 = don't run transition; 1 = run transition
-!    
-!
-!! note: transition path is run only if the second steady state is run
-!    switch_param_1 = 0          ! 0 = with old parameters; 1 = with new parameters  
-!    switch_param_2 = 1          ! 0 = with old parameters; 1 = with new parameters  
-!
-!! note: parameters on the transition path are determined by the parameters on the second steady state     
     

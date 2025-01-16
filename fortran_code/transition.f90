@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita)
+subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom, placeholder
@@ -22,7 +22,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
     real(dp), dimension(n_beq,bigM,bigT) :: beq_zipf_trans_big
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
-	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing, superstar_labinc_share_trans, superstar_pop_share_trans, superstar_totinc_share_trans, labinc_superstar_trans, totinc_superstar_trans, pop_superstar_trans, labinc_aggregate_trans, totinc_aggregate_trans
+	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_lab, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing, superstar_labinc_share_trans, superstar_pop_share_trans, superstar_totinc_share_trans, labinc_superstar_trans, totinc_superstar_trans, pop_superstar_trans, labinc_aggregate_trans, totinc_aggregate_trans, bequest_trans
     real(dp), dimension(bigj, bigT) :: N_t_j,bigl_j, bigl_j_aux
     real(dp), dimension(bigj, bigM, bigT) :: N_big_t_j
     real(dp), dimension(bigj, bigM, bigT) :: w_pom_trans, savings_j, b_j, b_j_old, lti_j, consumption_gross_j, bequest_j, bequest_j_old, bequest_left_j, labor_tax_j
@@ -35,7 +35,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
     
     
     
-    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j
+    real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j, lab_j
     
     
     

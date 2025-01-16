@@ -6,6 +6,7 @@
 ! from the old steady state
     k(1) = k_ss_1                                            
     l_j(:,:,1) = l_ss_j_1
+    lab_j(:,:,1) = lab_ss_j_1
     c_j(:,:,1) = c_ss_j_1
     sv_j(:,:,1) = s_ss_j_1
     b_j(:,:,1) = b_ss_j_1 
@@ -21,6 +22,7 @@
 do i = 3, bigT, 1 ! n_p+2,bigT,1
     k(i) = k_ss_2 
     l_j(:,:,i) = l_ss_j_2
+    lab_j(:,:,1) = lab_ss_j_2
     c_j(:,:,i) = c_ss_j_2
     sv_j(:,:,i) = s_ss_j_2
     b_j(:,:,i) = b_ss_j_2

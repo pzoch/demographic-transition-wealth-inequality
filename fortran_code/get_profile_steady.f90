@@ -161,6 +161,7 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
             call agent_vf()
             c_ss_j(:,m) = c_ss_j_vfi
             l_ss_j(:,m) = l_ss_j_vfi
+            lab_ss_j(:,m) = lab_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
             labor_tax_ss_j(:,m) = labor_tax_ss_j_vfi(:)
             lab_ss_j(:,m) = lab_ss_j_vfi(:)

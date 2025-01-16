@@ -113,8 +113,6 @@
          write(666, '(A)')
         
         write(666,'(A25,F10.5,A)') 'Gini on sav =  ', gini_val_sav
-        write(666,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax
-        write(666,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc 
         write(666,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss
         write(666,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss         
         write(666,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss 

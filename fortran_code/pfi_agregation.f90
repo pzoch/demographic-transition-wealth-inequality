@@ -197,7 +197,7 @@
         implicit none
         integer, intent(in) :: i 
         integer :: j, ial, iar, tp, year_birth
-        real*8 ::  check_euler_trans_cum, euler_trans_max(bigJ), lab_j_vfi(bigJ,bigT), w_sum(0:bigJ), bc, sum_y, sum_help, dist, p_1_5_trans(bigJ,bigT), sum_n 
+        real*8 ::  check_euler_trans_cum, euler_trans_max(bigJ), w_sum(0:bigJ), bc, sum_y, sum_help, dist, p_1_5_trans(bigJ,bigT), sum_n 
         
         t = 10
        ! write(*,*) c_trans(1,0,3)

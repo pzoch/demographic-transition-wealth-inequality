@@ -151,6 +151,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             aime_plus_trans  = aime_plus_trans_big(:, :, :, :, :, :,m,:)
             c_j_vfi = c_j(:,m,:)
             l_j_vfi = l_j(:,m,:)
+            lab_j_vfi = lab_j(:,m,:)
             s_pom_j_vfi = sv_j(:,m,:)   
             labor_tax_j_vfi = labor_tax_j(:,m,:) 
             l_pen_j_vfi(:,:) = l_j(:,m,:)
@@ -234,6 +235,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             
             c_j(:,m,:) = c_j_vfi(:,:)
             l_j(:,m,:) = l_j_vfi(:,:)
+            lab_j(:,m,:) = lab_j_vfi(:,:)
             sv_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
@@ -257,6 +259,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             sv_pom_j(1:bigJ-1,:,i) = up_t*sv_old_pom_j(1:bigJ-1,:,i) + (1-up_t)*sv_j(1:bigJ-1,:,i)
             
             do m = 1,bigM,1
+            
             avg_ef_l_supply_trans(i) = avg_ef_l_supply_trans(i)  + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *l_j(1:jbar_t(i)-1,m,i))/sum(N_t_j(1:jbar_t(i)-1,i)) 
             LabIncAVG_vfi(i)        =  LabIncAVG_vfi(i)          + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *l_j(1:jbar_t(i)-1,m,i)*w_pom_trans(1:jbar_t(i)-1,m,i))/sum(N_t_j(1:jbar_t(i)-1,i))   
             enddo
@@ -282,10 +285,13 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
         nu(i) = bigl(i)/bigl(i-1)
     enddo
     
-
+    average_lab = 0.0d0
+    average_l  = 0.0d0
+    average_w = 0.0d0
     do i = 1,bigT,1
          
         do m = 1,bigM,1  
+        average_lab(i)  = average_lab(i)  +  sum(N_big_t_j(1:jbar_t(i)-1,m,i)  * lab_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)      
         average_l(i) = average_l(i) + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *  l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         average_w(i) = average_w(i) + sum(N_big_t_j(1:jbar_t(i)-1,m,i) *  w_j(1:jbar_t(i)-1,m,i)*l_j(1:jbar_t(i)-1,m,i),dim=1)/sum(N_t_j(1:jbar_t(i)-1,i),dim=1)
         enddo
@@ -314,6 +320,17 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
     include 'bequest.f90'
     
     k_new(1) = k(1)
+    
+    bequest_trans = 0.0d0
+    
+    do i = 1,bigT,1
+        do m = 1,bigM,1
+            bequest_trans(i) = bequest_trans(i) + bequest(m,i)
+        enddo
+        bequest_trans(i) = bequest_trans(i) /  bigl(i)
+    enddo
+    
+     
     
     if (switch_exog_rate == 1) then
    

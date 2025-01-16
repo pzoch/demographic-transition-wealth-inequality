@@ -17,7 +17,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss)
+subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
@@ -43,7 +43,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     integer :: counter, n, remember
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
-    real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j
+    real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, lab_ss_j
     ! pension system 
      real(dp), dimension(bigj,bigM) :: b1_ss_j, b2_ss_j, w_pom_ss_implicit
      real(dp), dimension(bigj) :: pillarI_ss_j, pillarII_ss_j, &
@@ -56,7 +56,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
      real(dp), dimension(bigj,bigM) :: w_pom_ss_j, s_pom_ss_j, asset_pom_ss_j
      real(dp) :: avg_wl, mult_ss, asset_pom_ss, rho, exog_rate
      
-     real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j, lab_ss_j
+     real(dp), dimension(bigj,bigM) :: l_ss_pen_j, labor_tax_ss_j
      !real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, s_pom_ss_j_vfi, l_ss_j_vfi, lab_ss_j_vfi, b_ss_j_vfi, &
      !                      bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, l_ss_pen_j_vfi, &
      !                      labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_j_vfi 
@@ -113,7 +113,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
         type_multiplier_ss =  type_multiplier_ss_new
         type_share_ss = type_share_ss_new
         rho = rho_ss_new
-        exog_rate_ss = exog_rate_ss_old
+        exog_rate_ss = exog_rate_ss_new
     endif
     
     

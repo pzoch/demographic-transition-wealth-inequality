@@ -62,6 +62,8 @@
     OPEN (unit=83,  FILE = version//experiment//closure//"star_tinc_trans.txt")
     OPEN (unit=84,  FILE = version//experiment//closure//"star_linc_trans.txt")
     OPEN (unit=85,  FILE = version//experiment//closure//"star_pop_trans.txt")
+    OPEN (unit=86,  FILE = version//experiment//closure//"beq_gdp_trans.txt")
+    OPEN (unit=87,  FILE = version//experiment//closure//"avg_hours_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -123,9 +125,11 @@
         write(80,  '(F20.10)') 100*((1 + r_bar(i))**0.2_dp -1d0)
         write(81,  '(F20.10)') (y(i)-consumption_gross(i)-g(i))/y(i) 
         write(82,  '(F20.10)') zet(i) * bigY(i) / N_t(i) 
-        write(83,  '(F20.10)') superstar_totinc_share_trans
-        write(84,  '(F20.10)') superstar_labinc_share_trans
-        write(85,  '(F20.10)') superstar_pop_share_trans
+        write(83,  '(F20.10)') superstar_totinc_share_trans(i)
+        write(84,  '(F20.10)') superstar_labinc_share_trans(i)
+        write(85,  '(F20.10)') superstar_pop_share_trans(i)
+        write(86,  '(F20.10)') bequest_trans(i) / y(i)
+        write(87,  '(F20.10)') average_lab(i)
     enddo
     
     
@@ -202,7 +206,8 @@
      CLOSE(83)
      CLOSE(84)
      CLOSE(85)
-     
+     CLOSE(86)
+     CLOSE(87)
 ! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")
