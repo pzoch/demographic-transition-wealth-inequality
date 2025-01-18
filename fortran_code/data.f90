@@ -70,8 +70,8 @@ call chdir(cwd_r)
      if (switch_wage_vs_income == 0) then
          
         !OPEN (unit=3, FILE = "_data_omega_deaton_avghourlyhh.txt")    
-         Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt") 
-         !Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt") 
+         !Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt") 
+         Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt") 
      elseif (switch_wage_vs_income == 1) then
          
         OPEN (unit=3, FILE = "_data_omega_deaton_hdslabinc.txt")    
@@ -117,10 +117,10 @@ call chdir(cwd_r)
 
         
      if (switch_change_rho == 1) then 
-        do i = 1, last_data_rho, 1
+        do i = 1, break_index, 1
             read(5,*) rho_d(i)
         enddo
-        rho_d(last_data_rho+1:) = rho_d(last_data_rho)
+        rho_d(break_index+1:) = rho_d(break_index)
             
      else
          rho_d(:) = rho_d(1)
@@ -155,8 +155,8 @@ call chdir(cwd_r)
     if (switch_wage_vs_income == 0) then
     
         !Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourlyhh.txt")  
-        Open(unit = 8, FILE = "_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt")  
-        !Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")  
+        !Open(unit = 8, FILE = "_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt")  
+        Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")  
     
     elseif (switch_wage_vs_income == 1) then
         
