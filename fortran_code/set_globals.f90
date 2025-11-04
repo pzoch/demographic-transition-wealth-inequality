@@ -30,7 +30,6 @@ call chdir(cwd_i)
         read(3,*) switch_sigma2_epsilon_t        
         read(3,*) switch_change_premium      
         read(3,*) switch_change_type_share 
-        read(3,*) switch_change_debt 
         read(3,*) switch_change_sl 
         read(3,*) switch_change_depr 
         read(3,*) switch_change_contrib
@@ -39,7 +38,6 @@ call chdir(cwd_i)
         read(3,*) switch_residual_t 
         read(3,*) switch_residual_1 
         read(3,*) switch_residual_2 
-        read(3,*) switch_no_debt
 
         ! second, some debug switches/options
         read(3,*) switch_het_mortality

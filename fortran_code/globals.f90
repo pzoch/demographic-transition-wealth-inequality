@@ -48,7 +48,6 @@ IMPLICIT NONE
     integer :: switch_change_tauK                          ! 0 = const,  1 = empirical - warning: how will it interact with various closures?    
     integer :: switch_tauK_gross                           ! 0 = tax on net capital income,  1 = tax on gross capital income  
     integer :: switch_unequal_bequest
-    integer :: switch_change_debt
     integer :: switch_change_sl
     integer :: switch_change_depr
     integer :: switch_change_contrib
@@ -70,7 +69,6 @@ IMPLICIT NONE
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
     integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
-    integer :: switch_no_debt                               ! 0 - there is government debt, 1 - government debt set to 0 in all periods
     integer :: switch_change_rho
     integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
     integer :: switch_exog_rate                             ! 0 - GE model, 1 - use exog. path of returns

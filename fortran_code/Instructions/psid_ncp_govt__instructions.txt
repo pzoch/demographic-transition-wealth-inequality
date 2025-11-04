@@ -9,7 +9,6 @@
 1 // switch_sigma2_epsilon_t        
 0 // switch_change_premium      
 1 // switch_change_type_share 
-1 // switch_change_debt 
 1 // switch_change_sl
 1 // switch_change_depr 
 1 // switch_change_contrib 
@@ -18,7 +17,6 @@
 6 // switch_residual_t 
 6 // switch_residual_1 
 6 // switch_residual_2 
-1 // switch_no_debt
 1 // switch_het_mortality
 1 // switch_labor_choice
 0 // switch_cohort_ps             

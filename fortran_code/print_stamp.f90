@@ -18,7 +18,6 @@
         write(666,'(A30,I5.1)') 'switch_sigma2_epsilon_t =', switch_sigma2_epsilon_t       
         write(666,'(A30,I5.1)') 'switch_change_premium =',  switch_change_premium    
         write(666,'(A30,I5.1)') 'switch_change_type_share =', switch_change_type_share
-        write(666,'(A30,I5.1)') 'switch_change_debt =', switch_change_debt
         write(666,'(A30,I5.1)') 'switch_change_sl =', switch_change_sl
         write(666,'(A30,I5.1)') 'switch_keep_fixed =', switch_keep_fixed
         write(666,'(A30,I5.1)') 'switch_residual_t =', switch_residual_t
@@ -39,7 +38,6 @@
         write(666,'(A30,I5.1)') 'switch_run_1 =', switch_run_1
         write(666,'(A30,I5.1)') 'switch_run_2 =', switch_run_2
         write(666,'(A30,I5.1)') 'switch_run_t =', switch_run_t
-        write(666,'(A30,I5.1)') 'switch_no_debt =', switch_no_debt
         write(666,'(A30,I5.1)') 'switch_param_1 =', switch_param_1
         write(666,'(A30,I5.1)') 'switch_param_2 =', switch_param_2
         write(666,'(A30,I5.1)') 'switch_ss_write =', switch_ss_write

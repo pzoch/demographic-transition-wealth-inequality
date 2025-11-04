@@ -327,11 +327,8 @@ call chdir(cwd_r)
     close(5)
     
   !    -------------------------------- DEBT/GDP -------------------------------
-        if (switch_no_debt == 1) then
-            !if there is switch_no_debt == 1 set debt to 0 in all periods
-            
+            !set debt to 0 in all periods
             debt_constr_d = 0.0d0
-        else
 
     
  ! -------------------------------- LAMBDA -------------------------------
