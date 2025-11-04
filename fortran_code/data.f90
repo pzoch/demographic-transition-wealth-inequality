@@ -585,7 +585,7 @@ call chdir(cwd_r)
    ! --------------------------------calculate GAMMA now -------------------------------
  
         Open(unit = 4, FILE = "_data_gamma.txt") 
-
+        !Open(unit = 4, FILE = "_data_gamma_robustness.txt") 
 
     if (switch_go_to_lower_gamma .ne. 0) then 
         do i = 1, last_data_gamma, 1

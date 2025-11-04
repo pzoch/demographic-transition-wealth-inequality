@@ -1,0 +1,50 @@
+300 // n_iter_ss             
+15 // n_iter_t
+15 // n_iter_prof
+1e-7 // err_ss_tol             
+1e-4 // err_tol
+1e-5 // err_prof_tol
+0.6d0 // up_ss
+0.6d0 // up_t
+0.0d0 // up_debt_t
+0.6d0 // up_tc
+50.0d0 // l_bound
+1.0d0 // beta
+1.010d0 // delta            
+1.5d0 // theta           
+0.35d0 // alpha   
+0.05d0 // depr        
+1.00d0 // rho_subst      
+0.33d0 // phi 
+3.0d0 // disutil 
+1.0d0 // frisch 
+-0.0674225d0 // tc_ss 
+0.5d0 // g_share_ss 
+0.8d0 // rho_1 
+0.8d0 // rho_2 
+0.06d0 // t1_ss_old 
+0.06d0 // t1_ss_new 
+0.00d0 // t2_ss_old 
+0.00d0 // t2_ss_new 
+1.0d0  // valor_share 
+10 // switch_fix_retirement_age 
+0.0d0 //  a_l  
+180d0  //  a_u  
+0.04d0  //  a_grow  
+0.001d0 // aime_l !=0.001d0
+2.3374d0 // aime_u !=9165d0/3921d0
+2.3374d0 // aime_cap !=9165d0/3921d0
+0.992d0 // zeta_d
+0.0006d0 ** 2.0d0 // sigma_nu_d
+0.00 // zeta_r
+0.015125 // sigma_nu_r
+0.33// labor_constant
+30// g_correction_last_period
+0.1//delta_half_width
+0.05//htm_shock_freq
+2//beq_age
+2.5//zipf
+0.986910// zeta_p(1)
+0.98201515/zeta_p(2)  
+0.1// sigma2_fix(1)
+0.1//sigma2_fix(2)  

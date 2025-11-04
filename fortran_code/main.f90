@@ -20,7 +20,7 @@ program olg2
     
 
         
-    version = 'xxxx_' ! these three strings allow us to load a correct version
+    version = 'beqx_' ! these three strings allow us to load a correct version
     experiment = 'ndm_'
     closure = 'govt__'
     
