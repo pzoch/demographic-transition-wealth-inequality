@@ -107,15 +107,8 @@ contains
     function margu(cons, labor, tc)
         real*8, intent(in) :: cons, labor, tc !cosumption , labor and consumption tax
         real*8 :: margu, leis
-        if (switch_utility_function == 0) then
         leis=1d0-labor
         margu = 1/tc*phi*(cons**phi*leis**(1d0-phi))**(1d0-theta)/cons
-        elseif (switch_utility_function == 1) then
-        margu = 1/tc*(cons)**(1d0-theta)/cons     
-        elseif (switch_utility_function == 2) then
-        margu = 1/tc*(cons)**(1d0-theta)*(1d0 - disutil * (1d0 - theta) * labor ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta/cons         
-        endif
-        
     end function 
 
 !*******************************************************************************************
@@ -131,11 +124,7 @@ contains
 
         ! check whether consumption or leisure are too small
         c_help = max(cons, 1d-10)  
-        if (switch_utility_function ==0 ) then
         l_help = min(max(lab,1d-10), 1d0-1d-10)    
-        else
-        l_help = lab
-        endif
         ! get tomorrows utility
         call linear_int(sv_plus, ial, iar, dist, sv, n_a, a_grow)
         call linear_int(aime_plus, aimel, aimer, dist_aime, aime, n_aime, aime_grow)
@@ -151,46 +140,19 @@ contains
                               (1d0-dist)*dist_aime*EV_ss(j+1, iar, aimel, ip, ir, id) + &
                               (1d0-dist)*(1d0-dist_aime)*EV_ss(j+1, iar, aimer, ip, ir, id)
             else
-                if (switch_utility_function == 0) then
                 valuefunc =     max(dist*dist_aime*EV_ss(j+1, ial, aimel, ip, ir, id) + &
                               dist*(1d0-dist_aime)*EV_ss(j+1, ial, aimer, ip, ir, id) + &
                               (1d0-dist)*dist_aime*EV_ss(j+1, iar, aimel, ip, ir, id) + &
                         (1d0-dist)*(1d0-dist_aime)*EV_ss(j+1, iar, aimer, ip, ir, id), 1d-10)**(1d0-theta)/(1d0-theta)
-                else
-                valuefunc =     max(dist*dist_aime*EV_ss(j+1, ial, aimel, ip, ir, id) + &
-                              dist*(1d0-dist_aime)*EV_ss(j+1, ial, aimer, ip, ir, id) + &
-                              (1d0-dist)*dist_aime*EV_ss(j+1, iar, aimel, ip, ir, id) + &
-                        (1d0-dist)*(1d0-dist_aime)*EV_ss(j+1, iar, aimer, ip, ir, id), 1d-10)**(1d0-theta)/(1d0-theta)
-                endif
             endif
         endif    
         
                 ! add todays part and discount
-        if (switch_utility_function == 0) then
-        
             if (theta == 1) then
                 valuefunc = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
             else
                 valuefunc = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
             endif
-            
-        elseif (switch_utility_function == 1) then
-            
-            if (theta == 1) then
-                valuefunc = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
-            else
-                valuefunc = (c_help)**(1d0-theta)/(1d0-theta) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
-            endif
-            
-        elseif (switch_utility_function == 2) then
-            if (theta == 1) then
-                valuefunc = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
-            else
-                valuefunc =(c_help**(1d0-theta) * (1d0 - disutil * (1d0 - theta) * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta - 1.0d0) /(1d0-theta)   + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
-            endif
-            
-        endif
-        
 
     end function
 
@@ -206,11 +168,7 @@ contains
 
         ! check whether consumption or leisure are too small
         c_help = max(cons, 1d-10)  
-                if (switch_utility_function ==0 ) then
         l_help = min(max(lab,1d-10), 1d0-1d-10)    
-        else
-        l_help = lab
-        endif
         ! get tomorrows year
         itp = year(it, j, j+1)
         ! get tomorrows utility
@@ -232,30 +190,10 @@ contains
             endif
         endif    
         ! add todays part and discount
-        if (switch_utility_function == 0) then
-        
-            if (theta == 1) then
-                valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            else
-                valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            endif
-            
-        elseif (switch_utility_function == 1) then
-            
-            if (theta == 1) then
-                valuefunc_trans = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            else
-                valuefunc_trans = (c_help)**(1d0-theta)/(1d0-theta) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            endif
-            
-            
-        elseif (switch_utility_function == 2) then
-            if (theta == 1) then
-                valuefunc_trans = log(c_help) - disutil * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch) +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            else
-                valuefunc_trans =(c_help**(1d0-theta) * (1d0 - disutil * (1d0 - theta) * l_help ** (1d0 + 1d0/frisch) / (1d0 + 1d0/frisch)) ** theta - 1.0d0) /(1d0-theta)   + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
-            endif
-            
+        if (theta == 1) then
+            valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+        else
+            valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
         endif
         
     end function       
@@ -287,40 +225,22 @@ contains
        
         integer :: iter
        
-        if (switch_utility_function == 0) then
         c_mult = (1-phi)/phi
    
 
-            ! Newthon Rapson method
-            l = 0.0001
-            do iter = 1, 6, 1
-                f_iter = 1 - l - c*c_mult*1/((1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda)+w_non_tax)
-                f_prim_iter = -1 - c*c_mult*&
-                                 (lambda*(1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda-1) ) &
-                                 /((1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda)+w_non_tax)**2
-     
-                l = l-f_iter/f_prim_iter
-            enddo          
+        ! Newthon Rapson method
+        l = 0.0001
+        do iter = 1, 6, 1
+            f_iter = 1 - l - c*c_mult*1/((1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda)+w_non_tax)
+            f_prim_iter = -1 - c*c_mult*&
+                             (lambda*(1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda-1) ) &
+                             /((1-tau)*(1-lambda)*(w/LabIncAVG)**(1-lambda)*LabIncAVG*l**(-lambda)+w_non_tax)**2
+ 
+            l = l-f_iter/f_prim_iter
+        enddo          
 
        
         optimal_labor = min(1d0,max(l,0d0))
-        elseif (switch_utility_function == 1) then
-                
-             l = (1/tax *(c/tax) ** (-theta)  * (1d0 - lambda) / disutil * (1d0-tau) * (w/LabIncAVG)**(1-lambda) * LabIncAVG) ** (1d0 / (1d0/frisch + lambda))
-        
-        optimal_labor = min(l_bound,max(l,0d0)) ! probably not needed here
-        
-        
-        elseif (switch_utility_function == 2) then
-            l = 0.0001
-            do iter = 1, 6, 1
-            f_iter =    c * theta * disutil * l ** (1d0/frisch) - (1-lambda) *(1-tau)*(w/LabIncAVG)**(1-lambda)*LabIncAVG * (1 - disutil / (1 + 1/frisch) * (1-theta) * l ** (1 + 1/frisch)) * l ** lambda
-            f_prim_iter =(1d0/frisch)  * c * theta * disutil * l ** (1d0/frisch- 1) - (1-lambda) *(1-tau)*(w/LabIncAVG)**(1-lambda)*LabIncAVG * (lambda * l ** (lambda-1) * (1 - disutil / (1 + 1/frisch) * (1-theta) * l ** (1 + 1/frisch)) - disutil * (1-theta) * l ** lambda * l ** (1d0/frisch))
-             l = l-f_iter/f_prim_iter
-            enddo
-            optimal_labor =  min(l_bound,max(l,0d0))
-        endif
-        
          
         
      end function
@@ -549,7 +469,6 @@ implicit none
       del = 1d-8
       
       !!! Cobb-Douglas utility function
-    if (switch_utility_function == 0) then
       if ( (switch_fix_labor == 0d0) ) then 
           do i= 1, maxit
             taxinc = w_tax*l0
@@ -576,67 +495,6 @@ implicit none
       foc_intratemp(2) = min(max(l, 0d0), 1d0-del)
       foc_intratemp(3) = tax
 
-     !!! Constant Frisch separable function
-elseif (switch_utility_function == 1) then
-    if  ((switch_fix_labor == 0d0) ) then 
-          do i= 1, maxit
-            taxinc = w_tax*l0
-            nontaxinc = w_non_tax*l0
-            call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax, mrate)
-            res    = tc*((av+taxinc+nontaxinc-tax)/tc)**(theta) * (disutil * l0 ** (1/frisch))  -(w_tax*(1.0d0-mrate) + w_non_tax)
-            lp     = l0+del
-            taxinc = w_tax*lp
-            nontaxinc = w_non_tax*lp
-            call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax,mrate)
-            dres   = (tc*((av+taxinc+nontaxinc-tax)/tc)**(theta)*(disutil * lp ** (1/frisch))-(w_tax*(1.0d0-mrate) + w_non_tax) - res )/del
-            l0     = max(l0-res/dres, del)
-          enddo  
-    endif  
-      l = l0
-      taxinc = w_tax*l0
-      nontaxinc = w_non_tax*l0
-      call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax,mrate)
-      c = max((av+taxinc+nontaxinc-tax)/tc, del)
-      if ((c .NE. c) .or. (l .NE. l) ) then
-         write(*,*) 'problem'  
-      endif
-      foc_intratemp(1) = c
-      foc_intratemp(2) = min(l_bound,max(l, 0d0))
-      foc_intratemp(3) = tax
-      
-      !!! Harald's favorite function
-elseif (switch_utility_function == 2) then
-     if ((switch_fix_labor == 0d0) ) then 
-          do i= 1, maxit
-            taxinc = w_tax*l0
-            nontaxinc = w_non_tax*l0
-            call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax, mrate)
-            res    = 1/tc*(av+taxinc+nontaxinc-tax)-(w_tax*(1.0d0-mrate) + w_non_tax)*(1-disutil * (1-theta) * l0 ** (1 + 1/frisch) / (1 + 1/frisch)) / (theta * disutil * l0 ** (1/frisch) )
-            lp     = l0+del
-            taxinc = w_tax*lp
-            nontaxinc = w_non_tax*lp
-            call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax,mrate)
-            dres   = (1/tc*(av+taxinc+nontaxinc-tax)-(w_tax*(1.0d0-mrate) + w_non_tax)*(1-disutil * (1-theta) * lp ** (1 + 1/frisch) / (1 + 1/frisch)) / (theta * disutil * lp ** (1/frisch) ) - res )/del
-            l0     = max(l0-res/dres, del)
-          enddo  
-    endif  
-      l = l0
-      taxinc = w_tax*l0
-      nontaxinc = w_non_tax*l0
-      call comptax(taxinc, lambda, tau_prog, LabIncAVG, tax,mrate)
-      c = max((av+taxinc+nontaxinc-tax)/tc, del)
-      if ((c .NE. c) .or. (l .NE. l) ) then
-         write(*,*) 'problem'  
-      endif
-      foc_intratemp(1) = c
-      foc_intratemp(2) = min(l_bound,max(l, 0d0))
-      foc_intratemp(3) = tax
-    
-    
-    endif
-    
-
-      
 endfunction 
 
 
@@ -650,15 +508,9 @@ implicit none
     real*8 :: eta, nu, lambda, zeta, kappa, c
     real*8 :: derivative_crra
 
-        if (switch_utility_function == 0) then
-        derivative_crra = - zeta*lambda*(1-eta*c**nu)**(lambda-1)*eta*nu*c**(nu-1)&
-                          -kappa*eta*(nu-1)*c**(nu-2)*((1-eta*c**nu)**(lambda)- nu/(nu-1)*lambda*(1-eta*c**nu)**(lambda-1)*eta*c**nu ) &
-                          -eta*(nu-1)*c**(nu-2)
-        elseif (switch_utility_function == 1) then
-            
-        elseif (switch_utility_function == 2) then
-            
-        endif
+    derivative_crra = - zeta*lambda*(1-eta*c**nu)**(lambda-1)*eta*nu*c**(nu-1)&
+                      -kappa*eta*(nu-1)*c**(nu-2)*((1-eta*c**nu)**(lambda)- nu/(nu-1)*lambda*(1-eta*c**nu)**(lambda-1)*eta*c**nu ) &
+                      -eta*(nu-1)*c**(nu-2)
         
 
 endfunction
@@ -670,16 +522,7 @@ implicit none
     real*8 :: eta, nu, lambda, zeta, kappa, c
     real*8 :: function_crra
     
-        if (switch_utility_function == 0) then
-        function_crra = (zeta-kappa*eta*c**(nu-1))*(max(1-eta*c**nu, 0d0))**lambda-eta*c**(nu-1)
-        elseif (switch_utility_function == 1) then
-            
-        elseif (switch_utility_function == 2) then
-            
-        function_crra = (zeta-kappa*eta*c**(nu-1))*(max(1-eta*c**nu, 0d0))**lambda-eta*c**(nu-1)    
-            
-            
-        endif
+    function_crra = (zeta-kappa*eta*c**(nu-1))*(max(1-eta*c**nu, 0d0))**lambda-eta*c**(nu-1)
 endfunction
 
 !*******************************************************************************************
@@ -709,8 +552,6 @@ function optimal_consumption_and_labor_new(RHS,phi, theta, tau, lambda,w, w_NT, 
     iter_max = 20
     
     !!! Cobb-Douglas utility function
-    if (switch_utility_function == 0) then
-    
     if (switch_fix_labor > 0d0) then 
         optimal_consumption_and_labor_new(1) = max(RHS**(1d0/(-theta)),1d-15)
         optimal_consumption_and_labor_new(2) =  switch_fix_labor
@@ -812,28 +653,6 @@ endif
     l = 1d0-(RHS/(c_rts**(phi*(1d0-theta)-1d0)))**(1d0/(1d0-phi)/(1d0-theta))
     optimal_consumption_and_labor_new(2) = min(max(l, 0d0), 1d0-1d-8)
     
-    endif
-    !!! constant Frisch utility function
-    elseif (switch_utility_function == 1) then
-    c_rts =  max(RHS**(1d0/(-theta)),1d-7)
-    optimal_consumption_and_labor_new(1) = c_rts
-    
-    nu = 1.0d0/(lambda + 1.0d0/frisch)
-    l  = (1.0d0/disutil * 1.0d0/tc * (1.0d0-lambda) * (1.0d0-tau) * w ** (1.0d0-lambda) * LabIncAVG**lambda * c_rts ** (-theta)) ** nu
-    !l  = (1.0d0/disutil * 1.0d0/tc * (1.0d0-lambda) * (1.0d0-tau) * w ** (1.0d0-lambda) * LabIncAVG**lambda * c_rts ** (-1.0d0/theta)) ** nu
-    
-    optimal_consumption_and_labor_new(2) = min(l,l_bound)
-        
-    
-    !!! Uhlig-Trabandt utility function
-    elseif (switch_utility_function == 2) then
-    l =  ((theta * disutil) ** (-1) * RHS ** (1d0/theta) / tc * (1-lambda) * (1-tau) * w ** (1.0d0-lambda) * LabIncAVG**lambda) **  ((1 + 1/frisch)/(lambda + 1/frisch))
-    c_rts = max(RHS**(1d0/(-theta)) * (1.0d0 - disutil * (1.0d0 - theta) *  l ** (1 + 1/frisch) / (1 + 1/frisch)) ** (-1), 1d-10)
-    optimal_consumption_and_labor_new(1) = c_rts
-    
-    !l = ((theta * disutil) ** (-1) * RHS ** (-1d0) / tc * (1-lambda) * (1-tau) * w ** (1.0d0-lambda) * LabIncAVG**lambda) ** (1.0d0/(lambda + 1.0d0/frisch))
-    optimal_consumption_and_labor_new(2) = min(l,l_bound)
-        
     endif
     
 endfunction 

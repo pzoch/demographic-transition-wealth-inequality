@@ -67,16 +67,9 @@ call chdir(cwd_r)
         
 
 ! -------------------------------- OMEGA -------------------------------
-     if (switch_wage_vs_income == 0) then
-         
         !OPEN (unit=3, FILE = "_data_omega_deaton_avghourlyhh.txt")    
-         !Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt") 
-         Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt") 
-     elseif (switch_wage_vs_income == 1) then
-         
-        OPEN (unit=3, FILE = "_data_omega_deaton_hdslabinc.txt")    
-     
-     endif
+        !Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt") 
+        Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt")
      
      do m = 1, bigM, 1
        do j = 1, bigJ, 1
@@ -150,19 +143,10 @@ call chdir(cwd_r)
     !zeta_p = 0.985d0
     !zeta_p(1)  =  0.9640d0
     !zeta_p(2)  =  0.9799d0
-
-    
-    if (switch_wage_vs_income == 0) then
     
         !Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourlyhh.txt")  
         !Open(unit = 8, FILE = "_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt")  
-        Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")  
-    
-    elseif (switch_wage_vs_income == 1) then
-        
-        Open(unit = 8, FILE = "_data_sigma2eps_deaton_hdslabinc.txt")  
-        
-    endif
+        Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")
     
     
     ! reading sigma2_epsilon_t
@@ -173,8 +157,7 @@ call chdir(cwd_r)
             enddo
             sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
-     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year == 1) then   
-
+     elseif (switch_sigma2_epsilon_t == 0) then   
         do m = 1,bigM,1
             do i = 1, last_data_sigma2_epsilon, 1
                 read(8,*) sigma2_epsilon_t_big(i,m)
@@ -183,13 +166,6 @@ call chdir(cwd_r)
             last_data_sigma2_epsilon = break_index ! make it more mechanically
             sigma2_epsilon_t_big(last_data_sigma2_epsilon+1:,m) = sigma2_epsilon_t_big(last_data_sigma2_epsilon,m)
         enddo
-
-     elseif (switch_sigma2_epsilon_t == 0.AND.switch_starting_year .NE. 1) then
-        do m = 1,bigM,1 
-            read(8,*) sigma2_epsilon_t_big(1,m)
-             sigma2_epsilon_t_big(2:,m) = sigma2_epsilon_t_big(1,m)
-        enddo
-        
         endif
         close(8)
         
@@ -277,16 +253,12 @@ call chdir(cwd_r)
         enddo
         depr_d(last_data_depr+1:) = depr_d(last_data_depr)
             
-     elseif (switch_change_depr == 0 .AND. switch_starting_year == 1) then
+     elseif (switch_change_depr == 0) then
          last_data_depr = break_index
          do i = 1, last_data_depr, 1
             read(5,*) depr_d(i)
         enddo
         depr_d(last_data_depr+1:) = depr_d(last_data_depr) 
-        
-    elseif (switch_change_depr == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) depr_d(1)
-        depr_d(2:) = depr_d(1)
     endif
     
 
@@ -300,16 +272,12 @@ call chdir(cwd_r)
         enddo
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)
             
-     elseif (switch_change_tauK == 0.AND. switch_starting_year == 1) then
+     elseif (switch_change_tauK == 0) then
         last_data_tauK = break_index
         do i = 1, last_data_tauK, 1
             read(7,*) tauK_d(i)
         enddo
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)  
-         
-     elseif (switch_change_tauK == 0.AND. switch_starting_year .NE. 1) then    
-        read(7,*) tauK_d(1)
-        tauK_d(2:) = tauK_d(1)
     endif
     close(7)
 
@@ -323,16 +291,12 @@ call chdir(cwd_r)
         enddo
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL)
             
-     elseif (switch_change_tauL == 0 .AND. switch_starting_year == 1) then
+     elseif (switch_change_tauL == 0) then
          last_data_tauL = break_index
          do i = 1, last_data_tauL, 1
             read(5,*) tauL_d(i)
         enddo
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL) 
-        
-    elseif (switch_change_tauL == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) tauL_d(1)
-        tauL_d(2:) = tauL_d(1)
     endif
         
     
@@ -352,16 +316,12 @@ call chdir(cwd_r)
         enddo
         tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC)
             
-     elseif (switch_change_tauC == 0 .AND. switch_starting_year == 1) then
+     elseif (switch_change_tauC == 0) then
          last_data_tauC = break_index
          do i = 1, last_data_tauC, 1
             read(5,*) tauC_d(i)
         enddo
         tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC) 
-        
-    elseif (switch_change_tauC == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) tauC_d(1)
-        tauC_d(2:) = tauC_d(1)
     endif
         
     close(5)
@@ -372,44 +332,7 @@ call chdir(cwd_r)
             
             debt_constr_d = 0.0d0
         else
-    
-    
-        Open(unit = 5, FILE = "_data_debt_1935.txt")  
-        
-     if (switch_change_debt == 1) then 
-        do i = 1, last_data_debt, 1
-            read(5,*) debt_constr_d(i)
-        enddo
-        debt_constr_d(last_data_debt+1:) = debt_constr_d(last_data_debt)
-            
-     elseif (switch_change_debt == 0 .AND. switch_starting_year == 1) then
-         last_data_debt = break_index
-         do i = 1, last_data_debt, 1
-            read(5,*) debt_constr_d(i)
-        enddo
-        debt_constr_d(last_data_debt+1:) = debt_constr_d(last_data_debt) 
-        
-    elseif (switch_change_debt == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) debt_constr_d(1)
-        debt_constr_d(2:) = debt_constr_d(1)
-    endif
-        debt_constr_d = debt_constr_d/100   / zbar
-    close(5)
-    
-        if (switch_no_debt == 2) then
-                !if there is switch_no_debt == 2 shift debt so that it is 0 in the first period
-        debt_constr_d = debt_constr_d - debt_constr_d(1)
-        endif
-        
-        endif
-        
 
-    
-
-    
-
-
-     
     
  ! -------------------------------- LAMBDA -------------------------------
   
@@ -423,16 +346,12 @@ call chdir(cwd_r)
         enddo
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
             
-     elseif (switch_change_lambda == 0 .AND. switch_starting_year == 1 ) then
+     elseif (switch_change_lambda == 0) then
         last_data_lambda = break_index
         do i = 1, last_data_lambda+1, 1
             read(6,*) lambda_d(i)
         enddo
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
-        
-    elseif (switch_change_lambda == 0 .AND. switch_starting_year .NE. 1 ) then   
-        read(6,*) lambda_d(1)
-        lambda_d(2:) = lambda_d(1)
     endif
         
     close(6)
@@ -592,16 +511,12 @@ call chdir(cwd_r)
             read(4,*) gam_d(i)
         enddo
         gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year == 1) then
+    elseif (switch_go_to_lower_gamma == 0) then
         last_data_gamma= break_index
         do i = 1, last_data_gamma, 1
             read(4,*) gam_d(i)
         enddo
         gam_d(last_data_gamma+1:) = gam_d(last_data_gamma)
-        
-    elseif (switch_go_to_lower_gamma == 0 .AND. switch_starting_year .NE. 1) then
-        read(4,*) gam_d(1)
-        gam_d(2:) = gam_d(1)
     endif
     
     gam_d = gam_d + 1.00d0 + 0.00d0
@@ -664,38 +579,21 @@ call chdir(cwd_r)
          
 
 ! -------------------------------- fix type multiplier
-     if (switch_change_premium == 0.AND.switch_starting_year == 1) then   
-
+     if (switch_change_premium == 0) then   
         do m = 1,bigM,1
         last_data_type_multiplier = break_index
              type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
         enddo
-             
-     elseif (switch_change_premium == 0.AND.switch_starting_year .NE. 1) then
-        do m = 1,bigM,1 
-            last_data_type_multiplier = 1
-            
-             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier) 
-        enddo
-        
      endif
     
 ! -------------------------------- fix type share
      
      
-    if (switch_change_type_share == 0.AND.switch_starting_year == 1) then   
+    if (switch_change_type_share == 0) then   
             last_data_type_share = break_index
             do m = 1,bigM,1
                 type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
             enddo
-        
-  
-     elseif (switch_change_type_share == 0.AND.switch_starting_year .NE. 1) then
-        last_data_type_share = 1
-        do m = 1,bigM,1 
-            type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
-        enddo
-        
      endif
      
   ! ensure it sums up to 1
@@ -842,17 +740,12 @@ close(123)
 ! -------------------------------- fix labor share    
     
     Open(unit = 5, FILE = "_data_labsh.txt")    
-    if (switch_change_sl == 0 .AND. switch_starting_year == 1) then
+    if (switch_change_sl == 0) then
          last_data_sl = break_index
          do i = 1, last_data_sl, 1
             read(5,*) alpha_d(i)
         enddo
         alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
-        alpha_d = 1.0d0 - alpha_d / 100.0d0
-        
-    elseif (switch_change_sl == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) alpha_d(1)
-        alpha_d(2:) = alpha_d(1)
         alpha_d = 1.0d0 - alpha_d / 100.0d0
     endif
      
@@ -865,16 +758,12 @@ close(123)
         enddo
         t1_d(last_data_t1+1:) = t1_d(last_data_t1)
             
-     elseif (switch_change_contrib == 0 .AND. switch_starting_year == 1) then
+     elseif (switch_change_contrib == 0) then
          last_data_t1 = break_index
          do i = 1, last_data_t1, 1
             read(5,*) t1_d(i)
         enddo
         t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
-        
-    elseif (switch_change_contrib == 0.AND.switch_starting_year.NE. 1) then   
-        read(5,*) t1_d(1)
-        t1_d(2:) = t1_d(1)
     endif
     
     ! the above were contributions to gdp, now obtain contrib. rates:
@@ -942,17 +831,7 @@ elseif (switch_mortality == 4) then
     
         pi_big_weight_d = pi_d_big  
      
-elseif (switch_mortality == 5.AND. switch_starting_year .NE.1) then  !this changes subjective probability of survival to the initial ones but keeps the nunber of people born as in the data
-    pi_big_weight_d = pi_d_big
-    do i = 2, bigT,1
-        do j = 2, bigJ, 1   
-            pi_d_big(j,:,i) = pi_d_big(j,:,1)
-        enddo    
-    enddo
-    
-
-  
-elseif (switch_mortality == 5.AND. switch_starting_year ==1) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
+elseif (switch_mortality == 5) then  !this changes  subjective probability of survival to the initial ones but keeps the nunber of people born equal to the data
     pi_big_weight_d = pi_d_big
     do i = 2, bigT,1
         do j = 2, bigJ, 1   
@@ -961,19 +840,7 @@ elseif (switch_mortality == 5.AND. switch_starting_year ==1) then  !this changes
     enddo  
     
     
-elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
-       
-    do i = 2, bigT,1
-        do m = 1, bigM, 1
-            do j = 2, bigJ, 1   
-                pi_d_big(j,m,i) = pi_d_big(j,m,break_index)
-                Nn_d_big(j,m,i) = pi_d_big(j,m,i)/pi_d_big(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
-            enddo
-        enddo
-    enddo
-    pi_big_weight_d = pi_d_big
-    
-   elseif (switch_mortality == 6.AND. switch_starting_year ==1) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
+elseif (switch_mortality == 6) then !this changes  objective probability  of survival to the initial ones but keeps the nunber of people born equal to the data
        
     do i = 2, bigT,1
         do m = 1, bigM, 1
@@ -987,28 +854,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this change
 
   
     
-  elseif (switch_mortality == 7 .AND. switch_starting_year .NE.1) then ! this will keep the population structure as in the initial period (mortality) and will let the number of j=1 agents grow at nu_ss_new rate
-    
-    do i = 2, bigT,1
-        do m = 1, bigM, 1
-            do j = 2, bigJ, 1   
-                pi_d_big(j,m,i) = pi_d_big(j,m,1)
-                pi_big_weight_d(j,m,i) = pi_d_big(j,m,i)
-            enddo    
-        enddo
-    enddo
-    
-    do i = 2, bigT,1
-        do m = 1, bigM, 1
-        Nn_d_big(1,m,i) = Nn_d_big(1,m,i-1) * nu_ss_new * type_share_d(m,i) / type_share_d(m,i-1)
-            do j = 2, bigJ, 1   
-                Nn_d_big(j,m,i) = pi_d_big(j,m,max(i-1,1))/pi_d_big(j-1,m,max(i-2,1))*Nn_d_big(j-1,m,max(i-1,1))
-            enddo    
-        enddo
-    enddo
-    
-    
-  elseif (switch_mortality == 7 .AND. switch_starting_year ==1) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
+  elseif (switch_mortality == 7) then ! this will keep the population structure as in the initial period  (mortality) and will let the number of j=1 agents grow at nu_ss_new rate - nu_ss is recalculated here
         
     do i = 1,bigT,1
     N_temp_vec(i) = sum(Nn_d_big(:,:,i))
@@ -1038,18 +884,7 @@ elseif (switch_mortality == 6.AND. switch_starting_year .NE.1) then !this change
         enddo    
     enddo 
     
-    elseif (switch_mortality == 8.AND. switch_starting_year .NE.1) then !this keep mortality at the fixed level, but subjective probabilities are as in the data
-       
-    do i = 2, bigT,1
-        do m = 1, bigM, 1
-            do j = 2, bigJ, 1   
-                pi_big_weight_d(j,m,i) = pi_big_weight_d(j,m,break_index)
-                Nn_d_big(j,m,i) = pi_big_weight_d(j,m,i)/pi_big_weight_d(j-1,m,i-1)*Nn_d_big(j-1,m,i-1) 
-            enddo
-        enddo
-    enddo
-    
-   elseif (switch_mortality == 8.AND. switch_starting_year ==1) then !this keep mortality at the fixed level, but subjective probabilities are as in the data to the data
+   elseif (switch_mortality == 8) then !this keep mortality at the fixed level, but subjective probabilities are as in the data to the data
        
     do i = 2, bigT,1
         do m = 1, bigM, 1

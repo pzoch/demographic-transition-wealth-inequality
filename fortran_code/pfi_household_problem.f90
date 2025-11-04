@@ -85,14 +85,8 @@ do ia=0, n_a, 1
                             do ip_p = 1, n_sp,1
                                 if(theta == 1_dp)then
                                     EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)    
-                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
-                                    
+                                else
                                     EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)**(phi -theta*phi -1)
-                                    
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                     EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)**(-theta)   
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                    EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)**(-theta)   
                                 endif 
                                 EV_ss(bigj, ia, i_aime, ip, ir, id)  = EV_ss(bigj, ia, i_aime, ip, ir, id) + pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*V_ss(bigj, ia, i_aime, ip_p, ir_r, id_d)
                             enddo
@@ -102,11 +96,7 @@ do ia=0, n_a, 1
                         RHS_ss(bigj, ia, i_aime, ip, ir, id) = 1d0/((delta+n_sd_value(id))*pi_ss_vfi_cond(bigJ)*EV_prim)
                     else
                         RHS_ss(bigj, ia, i_aime, ip, ir, id) = (delta+n_sd_value(id))*pi_ss_vfi_cond(bigJ)*EV_prim
-                        if (switch_utility_function == 0) then
-                        EV_ss(bigj, ia, i_aime, ip, ir, id)  = ((1d0-theta)*EV_ss(bigj, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta)) 
-                        else 
-                        EV_ss(bigj, ia, i_aime, ip, ir, id)  = EV_ss(bigj, ia, i_aime, ip, ir, id)
-                        endif
+                        EV_ss(bigj, ia, i_aime, ip, ir, id)  = ((1d0-theta)*EV_ss(bigj, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta))
                         
                     endif
                     
@@ -133,7 +123,7 @@ do j = bigJ-1, 1, -1
                 do ir = 1, n_sr,1
                     do id =1, n_sd,1
                        
-                        if(((sv(ia)*(1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi + poss_ass_sum_ss(j))  <a_l) .and.  (switch_utility_function == 0)) then
+                        if((sv(ia)*(1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi + poss_ass_sum_ss(j))  <a_l) then
                             
                             c_ss(j, ia, i_aime, ip, ir, id) = 1d-10 
                             
@@ -228,13 +218,8 @@ do j = bigJ-1, 1, -1
 
                                     if(theta == 1)then ! consumption can be calculated diractly from RHS
                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id),1d-15)
-                                    elseif ((theta .ne. 1) .and. switch_utility_function == 0) then
+                                    else
                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id)**(1d0/(phi -theta*phi -1)),1d-15)
-                                    elseif ((theta .ne. 1) .and. switch_utility_function == 1) then
-                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id)**(1d0/(-theta)),1d-15)
-                                    elseif ((theta .ne. 1) .and. switch_utility_function == 2) then
-                                         c_ss(j, ia, i_aime, ip, ir, id) = max(RHS_ss(j+1, ia, i_aime, ip, ir, id)**(1d0/(-theta)),1d-15)
-                                        
                                     endif
                                     
                                                   sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
@@ -574,9 +559,7 @@ do j = bigJ-1, 1, -1
                                         
                                         if(theta == 1_dp)then
                                             EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)*1/c_help
-                                            
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
-                                            
+                                        else
                                             if(j<jbar_ss_vf)then
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq) &
                                                                     *((1-l_help)/c_help)**((1d0-theta)*(1d0-phi))*c_help**(-theta)
@@ -584,27 +567,6 @@ do j = bigJ-1, 1, -1
                                                 EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq) &
                                                           *c_help**(phi -theta*phi -1)
                                             endif
-                                            
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                               
-                                            if(j<jbar_ss_vf)then
-                                                EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
-                                                                    *c_help**(-theta)
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
-                                                          *c_help**( -theta)
-                                            endif
-                                            
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                               
-                                            if(j<jbar_ss_vf)then 
-                                                EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
-                                                                    *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq(ibeq)&
-                                                          *c_help**( -theta)
-                                            endif
-                                            
                                         endif
                                         
                                                                      
@@ -616,18 +578,12 @@ do j = bigJ-1, 1, -1
                             else
                             RHS_ss(j, ia, i_aime, ip, ir, id)= (delta+n_sd_value(id)) *pi_ss_vfi_cond(j)*EV_prim
                             endif 
-                    
-                                if (theta == 1) then 
+                            
+                            if (theta == 1) then 
                                 EV_ss(j, ia, i_aime, ip, ir, id) = EV_ss(j, ia, i_aime, ip, ir, id)
-                                else 
-                                if (switch_utility_function == 0) then
+                            else 
                                 EV_ss(j, ia, i_aime, ip, ir, id) = ((1d0-theta)*EV_ss(j, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta))
-                                else
-                                EV_ss(j, ia, i_aime, ip, ir, id) = EV_ss(j, ia, i_aime, ip, ir, id)    
-                                endif
-                                endif
-                        
-                                        
+                            endif                                        
                                         enddo
                                     enddo
                                 enddo
@@ -660,7 +616,7 @@ do j = bigJ-1, 1, -1
                                             
                                             EV_prim_after_beq = EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*1/c_help
                                             
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
+                                        else
                                             
                                             if(j<jbar_ss_vf)then 
                                                 EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
@@ -668,25 +624,6 @@ do j = bigJ-1, 1, -1
                                             else
                                                 EV_prim_after_beq = EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                           *c_help**(phi -theta*phi -1)
-                                            endif
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                               
-                                            if(j<jbar_ss_vf)then 
-                                                EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta)
-                                            else
-                                                EV_prim_after_beq = EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
-                                            endif
-                                            
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                               
-                                            if(j<jbar_ss_vf)then
-                                                EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim_after_beq = EV_prim_after_beq + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
                                             endif
                                         endif
                                         
@@ -700,12 +637,7 @@ do j = bigJ-1, 1, -1
                                         if (theta == 1) then 
                                             EV_after_beq_ss(j, ia, i_aime, ip, ir, id) = EV_after_beq_ss(ibeq, ia, i_aime, ip, ir, id)
                                         else 
-                                        if (switch_utility_function == 0) then
                                             EV_after_beq_ss(ibeq, ia, i_aime, ip, ir, id) = ((1d0-theta)*EV_after_beq_ss(ibeq, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta))
-                                        else
-                                            EV_after_beq_ss(ibeq, ia, i_aime, ip, ir, id) = EV_after_beq_ss(ibeq, ia, i_aime, ip, ir, id)    
-                                        endif
-                            
                                         endif
                                         
                                         
@@ -742,7 +674,7 @@ do j = bigJ-1, 1, -1
                                         if(theta == 1_dp)then
                                             EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)*1/c_help
                                             
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
+                                        elseif (theta .ne. 1_dp) then
                                             
                                             if(j<jbar_ss_vf)then 
                                                 EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
@@ -750,25 +682,6 @@ do j = bigJ-1, 1, -1
                                             else
                                                 EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                           *c_help**(phi -theta*phi -1)
-                                            endif
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                               
-                                            if(j<jbar_ss_vf)then 
-                                                EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta)
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
-                                            endif
-                                            
-                                        elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                               
-                                            if(j<jbar_ss_vf)then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim =  EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_ss_vfi+(1.0d0-tk_ss)*n_sr_value(ir_r))/gam_ss_vfi*pi_ip(ip, ip_p)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
                                             endif
                                         endif
                                         
@@ -789,11 +702,7 @@ do j = bigJ-1, 1, -1
                         if (theta == 1) then 
                             EV_ss(j, ia, i_aime, ip, ir, id) = EV_ss(j, ia, i_aime, ip, ir, id)
                         else 
-                            if (switch_utility_function == 0) then
                             EV_ss(j, ia, i_aime, ip, ir, id) = ((1d0-theta)*EV_ss(j, ia, i_aime, ip, ir, id))**(1d0/(1d0-theta))
-                            else
-                            EV_ss(j, ia, i_aime, ip, ir, id) = EV_ss(j, ia, i_aime, ip, ir, id)    
-                            endif
                         endif
                     endif
                             
@@ -872,12 +781,8 @@ do ia=0, n_a, 1
                             do ip_p=1,n_sp, 1
                                 if(theta==1_dp)then
                                     EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)    
-                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then 
-                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(phi -theta*phi -1)      
-                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then     
-                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(-theta)      
-                                elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then        
-                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(-theta)   
+                                else
+                                    EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p, tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*c_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)**(phi -theta*phi -1)   
                                 endif 
                                 EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it) + pi_ip_trans(ip, ip_p, tp)*pi_ir(ir,ir_r)*pi_id(id, id_d)*V_trans(bigj, ia, i_aime, ip_p, ir_r, id_d, it)
                             enddo
@@ -892,13 +797,7 @@ do ia=0, n_a, 1
                     if (theta == 1) then 
                         EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
                     else 
-                        
-                    if (switch_utility_function == 0) then
                         EV_trans(bigj, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(bigj, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
-                    else 
-                        EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
-                    endif
-                        
                     endif
                 enddo
             enddo
@@ -937,7 +836,7 @@ do j = bigJ-1, ij, -1
                     do id = 1, n_sd, 1
                         
                        
-                        if(((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + poss_ass_sum_ss(j)  <a_l) .and. (switch_utility_function == 0) ) then    ! is this (linr 450) boundary condition right - will it do neccesary steps ? 
+                        if(((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + poss_ass_sum_ss(j)  <a_l)) then    ! is this (linr 450) boundary condition right - will it do neccesary steps ? 
                                 c_trans(j, ia, i_aime, ip, ir, id, it) = 1d-10 
                                 
                                 if((j < jbar_t_vfi(it)) .and. (j == beq_age) .and. (switch_unequal_bequest == 2)) then
@@ -1125,13 +1024,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     
                                     
-                                    if (switch_utility_function == 0) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(phi -theta*phi -1)),1d-15)
-                                    elseif (switch_utility_function == 1) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-15)
-                                    elseif (switch_utility_function == 2) then
-                                         c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(-theta)),1d-15)
-                                    endif
+                                    c_trans(j, ia, i_aime, ip, ir, id, it) = max(RHS_trans(j+1, ia, i_aime, ip, ir, id, year(ii,ij,j+1))**(1d0/(phi -theta*phi -1)),1d-15)
 
                                     sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia)&
                                                                             -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it)&
@@ -1427,7 +1320,7 @@ do j = bigJ-1, ij, -1
                                     
                                     if(theta == 1_dp)then
                                         EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_ss_vfi*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*p_beq_trans(ibeq,it)/c_help
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
+                                    elseif (theta .ne. 1_dp) then
                                             if(j<jbar_t_vfi(it))then
                                                     EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                          *p_beq_trans(ibeq,it)*((1d0-l_help)/c_help)**((1d0-theta)*(1d0-phi))&
@@ -1436,28 +1329,6 @@ do j = bigJ-1, ij, -1
                                                     EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                         *p_beq_trans(ibeq,it)*c_help**(phi -theta*phi -1)
                                             endif                                
-                                    
-                                    
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                        
-                                            if(j<jbar_t_vfi(it))then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *p_beq_trans(ibeq,it)*c_help**(-theta)
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *p_beq_trans(ibeq,it)*c_help**( -theta)
-                                            endif
-                                        
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                        
-                                            if(j<jbar_t_vfi(it)) then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *p_beq_trans(ibeq,it)*c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *p_beq_trans(ibeq,it)*c_help**( -theta)
-                                            endif
-                                        
                                     endif
                                     EV_trans(j, ia, i_aime, ip, ir, id, it) = EV_trans(j, ia, i_aime, ip, ir, id, it) + pi_ip_trans(ip, ip_p,tp)*pi_ir(ir,ir_r)*pi_id(id, id_d)*V_beq_trans(ibeq, ia, i_aime, ip_p, ir_r, id_d, it)
                                     
@@ -1471,11 +1342,7 @@ do j = bigJ-1, ij, -1
                                      if (theta == 1) then 
                                         EV_trans(j, ia, i_aime, ip, ir, id, it) = EV_trans(j, ia, i_aime, ip, ir, id, it)
                                      else 
-                                        if (switch_utility_function == 0) then
                                         EV_trans(bigj, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(bigj, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
-                                        else 
-                                        EV_trans(bigj, ia, i_aime, ip, ir, id, it) = EV_trans(bigj, ia, i_aime, ip, ir, id, it)
-                                     endif
                                      endif
                                    enddo
                                 enddo
@@ -1498,7 +1365,7 @@ do j = bigJ-1, ij, -1
                                     l_help = dist*l_trans(j, ia, iaimel, ip_p, ir_r, id_d, it)  + (1d0-dist)*l_trans(j, ia, iaimer, ip_p, ir_r, id_d, it)
                                     if(theta == 1_dp)then
                                         EV_after_beq_trans = EV_after_beq_trans + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_ss_vfi*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_help  
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
+                                    else
                                             if(j<jbar_t_vfi(it))then
                                                     EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                          *((1d0-l_help)/c_help)**((1d0-theta)*(1d0-phi))&
@@ -1506,29 +1373,7 @@ do j = bigJ-1, ij, -1
                                             else
                                                     EV_prim_after_beq = EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*&
                                                                         c_help**(phi -theta*phi -1)
-                                            endif                                
-                                    
-                                    
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                        
-                                            if(j<jbar_t_vfi(it))then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta)
-                                            else
-                                                EV_prim_after_beq = EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
                                             endif
-                                        
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                        
-                                            if(j<jbar_t_vfi(it)) then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim_after_beq =  EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim_after_beq = EV_prim_after_beq + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
-                                            endif
-                                        
                                     endif
                             
                             
@@ -1543,11 +1388,7 @@ do j = bigJ-1, ij, -1
                                      if (theta == 1) then 
                                         EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
                                      else 
-                                        if (switch_utility_function == 0) then
                                         EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
-                                        else 
-                                        EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = EV_after_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)
-                                     endif
                                      endif
                                 enddo
                             enddo
@@ -1567,7 +1408,7 @@ do j = bigJ-1, ij, -1
                                     l_help = dist*l_trans(j, ia, iaimel, ip_p, ir_r, id_d, it)  + (1d0-dist)*l_trans(j, ia, iaimer, ip_p, ir_r, id_d, it)
                                     if(theta == 1_dp)then
                                         EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_ss_vfi*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)/c_help  
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 0) then
+                                    else
                                             if(j<jbar_t_vfi(it))then
                                                     EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
                                                                          *((1d0-l_help)/c_help)**((1d0-theta)*(1d0-phi))&
@@ -1575,29 +1416,7 @@ do j = bigJ-1, ij, -1
                                             else
                                                     EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)*&
                                                                         c_help**(phi -theta*phi -1)
-                                            endif                                
-                                    
-                                    
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 1) then
-                                        
-                                            if(j<jbar_t_vfi(it))then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta)
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
                                             endif
-                                        
-                                    elseif ((theta .ne. 1_dp) .and. switch_utility_function == 2) then
-                                        
-                                            if(j<jbar_t_vfi(it)) then !base  on D:\Dropbox (UW)\NCN EMERYT\__model\egm\CRRA
-                                                EV_prim =  EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                                    *c_help**(-theta) * (1 - disutil * (1 - theta) / (1 + 1/frisch) * l_help ** (1+1/frisch)) ** theta 
-                                            else
-                                                EV_prim = EV_prim + (1d0+r_vfi(it)+(1-tk(it))*n_sr_value(ir_r))/gam_vfi(it)*pi_ip_trans(ip, ip_p,tp)*pi_ir(ir, ir_r)*pi_id(id,id_d)&
-                                                          *c_help**( -theta)
-                                            endif
-                                        
                                     endif
                             
                             
@@ -1614,11 +1433,7 @@ do j = bigJ-1, ij, -1
                         if (theta == 1) then 
                             EV_trans(j, ia, i_aime, ip, ir, id, it) = EV_trans(j, ia, i_aime, ip, ir, id, it)
                         else 
-                            if (switch_utility_function == 0) then
                             EV_trans(j, ia, i_aime, ip, ir, id, it) = ((1d0-theta)*EV_trans(j, ia, i_aime, ip, ir, id, it))**(1d0/(1d0-theta))
-                            else 
-                            EV_trans(j, ia, i_aime, ip, ir, id, it) = EV_trans(j, ia, i_aime, ip, ir, id, it)
-                        endif
                         endif
                         
                     endif

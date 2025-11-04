@@ -79,11 +79,7 @@ do iter = 1,n_iter_t,1
     
     r_f = 1 + r_bar
 
-if (switch_g_const == 1) then 
-    g = g_per_capita*N_t/bigL
-elseif (switch_g_const == 0) then  
-    g = g_share * y 
-endif
+    g = g_share * y
 
     
    if ((switch_residual .NE. 2)) then

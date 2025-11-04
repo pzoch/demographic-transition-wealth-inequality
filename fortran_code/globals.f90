@@ -36,8 +36,6 @@ IMPLICIT NONE
     integer :: switch_residual_1                            ! old steady state; 0 = upsilon is residual, there are no more options for the first steady state
     integer :: switch_residual_2                            ! new steady state; 0 = upsilon is residual; 1 = tC is residual; 2 = tL is residual                
     integer :: switch_residual_t                            ! transition path;  0 = upsilon is residual; 1 = tC is residual; 2 = tL is residual
-    
-    integer :: switch_starting_year                         ! first year for which we have data: 0 = 1935, 1 = 1960, 2 = 1950 -- this matters for filling matrices with data
 
     integer :: switch_sigma2_epsilon_t                      ! transition path;  0 = sigma2_epsilon is constant; 1 = sigma2_epsilon is cohort specific; 2 = sigma2_epsilon is time specific (working on 1 currently)
     integer :: switch_initial_dispersion                    ! 0 = everybody is born the same; 1 = initial productivity is drawn from some distribution (so far only 0 works)
@@ -52,17 +50,14 @@ IMPLICIT NONE
     integer :: switch_unequal_bequest
     integer :: switch_change_debt
     integer :: switch_change_sl
-    integer :: switch_change_gy
     integer :: switch_change_depr
     integer :: switch_change_contrib
-    integer :: switch_utility_function
     integer :: switch_print
     integer :: switch_labor_choice                         ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
     integer :: switch_mortality                            ! 0 = no mortality on transition, 1 mortality according to data 
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
     integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
     integer :: switch_cohort_ps                            ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
-    integer :: switch_see_ret                              ! 0 = agent sees no tax-benefit link; 1 = agent sees implicit savings
     integer :: switch_persistent_delta                     ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
     integer :: switch_change_premium                       ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
@@ -71,15 +66,12 @@ IMPLICIT NONE
     integer :: switch_return_risk
     integer :: switch_keep_fixed                      
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
-    integer :: switch_g_const                               ! 0 = g keept as a fixed share of gdp, 1 = g keept as fixed in per capita terms 
     integer :: switch_change_type_share                            
     integer :: switch_ref_run_now 
     integer :: switch_reduce_pension
-    integer :: switch_increase_ret_age
     integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
     integer :: switch_no_debt                               ! 0 - there is government debt, 1 - government debt set to 0 in all periods
     integer :: switch_change_rho
-    integer :: switch_wage_vs_income                        ! 0 - use process for wages, 1 - use process for income
     integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
     integer :: switch_exog_rate                             ! 0 - GE model, 1 - use exog. path of returns
     real(dp), dimension(bigJ) :: omega_ss 

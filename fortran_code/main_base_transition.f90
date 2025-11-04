@@ -22,27 +22,8 @@
     
 ! enddo 
 
-    
-    if (switch_profile == 1) then
-        ! original longevity    
-        !experiment = 'beg_'
-        
-        
-        call profile_steady(switch_tauK_gross, switch_unequal_bequest, switch_param_1, &
-        rho_1, tc_ss, r_bar_ss_1, w_bar_ss_1, b_ss_j_1, bequest_ss_j_1, bequest_ss_1)
-        
-        ! new longevity, but everything as in old ss    
-    
-        !experiment = 'beg_'
-        variant    = 'partial_eqm_'
-        pi_big_ss_old = pi_big(:,:,bigT)
-        
-        pi_ss_old = pi(:,bigT)
-        call profile_steady(switch_tauK_gross, switch_unequal_bequest, switch_param_1, &
-        rho_1, tc_ss, r_bar_ss_1, w_bar_ss_1, b_ss_j_1, bequest_ss_j_1, bequest_ss_1)
-        endif
-    
-        ! what is happening here?    
+
+
         priv_share = 0.0d0
         
     switch_run_1 = 0 ! to be sure that we are running 2nd ss, in pfi procedure we are fullfiling 2nd part of transition
@@ -56,11 +37,3 @@
        call transition_path_db(switch_residual_t, switch_tauk_gross, switch_unequal_bequest,switch_param_2, l_db, c_db, s_db, tax_c_db, r_db, g_per_capita_db, lab_db)
     endif
     
-    ! terminal longevity 
-
-    if (switch_profile == 1) then    
-        !experiment = 'end_'
-        
-    call profile_steady(switch_tauK_gross, switch_unequal_bequest, switch_param_2, &
-    rho_2, tc_ss, r_bar_ss_2, w_bar_ss_2, b_ss_j_2, bequest_ss_j_2, bequest_ss_2)
-    endif

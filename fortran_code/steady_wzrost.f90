@@ -534,16 +534,7 @@ check_pension_clearing = 0.0d0
          
          
     else 
-        if (switch_g_const == 1) then ! 
-            g_per_capita_ss = g_per_capita_ss_1 
-            if (iter == 1) then ! we do not have big l in first iter 
-                g_ss = g_share_ss_2*y_ss
-            else
-                g_ss = g_per_capita_ss*N_ss/bigl_ss 
-            endif
-        elseif (switch_g_const == 0) then
-            g_ss = g_share_ss_2*y_ss
-        endif
+        g_ss = g_share_ss_2*y_ss
     endif  
    
     

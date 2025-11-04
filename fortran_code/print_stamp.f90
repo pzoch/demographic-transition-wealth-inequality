@@ -20,28 +20,22 @@
         write(666,'(A30,I5.1)') 'switch_change_type_share =', switch_change_type_share
         write(666,'(A30,I5.1)') 'switch_change_debt =', switch_change_debt
         write(666,'(A30,I5.1)') 'switch_change_sl =', switch_change_sl
-        write(666,'(A30,I5.1)') 'switch_change_gy =', switch_change_gy
         write(666,'(A30,I5.1)') 'switch_keep_fixed =', switch_keep_fixed
         write(666,'(A30,I5.1)') 'switch_residual_t =', switch_residual_t
         write(666,'(A30,I5.1)') 'switch_residual_1 =', switch_residual_1
         write(666,'(A30,I5.1)') 'switch_residual_2 =', switch_residual_2
-        write(666,'(A30,I5.1)') 'switch_utility_function =', switch_utility_function
         write(666,'(A30,I5.1)') 'switch_labor_choice =', switch_labor_choice
         write(666,'(A30,I5.1)') 'switch_cohort_ps =',  switch_cohort_ps        
-        write(666,'(A30,I5.1)') 'switch_see_ret =', switch_see_ret      
-        write(666,'(A30,I5.1)') 'switch_g_const =', switch_g_const  
         write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor
         write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross          
         write(666,'(A30,I5.1)') 'switch_unequal_bequest =', switch_unequal_bequest          
         write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
-        write(666,'(A30,I5.1)') 'switch_increase_ret_age =', switch_increase_ret_age      
         write(666,'(A30,I5.1)') 'switch_persistent_delta =',switch_persistent_delta  
         write(666,'(A30,I5.1)') 'switch_epsilon_corr =',    switch_epsilon_corr            
         write(666,'(A30,I5.1)') 'switch_income_risk =', switch_income_risk
         write(666,'(A30,I5.1)') 'switch_discount_risk =', switch_discount_risk
         write(666,'(A30,I5.1)') 'switch_return_risk =', switch_return_risk
         write(666,'(A30,I5.1)') 'switch_initial_dispersion =', switch_initial_dispersion
-        write(666,'(A30,I5.1)') 'switch_starting_year =', switch_starting_year
         write(666,'(A30,I5.1)') 'switch_run_1 =', switch_run_1
         write(666,'(A30,I5.1)') 'switch_run_2 =', switch_run_2
         write(666,'(A30,I5.1)') 'switch_run_t =', switch_run_t
@@ -50,7 +44,6 @@
         write(666,'(A30,I5.1)') 'switch_param_2 =', switch_param_2
         write(666,'(A30,I5.1)') 'switch_ss_write =', switch_ss_write
         write(666,'(A30,I5.1)') 'switch_profile =', switch_profile
-        write(666,'(A30,I5.1)') 'switch_wage_vs_income =', switch_wage_vs_income
         write(666,'(A30,I5.1)') 'beq_age =', beq_age
         write(666, '(A)') '*********************************'
         write(666, '(A)') 'GRIDS ARE INITIALIZED AS' 

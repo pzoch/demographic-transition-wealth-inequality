@@ -32,11 +32,9 @@ call chdir(cwd_i)
         read(3,*) switch_change_type_share 
         read(3,*) switch_change_debt 
         read(3,*) switch_change_sl 
-        read(3,*) switch_change_gy 
         read(3,*) switch_change_depr 
         read(3,*) switch_change_contrib
         read(3,*) switch_change_rho
-        read(3,*) switch_wage_vs_income
         read(3,*) switch_keep_fixed 
         read(3,*) switch_residual_t 
         read(3,*) switch_residual_1 
@@ -45,16 +43,12 @@ call chdir(cwd_i)
 
         ! second, some debug switches/options
         read(3,*) switch_het_mortality
-        read(3,*) switch_utility_function
         read(3,*) switch_labor_choice
         read(3,*) switch_cohort_ps             
-        read(3,*) switch_see_ret       
-        read(3,*) switch_g_const   
         read(3,*) switch_fix_labor
         read(3,*) switch_tauK_gross            
         read(3,*) switch_unequal_bequest           
         read(3,*) switch_reduce_pension   
-        read(3,*) switch_increase_ret_age        
         read(3,*) switch_persistent_delta      
         read(3,*) switch_epsilon_corr                
         read(3,*) switch_income_risk 
@@ -64,7 +58,6 @@ call chdir(cwd_i)
         read(3,*) switch_initial_dispersion 
         
         ! run properties
-        read(3,*) switch_starting_year
         read(3,*) switch_run_1
         read(3,*) switch_run_2
         read(3,*) switch_run_t
@@ -146,11 +139,6 @@ call chdir(cwd_p)
             read(3,*) sigma2_fix(m)
         enddo
         CLOSE(3) 
-        
-        
-        if (switch_increase_ret_age == 1 ) then 
-            switch_fix_retirement_age = 0
-        endif
   
 
         call read_data(omega_ss_big, gam_t, gam_cum, zet, pi_big, pi_big_weight, Nn_big, jbar_t, t1_t, tauL_t, tauK_t, tauC_t, lambda_t, debt_constr_t, alpha_t, type_multiplier_t, gy_factor_t, type_share_t, depr_t, rho_t, exog_rate_t)
@@ -166,14 +154,6 @@ call chdir(cwd_p)
     tk = tK
     tc = tc_ss
    
-    
-    ! adjustments to switch off labor choice if we use income data
-    
-    if (switch_wage_vs_income == 1) then
-        switch_labor_choice = 0
-        switch_fix_labor = labor_constant
-    endif
-    
     
     if (switch_labor_choice == 0) then
         phi  = 1.00_dp 
