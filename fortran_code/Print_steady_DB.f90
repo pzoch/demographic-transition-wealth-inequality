@@ -158,14 +158,12 @@
          write(666, '(A)')
          write(666, '(A)') 'OPTIONS THAT WERE USED:' 
          write(666, '(A)')
-         write(666,'(A30,I5.1 )') 'utility function =',     switch_utility_function  
          write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor
          write(666,'(A30,I5.1)') 'switch_unequal_bequest =', switch_unequal_bequest
          write(666,'(A30,I5.1)') 'beq_age =', beq_age
          write(666,'(A30,I5.1)') 'zipf =', zipf
          write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross              
          write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
-         write(666,'(A30,I5.1)') 'switch_increase_ret_age =', switch_increase_ret_age      
          write(666,'(A30,I5.1)') 'switch_persistent_delta =',switch_persistent_delta  
          write(666,'(A30,I5.1)') 'switch_epsilon_corr =',    switch_epsilon_corr            
          write(666,'(A30,I5.1)') 'switch_steady_demo =', switch_steady_demo      
