@@ -34,9 +34,6 @@ call chdir(cwd_i)
         read(3,*) switch_change_contrib
         read(3,*) switch_change_rho
         read(3,*) switch_keep_fixed 
-        read(3,*) switch_residual_t 
-        read(3,*) switch_residual_1 
-        read(3,*) switch_residual_2 
 
         ! second, some debug switches/options
         read(3,*) switch_het_mortality
@@ -124,7 +121,6 @@ call chdir(cwd_p)
         read(3,*) zeta_r
         read(3,*) sigma_nu_r
         read(3,*) labor_constant
-        read(3,*) g_correction_last_period
         read(3,*) delta_half_width
         read(3,*) htm_shock_freq
         read(3,*) beq_age
@@ -171,14 +167,6 @@ call chdir(cwd_p)
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
-        ! rescale to account for zbar
-        !depr_t        = (1.0_dp + depr_t)**zbar - 1.0_dp 
-    !depr_t        = 1.0d0-(1.0_dp -depr_t)**zbar
-    ! THIS JUNK BELOW CAN BE AXED
-    ! it is need for implicit tax subroutine
-    ! assume that jbar_t is monotonic for each year of birth we may calculete jbar 
-    
-
         
     new_ret_yob = -bigT
     new_ret_yob(1) = 1 - jbar_t(1) + 1

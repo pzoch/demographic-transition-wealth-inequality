@@ -17,9 +17,6 @@
 1 // switch_change_rho
 0 // switch_wage_vs_income
 0 // switch_keep_fixed 
-6 // switch_residual_t 
-6 // switch_residual_1 
-6 // switch_residual_2 
 1 // switch_no_debt
 1 // switch_het_mortality
 0 // switch_utility_function

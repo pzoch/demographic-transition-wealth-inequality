@@ -33,10 +33,6 @@ IMPLICIT NONE
     integer :: switch_type_1, switch_type_2                 ! 0 = payg; 1 = ff
     integer :: switch_steady_demo                           ! this is a switch that needs to be set to 1 to have nu_ss not equal to 1 in the initial steady state: 0 = demographical structure as in the data, 1 = demographical structure obtained by taking survival probabilities and some prespecified population growth rate
     
-    integer :: switch_residual_1                            ! old steady state; 0 = upsilon is residual, there are no more options for the first steady state
-    integer :: switch_residual_2                            ! new steady state; 0 = upsilon is residual; 1 = tC is residual; 2 = tL is residual                
-    integer :: switch_residual_t                            ! transition path;  0 = upsilon is residual; 1 = tC is residual; 2 = tL is residual
-
     integer :: switch_sigma2_epsilon_t                      ! transition path;  0 = sigma2_epsilon is constant; 1 = sigma2_epsilon is cohort specific; 2 = sigma2_epsilon is time specific (working on 1 currently)
     integer :: switch_initial_dispersion                    ! 0 = everybody is born the same; 1 = initial productivity is drawn from some distribution (so far only 0 works)
     integer :: switch_epsilon_corr                          ! 0 do not worry that variances shift means, 1 - correct to keep mean constant
@@ -94,7 +90,7 @@ IMPLICIT NONE
 
 ! parameters
     real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
-    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, g_correction_factor_old, g_correction_factor_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
+    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new, exog_rate_ss_old, exog_rate_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc, up_debt_t
@@ -103,13 +99,12 @@ IMPLICIT NONE
     real(dp) :: superstar_factor_1, superstar_factor_2
     real(dp), dimension(bigM,2) :: superstar_factor_mat
     real(dp), dimension(bigM,4) :: superstar_pi_mat
-    integer :: g_correction_last_period
     real(dp) :: delta_half_width, htm_shock_freq
     
 ! transition variables
     integer, dimension(bigT) :: jbar_t
 	real(dp), dimension(bigT) :: g_share, tk, tL, tc, gam_t, gam_cum, zet, feasibility, lambda_t, t1_t, tauL_t, tauK_t,tauC_t, debt_constr_t, alpha_t, depr_t, gy_factor_t, rho_t, exog_rate_t
-    real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t, g_correction_factor_t
+    real(dp), dimension(bigT) :: sigma2_epsilon_t, epsilon_correction_t
     real(dp), dimension(bigT,bigM) :: sigma2_epsilon_t_big, epsilon_correction_t_big
     real(dp), dimension(bigM,bigT) ::  type_multiplier_t, type_share_t,sum_b_weight_trans_outer_mat
     real(dp), dimension(bigJ, bigT) :: Nn_, pi, omega, t1, pi_weight

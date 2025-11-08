@@ -19,9 +19,6 @@
         write(666,'(A30,I5.1)') 'switch_change_type_share =', switch_change_type_share
         write(666,'(A30,I5.1)') 'switch_change_sl =', switch_change_sl
         write(666,'(A30,I5.1)') 'switch_keep_fixed =', switch_keep_fixed
-        write(666,'(A30,I5.1)') 'switch_residual_t =', switch_residual_t
-        write(666,'(A30,I5.1)') 'switch_residual_1 =', switch_residual_1
-        write(666,'(A30,I5.1)') 'switch_residual_2 =', switch_residual_2
         write(666,'(A30,I5.1)') 'switch_labor_choice =', switch_labor_choice
         write(666,'(A30,I5.1)') 'switch_cohort_ps =',  switch_cohort_ps        
         write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor

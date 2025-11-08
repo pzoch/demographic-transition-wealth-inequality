@@ -117,31 +117,6 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
     endif
     
     
-    !rho = 0.0d0
- ! rho change
-
-! force it to treat it as a 2nd steady state - for test purposes    
-!switch_run_1 = 0
-    
-
-!if (switch_run_1 == 0) then 
-!    do m = 1, bigM, 1
-!        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m)
-!        do j = 2, bigj
-!             N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
-!        enddo
-!    enddo
-!    
-!endif
-!
-!if (switch_steady_demo == 1) then 
-!    do m = 1, bigM, 1
-!        N_big_ss_j(1,m) = 1.0_dp * type_share_ss(m) 
-!        do j = 2, bigj
-!            N_big_ss_j(j,m) = nu_ss**(-j+1)*pi_big_weight_ss(j,m)/pi_big_weight_ss(1,m) * N_big_ss_j(1,m)
-!        enddo
-!    enddo
-!endif
 
 
 ! calculate the effective type share
@@ -334,10 +309,7 @@ else
     
 endif        
 
-! this has to go away after testing
-!bequest_ss = 0.0d0
-!bequest_ss_j = 0.0d0
-!b_ss_j = 0.0d0
+
 
         
         if (switch_tauK_gross == 0) then
@@ -442,7 +414,6 @@ endif
             asset_pom_ss_j(:,m)                         = asset_pom_ss_j_vfi
             s_ss_j(1:bigJ-1,m) = s_pom_ss_j_vfi(1:bigJ-1) 
             sum_b_weight_vec_ss(m) = sum_b_weight_ss_vfi
-            !sum_b_weight_ss = sum_b_weight_ss + type_share_big_ss(jbar_ss,m)  * sum_b_weight_ss_vfi
             labor_tax_ss_j(:,m) = labor_tax_ss_j_vfi(:)
         
         enddo
@@ -625,92 +596,7 @@ gini_val_sav            = gini(vec_sav,vec_prob)
 !gini_val_tinc_pretax    = gini(vec_tot_pretax,vec_prob)
 !gini_val_tinc           = gini(vec_tot,vec_prob)
 gini_val_lab_pret       = gini(vec_lab_pretax_inc,vec_prob)
-!gini_val_lab            = gini(vec_lab_inc,vec_prob)
 
-!n = bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd
-!vec_prob= vec_prob/sum(vec_prob)
-!
-!
-!
-!call sort(vec_sav, iorder_sav)
-!call sort(vec_tot_pretax, iorder_tot_pretax)
-!call sort(vec_tot, iorder_tot)
-!call sort(vec_lab_pretax_inc, iorder_lab_pretax_inc)
-!call sort(vec_lab_inc, iorder_lab_inc)
-!
-!do counter = 1,n,1
-!    vec_help_sav(counter)               = vec_prob(iorder_sav(counter))
-!    vec_help_tot_pretax(counter)        = vec_prob(iorder_tot_pretax(counter))
-!    vec_help_tot(counter)               = vec_prob(iorder_tot(counter))
-!    vec_help_lab_pretax_inc(counter)    = vec_prob(iorder_lab_pretax_inc(counter))
-!    vec_help_lab_inc(counter)           = vec_prob(iorder_lab_inc(counter))
-!enddo
-!
-!vec_sav             = vec_sav*vec_help_sav
-!vec_tot_pretax      = vec_tot_pretax*vec_help_tot_pretax
-!vec_tot             = vec_tot*vec_help_tot
-!vec_lab_pretax_inc  = vec_lab_pretax_inc*vec_help_lab_pretax_inc
-!vec_lab_inc         = vec_lab_inc*vec_help_lab_inc
-!
-!share_sav               = 0.0d0
-!share_tot_pretax        = 0.0d0
-!share_tot               = 0.0d0
-!share_lab_pretax_inc    = 0.0d0
-!share_lab_inc           = 0.0d0
-!
-!desired_pctiles(1) = 0.50d0
-!desired_pctiles(2) = 0.90d0
-!desired_pctiles(3) = 0.99d0
-!do counter = 1,n,1
-!    prc_count_sav               = sum(vec_help_sav(1:counter))
-!    prc_count_pretax            = sum(vec_help_tot_pretax(1:counter))
-!    prc_count_tot               = sum(vec_help_tot(1:counter))
-!    prc_count_lab_pretax_inc    = sum(vec_help_lab_pretax_inc(1:counter))
-!    prc_count_lab_inc           = sum(vec_help_lab_inc(1:counter))
-!    
-!    if (prc_count_sav > desired_pctiles(1) .and. share_sav(1) == 0.0d0) then 
-!        if (prc_count_sav > desired_pctiles(2) .and. share_sav == 0.0d0) then
-!           if (prc_count_sav > desired_pctiles(3) .and. share_sav == 0.0d0) then
-!            share_sav(3) = sum(vec_sav(counter:n))/sum(vec_sav)
-!           endif
-!        else
-!        share_sav(2) = sum(vec_sav(counter:n))/sum(vec_sav)    
-!        endif
-!    else
-!        
-!    endif
-!    
-!    if (prc_count_pretax > desired_pctile .and. share_tot_pretax == 0.0d0) then
-!        share_tot_pretax = sum(vec_tot_pretax(counter:n))/sum(vec_tot_pretax)
-!    endif
-!
-!    if (prc_count_tot > desired_pctile .and. share_tot == 0.0d0) then
-!        share_tot = sum(vec_tot(counter:n))/sum(vec_tot)
-!    endif
-!
-!    if (prc_count_lab_pretax_inc >= desired_pctile .and. share_lab_pretax_inc == 0.0d0) then
-!        share_lab_pretax_inc = sum(vec_lab_pretax_inc(counter:n))/sum(vec_lab_pretax_inc)
-!    endif
-!
-!    if (prc_count_lab_inc >= desired_pctile .and. share_lab_inc == 0.0d0) then
-!        share_lab_inc = sum(vec_lab_inc(counter:n))/sum(vec_lab_inc)
-!    endif
-!
-!enddo
-    
-
-!close (121)
-
-    !do j = 1,bigJ,1
-    !    if (j == 1) then
-    !        income_ss_j(j) = (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j) - upsilon_ss + bequest_ss_j(j)
-    !    else
-    !        income_ss_j(j) = r_ss*s_ss_j(j-1)/gam_ss + (1 - tl_ss)*w_ss_j(j)*l_ss_j(j) + sum_b_weight_ss*b_ss_j(j)  - upsilon_ss + bequest_ss_j(j)
-    !    endif
-    !enddo
-    !
-    !income_ss = sum(N_ss_j*income_ss_j(1:bigJ))/bigl_ss
-    !savings_ss_rate_j = s_ss_j/income_ss_j
     
     if (switch_run_1 == 1) then    
         l_ss_pen_j_1 = l_ss_pen_j
@@ -768,7 +654,7 @@ endif
         endif
     enddo
 
-!!!! THESE SEEMS TO BE SOMETHING WE NEED TO ADJUST IN THE STEADY STATE ROUTINE
+
             if (switch_run_1 == 1) then 
                 
                 c_beq_trans_big(:, :, :, :, :, :, :, 1) = c_beq_ss_big
@@ -851,31 +737,7 @@ endif
             endif    
     !include 'utility_ss.f90' 
 
-    ! g_y correction
-    
-    if (switch_residual_t /= 6) then
-    
-            
-    if ((switch_run_1 == 1) .and. (switch_residual_1) == 6) then 
-    g_correction_factor_old = g_share_ss / gy_factor_t(1)
-
-    elseif ((switch_run_1 == 0) .and. (switch_residual_1) == 6) then 
-    g_correction_factor_new = g_share_ss / gy_factor_t(bigT)
-    
-    if ((switch_run_t == 1) .and. (switch_residual_t) == 2) then
-        do i = 1,g_correction_last_period,1
-        g_correction_factor_t(i) = g_correction_factor_old + (g_correction_factor_new - g_correction_factor_old) * (i - 1) / (g_correction_last_period - 1)
-        enddo
-        g_correction_factor_t(g_correction_last_period+1:)=g_correction_factor_t(g_correction_last_period)
-
-    endif
-    
-    
-    
-    endif
-    g_share =g_correction_factor_t *  gy_factor_t 
-    endif
-
+    ! g_y correction block removed - was dead code (switch_residual_t always == 6)
             
             
             replacement_ss = 0.0d0
@@ -889,23 +751,7 @@ endif
 
     k_ss_o = k_ss
     
-    !! calculate marginal
-    ! prob_ss_marg = 0d0
-    !        do ia = 0, n_a, 1
-    !             do j = 1, bigJ  
-    !                 do i_aime = 0, n_aime, 1
-    !                      do ip = 1 , n_sp, 1
-    !                        do ir=1, n_sr, 1
-    !                            do id=1,n_sd,1 
-    !                            prob_ss_marg(ia) = prob_ss_marg(ia) + prob_ss(j, ia, i_aime, ip, ir, id)* N_ss_j(j)/N_ss
-    !                            enddo
-    !                        enddo
-    !                    enddo
-    !                enddo
-    !            enddo
-    !        enddo 
 
-    
 
             
 end subroutine steady

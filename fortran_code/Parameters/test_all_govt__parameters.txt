@@ -39,7 +39,6 @@
 0.00 // zeta_r
 0.015125 // sigma_nu_r
 0.33// labor_constant
-30// g_correction_last_period
 0.1//delta_half_width
 0.0//htm_shock_freq
 2//beq_age
