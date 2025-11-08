@@ -20,7 +20,6 @@ call chdir(cwd_i)
         ! preamble
         ! switches of the specification
         read(3,*) switch_mortality             
-        read(3,*) switch_unstable_dem_ss       
         read(3,*) switch_go_to_lower_gamma   
         read(3,*) switch_change_tauL
         read(3,*) switch_change_tauC
@@ -136,6 +135,8 @@ call chdir(cwd_p)
          do m = 1,bigM,1 
             read(3,*) sigma2_fix(m)
         enddo
+        read(3,*) nu_ss_old
+        read(3,*) nu_ss_new
         CLOSE(3) 
   
 

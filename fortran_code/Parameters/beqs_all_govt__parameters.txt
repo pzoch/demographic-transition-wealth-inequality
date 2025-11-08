@@ -54,3 +54,5 @@
 0.97980362301424/zeta_p(2)  
 0.1// sigma2_fix(1)
 0.1//sigma2_fix(2)  
+1.055d0 // nu_ss_old
+1.003210472d0 // nu_ss_new

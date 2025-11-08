@@ -9,7 +9,6 @@
         write(666, '(A)') 'THIS CODE WAS INITIALIZED WITH THE FOLLOWING SWITCHES' 
         write(666, '(A)')
         write(666,'(A30,I5.1)') 'switch_mortality =',  switch_mortality          
-        write(666,'(A30,I5.1)') 'switch_unstable_dem_ss =',   switch_unstable_dem_ss    
         write(666,'(A30,I5.1)') 'switch_go_to_lower_gamma =',  switch_go_to_lower_gamma 
         write(666,'(A30,I5.1)') 'switch_change_tauL =', switch_change_tauL
         write(666,'(A30,I5.1)') 'switch_change_lambda =', switch_change_lambda            

@@ -38,23 +38,23 @@ call chdir(cwd_r)
 ! -------------------------------- FIRST YEAR? -------------------------
 
         start_year = 1935
-        break_index = 5 ! this corresponds to year 1955
-        !break_index = 9 !use this for tax scenarios 
+
+        break_index = 5 ! this period corresponds this corresponds to year 1955
         
-        
+        ! end dates here correspond to our data availability
         last_data_demo = 33 ! for demography
         last_data_gamma = 34 ! for tfp
         last_data_lambda = 34 ! for lambda
         last_data_tauL = 34 ! for tauL
         last_data_tauK = 34 ! for tauK
-        last_data_gy = 34 ! for gy
+        last_data_gy   = 34 ! for gy
         last_data_sigma2_epsilon = 15 ! for sigma2_epsilon
         last_data_debt           = 34 ! debt/gdp
-        last_data_exog_rate          = 34 ! rate
+        last_data_exog_rate      = 34 ! rate
         
         
         last_data_sl = 34 ! for sl
-        last_data_type_multiplier= 34 ! type multip
+        last_data_type_multiplier= 34 ! type multipier
         last_data_type_share= 34 ! type share
         last_data_t1 = 34 ! SS contrib
         last_data_tauC = 34 ! for tauC
@@ -67,8 +67,6 @@ call chdir(cwd_r)
         
 
 ! -------------------------------- OMEGA -------------------------------
-        !OPEN (unit=3, FILE = "_data_omega_deaton_avghourlyhh.txt")    
-        !Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt") 
         Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt")
      
      do m = 1, bigM, 1
@@ -79,33 +77,7 @@ call chdir(cwd_r)
 
     close(3)
     
-
-! -------------------------------- gy -------------------------------
-      
-    ! Open(unit = 5, FILE = "_data_gy_1935.txt")  
-    !
-    !    
-    ! if (switch_change_gy == 1) then 
-    !    do i = 1, last_data_gy, 1
-    !        read(5,*) gy_factor_d(i)
-    !    enddo
-    !    gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy)
-    !        
-    ! elseif (switch_change_gy == 0 .AND. switch_starting_year == 1) then
-    !     last_data_gy = break_index
-    !     do i = 1, last_data_gy, 1
-    !        read(5,*) gy_factor_d(i)
-    !    enddo
-    !    gy_factor_d(last_data_gy+1:) = gy_factor_d(last_data_gy) 
-    !    
-    !elseif (switch_change_gy == 0.AND.switch_starting_year.NE. 1) then   
-    !    read(5,*) gy_factor_d(1)
-    !    gy_factor_d(2:) = gy_factor_d(1)
-    !endif
-    !
-    !close(5)
 ! -------------------------------- rho -------------------------------
-      
         Open(unit = 5, FILE = "_data_rho_1935.txt")  
 
         
@@ -124,10 +96,7 @@ call chdir(cwd_r)
 
 
 ! -------------------------------- rate -------------------------------
-      
         Open(unit = 5, FILE = "_data_exog_rate_1935.txt")  
-
-        
 
         do i = 1, last_data_exog_rate, 1
             read(5,*) exog_rate_d(i)
@@ -140,12 +109,6 @@ call chdir(cwd_r)
     
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
-    !zeta_p = 0.985d0
-    !zeta_p(1)  =  0.9640d0
-    !zeta_p(2)  =  0.9799d0
-    
-        !Open(unit = 8, FILE = "_data_sigma2eps_deaton_avghourlyhh.txt")  
-        !Open(unit = 8, FILE = "_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt")  
         Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")
     
     
@@ -175,9 +138,6 @@ call chdir(cwd_r)
     enddo
 
 ! -------------------------------- type multiplier - load --------------------
-    
-
-  
      Open(unit = 8, FILE = "_data_skill_premium.txt")  
 
     ! reading type_mutliplier
@@ -193,8 +153,6 @@ call chdir(cwd_r)
     close(8)
 
     ! -------------------------------- type share - load --------------------
-    
-    
         Open(unit = 8, FILE = "_data_college_share.txt")  
 
     ! reading type_share
@@ -219,12 +177,10 @@ call chdir(cwd_r)
     
     
 ! -------------------------------- JBAR -------------------------------
-  
       jbar_d = switch_fix_retirement_age
 
      
  ! -------------------------------- LABOR SHARE -------------------------------
-    
         Open(unit = 5, FILE = "_data_labsh.txt")  
 
          do i = 1, last_data_sl, 1
@@ -237,10 +193,6 @@ call chdir(cwd_r)
     
     alpha_d = 1.0d0 - alpha_d / 100.0d0
     
-    
-
-    
-
     
     ! -------------------------------- DEPRECIATION RATE -------------------------------
     
@@ -282,7 +234,6 @@ call chdir(cwd_r)
     close(7)
 
 ! -------------------------------- TAU_L -------------------------------
-    
         Open(unit = 5, FILE = "_data_tauL.txt")  
         
      if (switch_change_tauL == 1) then 
@@ -299,11 +250,7 @@ call chdir(cwd_r)
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL) 
     endif
         
-    
-    ! adjust for social security contributions
-    ! tau_L_data = tau_L_true * (1-tau_ss) + tau_ss 
-    ! tauL_d = (tauL_d - t1_d)/(1-t1_d)
-    
+
     close(5)
     
 ! -------------------------------- TAU_C -------------------------------
@@ -356,17 +303,15 @@ call chdir(cwd_r)
     bigJT = bigJ*bigT
     
  ! -------------------------------- BIGJ = 16 - US
-
         
     if (switch_het_mortality == 0) then
     
-    ! NEED TO MAKE THIS MORE AUTOMATIC!    
+
 
         Open(unit = 121, FILE = "_data_pi_cond_US_since1935.txt")  
         Open(unit = 122, FILE = "_data_Nn_US_1935_2100.txt")
         Open(unit = 123, FILE = "_data_Nn_US_1935_init_old.txt")
 
-    
     do i = 1,last_data_demo ,1 
             do j = 1, bigJ
                 read(121,*) pi_d_big(j,1,i)
@@ -427,22 +372,9 @@ call chdir(cwd_r)
 
     
 
-    
-    ! -------------------------------- unstable demography
-    if (switch_unstable_dem_ss == 1) then 
-
-    !THESE THINGS DO NOT WORK IF NU_SS_OLD IS ~= 1, unless we switch_steady_demo == 1
-    nu_ss_old =  1.055_dp!1.032998466_dp
-    nu_ss_new =  1.003210472_dp  ! base on UN leads 
-    
-    elseif (switch_unstable_dem_ss == 0) then 
-    nu_ss_old = 1.0_dp
-    nu_ss_new = 1.0_dp  
-
-    elseif (switch_unstable_dem_ss == -1) then 
-    nu_ss_old =  1.055_dp!1.032998466_dp ! this gives us a good fit
-    nu_ss_new =  1.055_dp   ! assume it remained constant
-    endif
+    ! -------------------------------- unstable demography (loaded from parameter files)
+    ! nu_ss_old and nu_ss_new are now read from parameter files in set_globals.f90
+    ! Typical values: nu_ss_old = 1.055 (5.5%/period), nu_ss_new = 1.003210472 (UN projection)
     
      
     ! calculate conditional probabilities
@@ -669,21 +601,9 @@ close(121)
 close(122)
 close(123)
 
-    ! -------------------------------- unstable demography
-    if (switch_unstable_dem_ss == 1) then 
-
-    !THESE THINGS DO NOT WORK IF NU_SS_OLD IS ~= 1, unless we switch_steady_demo == 1
-    nu_ss_old =  1.055_dp!1.032998466_dp
-    nu_ss_new =  1.003210472_dp  ! base on UN leads 
-    
-    elseif (switch_unstable_dem_ss == 0) then 
-    nu_ss_old = 1.0_dp
-    nu_ss_new = 1.0_dp  
-
-    elseif (switch_unstable_dem_ss == -1) then 
-    nu_ss_old =  1.055_dp!1.032998466_dp ! this gives us a good fit
-    nu_ss_new =  1.055_dp   ! assume it remained constant
-    endif
+    ! -------------------------------- unstable demography (loaded from parameter files)
+    ! nu_ss_old and nu_ss_new are now read from parameter files in set_globals.f90
+    ! NOTE: If nu_ss_old != 1, must have switch_steady_demo == 1
     
      
     ! calculate conditional probabilities

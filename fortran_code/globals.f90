@@ -55,7 +55,6 @@ IMPLICIT NONE
     integer :: switch_labor_choice                         ! 0 = no labor choice (phi = 1) , 1 =  labor choice determined by 0<phi<1
     integer :: switch_mortality                            ! 0 = no mortality on transition, 1 mortality according to data 
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
-    integer :: switch_unstable_dem_ss                      ! 0 = demography  in steady state is stable (fertility rate = 2), unstable demography in steady state 
     integer :: switch_cohort_ps                            ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
     integer :: switch_persistent_delta                     ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
     integer :: switch_change_premium                       ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
