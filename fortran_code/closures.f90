@@ -15,160 +15,41 @@
     enddo
     
     
-select case (switch_residual)
-    case(0)
-        if (switch_tauK_gross == 0) then
-            debt_share(1) = debt(1)/y(1)
-            Tax(1) = tc(1)*consumption_gross_new(1) + tk(1)*r_bar(1)*sum_priv_sv(1)/(nu(1)*gam_t(1)) &
-                    + labor_tax_revenue(1)/bigl(1) !+ tL(1)*sum_b(1)  
-            do i = 2,bigT,1
-                Tax(i) = tc(i)*consumption_gross_new(i) + tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                        + labor_tax_revenue(i)/bigl(i) !+ tL(i)*sum_b(i)  
-            enddo 
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-            upsilon(1) = (g(1) + subsidy(1) + (1 + r_bar(1))*debt(1)/(nu(1)*gam_t(1)) - Tax(1) - debt(1))*bigl(1)/N_t(1)
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                upsilon(i) = (g(i) + subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - Tax(i) - debt(i))*bigl(i)/N_t(i)
-            enddo
-        else
-              debt_share(1) = debt(1)/y(1)
-            Tax(1) = tc(1)*consumption_gross_new(1) + tk(1)*(r_bar(1)+depr_t(1))*k(1) &
-                    + labor_tax_revenue(1)/bigl(1) !+ tL(1)*sum_b(1)  
-            do i = 2,bigT,1
-                Tax(i) = tc(i)*consumption_gross_new(i) + tk(i)*(r_bar(i)+depr_t(i))*k(i) &
-                        +labor_tax_revenue(i)/bigl(i) !+ tL(i)*sum_b(i)  
-            enddo 
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-            upsilon(1) = (g(1) + subsidy(1) + (r(1))*debt(1)/(nu(1)*gam_t(1)) - Tax(1) - debt(1))*bigl(1)/N_t(1)
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                upsilon(i) = (g(i) + subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - Tax(i) - debt(i))*bigl(i)/N_t(i)
-            enddo  
+    ! Case 6 - g is residual (hardcoded)
+    if (switch_tauK_gross == 0) then
+
+        debt_share(1) = debt(1)/y(1)
+        if (switch_ref_run_now == 0) then 
+            upsilon = upsilon_r_ss_1*y*bigl/N_t
         endif
-        
-        
-    case(1)
-        if (switch_tauK_gross == 0) then
-    !       case 1 - tC is residual
-            debt_share(1) = debt(1)/y(1)
-            if (switch_ref_run_now == 0) then 
-                upsilon = upsilon_r_ss_1*y*bigl/N_t
-            endif
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
+        deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
 
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                tc(i) =  (g(i) + subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                         - labor_tax_revenue(i)/bigl(i))/consumption_gross_new(i) 
-            enddo
-        else
-            !   case 1 - tC is residual
-            debt_share(1) = debt(1)/y(1)
-            if (switch_ref_run_now == 0) then 
-                upsilon = upsilon_r_ss_1*y*bigl/N_t
-            endif
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                tc(i) =  (g(i) + subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*(r_bar(i)+depr_t(i))*k(i) &
-                         - labor_tax_revenue(i)/bigl(i))/consumption_gross_new(i) 
-            enddo
+        do i = 2,bigT,1
+            debt_share(i) = debt(i)/y(i)
+            deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
+            
+                    g(i) =   tc(i)*consumption_gross_new(i) - ( subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
+                     - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) & 
+                     -labor_tax_revenue(i)/bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
+            
+                    g_share(i) = g(i)/y(i)
+        enddo
+    else
+        ! case 6 - g is residual
+        debt_share(1) = debt(1)/y(1)
+        if (switch_ref_run_now == 0) then 
+            upsilon = upsilon_r_ss_1*y*bigl/N_t
         endif
-        
-        
-    case(2)
-    ! debt is closure
-        if (switch_tauK_gross == 0) then
-            debt_share(1) = debt(1)/y(1)
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
+        deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
 
-            do i = 2,bigT,1
-
-             deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-             debt(i) =  g(i) + subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) -  tc(i) * consumption_gross_new(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) &
-                         - labor_tax_revenue(i)/bigl(i)
-             debt_share(i) = debt(i)/y(i)
-            enddo
-        else
-
-            
-            ! trying to solve it backwards
-            !do i = bigt,2,-1
-            !debt(i-1)= (nu(i)*gam_t(i))/r(i) * ( debt(i) - g(i) - subsidy(i)  + tc(i) * consumption_gross_new(i)  + upsilon(i)/(bigl(i)/n_t(i)) + tk(i)*(r_bar(i)+depr)*k(i) + labor_tax_revenue(i)/bigl(i)) 
-            !
-            !    deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-            !enddo
-            
-                
-             !old version
-            do i = 2,bigt,1
-            debt_share(1) = debt(1)/y(1)
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-            
-            
-            
-                
-                debt(i)   =  g(i) + subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - tc(i) * consumption_gross_new(i)  - upsilon(i)/(bigl(i)/n_t(i)) &
-                         - tk(i)*(r_bar(i)+depr_t(i))*k(i) &
-                         - labor_tax_revenue(i)/bigl(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                
-            
-                debt_share(i) = debt(i)/y(i)
-            enddo
-        endif
-        
-        
-        
-        !       case 6 - g is residual
-          case(6)
-          if (switch_tauK_gross == 0) then
-
-            debt_share(1) = debt(1)/y(1)
-            if (switch_ref_run_now == 0) then 
-                upsilon = upsilon_r_ss_1*y*bigl/N_t
-            endif
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                
-                        g(i) =   tc(i)*consumption_gross_new(i) - ( subsidy(i) + (1 + r_bar(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*r_bar(i)*sum_priv_sv(i-1)/(nu(i)*gam_t(i)) & 
-                         -labor_tax_revenue(i)/bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
-                
-                        g_share(i) = g(i)/y(i)
-            enddo
-            else
-                !       case 6 - g is residual
-            debt_share(1) = debt(1)/y(1)
-            if (switch_ref_run_now == 0) then 
-                upsilon = upsilon_r_ss_1*y*bigl/N_t
-            endif
-            deficit(1) = debt(1) - debt(1)/(nu(1)*gam_t(1))
-
-            do i = 2,bigT,1
-                debt_share(i) = debt(i)/y(i)
-                deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
-                         g(i) = tc(i) * consumption_gross_new(i)  - (subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
-                         - tk(i)*(r_bar(i)+depr_t(i))*k(i) &
-                         - labor_tax_revenue(i)/ bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
-                         
-                         
-                         g_share(i) = g(i)/y(i)
-            enddo
-        endif
-        
-        
-        
-end select
+        do i = 2,bigT,1
+            debt_share(i) = debt(i)/y(i)
+            deficit(i) = debt(i) - debt(i-1)/(nu(i)*gam_t(i))
+                     g(i) = tc(i) * consumption_gross_new(i)  - (subsidy(i) + (r(i))*debt(i-1)/(nu(i)*gam_t(i)) - debt(i) - upsilon(i)/(bigl(i)/N_t(i)) &
+                     - tk(i)*(r_bar(i)+depr_t(i))*k(i) &
+                     - labor_tax_revenue(i)/ bigl(i)) - 0.0*(N_t_j(beq_age,i))/bigl(i)
+                     
+                     
+                     g_share(i) = g(i)/y(i)
+        enddo
+    endif

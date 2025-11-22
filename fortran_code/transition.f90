@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
+subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom, placeholder
@@ -29,7 +29,7 @@ subroutine transition_path_DB(switch_residual,switch_tauK_gross, switch_unequal_
 	real(dp), dimension(bigj, bigM, bigT) :: denominator_j, sv_old_j, sv_pom_j, sv_old_pom_j, subsidy_j,  l_new_j, w_j, u_j, income_j, savings_rate_j, contribution_j, type_share_j_t
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
     real(dp), dimension(bigM, bigT) :: w_bar
-    integer, intent(in) :: switch_residual, switch_tauK_gross, switch_unequal_bequest
+    integer, intent(in) :: switch_tauK_gross, switch_unequal_bequest
     integer, intent(in) :: param
     real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
     
@@ -99,10 +99,6 @@ t2 = t2_ss_new
 t2(:,1) = t2_ss_old
 t1_contrib = t1
 
-if (switch_residual_t == 4) then ! we use contribution closure  
-    t1(:,1)  = t1_ss_1
-    t1(:,2:) = t1_ss_2
-endif 
 
 
 life_exp = 0

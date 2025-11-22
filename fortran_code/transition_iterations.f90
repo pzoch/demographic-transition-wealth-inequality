@@ -82,8 +82,7 @@ do iter = 1,n_iter_t,1
     g = g_share * y
 
     
-   if ((switch_residual .NE. 2)) then
-    ! we are not using debt adjustment to smooth tax adjustment 
+    ! Case 6: g is residual, debt is fixed to constraint
     debt = debt_constr_t*y
     sum_priv_sv(1) = k(1)*gam_t(1)*nu(1) + debt(1) - PillarII(1)
  	do i = 2,bigT,1 
@@ -93,7 +92,7 @@ do iter = 1,n_iter_t,1
  	        sum_priv_sv(i) = k(i+1)*gam_t(i+1)*nu(i+1) + debt(i) - PillarII(i)
         endif 
     enddo 
-   endif
+
 debt_trans_old = debt
 
             sum_b_weight_trans_outer = sum_b_weight_ss

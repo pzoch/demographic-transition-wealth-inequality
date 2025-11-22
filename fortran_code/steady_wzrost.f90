@@ -17,7 +17,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j)
+subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j,  upsilon_r_ss, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, upsilon_ss, income_ss, &
@@ -39,7 +39,7 @@ subroutine steady(switch_residual, switch_tauK_gross, switch_unequal_bequest, pa
 	real(dp), dimension(bigj,bigM) :: denominator_j, subsidy_ss_j, consumption_ss_gross_j, bequest_left_ss_j, bequest_ss_j, bequest_ss_j_old, savings_ss_j
     real*8, dimension(0:n_a) :: prob_ss_marg	
     integer, intent(in)   :: param_ss
-    integer, intent(in)   :: switch_residual, switch_type, switch_tauK_gross, switch_unequal_bequest
+    integer, intent(in)   :: switch_type, switch_tauK_gross, switch_unequal_bequest
     integer :: counter, n, remember
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, upsilon_r_ss, t1_ss, g_per_capita_ss
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
@@ -167,10 +167,8 @@ valor_mult_ss = (1 + valor_share*(nu_ss*gam_ss - 1))/gam_ss
 
     LabIncAVG_ss_vfi = zbar*(1 - alpha)*k_ss**alpha * 0.33
     ! upsilon gess residual closure ( we need only upsil, other parameters are given in set globals)
-    select case (switch_residual)
-    case(0)
-        upsilon_ss = 0d0 ! 0.0686986 !0.053_dp
-    endselect
+    ! Using case 6 - g is residual (hardcoded)
+    upsilon_ss = 0d0
 
     bequest_ss = 0.0_dp
     bequest_ss_j = 0.0_dp
@@ -496,12 +494,10 @@ check_pension_clearing = 0.0d0
     
 
       
-    ! g due to closure consruction is expresse as G/bigL
+    ! g due to closure construction is expressed as G/bigL
+    ! Case 6: g is residual (closure), so we don't set g_ss here
     if (switch_run_1 == 1) then ! in initial ss we keep g as a share of gdp
-         if (switch_residual .ne. 6) then! unless it is used as closure 
-            g_ss = g_share_ss*y_ss
-            g_per_capita_ss = g_ss*bigl_ss/N_ss
-         endif
+         ! g is calculated as residual in closure_ss.f90
          
          
     else 
@@ -736,9 +732,6 @@ endif
                 enddo
             endif    
     !include 'utility_ss.f90' 
-
-    ! g_y correction block removed - was dead code (switch_residual_t always == 6)
-            
             
             replacement_ss = 0.0d0
       do m = 1,bigM,1      
