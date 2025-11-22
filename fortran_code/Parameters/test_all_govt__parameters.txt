@@ -9,7 +9,6 @@
 0.0d0 // up_debt_t
 0.6d0 // up_tc
 50.0d0 // l_bound
-1.0d0 // beta
 1.1d0 // delta            
 2d0 // theta           
 0.35d0 // alpha   

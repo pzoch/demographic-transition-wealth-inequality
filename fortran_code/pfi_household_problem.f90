@@ -57,7 +57,7 @@ do ia = 0, n_a, 1
         do ip=1, n_sp, 1
             do ir =1, n_sr,1
                 do id = 1, n_sd,1
-                    c_ss(bigj, ia, i_aime, ip, ir, id) = max(((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(bigJ) + bequest_ss_j_vfi(bigJ)- upsilon_ss_vf)/tc_ss_vfi, 1d-10)
+                    c_ss(bigj, ia, i_aime, ip, ir, id) = max(((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(bigJ) + bequest_ss_j_vfi(bigJ))/tc_ss_vfi, 1d-10)
                     l_ss(bigj, ia, i_aime, ip, ir, id) = 0d0
                     lab_income_ss(bigj, ia, i_aime, ip, ir, id) =0d0
                     lab_income_pretax_ss(bigj, ia, i_aime, ip, ir, id) =0d0
@@ -110,11 +110,11 @@ do j = bigJ-1, 1, -1
     poss_ass_sum_ss(j) = 0d0
         do i= j, bigJ, 1
             if(i < jbar_ss_vf .and. ((i .ne. beq_age) .or. (switch_unequal_bequest .ne. 2)))then
-                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ((1 - tL_ss)*(w_pom_ss_vfi(i)*omega_ss(j)*n_sp_value(1))**(1-lambda) + omega_ss(j)*n_sp_value(1)*w_pom_ss_implicit_vfi(i) + bequest_ss_j_vfi(i) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j) 
+                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ((1 - tL_ss)*(w_pom_ss_vfi(i)*omega_ss(j)*n_sp_value(1))**(1-lambda) + omega_ss(j)*n_sp_value(1)*w_pom_ss_implicit_vfi(i) + bequest_ss_j_vfi(i))/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j) 
             elseif (i == beq_age .and. switch_unequal_bequest == 2) then
-                                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ((1 - tL_ss)*(w_pom_ss_vfi(i)*omega_ss(j)*n_sp_value(1))**(1-lambda) + omega_ss(j)*n_sp_value(1)*w_pom_ss_implicit_vfi(i) + beq_zipf_ss(1) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j) 
+                                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ((1 - tL_ss)*(w_pom_ss_vfi(i)*omega_ss(j)*n_sp_value(1))**(1-lambda) + omega_ss(j)*n_sp_value(1)*w_pom_ss_implicit_vfi(i) + beq_zipf_ss(1))/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j) 
             else
-                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + (aime_replacement_rate(n_aime)*b_ss_j_vfi(i)             + bequest_ss_j_vfi(i) - upsilon_ss_vf)/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j)              
+                poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + (aime_replacement_rate(n_aime)*b_ss_j_vfi(i)             + bequest_ss_j_vfi(i))/((1d0+(1.0d0-tk_ss)*n_sr_value(1)+r_ss_vfi)/gam_ss_vfi)**(i-j)              
             endif         
         enddo   
     do ia=0, n_a, 1
@@ -193,14 +193,14 @@ do j = bigJ-1, 1, -1
                                 do ibeq = 1,n_beq,1
                                     
                                 sv_tempo_beq(ibeq, ia, i_aime, ip, ir, id) = (tc_ss_vfi* c_beq_ss(ibeq, ia, i_aime, ip, ir, id)+sv(ia)-lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) &
-                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-beq_zipf_ss(ibeq)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
+                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-beq_zipf_ss(ibeq))/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
                                 
                                 sv_tempo(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) * sv_tempo_beq(ibeq, ia, i_aime, ip, ir, id) + sv_tempo(j, ia, i_aime, ip, ir, id)
                                 enddo
                             else
                                 
                                 sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)-lab_income&
-                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-  bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
+                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-  bequest_ss_j_vfi(j))/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
                             endif
                             
                                 endif
@@ -224,7 +224,7 @@ do j = bigJ-1, 1, -1
                                     
                                                   sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
                                                                   - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
-                                                                  - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
+                                                                  - bequest_ss_j_vfi(j))/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
                             else
                                     
                                  if ( (mod(ip,n_sp_risk) == 0) .and. n_superstar> 0) then
@@ -273,7 +273,7 @@ do j = bigJ-1, 1, -1
                                     disposable_beq_ss(ibeq, ia, i_aime, ip, ir, id) =  tot_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + sv(ia)/gam_ss_vfi + beq_zipf_ss(ibeq)  + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)
                                     
                                     sv_tempo_beq(ibeq, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_beq_ss(ibeq, ia, i_aime, ip, ir, id)+sv(ia)-lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) &
-                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-beq_zipf_ss(ibeq)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
+                                                                  -aime_replacement_rate(i_aime)*b_ss_j_vfi(j)-beq_zipf_ss(ibeq))/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi)
                                     
                                     l_ss(j, ia, i_aime, ip, ir, id)  = p_beq(ibeq) * l_beq_ss(ibeq, ia, i_aime, ip, ir, id) + l_ss(j, ia, i_aime, ip, ir, id)
                                     lab_income_ss(j, ia, i_aime, ip, ir, id) = p_beq(ibeq) * lab_income_beq_ss(ibeq, ia, i_aime, ip, ir, id) + lab_income_ss(j, ia, i_aime, ip, ir, id)
@@ -324,7 +324,7 @@ do j = bigJ-1, 1, -1
                                     
                                     sv_tempo(j, ia, i_aime, ip, ir, id) = (tc_ss_vfi*c_ss(j, ia, i_aime, ip, ir, id)+sv(ia)&
                                                                   - lab_income-aime_replacement_rate(i_aime)*b_ss_j_vfi(j)&
-                                                                  - bequest_ss_j_vfi(j)+upsilon_ss_vf)/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
+                                                                  - bequest_ss_j_vfi(j))/((1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)/gam_ss_vfi )    
                                     endif
                                                                    
                             
@@ -394,7 +394,7 @@ do j = bigJ-1, 1, -1
                         if(j>=jbar_ss_vf) then
                             
                            available = (1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ bequest_ss_j_vfi(j) &
-                                        - upsilon_ss_vf- svplus_ss(j, ia, i_aime, ip, ir, id)
+                                        - svplus_ss(j, ia, i_aime, ip, ir, id)
                             
                             c_ss(j, ia, i_aime, ip, ir, id) = max( (available)/tc_ss_vfi, 1e-10)
                             l_ss(j, ia, i_aime, ip, ir, id)=0d0
@@ -441,7 +441,7 @@ do j = bigJ-1, 1, -1
                                 
                                 
                             available = (1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ beq_zipf_ss(ibeq) &
-                                        - upsilon_ss_vf- svplus_beq_ss(ibeq, ia, i_aime, ip, ir, id)    
+                                        - svplus_beq_ss(ibeq, ia, i_aime, ip, ir, id)    
                             if (switch_fix_labor == 0) then 
                                 foc = foc_intratemp(available, wage, wage_non_tax, tc_ss_vfi, l_beq_ss(ibeq, ia, i_aime, ip, ir, id), LabIncAVG_ss_vfi)
                             else
@@ -492,7 +492,7 @@ do j = bigJ-1, 1, -1
                            
                                 
                             available = (1d0+(1d0-tk_ss)*n_sr_value(ir)+r_ss_vfi)*sv(ia)/gam_ss_vfi + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)+ bequest_ss_j_vfi(j) &
-                                        - upsilon_ss_vf- svplus_ss(j, ia, i_aime, ip, ir, id)    
+                                        - svplus_ss(j, ia, i_aime, ip, ir, id)    
                                 
                             if (switch_fix_labor == 0) then 
                                 foc = foc_intratemp(available, wage, wage_non_tax, tc_ss_vfi, l_ss(j, ia, i_aime, ip, ir, id), LabIncAVG_ss_vfi)
@@ -750,7 +750,7 @@ do ia = 0, n_a, 1
         do ip=1, n_sp, 1
             do ir =1, n_sr,1
                 do id = 1, n_sd,1
-                    c_trans(bigj, ia, i_aime, ip, ir, id, it) = max(((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(bigJ,it) + bequest_j_vfi(bigJ,it)- upsilon_vfi(it))/tc_vfi(it), 1d-10)
+                    c_trans(bigj, ia, i_aime, ip, ir, id, it) = max(((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(bigJ,it) + bequest_j_vfi(bigJ,it))/tc_vfi(it), 1d-10)
                     l_trans(bigj, ia, i_aime, ip, ir, id, it) = 0d0
                     lab_income_trans(bigj, ia, i_aime, ip, ir, id, it) = 0d0
                     bequest_j_trans(bigj, ia, i_aime, ip, ir, id, it) = bequest_j_vfi(bigJ,it)
@@ -811,21 +811,21 @@ do j = bigJ-1, ij, -1
     it = year(ii,ij,j)
     i = it
     if(i < jbar_t_vfi(it) .and. ((i .ne. beq_age) .or. (switch_unequal_bequest .ne. 2)))then
-            poss_ass_sum_ss(j) = (1-tl(it))*(w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(it))+bequest_j_vfi(j,it)-upsilon_vfi(it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp) 
+            poss_ass_sum_ss(j) = (1-tl(it))*(w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(it))+bequest_j_vfi(j,it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp) 
         elseif (j == beq_age .and. switch_unequal_bequest == 2) then
-            poss_ass_sum_ss(j) = (1-tl(it))*(w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(it))+beq_zipf_trans(1,it)-upsilon_vfi(it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp) 
+            poss_ass_sum_ss(j) = (1-tl(it))*(w_pom_trans_vfi(j,it)*omega(j,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(it))+beq_zipf_trans(1,it) + w_pom_trans_implicit_vfi(j, it)*omega(j,it)*n_sp_value_trans(1,tp) 
         else
-        poss_ass_sum_ss(j) =aime_replacement_rate(n_aime)*b_j_vfi(j,it)+bequest_j_vfi(j,it)-upsilon_vfi(it)
+        poss_ass_sum_ss(j) =aime_replacement_rate(n_aime)*b_j_vfi(j,it)+bequest_j_vfi(j,it)
     endif
     do k= j+1, bigJ, 1
         ik = year(ii, j, k)
         ! to do 
          if(k < jbar_t_vfi(ik) .and. ((i .ne. beq_age) .or. (switch_unequal_bequest .ne. 2)))then
-            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) +  w_pom_trans_implicit_vfi(k, ik)*omega(k,it)*n_sp_value_trans(1,tp) + ((1-tl(ik))*(w_pom_trans_vfi(k,ik)*omega(k,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(ik))+bequest_j_vfi(k,ik)-upsilon_vfi(ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik)) 
+            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) +  w_pom_trans_implicit_vfi(k, ik)*omega(k,it)*n_sp_value_trans(1,tp) + ((1-tl(ik))*(w_pom_trans_vfi(k,ik)*omega(k,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(ik))+bequest_j_vfi(k,ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik)) 
         elseif (k == beq_age .and. switch_unequal_bequest == 2) then
-            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) +  w_pom_trans_implicit_vfi(k, ik)*omega(k,it)*n_sp_value_trans(1,tp) + ((1-tl(ik))*(w_pom_trans_vfi(k,ik)*omega(k,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(ik))+beq_zipf_trans(1,ik)-upsilon_vfi(ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik)) 
+            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) +  w_pom_trans_implicit_vfi(k, ik)*omega(k,it)*n_sp_value_trans(1,tp) + ((1-tl(ik))*(w_pom_trans_vfi(k,ik)*omega(k,it)*n_sp_value_trans(1,tp))**(1-lambda_trans(ik))+beq_zipf_trans(1,ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik)) 
         else
-            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ( aime_replacement_rate(n_aime)*b_j_vfi(k,ik)+bequest_j_vfi(k,ik)-upsilon_vfi(ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik))
+            poss_ass_sum_ss(j) = poss_ass_sum_ss(j) + ( aime_replacement_rate(n_aime)*b_j_vfi(k,ik)+bequest_j_vfi(k,ik))/product(1d0+r_vfi(it+1:ik)+(1.0d0-tk(it+1:ik))*n_sr_value(1))*product(gam_vfi(it+1:ik))
         endif
     enddo
     
@@ -865,7 +865,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it) + beq_zipf_trans(ibeq,it)
                                     tot_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it)+ aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = 1d-10 
-                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
+                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) *  l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + l_trans(j, ia, i_aime, ip, ir, id, it)
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_trans(j, ia, i_aime, ip, ir, id, it) 
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it)
@@ -909,7 +909,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) +   aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                 endif
-                                sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) - bequest_j_vfi(j,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
+                                sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) - bequest_j_vfi(j,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
                                 endif
                                 
                         
@@ -961,7 +961,7 @@ do j = bigJ-1, ij, -1
                                     lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax
                                     tot_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     tot_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
-                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
+                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) *  l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + l_trans(j, ia, i_aime, ip, ir, id, it)
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_trans(j, ia, i_aime, ip, ir, id, it) 
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it)
@@ -1004,7 +1004,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia)&
                                                                             -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it)&
-                                                                            - bequest_j_vfi(j,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
+                                                                            - bequest_j_vfi(j,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
                                     endif
                                 endif
                                 
@@ -1028,7 +1028,7 @@ do j = bigJ-1, ij, -1
 
                                     sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia)&
                                                                             -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it)&
-                                                                            - bequest_j_vfi(j,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))                  
+                                                                            - bequest_j_vfi(j,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))                  
                                     
                                 else
                                     
@@ -1070,7 +1070,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income_pretax + (n_sr_value(ir)+r_vfi_pretax(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     tot_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)    
                                     
-                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
+                                    sv_tempo_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_beq_trans(ibeq, ia, i_aime, ip, ir, id, it)+sv(ia) -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it) -beq_zipf_trans(ibeq,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))
                                     l_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) *  l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + l_trans(j, ia, i_aime, ip, ir, id, it)
                                     lab_income_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_trans(j, ia, i_aime, ip, ir, id, it) 
                                     lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it) = p_beq_trans(ibeq,it) * lab_income_pretax_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + lab_income_pretax_trans(j, ia, i_aime, ip, ir, id, it)
@@ -1111,7 +1111,7 @@ do j = bigJ-1, ij, -1
                                     tot_income_trans(j, ia, i_aime, ip, ir, id, it) = lab_income  + ((1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it)+ aime_replacement_rate(i_aime)*b_j_vfi(j,it)
                                     sv_tempo_trans(j, ia, i_aime, ip, ir, id, it) = (tc_vfi(it)*c_trans(j, ia, i_aime, ip, ir, id, it)+sv(ia)&
                                                                             -lab_income- aime_replacement_rate(i_aime)*b_j_vfi(j,it)&
-                                                                            - bequest_j_vfi(j,it)+upsilon_vfi(it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))                            
+                                                                            - bequest_j_vfi(j,it))/((1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))/gam_vfi(it))                            
                                     endif
                                     
                                 endif
@@ -1166,9 +1166,9 @@ do j = bigJ-1, ij, -1
                                 svplus_trans(j, ia, i_aime, ip, ir, id, it) = a_l
                             endif
                             if ((it == 2) .and. (j > 1) .and. (j<jbar_t_vfi(it))) then 
-                                available = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*(sv(ia)+transfer_pfi(j-1))/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(j,it)+ bequest_j_vfi(j,it)- upsilon_vfi(it)
+                                available = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*(sv(ia)+transfer_pfi(j-1))/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(j,it)+ bequest_j_vfi(j,it)
                             else    
-                                available = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(j,it)+ bequest_j_vfi(j,it)- upsilon_vfi(it)
+                                available = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) +  aime_replacement_rate(i_aime)*b_j_vfi(j,it)+ bequest_j_vfi(j,it)
                             endif
                             l_trans(j, ia, i_aime, ip, ir, id, it)=0d0
                             c_trans(j, ia, i_aime, ip, ir, id, it) = max( (available - svplus_trans(j, ia, i_aime, ip, ir, id, it))/tc_vfi(it), 1e-10)
@@ -1221,7 +1221,7 @@ do j = bigJ-1, ij, -1
                                 
                                 endif   
                                 
-                                av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + beq_zipf_trans(ibeq, it)- upsilon_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)    
+                                av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_beq_trans(ibeq, ia, i_aime, ip, ir, id, it) + beq_zipf_trans(ibeq, it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)    
                                 
                                 if (switch_fix_labor == 0) then 
                                     foc = foc_intratemp(av, wage, wage_non_tax,  tc_vfi(it), l_beq_trans(ibeq, ia, i_aime, ip, ir, id, it), LabIncAVG_vfi(it))
@@ -1258,7 +1258,7 @@ do j = bigJ-1, ij, -1
                                 if(svplus_trans(j, ia, i_aime, ip, ir, id, it)<a_l)then
                                     svplus_trans(j, ia, i_aime, ip, ir, id, it) = a_l
                                 endif    
-                                av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_trans(j, ia, i_aime, ip, ir, id, it) + bequest_j_vfi(j, it)- upsilon_vfi(it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
+                                av = (1d0+(1d0-tk(it))*n_sr_value(ir)+r_vfi(it))*sv(ia)/gam_vfi(it) - svplus_trans(j, ia, i_aime, ip, ir, id, it) + bequest_j_vfi(j, it) + aime_replacement_rate(i_aime)*b_j_vfi(j,it)
 
 
                                 if (switch_fix_labor == 0) then 

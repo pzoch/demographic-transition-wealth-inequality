@@ -24,13 +24,10 @@
         write(666,'(A30,I5.1)') 'switch_fix_labor =', switch_fix_labor
         write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross          
         write(666,'(A30,I5.1)') 'switch_unequal_bequest =', switch_unequal_bequest          
-        write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
-        write(666,'(A30,I5.1)') 'switch_persistent_delta =',switch_persistent_delta  
         write(666,'(A30,I5.1)') 'switch_epsilon_corr =',    switch_epsilon_corr            
         write(666,'(A30,I5.1)') 'switch_income_risk =', switch_income_risk
         write(666,'(A30,I5.1)') 'switch_discount_risk =', switch_discount_risk
         write(666,'(A30,I5.1)') 'switch_return_risk =', switch_return_risk
-        write(666,'(A30,I5.1)') 'switch_initial_dispersion =', switch_initial_dispersion
         write(666,'(A30,I5.1)') 'switch_run_1 =', switch_run_1
         write(666,'(A30,I5.1)') 'switch_run_2 =', switch_run_2
         write(666,'(A30,I5.1)') 'switch_run_t =', switch_run_t
@@ -62,7 +59,6 @@
          write(666,'(A30,F9.5 )') 'alpha =',     alpha  
          write(666,'(A30,F9.5 )') 'theta =',     theta          
          write(666,'(A30,F9.5 )') 'err_tol =',     err_tol  
-         write(666,'(A30,F9.5 )') 'beta =',     beta  
          write(666,'(A30,F9.5 )') 'frisch =',     frisch  
          write(666,'(A30,F9.5 )') 'depr =',     depr  
          write(666,'(A30,F9.5 )') 'rho_subst =',     rho_subst  

@@ -152,9 +152,9 @@
                             enddo
                         enddo
                         !if(j>1)then
-                        !    w_sum(j) = w_sum(j-1) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
+                        !    w_sum(j) = w_sum(j-1) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j)  
                         !else
-                        !    w_sum(j) = 0d0 + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j) - upsilon_ss_vf 
+                        !    w_sum(j) = 0d0 + aime_replacement_rate(i_aime)*b_ss_j_vfi(j) + l_ss_j_vfi(j)*w_pom_ss_vfi(j) + bequest_ss_j_vfi(j)  
                         !endif
                        enddo
                
@@ -308,3 +308,4 @@
     end subroutine
 
 !**************************************************************************************
+

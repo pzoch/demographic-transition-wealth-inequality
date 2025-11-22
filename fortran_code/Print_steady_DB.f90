@@ -81,7 +81,6 @@
          write(666, '(A)')
          write(666,'(A30,F6.3 )') 'alpha =',  alpha  
          write(666,'(A30,F6.3 )') 'theta =',  theta 
-         write(666,'(A30,F6.3 )') 'beta =',  beta 
          write(666,'(A30,F6.3 )') 'depr =',  depr 
          write(666,'(A30,F6.3 )') 'rho_subst =',  rho_subst 
          write(666,'(A30,F6.3 )') 'alpha =',  alpha 
@@ -101,7 +100,6 @@
          write(666,'(A30,F6.3 )') 'debt_constr =',     debt_constr  
          write(666,'(A30,F6.3 )') 'g_share_ss =',     g_share_ss          
          write(666,'(A30,F6.3 )') 'err_tol =',     err_tol  
-         write(666,'(A30,F6.3 )') 'beta =',     beta  
          write(666,'(A30,F6.3 )') 'frisch =',     frisch  
          write(666,'(A30,F6.3 )') 'depr =',     depr  
          write(666,'(A30,F6.3 )') 'rho_subst =',     rho_subst  
@@ -163,14 +161,8 @@
          write(666,'(A30,I5.1)') 'beq_age =', beq_age
          write(666,'(A30,I5.1)') 'zipf =', zipf
          write(666,'(A30,I5.1)') 'switch_tauK_gross =',  switch_tauK_gross              
-         write(666,'(A30,I5.1)') 'switch_reduce_pension =', switch_reduce_pension  
-         write(666,'(A30,I5.1)') 'switch_persistent_delta =',switch_persistent_delta  
          write(666,'(A30,I5.1)') 'switch_epsilon_corr =',    switch_epsilon_corr            
-         write(666,'(A30,I5.1)') 'switch_steady_demo =', switch_steady_demo      
-         write(666,'(A30,I5.1)') 'switch_income_risk =',switch_income_risk  
-         write(666,'(A30,I5.1)') 'switch_discount_risk =',switch_discount_risk  
-         write(666,'(A30,I5.1)') 'switch_return_risk =',switch_return_risk  
-         write(666,'(A30,I5.1)') 'switch_initial_dispersion =',    switch_initial_dispersion   
+         write(666,'(A30,I5.1)') 'switch_steady_demo =', switch_steady_demo   
          write(666,'(A30,I5.1)') 'superstars =',   (n_p > 5)
          write(666, '(A)')
          write(666, '(A)') 'mortality was ...' 

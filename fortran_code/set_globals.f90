@@ -42,14 +42,10 @@ call chdir(cwd_i)
         read(3,*) switch_fix_labor
         read(3,*) switch_tauK_gross            
         read(3,*) switch_unequal_bequest           
-        read(3,*) switch_reduce_pension   
-        read(3,*) switch_persistent_delta      
-        read(3,*) switch_epsilon_corr                
+        read(3,*) switch_epsilon_corr 
         read(3,*) switch_income_risk 
-        read(3,*) switch_income_fixed_effect 
         read(3,*) switch_discount_risk 
         read(3,*) switch_return_risk 
-        read(3,*) switch_initial_dispersion 
         
         ! run properties
         read(3,*) switch_run_1
@@ -79,7 +75,6 @@ call chdir(cwd_p)
         read(3,*) up_debt_t
         read(3,*) up_tc
         read(3,*) l_bound
-        read(3,*) beta
         read(3,*) delta            
         read(3,*) theta           
         read(3,*) alpha   
@@ -200,7 +195,6 @@ call chdir(cwd_p)
     
     g_share    =  g_share_ss * gy_factor_t
     g_share_ss =  g_share(1)
-    g_share_ss_2 =g_share(bigT)
     
     t1_ss_old    = t1_t(1)
     t1_ss_new    = t1_t(bigT)
@@ -263,7 +257,6 @@ subroutine clear_globals
     k_ss_1 = 0
     r_ss_1 = 0
     w_bar_ss_1 = 0
-    upsilon_r_ss_1 = 0
     l_ss_j_1 = 0
     lab_ss_j_1 = 0
     w_ss_j_1 = 0
@@ -275,7 +268,6 @@ subroutine clear_globals
     k_ss_2 = 0
     r_ss_2 = 0
     w_bar_ss_2 = 0
-    upsilon_r_ss_2 = 0
     l_ss_j_2 = 0
     lab_ss_j_2 = 0
     w_ss_j_2 = 0

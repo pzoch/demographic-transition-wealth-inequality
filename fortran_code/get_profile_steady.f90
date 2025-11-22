@@ -13,8 +13,7 @@ CONTAINS
 
 subroutine profile_steady(switch_tauK_gross, switch_unequal_bequest, param_ss, &
     rho, tc_ss, r_bar_ss, w_bar_ss, b_ss_j, bequest_ss_j, bequest_ss)
-    real(dp) :: jbar_ss, gam_ss, N_ss, nu_ss, &
-                upsilon_ss
+    real(dp) :: jbar_ss, gam_ss, N_ss, nu_ss
     real(dp), dimension(bigM) :: type_multiplier_ss, type_share_ss
     real(dp), dimension(bigj) :: pi_ss, pi_weight_ss
     real(dp), dimension(bigj,bigM) :: N_big_ss_j, pi_big_ss, pi_big_weight_ss 
@@ -66,7 +65,6 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
         pi_ip_big = pi_ip_ss_old_big
         n_sp_value_big = n_sp_value_ss_old_big
         pi_ip_init_big = pi_ip_init_ss_old_big
-        g_share_ss = g_share_ss
         type_multiplier_ss =  type_multiplier_ss_old
         type_share_ss = type_share_ss_old
         
@@ -89,7 +87,7 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
         debt_constr= debt_constr_ss_new
         n_sp_value_big = n_sp_value_ss_new_big
         pi_ip_init_big = pi_ip_init_ss_new_big
-        g_share_ss = g_share_ss_2
+
         type_multiplier_ss =  type_multiplier_ss_new
         type_share_ss = type_share_ss_new
          
@@ -153,7 +151,6 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
             bequest_ss_vfi =  bequest_ss(m)
             b_ss_j_vfi = b_ss_j(:,m)
             bequest_ss_j_vfi(:) =  bequest_ss_j(:,m)
-            upsilon_ss_vf = 0d0
             aime_plus_ss  = aime_plus_ss_big(:, :, :, :, :, :,m)
             V_ss = V_ss_big(:, :, :, :, :, :,m)          
             

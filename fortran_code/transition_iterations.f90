@@ -140,8 +140,7 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             bequest_j_vfi_dif = bequest_j(:,m,:) - bequest_j_old(:,m,:)
             beq_zipf_trans = beq_zipf_trans_big(:,m,:)
             jbar_t_vfi = jbar_t !switch_fix_retirement_age
-            upsilon_vfi = upsilon
-            upsilon_dif = upsilon - upsilon_old
+
             b_pom_j_dif(:,:) = b_j(:,m,:) - b_j_old(:,m,:)
             aime_plus_trans  = aime_plus_trans_big(:, :, :, :, :, :,m,:)
             c_j_vfi = c_j(:,m,:)

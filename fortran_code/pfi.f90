@@ -57,7 +57,7 @@ real*8, dimension(bigJ, bigT) :: bequest_j_vfi, bequest_j_vfi_dif, check_e, w_po
                                  pi_trans_vfi_cond,  b_j_vfi, b_pom_j_dif,  N_t_j_vfi, pi_vfi, &
                                  c_j_vfi,  s_pom_j_vfi, l_j_vfi, labor_tax_j_vfi, lw_j_vfi, lw_lambda_j_vfi, l_pen_j_vfi, lab_j_vfi
 
-real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, upsilon_vfi, upsilon_dif, LabIncAVG_vfi, bequest_vfi, r_vfi_pretax, w_bar_vfi
+real*8, dimension(bigT) ::   r_vfi, tc_vfi, gam_vfi, LabIncAVG_vfi, bequest_vfi, r_vfi_pretax, w_bar_vfi
 real*8, dimension(n_beq,bigT) :: beq_zipf_trans
 
 integer :: jbar_t_vfi(bigT)
@@ -82,7 +82,7 @@ real*8, dimension(bigJ) :: V_ss_j_vfi, c_ss_j_vfi, lab_income_ss_j_vfi, lab_inco
                            bequest_ss_j_vfi, bequest_ss_j_vfi_dif, pi_ss_vfi, pi_ss_vfi_cond, s_pom_ss_j_vfi, pension_ss_j_vfi, &
                            labor_tax_ss_j_vfi, lw_ss_j_vfi, lw_lambda_ss_j_vfi, w_pom_ss_vfi, w_pom_ss_implicit_vfi, lab_high_ss_j_vfi, l_ss_pen_j_vfi, asset_pom_ss_j_vfi
 
-real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, LabIncAVG_ss_vfi_L, LabIncAVG_ss_vfi_H, gam_ss_vfi, upsilon_ss_vf, upsilon_old_ss, upsilon_dif_ss, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi, sum_b_weight_ss_vfi
+real*8 ::   r_ss_vfi, r_ss_pretax_vfi, tc_ss_vfi, LabIncAVG_ss_vfi, LabIncAVG_ss_vfi_L, LabIncAVG_ss_vfi_H, gam_ss_vfi, available_temp, l_temp,c_temp, sv_temp, bequest_ss_vfi, w_bar_ss_vfi, sum_b_weight_ss_vfi
 real*8 ::   gini_weight_sv(bigJ, 0:n_a)
 integer ::  jbar_ss_vf
 
@@ -149,9 +149,9 @@ contains
         
                 ! add todays part and discount
             if (theta == 1) then
-                valuefunc = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+                valuefunc = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  (delta+n_sd_value(id))*pi_com*valuefunc 
             else
-                valuefunc = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc 
+                valuefunc = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + (delta+n_sd_value(id))*pi_com*valuefunc 
             endif
 
     end function
@@ -191,9 +191,9 @@ contains
         endif    
         ! add todays part and discount
         if (theta == 1) then
-            valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            valuefunc_trans = (phi*log(c_help) +(1d0-phi)*log(1d0 - l_help))  +  (delta+n_sd_value(id))*pi_com*valuefunc_trans 
         else
-            valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + beta*(delta+n_sd_value(id))*pi_com*valuefunc_trans 
+            valuefunc_trans = (c_help**phi*(1d0-l_help)**(1d0-phi))**(1d0-theta)/(1d0-theta)  + (delta+n_sd_value(id))*pi_com*valuefunc_trans 
         endif
         
     end function       

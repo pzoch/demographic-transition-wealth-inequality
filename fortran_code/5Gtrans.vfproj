@@ -105,7 +105,7 @@
 				<File RelativePath=".\main.f90"/>
 				<File RelativePath=".\main_base_transition.f90"/>
 				<File RelativePath=".\sort.f90"/>
-				<File RelativePath=".\steady_wzrost.f90"/>
+				<File RelativePath=".\steady_state.f90"/>
 				<File RelativePath=".\transition.f90"/>
 				<File RelativePath=".\transition_iterations.f90"/>
 			</Filter>

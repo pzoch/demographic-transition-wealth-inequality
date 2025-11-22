@@ -34,7 +34,6 @@ IMPLICIT NONE
     integer :: switch_steady_demo                           ! this is a switch that needs to be set to 1 to have nu_ss not equal to 1 in the initial steady state: 0 = demographical structure as in the data, 1 = demographical structure obtained by taking survival probabilities and some prespecified population growth rate
     
     integer :: switch_sigma2_epsilon_t                      ! transition path;  0 = sigma2_epsilon is constant; 1 = sigma2_epsilon is cohort specific; 2 = sigma2_epsilon is time specific (working on 1 currently)
-    integer :: switch_initial_dispersion                    ! 0 = everybody is born the same; 1 = initial productivity is drawn from some distribution (so far only 0 works)
     integer :: switch_epsilon_corr                          ! 0 do not worry that variances shift means, 1 - correct to keep mean constant
 
     integer :: switch_go_to_lower_gamma                    ! 0 = const,  1 = empirical     
@@ -52,17 +51,14 @@ IMPLICIT NONE
     integer :: switch_mortality                            ! 0 = no mortality on transition, 1 mortality according to data 
     integer :: switch_fix_retirement_age                   ! 0 = retirement age from data file, retirement age equal to value of switch_fix_retirement_age
     integer :: switch_cohort_ps                            ! 0 = points pension system like us, 1 = the same benefits within a whole cohorts 
-    integer :: switch_persistent_delta                     ! 0 = AR1 shocks to patience, 1 = permanent types assigned at birth (normal distr), 2 = permanent types assigned at birth (uniform)
     integer :: switch_change_premium                       ! 0 = does not change premium, 1 = changes wage premium !!! HERE IMPLEMENTED AS A CHANGE IN ETAS
     integer :: switch_income_risk
-    integer :: switch_income_fixed_effect               ! 0 = no income fixed effects, 1 = income fixed effects, group specific
     integer :: switch_discount_risk
     integer :: switch_return_risk
     integer :: switch_keep_fixed                      
     real*8  :: switch_fix_labor                             ! 0 = endogenous labor, other number (=0.33 for US) fix labor force participation
     integer :: switch_change_type_share                            
     integer :: switch_ref_run_now 
-    integer :: switch_reduce_pension
     integer :: switch_het_mortality                         ! 0 - take UN data, 1 - take our pi 
     integer :: switch_change_rho
     integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
@@ -78,8 +74,8 @@ IMPLICIT NONE
     real(dp) :: debt_constr
     real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
 
-    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, upsilon_r_ss_1, t1_ss_1, g_per_capita_ss_1 
-    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, upsilon_r_ss_2, t1_ss_2, g_per_capita_ss_2
+    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, t1_ss_1, g_per_capita_ss_1 
+    real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, t1_ss_2, g_per_capita_ss_2
     
     real(dp), dimension(bigM) :: w_bar_ss_1
     real(dp), dimension(bigM) :: w_bar_ss_2
@@ -89,8 +85,8 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2, lab_ss_j_2
 
 ! parameters
-    real(dp) :: alpha, beta, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
-    real(dp) :: g_share_ss, g_share_ss_2, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
+    real(dp) :: alpha, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
+    real(dp) :: g_share_ss, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
     real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new, exog_rate_ss_old, exog_rate_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc, up_debt_t
@@ -116,7 +112,6 @@ IMPLICIT NONE
     real(dp), dimension(- bigJ: bigT) ::  V_20_years_old_db !  V_20_years_old_base, V_20_years_old_ref
     real(dp), dimension(bigT) :: r_db, tax_c_db, g_per_capita_db, better !  r_base, tax_c_base, g_per_capita_base, r_ref, tax_c_ref, g_per_capita_ref
     real(dp), dimension(bigJ, bigT) :: x_j_pro,  x_unif_pro, sum_x_pro, x_c_j_pro, eq_unif_pro, sum_eq_pro
-    real(dp) :: upsilon_r_ss_nr
 
 ! multiple types
     real(dp), dimension(bigM) :: bigM_share_ss
@@ -170,7 +165,7 @@ IMPLICIT NONE
     real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
     
  ! pension system 
-    real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, priv_share, t1_ss_contrib
+    real*8 :: sum_b_weight_ss, b_scale_factor_old, b_scale_factor_new, avg_ef_l_supply, t1_ss_contrib
     real*8, dimension(bigJ, bigT) ::  sum_b_weight_trans(bigT), t1_contrib(bigJ, bigT), t2(bigJ, bigT), sum_b_weight_trans_outer(bigT)
     real*8, dimension(bigT) :: avg_ef_l_supply_trans, sum_b1_help, debt_trans, debt_trans_old
     

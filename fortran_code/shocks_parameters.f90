@@ -41,11 +41,7 @@ sigma2_epsilon_ss_new_big = sigma2_epsilon_t_big(bigT,:)
 
 ! implement correction of epsilons - this is to ensure that the mean is zero
 do m = 1,bigM,1
-        if (switch_epsilon_corr == 1) then
-            epsilon_correction_t_big(:,m) = - (sigma2_epsilon_t_big(:,m)/(1.0d0 - zeta_p(m) ** 2d0)) / 2.0d0
-        else
-             epsilon_correction_t_big(:,m) = 0.0d0
-        endif
+        epsilon_correction_t_big(:,m) = - (sigma2_epsilon_t_big(:,m)/(1.0d0 - zeta_p(m) ** 2d0)) / 2.0d0
         epsilon_correction_ss_old_big(m) = epsilon_correction_t_big(1,m)
         epsilon_correction_ss_new_big(m) = epsilon_correction_t_big(bigT,m)
 enddo
@@ -165,29 +161,15 @@ if (n_superstar>0) then
         
         
         
-        ! now do initial things
-        
-        if (switch_initial_dispersion == 1) then
-            do t = 1, bigT, 1
-                do ip = 1 , n_sp_risk, 1
-                pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
-                enddo
-            enddo                
-            do ip = 1 , n_sp_risk, 1
-                pi_ip_risk_init_ss_old(ip) = pi_ip_risk_ss_old(n_sp_initial,ip)
-                pi_ip_risk_init_ss_new(ip) = pi_ip_risk_ss_new(n_sp_initial,ip)
-            enddo
-            
-        elseif (switch_initial_dispersion == 0) then
-            do t = 1, bigT, 1
-                        pi_ip_risk_init_trans(:,t) = 0.0d0
-                        pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
-            enddo        
-            pi_ip_risk_init_ss_old(:) = 0.0d0
-            pi_ip_risk_init_ss_new(:) = 0.0d0
-            pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
-            pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0    
-        endif
+        ! now do initial things - everyone born the same (initial_dispersion=0)
+        do t = 1, bigT, 1
+                    pi_ip_risk_init_trans(:,t) = 0.0d0
+                    pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
+        enddo        
+        pi_ip_risk_init_ss_old(:) = 0.0d0
+        pi_ip_risk_init_ss_new(:) = 0.0d0
+        pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
+        pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0
             
         
         
@@ -248,28 +230,15 @@ elseif (n_sp_risk>1)  then
             
      
             
-        ! now do initial things
-        if (switch_initial_dispersion == 1) then
-            do t = 1, bigT, 1
-                do ip = 1 , n_sp_risk, 1
-                        pi_ip_risk_init_trans(ip,t) = pi_ip_risk_trans(n_sp_initial,ip,t)
-                enddo
-            enddo                
-            do ip = 1 , n_sp_risk, 1
-                pi_ip_risk_init_ss_old(ip) = pi_ip_risk_ss_old(n_sp_initial,ip)
-                pi_ip_risk_init_ss_new(ip) = pi_ip_risk_ss_new(n_sp_initial,ip)
-            enddo
-            
-        elseif (switch_initial_dispersion == 0) then
-            do t = 1, bigT, 1
-                        pi_ip_risk_init_trans(:,t) = 0.0d0
-                        pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
-            enddo        
-            pi_ip_risk_init_ss_old(:) = 0.0d0
-            pi_ip_risk_init_ss_new(:) = 0.0d0
-            pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
-            pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0    
-        endif
+        ! now do initial things - everyone born the same (initial_dispersion=0)
+        do t = 1, bigT, 1
+                    pi_ip_risk_init_trans(:,t) = 0.0d0
+                    pi_ip_risk_init_trans(n_sp_initial,t) = 1.0d0
+        enddo        
+        pi_ip_risk_init_ss_old(:) = 0.0d0
+        pi_ip_risk_init_ss_new(:) = 0.0d0
+        pi_ip_risk_init_ss_old(n_sp_initial) = 1.0d0
+        pi_ip_risk_init_ss_new(n_sp_initial) = 1.0d0
 
         
             ! pack
@@ -310,28 +279,17 @@ else
   
     
     
-        ! now do initial things
+        ! now do initial things - everyone born the same (initial_dispersion=0)
     do m=  1, bigM, 1
     do t = 1, bigT, 1
-        do ip = 1 , n_sp_risk, 1
-                if (switch_initial_dispersion == 1) then
-                    pi_ip_risk_init_trans_big(ip,m,t) = pi_ip_risk_trans_big(n_sp_initial,ip,m,t)
-                elseif (switch_initial_dispersion == 0) then
-                    pi_ip_risk_init_trans_big(:,m,t) = 0.0d0
-                    pi_ip_risk_init_trans_big(n_sp_initial,m,t) = 1.0d0
-                endif
-        enddo
+        pi_ip_risk_init_trans_big(:,m,t) = 0.0d0
+        pi_ip_risk_init_trans_big(n_sp_initial,m,t) = 1.0d0
     enddo             
     
-     if (switch_initial_dispersion == 1) then
-        pi_ip_risk_init_ss_old_big(:,m) = pi_ip_risk_ss_old_big(n_sp_initial,:,m)
-        pi_ip_risk_init_ss_new_big(:,m) = pi_ip_risk_ss_new_big(n_sp_initial,:,m)
-     elseif (switch_initial_dispersion == 0) then
-        pi_ip_risk_init_ss_old_big(:,m) = 0.0d0
-        pi_ip_risk_init_ss_new_big(:,m) = 0.0d0
-        pi_ip_risk_init_ss_old_big(n_sp_initial,m) = 1.0d0
-        pi_ip_risk_init_ss_new_big(n_sp_initial,m) = 1.0d0      
-    endif
+    pi_ip_risk_init_ss_old_big(:,m) = 0.0d0
+    pi_ip_risk_init_ss_new_big(:,m) = 0.0d0
+    pi_ip_risk_init_ss_old_big(n_sp_initial,m) = 1.0d0
+    pi_ip_risk_init_ss_new_big(n_sp_initial,m) = 1.0d0      
     enddo
 
 
@@ -354,25 +312,8 @@ else
 
  endif
  
-    if (switch_persistent_delta == 1) then
-    call normal_discrete_1(n_sd_value, prob_norm_d, 1d0, sigma_nu_d)
-
-
-     pi_id(:,:) = 0.0d0
-    do  s = 1, n_sd, 1
-        pi_id_init(s) = prob_norm_d(s)
-        pi_id(s,s) = 1.0d0     
-    enddo
-    
-    elseif (switch_persistent_delta == 2) then
-         pi_id(:,:) = 0.0d0
-    do  s = 1, n_sd, 1
-        n_sd_value(s) = - delta_half_width + 2 * delta_half_width / (n_sd - 1) * (s - 1) 
-        pi_id_init(s) = 1.0/float(n_sd)
-        pi_id(s,s) = 1.0d0     
-        
-    enddo
-endif
+    ! switch_persistent_delta removed - was always 0 (AR1 shocks to patience)
+    ! The discretize_AR call above handles delta shocks when n_sd > 1
     
 
     
@@ -475,15 +416,10 @@ endif
             pi_ip_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_old_big(:,:,m)
             pi_ip_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_new_big(:,:,m)
          
-            if (switch_income_fixed_effect == 0) then 
-                n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = n_sp_risk_value_trans_big(:,m,:)
-                n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_old_big(:,m) 
-                n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_new_big(:,m)
-            else
-                n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = exp(log(n_sp_risk_value_trans_big(:,m,:) + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
-                n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = exp(log(n_sp_risk_value_ss_old_big(:,m)  + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
-                n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = exp(log(n_sp_risk_value_ss_new_big(:,m)  + n_sp_fix_value(i,m) - sigma2_fix(m)/ 2.0d0 ))
-            endif
+            ! switch_income_fixed_effect removed - was always 0 (no income fixed effects)
+            n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = n_sp_risk_value_trans_big(:,m,:)
+            n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_old_big(:,m) 
+            n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_new_big(:,m)
         
     enddo
     enddo

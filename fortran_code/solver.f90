@@ -10,14 +10,14 @@ double precision function uncertainty(sav, lti_past, lti_fut, jj)
 
     lhs = 0.0_dp
     do s = 1, jj
-        lhs = lhs + beta**(s-1)*(1+phi_j(s))
+        lhs = lhs + (1+phi_j(s))
     enddo
     lhs = lhs / (lti_past - sav)
 
     rhs = 0.0_dp
     do mm = 1, 2
         do s = jj+1, bigJ
-            rhs(mm) = rhs(mm) + beta**(s-1)*(1+phi_j(s))
+            rhs(mm) = rhs(mm) + (1+phi_j(s))
         enddo
         rhs(mm) = rhs(mm) / (sav + lti_fut(mm))
     enddo

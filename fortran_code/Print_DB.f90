@@ -11,7 +11,7 @@
     
     OPEN (unit=10, FILE = version//experiment//closure//"bigl_trans.txt")
     OPEN (unit=11, FILE = version//experiment//closure//"replacement_trans.txt")
-    OPEN (unit=12, FILE = version//experiment//closure//"upsilon_trans.txt")
+    ! upsilon removed - always 0
     OPEN (unit=13, FILE = version//experiment//closure//"tC_trans.txt")
     OPEN (unit=14, FILE = version//experiment//closure//"tL_trans.txt")
     OPEN (unit=15, FILE = version//experiment//closure//"tK_trans.txt")
@@ -19,7 +19,7 @@
     OPEN (unit=17, FILE = version//experiment//closure//"debt_share_trans.txt")
     OPEN (unit=18, FILE = version//experiment//closure//"debt_cost_share_trans.txt")
     
-    OPEN (unit=20, FILE = version//experiment//closure//"upsilon_share_trans.txt")
+    ! upsilon removed - always 0
     OPEN (unit=21, FILE = version//experiment//closure//"replacement2_trans.txt") !rozumiane jako pierwsza emerytura do ostatniej placy
     OPEN (unit=22, FILE = version//experiment//closure//"bigL_trans.txt")
     OPEN (unit=23, FILE = version//experiment//closure//"Nt_trans.txt")
@@ -81,14 +81,14 @@
         write(9, '(F20.10)')  sum_b(i)/y(i) !units?
         write(10, '(F20.10)') bigl_aux(i)/1000000 
         write(11, '(F20.10)') replacement(i)
-        write(12, '(F20.10)') upsilon(i)
+        ! write(12, '(F20.10)') upsilon(i) - removed, always 0
         write(13, '(F20.10)') tC(i)
         write(14, '(F20.10)') tL(i)
         write(15, '(F20.10)') tK(i)
         write(16, '(F20.10)') contribution(i)/y(i)
         write(17, '(F20.10)') debt_share(i)
         write(18, '(F20.10)') ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)
-        write(20, '(F20.10)') upsilon(i)/(bigl(i)/N_t(i))/y(i) 
+        ! write(20, '(F20.10)') upsilon(i)/(bigl(i)/N_t(i))/y(i) - removed, always 0
         write(21, '(F20.10)') replacement2(i)         
         write(22, '(F20.10)') bigl(i)
         write(23, '(F20.10)') N_t(i)
@@ -211,11 +211,11 @@
 ! pension system closure
     OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
     OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")
-    OPEN (unit=3, FILE = version//experiment//closure//"upsilon.txt")
+    ! upsilon removed - always 0
         do i = 1,n_p+1,1
             write(1, '(F20.10)')  b_scale_factor(i) 
             write(2, '(F20.10)')  t1(1,i) - t1_contrib(1,i)
-            write(3, '(F20.10)')  upsilon(i) 
+            ! write(3, '(F20.10)')  upsilon(i) - removed, always 0 
     enddo
 
     CLOSE(1)

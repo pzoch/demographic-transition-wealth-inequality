@@ -19,7 +19,7 @@ subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, param, 
     real(dp), dimension(bigj+n_p) :: u_all
     real(dp), dimension(bigj) ::  u_init_old
     real(dp), dimension(bigT) :: k_new, k_total, k_star, i_star,  err, sv_flow, debt_share, r_bar, r, u
-    real(dp), dimension(bigT) :: upsilon, upsilon_r, upsilon_old, Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
+    real(dp), dimension(bigT) :: Tax, debt, sum_b, replacement, replacement2, income, nu, nu_pop, labor_tax_revenue
     real(dp), dimension(n_beq,bigM,bigT) :: beq_zipf_trans_big
     real(dp), dimension(bigM,bigT) :: bequest, bigl_type
 	real(dp), dimension(bigT) :: bigl, bigl_aux, average_l, average_lab, average_w, subsidy, consumption, consumption_gross, consumption_gross_new, savings, y, k, bigK, wl_bar, bigY,N_t, rI, g, deficit, sum_priv_sv, contribution, gap, valor_mult, r_, multiplier_ces, check_pension_clearing, superstar_labinc_share_trans, superstar_pop_share_trans, superstar_totinc_share_trans, labinc_superstar_trans, totinc_superstar_trans, pop_superstar_trans, labinc_aggregate_trans, totinc_aggregate_trans, bequest_trans
@@ -264,9 +264,9 @@ include 'transition_iterations.f90'
     !do i = 2,bigT,1
     !    do j = 1,bigJ,1
     !        if (j == 1) then
-    !            income_j(j,i) = w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
+    !            income_j(j,i) = w_j(j,i)*l_j(j,i) + b_j(j,i)   + bequest_j(j,i)
     !        else
-    !            income_j(j,i) = r(i)*sv_j(j-1,i-1)/gam_t(i) + w_j(j,i)*l_j(j,i) + b_j(j,i)  - upsilon(i) + bequest_j(j,i)
+    !            income_j(j,i) = r(i)*sv_j(j-1,i-1)/gam_t(i) + w_j(j,i)*l_j(j,i) + b_j(j,i)   + bequest_j(j,i)
     !        endif
     !    enddo
     !    savings_rate_j(:,i) = sv_j(:,i)/income_j(:,i)
@@ -282,9 +282,9 @@ tax_c = tc
 ! budget constrain 
 !do j = 1, bigJ, 1
 !    if (j == 1) then
-!         write(*,*) (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
+!         write(*,*) (1 - tl(2))*w_j(j,2)*l_j(j,2)  + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
 !    else
-!         write(*,*) r(2)*sv_j(j-1,1)/gam_t(2) +  sum_b_weight_trans(2)*b_j(j,2) + (1 - tl(2))*w_j(j,2)*l_j(j,2) - upsilon(2) + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
+!         write(*,*) r(2)*sv_j(j-1,1)/gam_t(2) +  sum_b_weight_trans(2)*b_j(j,2) + (1 - tl(2))*w_j(j,2)*l_j(j,2)  + bequest_j(j,2) - (1+tc(2)) *c_j(j,2) - sv_j(j,2)
 !    endif 
 !enddo 
 ! 
