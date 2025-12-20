@@ -12,36 +12,6 @@
         write(*,*) '******* STEADY STATE PAYG *******'
         write(*,*)
         write(*,*) '*********************************'
-        write(*,*) 'Calibration:'
-        write(*,*)
-             
-     
-        ! most of it has to be removed, we do not care about these... 
-        write(*,'(A25,F10.5,A)') 'Gini on sav =  ', gini_val_sav, '  |  TARGET: ' 
-        !write(*,'(A25,F10.5,A)') 'Gini on pretax tot_inc =  ', gini_val_tinc_pretax, '  |  TARGET: ' 
-        !write(*,'(A25,F10.5,A)') 'Gini on tot_inc =  ', gini_val_tinc, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Gini on pretax lab inc =  ', gini_val_lab_pret, '  |  TARGET: ' 
-        !write(*,'(A25,F10.5,A)') 'Gini on lab inc =  ', gini_val_lab, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Superstar labor income share=  ', superstar_labinc_share, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'Superstar tot income share=  ', superstar_totinc_share, '  |  TARGET: ' 
-
-        write(*,'(A25,F10.5,A)') 'Superstar pop share / work. pop =  ', superstar_pop_share, '  |  TARGET: ' 
-        write(*,'(A25,F10.5,A)') 'share zero assets (25-64) =  ', share_0_sav, '  |  TARGET: '
-        write(*,'(A25,F10.3,A)') '100*beq_sum_ss/y =  ', 100*beq_sum_ss/y_ss, '  |  TARGET: ' 
-        write(*,'(A25,F10.3,A)') '100*sum_b/y =  ', 100*sum_b_ss/y_ss, '  |  TARGET: ' 
-        write(*,'(A25,F10.3,A)') ' average hours (%) =  ', 100*average_lab_ss,  '  |  TARGET: 33%', 100*labor_constant
-        write(*,'(A30,F10.3,A)') ' Pre-tax real interest rate = ', 100*((1 + r_bar_ss)**0.2_dp -1d0), '  |  TARGET: '
-        write(*,'(A30,F10.3,A)') ' After-tax real interest rate = ', 100*(r_ss**0.2_dp -1d0), '  |  TARGET:'
-        write(*,'(A25,F10.3,A)') ' investment rate (%) =  ', 100*(y_ss - consumption_ss_gross - g_ss)/y_ss,  '  |  TARGET:'
-        write(*,'(A20,F10.3,A)') ' Tax_C/y_ss = ',  100*tc_ss*consumption_ss_gross/y_ss   
-        write(*,'(A20,F10.3,A)') ' Tax_K/y_ss = ',  100*tk_ss*(r_bar_ss + depr)*k_ss/y_ss 
-        write(*,'(A20,F10.3,A)') ' Tax_L/y_ss = ',  100*labor_tax_revenue_ss/bigl_ss/y_ss
-        write(*,'(A20,F10.3,A)') 'g/y = ',   g_ss/y_ss, '  |  TARGET: be 2.8%'
-        write(*,'(A20,F10.3,A)') '100*subsidy/y = ',   subsidy_ss/y_ss, '  |  TARGET: be 2.8%'
-        write(*,'(A20,F10.3,A)') 'gam_ss*nu_ss = ',   gam_ss*nu_ss
-        
-        
-        write(*,*) '*********************************'
         write(*,*)
         write(*,'(A30,F10.3,A)') ' err_ss = ', err_ss
         write(*,'(A30,F10.3,A)') ' k_ss = ', k_ss

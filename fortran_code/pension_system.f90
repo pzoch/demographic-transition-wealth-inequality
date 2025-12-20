@@ -1,5 +1,6 @@
-    valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1)  - 1))/gam_t(1)
-    valor_mult(2) = (1 + valor_share*(gam_t(1)*nu(1)  - 1))/gam_t(2)
+    ! valor_share removed - was always 1.0 (full indexation)
+    valor_mult(1) = (1 + 1.0d0*(gam_t(1)*nu(1)  - 1))/gam_t(1)
+    valor_mult(2) = (1 + 1.0d0*(gam_t(1)*nu(1)  - 1))/gam_t(2)
     wl_bar = 0.0d0
     do i = 1,bigT,1
     do m = 1,bigM,1
@@ -7,7 +8,7 @@
     enddo
     enddo
     do i = 3,bigT,1
-        valor_mult(i) = (1 + valor_share*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
+        valor_mult(i) = (1 + 1.0d0*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
     enddo 
     
     

@@ -19,13 +19,6 @@
 1.0d0 // frisch 
 -0.0674225d0 // tc_ss 
 0.5d0 // g_share_ss 
-0.8d0 // rho_1 
-0.8d0 // rho_2 
-0.06d0 // t1_ss_old 
-0.06d0 // t1_ss_new 
-0.00d0 // t2_ss_old 
-0.00d0 // t2_ss_new 
-1.0d0  // valor_share 
 10 // switch_fix_retirement_age 
 16.23d0 // superstar_factor(m,1)
 16.23d0 // superstar_factor(m+1,1)

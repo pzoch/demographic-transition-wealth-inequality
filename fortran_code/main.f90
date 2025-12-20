@@ -4,8 +4,7 @@ program olg2
     use global_vars2
     use transition_DB
     use get_data
-    use clock 
-    !use geompack3
+    use clock
  
     
     implicit none
@@ -19,8 +18,8 @@ program olg2
     
 
         
-    version = 'beqx_' ! these three strings allow us to load a correct version
-    experiment = 'ndm_'
+    version = 'base_' ! these three strings allow us to load a correct version
+    experiment = 'all_'
     closure = 'govt__'
     
     call globals         ! globals is a subroutine in global_vars2 module             

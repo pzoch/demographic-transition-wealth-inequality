@@ -31,8 +31,8 @@
         write(666,'(A30,I5.1)') 'switch_run_1 =', switch_run_1
         write(666,'(A30,I5.1)') 'switch_run_2 =', switch_run_2
         write(666,'(A30,I5.1)') 'switch_run_t =', switch_run_t
-        write(666,'(A30,I5.1)') 'switch_param_1 =', switch_param_1
-        write(666,'(A30,I5.1)') 'switch_param_2 =', switch_param_2
+        write(666,'(A30,I5.1)') 'switch_param_1 =', 0
+        write(666,'(A30,I5.1)') 'switch_param_2 =', 1
         write(666,'(A30,I5.1)') 'switch_ss_write =', switch_ss_write
         write(666,'(A30,I5.1)') 'switch_profile =', switch_profile
         write(666,'(A30,I5.1)') 'beq_age =', beq_age
@@ -51,7 +51,6 @@
          write(666,'(A30,F9.5 )') 'err_ss_tol =',     err_ss_tol  
          write(666,'(A30,F9.5 )') 'up_ss =',     up_ss  
          write(666,'(A30,F9.5 )') 'up_t =',     up_t  
-         write(666,'(A30,F9.5 )') 'valor_share =',     valor_share  
          write(666,'(A30,F9.5 )') 'up_tc =',     up_tc  
          write(666,'(A30,F9.5 )') 'g_share_ss =',     g_share_ss / gy_factor_t(1)
          write(666,'(A30,F9.5 )') 'superstar_factor_1 =',     superstar_factor_1  
@@ -64,12 +63,7 @@
          write(666,'(A30,F9.5 )') 'rho_subst =',     rho_subst  
          write(666,'(A30,F9.5 )') 'delta =',     delta  
          write(666,'(A30,F9.5 )') 'phi =',     phi  
-         write(666,'(A30,F9.5 )') 'rho_1 =',     rho_1  
-         write(666,'(A30,F9.5 )') 'rho_2 =',     rho_2  
-         write(666,'(A30,F9.5 )') 't1_ss_old =',     t1_ss_old  
-         write(666,'(A30,F9.5 )') 't1_ss_new =',     t1_ss_new  
-         write(666,'(A30,F9.5 )') 't2_ss_old =',     t2_ss_old  
-         write(666,'(A30,F9.5 )') 't2_ss_new =',     t2_ss_new  
+         ! t1_ss and t2_ss removed - loaded from data files
          write(666,'(A30,F9.5 )') 'delta_half_width =',     delta_half_width  
          write(666, '(A)') 'NOTE: ' 
          write(666, '(A)') 'THIS DOES NOT MEAN IT RUNS WITH THESE PARAMETERS ' 

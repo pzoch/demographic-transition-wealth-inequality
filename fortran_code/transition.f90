@@ -10,7 +10,7 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
-subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, param, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
+subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
 
     integer, parameter :: dp = kind(1.0d0)
     real(dp) :: pom, placeholder
@@ -30,12 +30,8 @@ subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, param, 
     real(dp), dimension(0:n_a,bigT) :: prob_trans_marg
     real(dp), dimension(bigM, bigT) :: w_bar
     integer, intent(in) :: switch_tauK_gross, switch_unequal_bequest
-    integer, intent(in) :: param
-    real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
-    
-    
-    
     real(dp), dimension(bigj, bigM, bigT), intent(out) :: c_j, l_j, sv_j, lab_j
+    real(dp), dimension(bigT), intent(out) :: r_f, tax_c, g_per_capita
     
     
     
@@ -67,30 +63,6 @@ subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, param, 
     
 
     N_big_t_j = Nn_big
-    if (param == 0) then    ! 0 = with old parameters (i.e. overwriting);  1 = with default (transition) parameters
-        do i = 1,bigT,1
-		    omega_big(:,:,i)  = omega_ss_big
-            pi_big(:,:,i)       = pi_big_ss_old
-            pi_big_weight(:,:,i) = pi_big_weight_ss_old
-            N_big_t_j(:,:,i)    = N_big_ss_old
-            gam_t(i)    = gam_ss_old
-            jbar_t(i)   = jbar_ss_old
-            tL(i)       = tauL_ss_old
-            lambda_t(i) = lambda_ss_old
-            tK(i)       = tauK_ss_old
-            tC(i)       = tauC_ss_old
-            t1(:,i)     = t1_ss_old
-            alpha_t(i)       = alpha_ss_old
-            depr_t(i)       = depr_ss_old
-            debt_constr_t(i) = debt_constr_ss_old
-            g_share(i)      = g_share_ss
-            exog_rate_t(i)    = exog_rate_ss_old
-	    enddo
-        gam_cum(1) = gam_t(1)
-        do i=2,bigT,1
-            gam_cum(i) = gam_cum(i-1)*gam_t(i)
-        enddo
-    endif
 
     
 
@@ -192,14 +164,6 @@ enddo
     bigK = k * bigl
     bigY = y * bigl
 
-    do i = n_p+2,bigT,1
-           
-        tc(i) = tc_new
-        !tl(i) = tl_new
-    enddo
-
-    
-    
     lambda_trans = lambda_t
     debt_constr_trans = debt_constr_t
     
@@ -223,12 +187,13 @@ enddo
            wl_bar(i) = wl_bar(i) +  sum(N_big_t_j(:,m,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
         enddo
     enddo
-    valor_mult(1) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(1)
-    valor_mult(2) = (1 + valor_share*(gam_t(1)*nu(1) - 1))/gam_t(2)
+    ! valor_share removed - was always 1.0 (full indexation)
+    valor_mult(1) = (1 + 1.0d0*(gam_t(1)*nu(1) - 1))/gam_t(1)
+    valor_mult(2) = (1 + 1.0d0*(gam_t(1)*nu(1) - 1))/gam_t(2)
     
     
-    do i = 3,bigT,1
-        valor_mult(i) = (1 + valor_share*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
+    do i = 3, bigT, 1
+        valor_mult(i) = (1 + 1.0d0*(gam_t(i-1)*(wl_bar(i-1))/(wl_bar(i-2))-1))/gam_t(i)
     enddo
     
     if (switch_tauK_gross == 0) then

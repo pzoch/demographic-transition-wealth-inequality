@@ -51,8 +51,8 @@ call chdir(cwd_i)
         read(3,*) switch_run_1
         read(3,*) switch_run_2
         read(3,*) switch_run_t
-        read(3,*) switch_param_1
-        read(3,*) switch_param_2
+        read(3,*) ! switch_param_1 (always 0, hardcoded)
+        read(3,*) ! switch_param_2 (always 1, hardcoded)
         read(3,*) switch_ss_write
         read(3,*) switch_profile 
         read(3,*) switch_small_write 
@@ -85,13 +85,7 @@ call chdir(cwd_p)
         read(3,*) frisch 
         read(3,*) tc_ss 
         read(3,*) g_share_ss 
-        read(3,*) rho_1 
-        read(3,*) rho_2 
-        read(3,*) t1_ss_old 
-        read(3,*) t1_ss_new 
-        read(3,*) t2_ss_old 
-        read(3,*) t2_ss_new 
-        read(3,*) valor_share 
+        ! t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new removed - always overwritten by data
         read(3,*) switch_fix_retirement_age
         if (n_superstar > 0) then
         do m = 1,bigM,1 
@@ -138,9 +132,6 @@ call chdir(cwd_p)
         sigma_nu_d  = sigma_nu_d*(1-zeta_d**(2*zbar))/(1-zeta_d**2)
         zeta_d      = zeta_d**zbar 
         
-    ones = 1 
- 
-    tL = tL
     tk = tK
     tc = tc_ss
    
@@ -162,32 +153,8 @@ call chdir(cwd_p)
     include 'shocks_parameters.f90'
     include 'print_stamp.f90' 
     
-        
-    new_ret_yob = -bigT
-    new_ret_yob(1) = 1 - jbar_t(1) + 1
-    last = new_ret_yob(1) 
-    do i = 2, bigT    
-        ! calculate years of birth of new retired
-        new_ret_yob(i) = i - jbar_t(i) + 1
-        ! during increase ret age we may have 
-        ! new_ret_yob(i) <=  new_ret_yob(i -1) which is not true cause 
-        ! there is no possibility to be shorn of pension - we need to 
-        ! take in to account during calculate year of birth [yob] specifc ret age
-            if (new_ret_yob(i) <= last) then
-                new_ret_yob(i) = -bigT ! unreal small number
-            else 
-                 last  = new_ret_yob(i)
-            endif
-    enddo
+    ! Simplified retirement age setup - retirement age is constant across all periods
     jbar_t_yob(:) = jbar_t(1)
-    do i = 1, bigT, 1
-        if (new_ret_yob(i) > -bigT) then
-            ! we use first occuring of 
-            jbar_t_yob(new_ret_yob(i)) =  jbar_t(i)  
-        endif
-    enddo
-    
-
     
     do i = 1,bigT,1
         omega_big(:,:,i) = omega_ss_big
@@ -247,7 +214,13 @@ call chdir(cwd_p)
     type_share_ss_old = type_share_t(:,1)
     type_share_ss_new = type_share_t(:,bigT)
     
-call chdir(cwd_w)    
+    
+    c_db = 0
+    l_db = 0
+    tax_c_db = 0
+    r_db = 0 
+
+call chdir(cwd_w)
 
 end subroutine globals
 
@@ -277,10 +250,7 @@ subroutine clear_globals
 
    
     
-    c_db = 0
-    l_db = 0
-    tax_c_db = 0
-    r_db = 0 
+ 
 end subroutine clear_globals
 
     end module global_vars2

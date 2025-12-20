@@ -29,7 +29,7 @@ IMPLICIT NONE
     
     integer :: switch_run_1, switch_run_2, switch_run_t     ! 0 = don't run the first/second steady state/transition path; 1 = run the first/second steady state/transition path
     integer :: switch_profile                               ! 0 = do not calculate profiles; 1 = calculate profiles 
-    integer :: switch_param_1, switch_param_2               ! 0 = with old parameters; 1 = with new parameters (pi,gam,N,jbar) 
+ 
     integer :: switch_type_1, switch_type_2                 ! 0 = payg; 1 = ff
     integer :: switch_steady_demo                           ! this is a switch that needs to be set to 1 to have nu_ss not equal to 1 in the initial steady state: 0 = demographical structure as in the data, 1 = demographical structure obtained by taking survival probabilities and some prespecified population growth rate
     
@@ -85,9 +85,9 @@ IMPLICIT NONE
     real(dp), dimension(bigJ,bigM) :: l_ss_j_2, w_ss_j_2, s_ss_j_2, c_ss_j_2, b_ss_j_2, l_ss_pen_j_2, lab_ss_j_2
 
 ! parameters
-    real(dp) :: alpha, delta, depr, theta, rho_subst, phi, up_ss, up_t, rho_1, rho_2, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
-    real(dp) :: g_share_ss, tk_ss, tl_ss, tc_ss, tc2_ss, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new, valor_share, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
-    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new, exog_rate_ss_old, exog_rate_ss_new
+    real(dp) :: alpha, delta, depr, theta, rho_subst, phi, up_ss, up_t, err_tol, err_ss_tol, err_prof_tol, frisch, disutil, l_bound, labor_constant
+    real(dp) :: g_share_ss, tk_ss, tl_ss, tc_ss, tc2_ss, debt_constr_ss_old, debt_constr_ss_new, tc_new, tl_new, tk_new, alpha_ss_old, alpha_ss_new, depr_ss_old, depr_ss_new, rho_ss_old, rho_ss_new, frac_pat, delta_H
+    real(dp) :: jbar_ss_old, jbar_ss_new, gam_ss_old, gam_ss_new, nu_ss_old, nu_ss_new, tauL_ss_old, tauL_ss_new, tauK_ss_old, tauK_ss_new, tauC_ss_old, tauC_ss_new, lambda_ss_old, lambda_ss_new, epsilon_correction_ss_old, epsilon_correction_ss_new, exog_rate_ss_old, exog_rate_ss_new, t1_ss_old, t1_ss_new, t2_ss_old, t2_ss_new
     real(dp), dimension(bigM) :: epsilon_correction_ss_old_big, epsilon_correction_ss_new_big, type_multiplier_ss_old, type_multiplier_ss_new, type_share_ss_old, type_share_ss_new
     real(dp) :: tc_growth, up_tc, up_debt_t
     real(dp), dimension(bigJ) :: pi_ss_old, pi_ss_new, pi_weight_ss_old, pi_weight_ss_new, N_, N_ss_old, N_ss_new  
@@ -107,11 +107,9 @@ IMPLICIT NONE
     real(dp), dimension(bigJ, bigM, bigT) ::pi_big, pi_big_weight, Nn_big, pi_trans_cond_big
     real(dp), dimension(bigJ,bigM, bigT) :: omega_big
     
-! LSRA
-    real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db, lab_db!  c_base, l_base,  c_ref, l_ref
-    real(dp), dimension(- bigJ: bigT) ::  V_20_years_old_db !  V_20_years_old_base, V_20_years_old_ref
-    real(dp), dimension(bigT) :: r_db, tax_c_db, g_per_capita_db, better !  r_base, tax_c_base, g_per_capita_base, r_ref, tax_c_ref, g_per_capita_ref
-    real(dp), dimension(bigJ, bigT) :: x_j_pro,  x_unif_pro, sum_x_pro, x_c_j_pro, eq_unif_pro, sum_eq_pro
+! transition output variables
+    real(dp), dimension(bigJ, bigM, bigT) :: c_db, l_db, s_db, lab_db
+    real(dp), dimension(bigT) :: r_db, tax_c_db, g_per_capita_db
 
 ! multiple types
     real(dp), dimension(bigM) :: bigM_share_ss
