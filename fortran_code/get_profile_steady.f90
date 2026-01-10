@@ -1,3 +1,56 @@
+!===============================================================================
+! FILE: get_profile_steady.f90
+!
+! DESCRIPTION:
+!   Computes life-cycle profiles for steady state given prices and pension parameters.
+!   Wrapper module that orchestrates PFI solution for a single steady state.
+!
+! MODULE: prof_steady
+!   Profile calculation for steady-state equilibrium.
+!
+! SUBROUTINES:
+!   - profile_steady: Main routine for steady-state profile computation
+!                     Given (r_bar_ss, w_bar_ss, tc_ss, b_ss_j, bequest_ss_j),
+!                     solves household problem and computes distributions
+!
+! INPUTS:
+!   - switch_tauK_gross, switch_unequal_bequest, param_ss: Configuration switches
+!   - rho: Discount factor (or preference parameter)
+!   - tc_ss: Consumption tax rate (steady state)
+!   - r_bar_ss: Interest rate (steady state)
+!   - w_bar_ss(bigM): Type-specific wages (steady state)
+!   - b_ss_j(bigJ,bigM): Pension benefits by age/type (steady state)
+!   - bequest_ss_j(bigJ,bigM): Bequests by age/type (steady state)
+!   - bequest_ss(bigM): Total bequests by type (steady state)
+!
+! OPERATIONS:
+!   1. Construct demographic/pension system profiles:
+!      - jbar_ss, gam_ss, N_ss, nu_ss: Demographics
+!      - tau1_ss, tau2_ss: Contribution rates
+!      - w_pom_ss_j, pension_ss_j: Wage/benefit profiles
+!   2. Call PFI routines (from pfi_trans module):
+!      - household problem solver
+!      - distribution computation
+!      - aggregation
+!   3. Return profiles: V_ss_j, c_ss_j, l_ss_j, s_ss_j, etc.
+!
+! OUTPUTS:
+!   Life-cycle profiles (bigJ vectors/matrices):
+!   - V_ss_j, c_ss_j, l_ss_j: Value, consumption, labor by age
+!   - s_ss_j, s_pom_ss_j: Savings
+!   - pension_ss_j, labor_tax_ss_j: Pension benefits, taxes
+!   - w_ss_j, tot_income_ss_j: Wages, total income
+!
+! DEPENDENCIES:
+!   - global_vars: Model parameters and grids
+!   - pfi_trans: PFI solution routines (household_endo, get_distribution_ss, aggregation_ss)
+!
+! NOTES:
+!   "Profile" refers to age-specific averages conditional on aggregate prices.
+!   Used within steady state solver (steady.f90) as inner loop - given prices,
+!   compute quantities. Outer loop adjusts prices until market clearing.
+!   Variable naming: *_ss_implicit for pension system internals, *_vfi for PFI outputs.
+!===============================================================================
 ! WHAT   : this function takes some exogenous variables and calculates profiles
 
 

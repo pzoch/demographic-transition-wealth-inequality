@@ -1,11 +1,34 @@
-!##############################################################################
-! MODULE matrixtools
-! 
-! Module for some matrix tools.
+!===============================================================================
+! FILE: matrixtools.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Linear algebra utility library providing matrix operations, decompositions,
+!   and solvers for dense systems. Core computational support for model solution.
+!
+! MODULE: matrixtools
+!   Collection of matrix manipulation and linear algebra routines.
+!
+! KEY ROUTINES:
+!   - mat_mult: Multiplies 2-6 matrices (overloaded interface)
+!   - lu_solve: Solves Ax=b via LU decomposition with partial pivoting
+!   - cholesky: Cholesky decomposition for symmetric positive-definite matrices
+!   - inverse: Matrix inversion using LU decomposition
+!   - det: Determinant calculation
+!
+! INTERFACES:
+!   - mat_mult: Generic interface supporting mat_mult2 through mat_mult6
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Based on Numerical Recipes (Press et al. 1992). Optimized for moderate-sized
+!   dense matrices typical in aggregate OLG model computations.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !
 ! Large parts of the procedures were taken from:
 !     Press, Teukolsky, Vetterling and Flannery (1992): "Numerical Recipes in

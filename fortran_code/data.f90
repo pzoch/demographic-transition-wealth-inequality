@@ -1,15 +1,86 @@
-! WHAT   :  read initial data and inital values from world without the reform
-! TAKE   :  data files and output files from base scenario (without reform) 
-! DO     :  read data from files to variables and parameters 
-! RETURN :  base variable CRUCIAL to the next run on the path 
+!===============================================================================
+! FILE: data.f90
+!
+! DESCRIPTION:
+!   Module for loading external data files containing demographic projections,
+!   economic time series, and policy parameters. Processes raw data and prepares
+!   time-varying arrays for steady state and transition path computations.
+!
+! MODULE: get_data
+!   Contains data reading and processing routines
+!
+! SUBROUTINES:
+!   - read_data: Master data loading routine that reads all external data files
+!
+! DATA FILES READ (from Data/ directory):
+!   - _data_Nn_US_*.txt: Population by age and time
+!   - _data_gamma*.txt: TFP growth rates
+!   - _data_pi_*.txt: Conditional survival probabilities
+!   - _data_omega_*.txt: Age-efficiency profiles
+!   - _data_sigma2eps_*.txt: Earnings shock variances
+!   - _data_tau*.txt: Tax rate time series (L, K, C)
+!   - _data_lambda.txt: Bequest tax rates
+!   - _data_skill_premium.txt: College wage premium
+!   - _data_college_share.txt: Population share by education
+!   - _data_contrib*.txt: Pension contribution rates
+!   - _data_depr.txt: Depreciation rates
+!   - _data_rho_*.txt: Pension replacement rates
+!   - _data_exog_rate_*.txt: Exogenous interest rates
+!   - _data_gy_*.txt: Government spending ratios
+!
+! PROCESSING:
+!   - Extends data series to full transition horizon using last available values
+!   - Calculates implied survival probabilities from population data
+!   - Computes cumulative TFP growth and labor efficiency measures
+!   - Applies cohort and period-specific shocks and mortality patterns
+!
+! RETURNS:
+!   Time-varying arrays (*_d suffix) for all demographic and policy variables
+!===============================================================================
 
 MODULE get_data
 use global_vars
 IMPLICIT NONE
 CONTAINS
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+!-------------------------------------------------------------------------------
+! SUBROUTINE: read_data
+!
+! PURPOSE:
+!   Master data loading routine. Reads all external demographic, economic, and
+!   policy data files from Data/ directory and prepares time-varying arrays.
+!
+! ARGUMENTS:
+!   All intent(out) arrays for demographic and policy time series:
+!   - omega_ss_d: Age-efficiency profile (steady state)
+!   - gam_d, gam_cum_d: TFP growth (period and cumulative)
+!   - zet_d: Effective labor per capita
+!   - pi_d_big, pi_big_weight_d: Survival probabilities (conditional and from age 1)
+!   - Nn_d_big: Population by age, type, and time
+!   - jbar_d: Retirement age by period
+!   - t1_d: Pension contribution rate
+!   - tauL_d, tauK_d, tauC_d: Tax rates (labor, capital, consumption)
+!   - lambda_d: Bequest tax rate
+!   - debt_constr_d: Government debt constraint
+!   - alpha_d: Capital share in production
+!   - type_multiplier_d: Skill premium (college vs non-college)
+!   - gy_factor_d: Government spending adjustment factor
+!   - type_share_d: Population share by education type
+!   - depr_d: Depreciation rate
+!   - rho_d: Pension replacement rate
+!   - exog_rate_d: Exogenous interest rate (if used)
+!
+! DATA SOURCES:
+!   Reads from text files in Data/ directory. Data availability typically spans
+!   1935-2100, with different end dates for different series. Missing future
+!   values are filled by extending last observed value.
+!
+! NOTES:
+!   - start_year = 1935 (model time t=1)
+!   - break_index = 5 corresponds to year 1955
+!   - last_data_* variables define data availability for each series
+!   - Applies switch_* settings to control which data series are active
+!-------------------------------------------------------------------------------
 subroutine read_data(omega_ss_d, gam_d, gam_cum_d, zet_d, pi_d_big, pi_big_weight_d, Nn_d_big, jbar_d, t1_d, tauL_d, tauK_d, tauC_d, lambda_d, debt_constr_d, alpha_d, type_multiplier_d, gy_factor_d, type_share_d, depr_d, rho_d, exog_rate_d)
       integer :: bigJT
       real(dp)::  sum_N_temp , N_temp ! pop summation

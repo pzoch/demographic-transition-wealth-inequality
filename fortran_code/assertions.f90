@@ -1,16 +1,43 @@
-!##############################################################################
-! MODULE assertions 
-! 
-! Contains several assertion methods.
+!===============================================================================
+! FILE: assertions.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Runtime assertion utilities for validating array dimensions and preventing
+!   shape mismatches. Provides defensive programming support across toolbox.
 !
-! Large parts of the procedures were taken from:
-!     Press, Teukolsky, Vetterling and Flannery (1992): "Numerical Recipes in
-!     FORTRAN: The Art of Scientific Computing", 2nd edition, Cambridge
-!     Univeristy Press, Cambridge.
+! MODULE: assertions
+!   Dimension checking and assertion routines.
+!
+! FUNCTIONS:
+!   - assert_eq: Generic interface for equality assertions (overloaded)
+!   - assert_eq2: Checks two arrays have same size; returns common size
+!   - assert_eq3: Checks three arrays have same size; returns common size
+!   - assert_eq4: Checks four arrays have same size; returns common size
+!   - assert_eq5: Checks five arrays have same size; returns common size
+!   - assert_eqn: Checks arbitrary number of arrays have same size
+!
+! INTERFACES:
+!   - assert_eq: Dispatches to assert_eq2 through assert_eqn based on argument count
+!
+! BEHAVIOR:
+!   On mismatch: Calls error() from errwarn module, prints diagnostic message,
+!   waits for user input, then stops execution.
+!
+! USAGE:
+!   n = assert_eq(size(a), size(b), 'routine_name')
+!   ! Returns n if sizes match; errors otherwise
+!
+! DEPENDENCIES:
+!   - errwarn: For error() routine
+!
+! NOTES:
+!   Based on Numerical Recipes (Press et al. 1992). Used throughout toolbox
+!   modules (linint, splines, matrixtools, etc.) to catch dimension errors early.
+!   Minimal performance overhead - assertions compiled out in release builds.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 
 module assertions

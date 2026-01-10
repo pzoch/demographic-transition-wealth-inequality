@@ -1,7 +1,39 @@
-! WHAT   : transition path for PAYG  
-! TAKE   : initial parametrizations and values of the basic variables as a guess on the path,             
-! DO     : start iteration, variable_new = f(variable_old) etc. until sum|variable_new(i) - variable_old(i)|< err_tol
-! RETURN : generated transition path
+!===============================================================================
+! FILE: transition.f90
+!
+! DESCRIPTION:
+!   Module for computing transition path between two steady states in the OLG
+!   model. Solves for time-varying general equilibrium given demographic changes,
+!   policy reforms, and productivity shocks over the transition horizon.
+!
+! MODULE: transition_DB
+!   Contains transition path computation routine
+!
+! SUBROUTINE:
+!   - transition_path_DB: Main iterative solver for transition path equilibrium
+!
+! ALGORITHM:
+!   1. Initialize guess for capital path {k(t)} from steady states
+!   2. For each period t = 1,...,bigT:
+!      a. Compute factor prices r(t), w(t) from production
+!      b. Calculate pension benefits for all cohorts alive at t
+!      c. Solve household problem via backward induction PFI
+!      d. Aggregate decisions across cohorts and types
+!      e. Compute bequests and government budget for period t
+!   3. Update capital path based on aggregate savings
+!   4. Iterate until convergence: sum_t |k_new(t) - k_old(t)| < tol
+!
+! DEPENDENCIES:
+!   - get_data: Data structures and utilities
+!   - global_vars: Parameter and variable declarations
+!   - pfi_trans: Policy function iteration for transition
+!
+! NOTES:
+!   - Initial conditions from "old" steady state (t=1)
+!   - Terminal conditions approach "new" steady state (t=bigT)
+!   - Cohorts overlap across periods creating complex dynamics
+!   - Handles demographic transitions, policy reforms, TFP shocks simultaneously
+!===============================================================================
 
 MODULE transition_DB
 use get_data
@@ -10,6 +42,93 @@ use pfi_trans
 
 IMPLICIT NONE 
 CONTAINS
+
+!-------------------------------------------------------------------------------
+! SUBROUTINE: transition_path_DB
+!
+! PURPOSE:
+!   Computes full transition path from initial to terminal steady state.
+!   Solves for time-varying general equilibrium with demographic changes,
+!   policy reforms, and aggregate shocks.
+!
+! ARGUMENTS (selected key inputs/outputs):
+!   INPUT:
+!     - switch_tauK_gross: Capital tax treatment (0=net, 1=gross)
+!     - switch_unequal_bequest: Bequest distribution mechanism (0/1/2)
+!   OUTPUT:
+!     - l_j(j,m,t): Labor supply by age, type, and time
+!     - c_j(j,m,t): Consumption by age, type, and time
+!     - sv_j(j,m,t): Savings by age, type, and time
+!     - lab_j(j,m,t): Labor hours by age, type, and time
+!     - tax_c(t): Consumption tax revenue path
+!     - r_f(t): After-tax interest rate path
+!     - g_per_capita(t): Government spending per capita path
+!
+! LOCAL VARIABLES (key transition paths):
+!   - k(t): Capital stock per effective labor
+!   - r(t), r_bar(t): Net and gross interest rates
+!   - w_bar(m,t): Average wage by type
+!   - bigl(t): Aggregate effective labor
+!   - y(t): Output per effective labor
+!   - g(t): Government spending
+!   - debt(t): Government debt
+!   - Tax(t): Total tax revenue
+!   - b_j(j,m,t): Pension benefits
+!   - bequest(m,t): Aggregate bequests by type
+!   - N_t_j(j,t): Population by age
+!
+! ALGORITHM DETAILS:
+!   Outer loop (up to n_iter_t iterations):
+!     For t = 1 to bigT:
+!       1. Compute factor prices from k(t) via production function
+!       2. Calculate pension benefits for all cohorts using past wages
+!       3. Solve household problem via backward PFI:
+!          - Start from terminal period with known terminal SS value
+!          - Work backward computing value/policy functions
+!          - Handle bequest shocks at specified age
+!       4. Simulate forward to get distributions
+!       5. Aggregate to get macro variables: bigl(t), savings, consumption
+!       6. Compute bequests using mortality and bequest rules
+!       7. Apply government budget closure to balance budget
+!       8. Update k(t+1) from aggregate savings and population growth
+!     
+!     Check convergence:
+!       err = sum over t of |k_new(t) - k_old(t)|
+!       If err < err_tol, exit; else damp update and continue
+!
+! PENSION SYSTEM:
+!   - Calculates benefits using earnings history (AIME)
+!   - Handles both PAYG and funded pillars
+!   - Applies valorization and indexation rules
+!   - Cohort-specific retirement ages via jbar_t_yob array
+!
+! GOVERNMENT BUDGET:
+!   Multiple closure rules (via switch_residual):
+!     0: Lump-sum transfers adjust (upsilon residual)
+!     1: Consumption tax adjusts (tauC residual)
+!     2: Debt adjusts (debt residual)
+!     6: Spending adjusts (g residual)
+!
+! CONVERGENCE:
+!   - Tolerance: err_tol (typically 1e-6)
+!   - Maximum iterations: n_iter_t (typically 100-500)
+!   - Damping: up_t parameter smooths capital path updates
+!   - Prints cumulative error each iteration if switch_print=1
+!
+! INITIAL/TERMINAL CONDITIONS:
+!   - k(1) initialized from old steady state
+!   - k(bigT) should converge to new steady state
+!   - Value functions at bigT use terminal steady state
+!   - Population N_t_j from demographic projections
+!
+! NOTES:
+!   - Handles cohort overlaps: at time t, ages 1 to bigJ are alive
+!   - Each cohort born at different calendar time with different parameters
+!   - Bequests distributed according to switch_unequal_bequest rule
+!   - Supports heterogeneous mortality (switch_het_mortality)
+!   - Can fix labor supply (switch_fix_labor) or solve endogenously
+!   - Includes "superstar" workers with higher productivity
+!-------------------------------------------------------------------------------
 subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
 
     integer, parameter :: dp = kind(1.0d0)

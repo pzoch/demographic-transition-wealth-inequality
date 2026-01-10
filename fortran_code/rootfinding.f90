@@ -1,11 +1,34 @@
-!##############################################################################
-! MODULE rootfinding
-! 
-! Finds zeros of multidimensional function.
+!===============================================================================
+! FILE: rootfinding.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Multidimensional root-finding library for solving systems of nonlinear
+!   equations. Implements Broydn quasi-Newton method for finding zeros.
+!
+! MODULE: rootfinding
+!   Robust numerical routines for solving f(x) = 0 in multiple dimensions.
+!
+! KEY ROUTINES:
+!   - broydn: Main solver using Broyden's quasi-Newton method
+!   - fdjac: Finite-difference Jacobian approximation
+!   - lnsrch: Line search with backtracking for global convergence
+!   - qrdcmp/qrupdt: QR decomposition and update for Jacobian approximation
+!
+! PARAMETERS:
+!   - gftol_root: Convergence tolerance (default 1e-8)
+!   - itermax_root: Maximum iterations (default 6000)
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Based on Numerical Recipes (Press et al. 1992). Used throughout OLG model
+!   for market clearing and government budget balance conditions.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !
 ! Large parts of the procedures were taken from:
 !     Press, Teukolsky, Vetterling and Flannery (1992): "Numerical Recipes in

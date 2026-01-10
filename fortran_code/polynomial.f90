@@ -1,11 +1,39 @@
-!##############################################################################
-! MODULE polynomial
-! 
-! Module for onedimensional polynomial interpolation.
+!===============================================================================
+! FILE: polynomial.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   One-dimensional polynomial interpolation using Lagrange or Neville's algorithm.
+!   Provides high-order approximation for smooth functions.
+!
+! MODULE: polynomial
+!   Polynomial interpolation and grid construction utilities.
+!
+! KEY ROUTINES:
+!   - poly_interpol: Generic interface for 1D polynomial interpolation
+!   - poly_interpol_1: Single-point evaluation
+!   - poly_interpol_m: Multiple-point evaluation (vectorized)
+!   - grid_Cons_Equi: Constructs equidistant grid
+!   - grid_Cons_Cheb: Constructs Chebyshev nodes (minimizes Runge phenomenon)
+!
+! INTERFACES:
+!   - poly_interpol: Dispatches to single/multiple point routines
+!
+! ALGORITHM:
+!   Neville's algorithm for stable polynomial evaluation. Order determined by
+!   number of interpolation points provided.
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Use with caution for high-degree polynomials (Runge phenomenon). Prefer
+!   Chebyshev nodes over equidistant grids for accuracy. Rarely used in main
+!   model solution; typically for testing/diagnostics.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 module polynomial
 

@@ -1,11 +1,38 @@
-!##############################################################################
-! MODULE clock
-! 
-! Module for gmeasuring elapsed time.
+!===============================================================================
+! FILE: clock.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Simple timing utilities for measuring elapsed CPU and wall-clock time.
+!   Used for profiling model solution performance.
+!
+! MODULE: clock
+!   Lightweight timer for performance measurement.
+!
+! SUBROUTINES:
+!   - tic: Starts CPU timer (records start time)
+!   - toc: Stops CPU timer and reports elapsed time in seconds
+!   - tic_real: Starts real (wall-clock) timer
+!   - toc_real: Stops real timer and reports elapsed wall-clock time
+!
+! VARIABLES (private):
+!   - starttime_cpu: CPU time at tic() call
+!   - starttime_real: Wall-clock time array at tic_real() call (8 integers)
+!
+! USAGE:
+!   call tic()
+!   [... code to time ...]
+!   call toc()
+!   ! Prints: "Elapsed time: X.XXX seconds"
+!
+! NOTES:
+!   CPU time measures processor time used by current process. Wall-clock time
+!   measures actual elapsed time (includes I/O wait, system interrupts).
+!   Use toc_real for parallel code; tic/toc for serial performance.
+!   Minimal overhead (~microseconds per call).
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 
 module clock

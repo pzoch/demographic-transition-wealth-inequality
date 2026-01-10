@@ -1,3 +1,39 @@
+!===============================================================================
+! FILE: Print_DB.f90
+!
+! DESCRIPTION:
+!   Opens output files and writes transition path results to disk. Handles bulk
+!   data export for aggregate and cohort-level variables across time periods.
+!
+! SCRIPT (included code fragment)
+!   Executed at end of transition path solution to save results.
+!
+! OUTPUT FILES (all prefixed with version//experiment//closure):
+!   Time series (bigT vectors):
+!   - *_trans.txt: Aggregates (y, capital, rate, bigl, debt_share, g_share, etc.)
+!   - *_tax_revenue_trans.txt: Tax revenues by type (tC, tL, tK)
+!   
+!   Cohort profiles (bigJ x bigT matrices):
+!   - *_j_trans.csv: Life-cycle profiles (u, l, c, b, sv by age and time)
+!   
+!   Additional:
+!   - gamma_trans.txt, lambda_trans.txt: Demographics/productivity
+!   - replacement*_trans.txt: Pension replacement rates
+!   - cy_ratio, ky_ratio: Consumption/capital to output ratios
+!
+! FILE UNITS:
+!   Uses Fortran unit numbers 1-72 for different output streams.
+!   All files written as formatted text (human-readable).
+!
+! VARIABLES WRITTEN:
+!   From global_vars transition arrays: y(bigT), k(bigT), r(bigT), w(bigT),
+!   c_j(bigJ,bigT), l_j(bigJ,bigT), sv_j(bigJ,bigT), b_j(bigJ,bigT), etc.
+!
+! NOTES:
+!   Part of transition_path_DB output sequence. Controlled by switch_small_write.
+!   File paths constructed from version/experiment/closure strings set in main.f90.
+!   Some units reused (e.g., unit 22) - ensure CLOSE before reopening.
+!===============================================================================
   ! save in files
 
     OPEN (unit=1,  FILE = version//experiment//closure//"u_init_old_trans.txt")

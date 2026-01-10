@@ -1,3 +1,52 @@
+!===============================================================================
+! FILE: pfi_household_problem.f90
+!
+! DESCRIPTION:
+!   Solves household optimization problem via policy function iteration (PFI).
+!   Core routine for computing value and policy functions in steady state.
+!
+! SUBROUTINES:
+!   - household_endo: Main PFI solver for endogenous labor choice
+!                     Backward induction over age j, iterating until V_ss converges
+!   - household_exo: Variant with exogenous labor supply (if switch_labor_choice==0)
+!   - foc_solver: Solves first-order conditions for {c, l} given state (a, aime, ε, δ, r)
+!
+! STATE SPACE:
+!   Dimensions: (j, a, aime, ip, ir, id) where
+!   - j: Age (1:bigJ)
+!   - a: Assets (0:n_a)
+!   - aime: Average indexed monthly earnings (0:n_aime)
+!   - ip: Income shock state (1:n_sp)
+!   - ir: Return shock state (1:n_sr)
+!   - id: Discount factor shock state (1:n_sd)
+!
+! POLICY FUNCTIONS (output):
+!   - svplus_ss(j,a,aime,ip,ir,id): Savings a' = s(j,a,aime,ε,δ,r)
+!   - c_ss(j,a,aime,ip,ir,id): Consumption c(⋅)
+!   - l_ss(j,a,aime,ip,ir,id): Labor supply l(⋅)
+!   - V_ss(j,a,aime,ip,ir,id): Value function V(⋅)
+!
+! ALGORITHM:
+!   1. Initialize terminal condition: V(bigJ,⋅) from bequest motive
+!   2. Backward induction: For j=bigJ-1 down to 1:
+!      a. Compute EV'(a',⋅) by integrating over future shocks
+!      b. For each (a,aime,ip,ir,id), solve:
+!         max_{c,l,a'} u(c,l) + β*E[V'(a',aime',ε',δ',r') | ε,δ,r]
+!         s.t. budget constraint, borrowing limit, etc.
+!      c. Store optimal {c*,l*,a'*,V}
+!   3. Iterate until sup|V_new - V_old| < tolerance
+!
+! BEQUEST HANDLING:
+!   If switch_unequal_bequest==2: Distributes bequests via Zipf law across n_beq classes
+!
+! DEPENDENCIES:
+!   - global_vars: All model parameters and grids
+!   - linint: For interpolating EV' between grid points
+!
+! NOTES:
+!   Critical performance bottleneck - optimize loops. Uses pre-computed transition
+!   matrices (pi_ip_risk, pi_ir, pi_id) for expectation operator.
+!===============================================================================
 !*******************************************************************************************
 ! find futur assets for every age, assets grid point, state  
 ! steady state

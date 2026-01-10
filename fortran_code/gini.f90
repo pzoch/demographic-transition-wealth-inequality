@@ -1,3 +1,35 @@
+!===============================================================================
+! FILE: gini.f90
+!
+! DESCRIPTION:
+!   Calculates Gini coefficient and constructs Lorenz curves for wealth and
+!   income inequality measurement in the OLG model.
+!
+! MODULE: gini_calc
+!   Inequality measures for distribution analysis.
+!
+! FUNCTIONS:
+!   - gini: Computes Gini coefficient from population weights and values
+!           Returns scalar Gini ∈ [0,1] where 0=perfect equality, 1=total inequality
+!
+! ALGORITHM:
+!   1. Sort population by value (x_in) using quicksort
+!   2. Compute cumulative distributions of population and value
+!   3. Calculate Gini as area between Lorenz curve and 45-degree line
+!   Formula: G = 1 - 2*∫Lorenz(p)dp
+!
+! INPUTS:
+!   - x_in: Population weights/shares (e.g., cohort sizes)
+!   - y_in: Values to measure inequality (e.g., wealth, income)
+!
+! DEPENDENCIES:
+!   - sorting: For sort routine (quicksort implementation)
+!
+! NOTES:
+!   Written by F. Kindermann. Used throughout model for wealth/income inequality
+!   statistics. Arrays dynamically allocated/deallocated to handle varying sizes.
+!   See: https://www.ce-fortran.com/forums/topic/gini-coefficient-and-lorenz-curve/
+!===============================================================================
 !include "toolbox.f90"
 
 module gini_calc

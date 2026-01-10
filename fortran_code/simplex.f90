@@ -1,11 +1,42 @@
-!##############################################################################
-! MODULE simplex
-! 
-! For applying the simplex algorithm to linear optimization problems.
+!===============================================================================
+! FILE: simplex.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Linear programming solver using the simplex algorithm. Solves optimization
+!   problems in normal form: minimize c'x subject to Ax <= b, x >= 0.
+!
+! MODULE: simplex
+!   Implementation of the simplex algorithm for linear program solution.
+!
+! SUBROUTINES:
+!   - solve_lin: Main solver for linear programs in normal form
+!                Handles inequality (<=, >=) and equality constraints
+!   - simplx: Core simplex iteration routine
+!   - simp1/simp2/simp3: Auxiliary pivot and update operations
+!
+! INPUT/OUTPUT:
+!   solve_lin(x, c, A, b, numle, numge, numeq)
+!   - x: Solution vector (output)
+!   - c: Objective function coefficients
+!   - A: Constraint matrix
+!   - b: Right-hand side vector
+!   - numle/numge/numeq: Number of <=, >=, = constraints
+!
+! ALGORITHM:
+!   Two-phase simplex method with artificial variables for feasibility.
+!   Bland's rule for pivot selection to avoid cycling.
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Used for specialized optimization problems where linearity can be exploited.
+!   Not part of main OLG solution loop; reserved for calibration/side problems.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 
 module simplex

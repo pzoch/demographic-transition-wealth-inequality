@@ -1,3 +1,36 @@
+!===============================================================================
+! FILE: sort.f90
+!
+! DESCRIPTION:
+!   Sorting algorithms for real and integer arrays. Required for Gini coefficient
+!   calculation and distribution analysis in OLG model.
+!
+! MODULE: sorting
+!   Fast sorting routines using quicksort algorithm.
+!
+! SUBROUTINES:
+!   - sort: Generic interface for sorting (overloaded for types/dimensions)
+!   - sort_r: Sorts real*8 array in ascending order (1D)
+!   - sort_r2: Sorts real*8 array + carries along companion array (2D)
+!   - sort_i: Sorts integer array in ascending order (1D)
+!   - sort_i2: Sorts integer array + carries along companion array (2D)
+!
+! INTERFACES:
+!   - sort: Dispatches to type/dimension-specific routine
+!
+! ALGORITHM:
+!   Quicksort with median-of-three pivot selection. O(n log n) average case.
+!
+! PARAMETERS:
+!   - tbox_seed: Random seed flag (private)
+!   - tbox_gftol: Function tolerance (private, 1e-8)
+!   - tbox_itermax_min: Iteration limit (private, 200)
+!
+! NOTES:
+!   Implementation adapted from Wikibook Algorithm Implementation. Essential
+!   for wealth distribution analysis, Gini calculation, and percentile computation.
+!   The _2 variants preserve correspondence between sorted and companion arrays.
+!===============================================================================
 
 
 !##############################################################################

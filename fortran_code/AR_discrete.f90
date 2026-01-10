@@ -1,12 +1,47 @@
-!##############################################################################
-! MODULE AR_discrete
-! 
-! For discretizing autoregressive processes using the Rouwenhorst method
-!     as described in Kopecky and Suen (2010).
+!===============================================================================
+! FILE: AR_discrete.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Discretizes continuous AR(1) processes into finite-state Markov chains using
+!   the Rouwenhorst method. Essential for income shock process in heterogeneous-agent OLG.
+!
+! MODULE: AR_discrete
+!   Discretization routines for autoregressive processes.
+!
+! SUBROUTINES:
+!   - discretize_AR: Main discretization routine for AR(1) process
+!                    z_j = ρ*z_{j-1} + ε, where ε ~ N(0, σ²)
+!   - rouwenhorst: Constructs transition matrix via Rouwenhorst method
+!   - tauchen: Alternative discretization using Tauchen method
+!   - normal_discrete: Discretizes normal distribution (from Miranda & Fackler)
+!
+! ALGORITHM:
+!   Rouwenhorst method (Kopecky & Suen 2010) - superior to Tauchen for
+!   persistent processes (ρ ≈ 1). Matches conditional moments exactly.
+!
+! INPUTS:
+!   - rho: Autoregressive coefficient
+!   - mu: Unconditional mean
+!   - sigma_eps: Innovation standard deviation
+!
+! OUTPUTS:
+!   - z: Grid of discrete state values
+!   - pi: Transition probability matrix
+!   - w: Optional integration weights
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!   - normalProb: For normal CDF/PDF calculations
+!   - gaussian_int: For Gaussian quadrature (legendre)
+!
+! NOTES:
+!   Used in globals.f90/set_globals.f90 to construct income shock grids (pi_ip_risk).
+!   Critical for heterogeneity in labor productivity (ε_i process).
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 
 module AR_discrete

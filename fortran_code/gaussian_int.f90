@@ -1,16 +1,43 @@
-!##############################################################################
-! MODULE gaussian_int
-! 
-! Calculates abscissas and weights for Gaussian quadrature.
+!===============================================================================
+! FILE: gaussian_int.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Computes abscissas (nodes) and weights for Gaussian quadrature numerical
+!   integration. Provides accurate approximation of definite integrals.
 !
-! Large parts of the procedures were taken from:
-!     Press, Teukolsky, Vetterling and Flannery (1992): "Numerical Recipes in
-!     FORTRAN: The Art of Scientific Computing", 2nd edition, Cambridge
-!     Univeristy Press, Cambridge.
+! MODULE: gaussian_int
+!   Gaussian quadrature rule construction for numerical integration.
+!
+! SUBROUTINES:
+!   - legendre: Computes Gauss-Legendre quadrature nodes and weights on [x1, x2]
+!               ∫ f(x)dx ≈ ∑ w_i * f(x_i)
+!   - hermite: Gauss-Hermite quadrature for integrals over (-∞, ∞) with e^(-x²) weight
+!   - laguerre: Gauss-Laguerre quadrature for integrals over [0, ∞) with e^(-x) weight
+!
+! ALGORITHM:
+!   Constructs nodes as roots of orthogonal polynomials (Legendre, Hermite, Laguerre).
+!   Uses recurrence relations and Newton-Raphson refinement.
+!
+! INPUTS:
+!   - x1, x2: Integration interval endpoints (for Legendre)
+!   - n: Number of quadrature points (order)
+!
+! OUTPUTS:
+!   - x: Quadrature nodes (abscissas)
+!   - w: Quadrature weights
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Based on Numerical Recipes (Press et al. 1992). Used in AR_discrete.f90
+!   for discretizing continuous distributions. Higher-order rules (n ≥ 5)
+!   provide machine precision for smooth integrands.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 
 module gaussian_int

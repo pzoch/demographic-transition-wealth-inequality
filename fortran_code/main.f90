@@ -1,3 +1,31 @@
+!===============================================================================
+! FILE: main.f90
+! 
+! DESCRIPTION:
+!   Main entry point for the overlapping generations (OLG) model with heterogeneous
+!   agents. This program computes steady states and transition paths for a PAYG
+!   pension system with demographic changes, productivity shocks, and policy reforms.
+!
+! PROGRAM:
+!   olg2 - Main execution program that:
+!          1. Sets up file paths for inputs/outputs
+!          2. Loads parameters and data
+!          3. Allocates memory for transition path arrays
+!          4. Executes steady state and transition computations via included file
+!          5. Cleans up and reports timing
+!
+! DEPENDENCIES:
+!   - global_vars: Global variable declarations
+!   - global_vars2: Parameter loading and initialization (globals subroutine)
+!   - steady_state: Steady state computation module
+!   - transition_DB: Transition path computation module
+!   - get_data: Data loading routines
+!   - clock: Timing utilities
+!
+! INCLUDED FILES:
+!   - main_base_transition.f90: Contains main computational logic
+!===============================================================================
+
 program olg2
     use global_vars
     use steady_state

@@ -1,8 +1,37 @@
-! WHAT   : stady state routine for PAYG 
-! TAKE   : data on mortality [[pi]], retirement age [[jbar]], change in technological progress [[gamma = z_t/z_(t-1)]], the size of the cohort [[N_ss_j]], pension system parameters [[t1 - ZUS, [[t2 - OFE]]  <- constant during iteration
-!          and guess for capital, labor force participation [[l_]], consumption, bequest , nu_ss population growth rate in steady state, N_ss_j population age structure
-! DO     : during iterations update guess values to new ones in order to find optimal allocation in steady state; iterations end when difference between old and new value is really small (err_ss < 1e-8)
-! RETURN : k_ss, c_ss, r_ss etc. that fullfil the condition of optimal allocation. It is one of the edge of transition path
+!===============================================================================
+! FILE: steady_state.f90
+!
+! DESCRIPTION:
+!   Module for computing steady state equilibrium of the OLG model with PAYG
+!   pension system. Iteratively solves for general equilibrium given demographic
+!   structure, policy parameters, and productivity levels.
+!
+! MODULE: steady_state
+!   Contains steady state computation routine
+!
+! SUBROUTINE:
+!   - steady: Main iterative solver for steady state equilibrium
+!
+! ALGORITHM:
+!   1. Initialize guess for capital stock, consumption, bequests
+!   2. Compute factor prices (r, w) from production function
+!   3. Solve household problem via policy function iteration (PFI)
+!   4. Aggregate individual decisions to get macro variables
+!   5. Compute pension benefits and government budget
+!   6. Update capital stock guess based on aggregate savings
+!   7. Iterate until convergence (err_ss < tolerance)
+!
+! DEPENDENCIES:
+!   - global_vars: Parameter and variable declarations
+!   - pfi_trans: Policy function iteration routines
+!   - sorting: For wealth distribution calculations
+!   - gini_calc: For inequality measures
+!
+! NOTES:
+!   - Supports both PAYG (switch_type=0) and fully-funded (switch_type=1) pensions
+!   - Can solve for "old" (param_ss=0) or "new" (param_ss=1) steady state
+!   - Multiple closure rules available via switch_residual parameter
+!===============================================================================
 
 MODULE steady_state
 use global_vars
@@ -17,6 +46,65 @@ IMPLICIT NONE
 
 CONTAINS
 
+!-------------------------------------------------------------------------------
+! SUBROUTINE: steady
+!
+! PURPOSE:
+!   Computes steady state general equilibrium for given demographic and policy
+!   parameters. Iteratively solves for factor prices, household decisions, and
+!   government budget until convergence.
+!
+! ARGUMENTS (selected key inputs/outputs):
+!   INPUT:
+!     - switch_tauK_gross: Capital tax on gross (1) vs net (0) returns
+!     - switch_unequal_bequest: Bequest distribution rule (0/1/2)
+!     - param_ss: Which parameter set to use (0=old, 1=new)
+!     - switch_type: Pension system type (0=PAYG, 1=fully funded)
+!   OUTPUT:
+!     - k_ss_o: Steady state capital stock per effective labor
+!     - r_ss, r_bar_ss: Net and gross real interest rates
+!     - w_bar_ss: Average wage rates by type
+!     - l_ss_j, lab_ss_j: Labor supply decisions (intensive and extensive)
+!     - c_ss_j: Consumption by age and type
+!     - s_ss_j: Savings by age and type
+!     - b_ss_j: Pension benefits by age and type
+!     - t1_ss: Equilibrium pension contribution rate
+!     - g_per_capita_ss: Government spending per capita
+!     - b1_ss_j, b2_ss_j: Pillar I and II pension benefits
+!     - pillarI_ss_j, pillarII_ss_j: Pillar-specific pension accumulations
+!     - bequest_ss_j: Bequest receipts by age and type
+!     - bequest_ss: Aggregate bequests by type
+!
+! ALGORITHM:
+!   Outer loop (up to n_iter_ss iterations):
+!     1. Guess capital stock k_ss
+!     2. Compute factor prices from production: r_bar_ss, w_bar_ss
+!     3. Calculate pension benefits (via pension_system_ss module)
+!     4. Solve household problem via PFI to get decision rules
+!     5. Compute distribution and aggregate
+!     6. Calculate bequests distribution
+!     7. Apply government budget closure
+!     8. Update k_ss = aggregate savings
+!     9. Check convergence: err_ss = |k_ss_new - k_ss|
+!     10. If err_ss < err_ss_tol, exit; else update guess and continue
+!
+! CLOSURE RULES (via switch_residual parameter, passed from calling code):
+!   - 0: Lump-sum transfer (upsilon) adjusts
+!   - 1: Consumption tax (tauC) adjusts
+!   - 2: Debt level adjusts
+!   - 6: Government spending (g) adjusts
+!
+! CONVERGENCE:
+!   - Tolerance: err_ss_tol (typically 1e-8)
+!   - Maximum iterations: n_iter_ss (typically 500-1000)
+!   - Uses damping parameter up_ss to smooth updates
+!
+! NOTES:
+!   - Demographic structure (jbar_ss, pi_ss, N_ss_j) determines age distribution
+!   - Initial guesses taken from global variables or previous solution
+!   - Prints diagnostic information if switch_print = 1
+!   - Calls Print_steady_DB for detailed output if switch_ss_write = 1
+!-------------------------------------------------------------------------------
 subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &

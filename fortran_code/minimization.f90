@@ -1,11 +1,35 @@
-!##############################################################################
-! MODULE minimization
-! 
-! Minimizes a one- or multidimensional function on a rectangular interval.
+!===============================================================================
+! FILE: minimization.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   General-purpose optimization library for minimizing functions in one or
+!   multiple dimensions over rectangular domains. Provides robust algorithms.
+!
+! MODULE: minimization
+!   Suite of minimization routines for unconstrained and constrained optimization.
+!
+! KEY ROUTINES:
+!   - fminsearch: Nelder-Mead simplex method for multidimensional minimization
+!   - brent: Brent's method for one-dimensional minimization (golden section + parabolic)
+!   - brent_pow: Powell's method for one-dimensional minimization
+!   - grid_search: Exhaustive grid search over parameter space
+!
+! PARAMETERS:
+!   - gftol: Function tolerance (default 1e-8)
+!   - itermax_min: Maximum iterations (default 200)
+!   - minn/maxx: Left/right optimization interval endpoints
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Based on Numerical Recipes (Press et al. 1992). Used for calibration,
+!   parameter optimization, and solving inner loops in steady state.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !
 ! Large parts of the procedures were taken from:
 !     Press, Teukolsky, Vetterling and Flannery (1992): "Numerical Recipes in

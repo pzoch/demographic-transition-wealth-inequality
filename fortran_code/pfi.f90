@@ -1,15 +1,101 @@
-!|==============================================================================================================================================|
-!| module solove consumer problem (given rbar, wbar, taxes and other parameters) using policy iterations function, Right Hand Side (RHS) method |                         
-!|functions: euler_trans, euler_transsec, euler_ss, eulersec_ss - finding optimal futur assets for given grid point                             |
-!|function margu - marginal utility for consumption                                                                                             |
-!|function year - find year in which consumer will have ijj years, having in year it, ij years                                                  |    
-!|subroutines: linear_int - linear evaluation assets on the asset grid point                                                  |
-!|subroutines: household_ss, household_trans - find futur assets for every age, assets grid point                                               |
-!|subroutines: interpolate_ss, interpolate_trans - interpolate RHS                                                                              |
-!|subroutines: get_distribution_ss, get_distribution_trans - get distribution of consumers on age, gridpoints                                   |    
-!|subroutines: aggregation_ss, aggregation_trans - agreggate consumption, labour, savings                                                       |
-!|subroutine output - print to CSV                                                                                                              |
-!|==============================================================================================================================================|
+!===============================================================================
+! FILE: pfi.f90
+!
+! DESCRIPTION:
+!   Policy Function Iteration (PFI) module for solving household dynamic
+!   optimization problem. Uses Right-Hand Side (RHS) method with interpolation
+!   to find optimal consumption, labor supply, and savings decisions.
+!
+! MODULE: pfi_trans
+!   Master module containing all household problem solving routines
+!
+! ALGORITHM:
+!   Policy Function Iteration (PFI) / Endogenous Grid Method variant:
+!   1. Guess value/policy functions on discrete grids
+!   2. Solve Euler equations at each grid point
+!   3. Interpolate to get continuous policy functions
+!   4. Iterate until convergence
+!
+! KEY FUNCTIONS:
+!   - euler_trans, euler_transsec: Solve Euler equations for transition
+!   - euler_ss, eulersec_ss: Solve Euler equations for steady state
+!   - margu: Marginal utility of consumption
+!   - year: Time/cohort index calculations
+!
+! KEY SUBROUTINES:
+!   - household_ss: Solve household problem in steady state
+!   - household_trans: Solve household problem along transition
+!   - interpolate_ss, interpolate_trans: Interpolate RHS/value functions
+!   - get_distribution_ss, get_distribution_trans: Compute distributions
+!   - aggregation_ss, aggregation_trans: Aggregate individual decisions
+!   - output: Write results to CSV files
+!
+! STATE SPACE:
+!   Individual state: (age, assets, AIME, permanent shock, persistent shock, 
+!                      discount shock, type)
+!   - age j ∈ {1,...,bigJ}
+!   - assets a ∈ [a_l, a_u] (n_a grid points)
+!   - AIME aime ∈ [aime_l, aime_u] (n_aime grid points for pension calculation)
+!   - permanent shock s_p ∈ {1,...,n_sp}
+!   - persistent shock s_r ∈ {1,...,n_sr}
+!   - discount shock s_d ∈ {1,...,n_sd}
+!   - type m ∈ {1,...,bigM}
+!
+! HOUSEHOLD PROBLEM:
+!   max E[sum_{j} beta^j * pi(j) * u(c_j, l_j)]
+!   s.t. 
+!     a_{j+1} = (1+r)*a_j + w*epsilon*l_j + b_j + bequest_j - c_j - tax
+!     a_{j+1} >= 0 (no borrowing)
+!     l_j ∈ [0,1] (labor supply)
+!     c_j > 0
+!
+! UTILITY:
+!   u(c,l) = [c^(1-1/sigma) * phi^(1/sigma) * (1-l)^((sigma-1)/sigma)]^(1-1/theta) / (1-1/theta)
+!   - theta: inter-temporal elasticity of substitution
+!   - sigma: intra-temporal elasticity (consumption-leisure)
+!   - phi: weight on leisure
+!
+! SHOCKS:
+!   - Permanent (s_p): Affects productivity throughout life
+!   - Persistent (s_r): AR(1) process for transitory productivity
+!   - Discount factor (s_d): Heterogeneous time preferences
+!   - Mortality: Age-specific survival probabilities pi(j)
+!
+! INTERPOLATION:
+!   - Linear interpolation for assets within grid
+!   - Handles boundary constraints (no borrowing, no negative consumption)
+!   - Extrapolation rules for off-grid points
+!
+! DISTRIBUTION:
+!   - Forward simulation from age 1
+!   - Transition probabilities for shocks
+!   - Population weights by age and type
+!   - Tracks joint distribution over full state space
+!
+! AGGREGATION:
+!   - Integrates individual decisions over distribution
+!   - Computes: aggregate C, L, K, tax revenue, pension contributions
+!   - By age, type, and time
+!
+! DEPENDENCIES:
+!   Utility modules for numerical methods:
+!   - linint: Linear interpolation
+!   - splines: Spline interpolation
+!   - rootfinding: Equation solvers
+!   - minimization: Optimization routines
+!   - gaussian_int, normalProb: Integration and distributions
+!   - AR_discrete: Discretize AR(1) processes
+!   - matrixtools, polynomial, simplex: Linear algebra and optimization
+!   - assertions, errwarn: Error handling
+!   - clock: Timing utilities
+!
+! NOTES:
+!   - Large state space requires significant memory
+!   - Parallelization possible over grid points
+!   - Convergence can be slow for high curvature utility
+!   - AIME tracking complicates state space (pension calculation)
+!===============================================================================
+
 module pfi_trans
     ! modules
     use assertions

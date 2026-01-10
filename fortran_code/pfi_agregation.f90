@@ -1,3 +1,53 @@
+!===============================================================================
+! FILE: pfi_agregation.f90
+!
+! DESCRIPTION:
+!   Aggregates individual policy functions over distribution to compute cohort-level
+!   and economy-wide statistics. Integrates micro decisions into macro variables.
+!
+! SUBROUTINES:
+!   - aggregation_ss: Steady-state aggregation
+!                     Computes ∑_{states} prob(j,⋅) * policy(j,⋅) for all j
+!   - aggregation_trans: Transition path aggregation (cohort-time tracking)
+!
+! COHORT AGGREGATES (steady state):
+!   For each age j, computes:
+!   - c_ss_j_vfi(j): Average consumption
+!   - l_ss_j_vfi(j): Average labor supply
+!   - s_pom_ss_j_vfi(j): Average savings
+!   - V_ss_j_vfi(j): Average value
+!   - lab_income_ss_j_vfi(j): Average labor income (gross)
+!   - asset_pom_ss_j_vfi(j): Average assets
+!   - pension_ss_j_vfi(j): Average pension benefits
+!   - labor_tax_ss_j_vfi(j): Average labor tax paid
+!
+! ECONOMY-WIDE AGGREGATES:
+!   Weighted by cohort size N_ss_j:
+!   - bigC_ss = ∑_j N_ss_j * c_ss_j_vfi(j): Total consumption
+!   - bigL_ss = ∑_j N_ss_j * l_ss_j_vfi(j): Total labor supply
+!   - bigK_ss = ∑_j N_ss_j * s_pom_ss_j_vfi(j): Total capital
+!   - bequest_ss_vfi: Total bequests left
+!
+! INEQUALITY MEASURES:
+!   - gini_*: Gini coefficients for wealth/consumption (calls gini_calc module)
+!   - top_ten, top_100: Wealth shares of top decile/percentile
+!   - share_0_sav, share_neg, share_nonpos: Fraction at/below zero savings
+!
+! ALGORITHM:
+!   For each cohort j:
+!     Initialize aggregates to zero
+!     Loop over all states (ia, i_aime, ip, ir, id):
+!       aggregate(j) += prob_ss(j,ia,i_aime,ip,ir,id) * policy_ss(j,ia,i_aime,ip,ir,id)
+!     Scale by cohort size N_ss_j for economy totals
+!
+! DEPENDENCIES:
+!   - global_vars: Distributions (prob_ss), policies (c_ss, l_ss, etc.)
+!   - gini_calc: For gini() function
+!
+! NOTES:
+!   Called after distribution and policy functions converge. Provides moments for
+!   market clearing checks and welfare analysis. Euler equation errors computed here.
+!===============================================================================
 !***************************************************************************************
 ! find aggegate variables for steady state
 

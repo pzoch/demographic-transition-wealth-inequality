@@ -1,5 +1,26 @@
 
 
+!===============================================================================
+! FILE: set_globals.f90
+!
+! DESCRIPTION:
+!   Module for loading and initializing global parameters and variables for the
+!   OLG model. Reads configuration files (instructions, parameters, data) and
+!   sets up initial values for steady state and transition path computations.
+!
+! MODULE: global_vars2
+!   Contains parameter initialization routines
+!
+! SUBROUTINES:
+!   - globals: Loads all parameters, data, and initializes global variables
+!   - clear_globals: Resets steady state variables to zero
+!
+! DEPENDENCIES:
+!   - global_vars: Global variable declarations
+!   - get_data: Data file reading routines  
+!   - pfi_trans: Policy function iteration for transitions
+!===============================================================================
+
 MODULE global_vars2
 USE global_vars
 USE get_data
@@ -8,6 +29,35 @@ use pfi_trans
 IMPLICIT NONE
 CONTAINS
 
+!-------------------------------------------------------------------------------
+! SUBROUTINE: globals
+!
+! PURPOSE:
+!   Master initialization routine that loads all model parameters, switches, and
+!   data files. Sets up scenario-specific configurations and prepares global
+!   variables for steady state and transition computations.
+!
+! ACTIONS:
+!   1. Changes to Instructions directory and reads switch settings from text file
+!   2. Changes to Parameters directory and reads numerical parameters
+!   3. Calls read_data to load demographic and economic time series
+!   4. Rescales shock parameters for model periodicity (zbar)
+!   5. Initializes retirement age arrays (jbar_t_yob)
+!   6. Sets up steady state parameter pairs (_ss_old, _ss_new)
+!   7. Includes shock parameter calculations and prints model stamp
+!   8. Changes back to working directory
+!
+! READS FROM FILES:
+!   - version//experiment//closure//"instructions.txt": Model switches
+!   - version//experiment//closure//"parameters.txt": Numerical parameters
+!   - Various data files via read_data subroutine
+!
+! GLOBAL VARIABLES MODIFIED:
+!   - All switch_* variables controlling model behavior
+!   - Numerical parameters (delta, theta, alpha, phi, etc.)
+!   - Time-varying parameters (*_t arrays) and steady state pairs (*_ss_old, *_ss_new)
+!   - Demographic arrays (jbar_t, pi_big, Nn_big, etc.)
+!-------------------------------------------------------------------------------
 subroutine globals 
     real, dimension(bigJ, bigT) :: ones
 
@@ -224,8 +274,26 @@ call chdir(cwd_w)
 
 end subroutine globals
 
-
-
+!-------------------------------------------------------------------------------
+! SUBROUTINE: clear_globals
+!
+! PURPOSE:
+!   Resets steady state solution variables to zero before computation.
+!   Ensures clean initial state for iterative steady state solvers.
+!
+! ACTIONS:
+!   Sets all steady state variables (suffix _ss_1 and _ss_2) to zero for:
+!   - Capital stock (k_ss)
+!   - Interest rates (r_ss)
+!   - Wage rates (w_bar_ss, w_ss_j)
+!   - Labor supply (l_ss_j, lab_ss_j)
+!   - Savings (s_ss_j)
+!   - Consumption (c_ss_j)
+!   - Pension benefits (b_ss_j)
+!
+! NOTE:
+!   Suffix _1 denotes "old" steady state, _2 denotes "new" steady state
+!-------------------------------------------------------------------------------
 subroutine clear_globals
     k_ss_1 = 0
     r_ss_1 = 0

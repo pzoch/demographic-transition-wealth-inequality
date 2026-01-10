@@ -1,3 +1,55 @@
+!===============================================================================
+! FILE: transition_iterations.f90
+!
+! DESCRIPTION:
+!   Main iteration loop for transition path computation in PAYG pension system.
+!   Iterates on prices, taxes, and policies until convergence to full transition path.
+!
+! ALGORITHM:
+!   Fixed-point iteration on transition path:
+!   1. Take old guess: k(t), w(t), r(t), tau(t), benefits(t)
+!   2. Solve household problems given prices → policies {c,l,a'}(j,t)
+!   3. Aggregate over distribution → new K(t), L(t)
+!   4. Update prices from production: w(t)=FK'(K,L), r(t)=FL'(K,L)
+!   5. Compute government budget → new taxes/transfers (closure rule)
+!   6. Calculate pension benefits from contribution/replacement rates
+!   7. Check convergence: ∑_t |new(t) - old(t)| < err_tol
+!   8. Update guess (damping if needed), return to step 1
+!
+! KEY OPERATIONS PER ITERATION:
+!   - Labor aggregation by type: bigl_type(m,t) = ∑_j N(j,m,t)*l(j,m,t)
+!   - CES wage calculation: w_bar(m,t) from bigl_type (include 'ces_production.f90')
+!   - Technological progress: nu(t) = bigl(t)/bigl(t-1)
+!   - Interest rate: r_bar from exog_rate_t or endogenous production
+!   - Tax/transfer updates: pillarI_j, pillarII_j, bequest_j, b_j (pension benefits)
+!   - Government closure: Adjust residual (upsilon/tC/debt/g) per switch_residual
+!
+! CONVERGENCE:
+!   - err(t): Period-specific errors (market clearing, budget balance)
+!   - cum_err: ∑ err(t) - target < err_tol
+!   - feasibility(t): Resource constraint violation Y=C+I+G
+!   - Max iterations: n_iter_t (typically 1000-5000)
+!
+! SWITCHES:
+!   - switch_exog_rate: Use exogenous interest rate path (==1) vs endogenous
+!   - switch_print: Display iteration diagnostics every 1 iter (==1)
+!
+! INCLUDED FRAGMENTS:
+!   - print_iter.f90: Prints diagnostics if switch_print==1 and MOD(iter,1)==0
+!
+! VARIABLES UPDATED:
+!   Old values stored: pillarI_old_j, bequest_j_old, sv_old_j, tau1_s_t_old, etc.
+!   Used for damping or checking convergence.
+!
+! DEPENDENCIES:
+!   - global_vars: Full model state and parameters
+!   - Included scripts: print_iter.f90, ces_production.f90
+!
+! NOTES:
+!   Part of transition_path_DB in transition.f90. Nested inside outer loop over
+!   steady states. Comments indicate data flow: "TAKE" (inputs), "DO" (operations),
+!   "RETURN" (outputs). Critical for understanding adjustment dynamics.
+!===============================================================================
 ! WHAT   : iteration for transition path for PAYG 
 ! TAKE   : unchanged in routine: productivity (omega), the size of each cohort [[N_t_j]], contribution to the pension system rate [[t1, t1_a, t2]], replacement rate [[rho1, [[rho2]]
 !          unchanged in routine: percentage of change in technological progress used to indexation of pension benefit (valor_share)

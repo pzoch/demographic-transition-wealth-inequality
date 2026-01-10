@@ -1,15 +1,42 @@
-!##############################################################################
-! MODULE normalProb
-! 
-! Module for calculation of (cumulated) normal density function.
+!===============================================================================
+! FILE: normalProb.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Normal distribution functions including PDF, CDF, inverse CDF (quantile),
+!   and discretization. Essential for shock processes and uncertainty in OLG model.
 !
-! normal_discrete is taken from:
-!     Miranda and Fackler (1992): "Applied Computational Economics and 
-!     Finance", MIT Press, 2002.
+! MODULE: normalProb
+!   Complete suite of normal distribution calculations.
+!
+! FUNCTIONS:
+!   - normalPDF: Probability density function φ(x) = (1/√(2π))e^(-x²/2)
+!   - normalCDF: Cumulative distribution function Φ(x) = ∫_{-∞}^x φ(t)dt
+!   - normalCDF_inv: Inverse CDF (quantile function) Φ^(-1)(p)
+!   - normal_discrete: Discretizes normal distribution (from Miranda & Fackler 2002)
+!   - normal_01: Generates standard normal grid with Gauss-Hermite nodes
+!
+! VARIABLES:
+!   - nCoeffs: Spline coefficients for CDF approximation (503 points)
+!   - iCoeffs: Spline coefficients for inverse CDF approximation
+!   - derNormal/derNormalInv: Boundary derivatives for spline extrapolation
+!   - normal_loaded: Initialization flag
+!
+! ALGORITHM:
+!   Uses piecewise cubic spline interpolation for fast evaluation. Coefficients
+!   precomputed and loaded on first call. Ensures machine precision over [-5, 5].
+!
+! DEPENDENCIES:
+!   - errwarn: Error/warning message handling
+!   - assertions: For array dimension checking
+!
+! NOTES:
+!   normal_discrete taken from Miranda & Fackler (2002) "Applied Computational
+!   Economics and Finance". Used throughout for constructing income/return shock
+!   distributions. Preloading coefficients amortizes initialization cost.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 module normalProb
 

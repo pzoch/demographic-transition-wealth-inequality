@@ -1,3 +1,39 @@
+!===============================================================================
+! FILE: shocks_parameters.f90
+!
+! DESCRIPTION:
+!   Initializes shock distributions and transition probabilities for income,
+!   discount factor, and return risk in the OLG model. Sets up discrete grids.
+!
+! SCRIPT (not a module)
+!   Included/executed during globals initialization to populate shock arrays.
+!
+! KEY OPERATIONS:
+!   - Defines initial distributions for income (ε), discount (δ), return (r) shocks
+!   - Sets n_sp_initial, n_sr_initial, n_sd_initial (starting grid points)
+!   - Constructs pi_ip_risk (income transition matrix)
+!   - Builds n_sp_risk_value, n_sr_value, n_sd_value (discrete state values)
+!   - Implements epsilon correction: ensures E[ε] = 0 accounting for persistence
+!   - Handles superstar state (n_superstar > 0) if enabled
+!
+! KEY VARIABLES:
+!   - n_sp_risk_ordinary: Regular income states (excludes superstar)
+!   - pi_ir_init, pi_id_init: Initial probability vectors for return/discount shocks
+!   - sigma2_epsilon_*_big: Variance arrays by cohort/time/type
+!   - epsilon_correction_*: Mean correction terms for log-normal transformation
+!
+! SWITCHES:
+!   - switch_discount_risk: Enables discount factor heterogeneity (0/1/2)
+!   - n_superstar: Number of superstar states in income distribution
+!
+! DEPENDENCIES:
+!   - global_vars: All shock grid parameters (n_sp, n_sr, n_sd, bigM, bigT, bigJ)
+!
+! NOTES:
+!   This is an included script, not a standalone module. Executed inside
+!   globals/set_globals setup. Order-dependent - must run after grid sizes defined.
+!   Epsilon correction critical for correct wage level in equilibrium.
+!===============================================================================
 ! shocks    
 
     

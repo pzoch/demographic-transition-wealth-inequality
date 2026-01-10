@@ -1,11 +1,34 @@
-!##############################################################################
-! MODULE linint
-! 
-! Module for multidimensional linear interpolation.
+!===============================================================================
+! FILE: linint.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Multidimensional linear interpolation library for evaluating functions on
+!   gridded data. Essential for policy function evaluation in heterogeneous-agent models.
+!
+! MODULE: linint
+!   Fast linear interpolation in 1D, 2D, and 3D for value/policy function evaluation.
+!
+! KEY ROUTINES:
+!   - linear: Generic interface for 1D-3D linear interpolation (overloaded)
+!   - linear1_o/linear1_m: 1D interpolation (single/multiple evaluation points)
+!   - linear2_o/linear2_m: 2D bilinear interpolation
+!   - linear3_o/linear3_m: 3D trilinear interpolation
+!   - grid_Cons_Equi/Grow: Construct equidistant/geometric grid vectors
+!
+! INTERFACES:
+!   - linear: Dispatches to appropriate dimension-specific routine
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Critical performance path in PFI loops. Used extensively for evaluating
+!   value functions V(a,aime,ε) and policy functions c(a,aime,ε) on state grids.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 module linint
 

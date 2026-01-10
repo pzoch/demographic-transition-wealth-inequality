@@ -1,3 +1,47 @@
+!===============================================================================
+! FILE: pfi_distribution.f90
+!
+! DESCRIPTION:
+!   Computes stationary distribution of households over state space given policy
+!   functions. Forward simulation from initial distribution to equilibrium.
+!
+! SUBROUTINES:
+!   - get_distribution_ss: Steady-state distribution computation
+!                          Forward iteration: prob(j,⋅) → prob(j+1,⋅) using policy a'(⋅)
+!   - get_distribution_trans: Transition path variant (cohort-time tracking)
+!
+! STATE DISTRIBUTION:
+!   prob_ss(j, ia, i_aime, ip, ir, id) = measure of agents at state (j,a,aime,ε,δ,r)
+!   Initialized at j=1 from bequest distribution, then evolved forward using:
+!   prob(j+1,a',aime',ε',δ',r') = ∑_{a,aime,ε,δ,r} prob(j,a,aime,ε,δ,r) * 
+!                                 Pr[a'|policy] * Pr[ε'|ε] * Pr[δ'|δ] * Pr[r'|r] * survival
+!
+! INITIAL DISTRIBUTION (j=1):
+!   - Assets: From bequest distribution (bequest_ss_vfi)
+!   - AIME: Zero (no work history)
+!   - Shocks: Equal probability across grid points (n_sp_initial, n_sr_initial, n_sd_initial)
+!
+! BEQUEST VARIANTS (switch_unequal_bequest):
+!   - ==0: Equal bequest distribution
+!   - ==1: Zipf law with n_beq classes (ia_initial computed from bequest_ss_vfi)
+!   - ==2: Alternative Zipf parameterization
+!
+! INTERPOLATION:
+!   Policy function a'(⋅) typically off-grid → use linear_int to find bracket [ial, iar]
+!   and weight dist. Distributes probability mass across neighboring grid points.
+!
+! OUTPUTS:
+!   - prob_ss(j,ia,i_aime,ip,ir,id): Full distribution
+!   Used in pfi_agregation.f90 to compute aggregates via ∑ prob(⋅)*policy(⋅)
+!
+! DEPENDENCIES:
+!   - global_vars: State grids, survival probabilities (pi_j), transition matrices
+!   - linint: For linear_int function
+!
+! NOTES:
+!   Normalization: ∑_{all states} prob_ss(j,⋅) = 1 for each age j.
+!   Forward simulation stable if policy functions well-behaved (no explosive paths).
+!===============================================================================
 !***************************************************************************************
 
 ! get distribution for every gridpoint and state for every age
@@ -38,7 +82,7 @@
                     dist = min(dist, 1d0)
 
                     
-                    prob_ss(1, ial, 0, :, :, :)  = prob_ss(1, ial, 0, :, :, :)  + p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+                    prob_ss(1, ial, 0, :, :, :)  = prob_ss(1, ial, 0, :, :, :)  + p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
                     prob_ss(1, iar, 0, :,  :, :) = prob_ss(1, iar, 0, :, :, :) +  p_initial(ind)*(1d0 - dist)
                     
                     
@@ -70,7 +114,7 @@
             
             ! need to amend it to get initial dispersion
             
-            prob_ss(1, ial, 0, :, :, :) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+            prob_ss(1, ial, 0, :, :, :) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
             prob_ss(1, iar, 0, :,  :, :) = 1d0 - dist
             
             
@@ -208,7 +252,7 @@
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
 
-                    prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, :, :, :,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+                    prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, :, :, :,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
                     prob_trans(1, iar, 0, :, :, :, i) =  prob_trans(1, iar, 0, :, :, :,i) +  p_initial(ind)*(1d0 - dist)
                 enddo
                 
@@ -239,7 +283,7 @@
                     ial = min(ial, n_a)
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
-            prob_trans(1, ial, 0, :, :, :, i) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+            prob_trans(1, ial, 0, :, :, :, i) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
             prob_trans(1, iar, 0, :, :, :, i) = 1d0 - dist
             
             

@@ -1,7 +1,39 @@
-! WHAT  : declaration of global (ALL subroutines and functions MAY USE them) parameters and variables
-! TAKE  : none 
-! DO    : definition of a switch in comments 
-! RETURN: nothing
+!===============================================================================
+! FILE: globals.f90
+!
+! DESCRIPTION:
+!   Global variable declarations for the OLG model with heterogeneous agents.
+!   Contains all parameters, switches, and state variables accessible throughout
+!   the program. Defines model dimensions, numerical parameters, demographic data,
+!   policy variables, and computational settings.
+!
+! MODULE: global_vars
+!   Master declaration module used by all computational routines
+!
+! KEY PARAMETERS:
+!   - bigJ: Number of age groups (16 periods of 5 years each = 80 years)
+!   - bigM: Number of permanent agent types (2: college/non-college)
+!   - n_p: Number of transition periods (140)
+!   - bigT: Total time dimension = n_p + bigJ + 1
+!   - zbar: Period length scaling factor (5 years)
+!
+! VARIABLE CATEGORIES:
+!   1. Model dimensions and indices (bigJ, bigM, bigT, n_a, n_aime, etc.)
+!   2. Switches controlling model behavior (switch_mortality, switch_labor_choice, etc.)
+!   3. Numerical parameters (delta, theta, alpha, phi, rho, etc.)
+!   4. Demographic data (pi_big, omega_ss_big, Nn_big, life_exp, etc.)
+!   5. Policy variables (tauL, tauK, tauC, lambda, jbar, t1, t2, etc.)
+!   6. State variables for steady state and transition (k, r, w, l, c, s, b, etc.)
+!   7. Grid definitions (a_grid, aime_grid, shock grids)
+!   8. File paths and I/O settings (cwd_*, switch_ss_write, etc.)
+!
+! NOTE:
+!   All variables declared with 'save' attribute to preserve values across calls.
+!   Variables with suffix _ss denote steady state, _t denote time-varying transition.
+!   Suffix _old/_new distinguish initial vs final steady state parameters.
+!   Suffix _j denotes age dimension, _m denotes type dimension.
+!===============================================================================
+
 MODULE global_vars
 IMPLICIT NONE
    save

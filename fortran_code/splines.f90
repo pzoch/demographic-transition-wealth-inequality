@@ -1,11 +1,39 @@
-!##############################################################################
-! MODULE splines
-! 
-! Module for multidimensional spline interpolation.
+!===============================================================================
+! FILE: splines.f90
 !
-! copyright: Fabian Kindermann
-!            University of Wuerzburg
-!            kindermann.fabian@uni-wuerzburg.de
+! DESCRIPTION:
+!   Multidimensional cubic spline interpolation library for smooth function
+!   approximation. Provides higher accuracy than linear interpolation at cost of setup.
+!
+! MODULE: splines
+!   Cubic spline construction and evaluation in 1D through 4D.
+!
+! KEY ROUTINES:
+!   - spline_interp: Generic interface for 1D-4D spline interpolation
+!   - spline: Constructs cubic spline coefficients (tridiagonal solver)
+!   - spline_eval: Evaluates spline at given point(s)
+!   - spline_complete/natural: Boundary condition variants
+!   - grid_Val_Inv: Inverts gridpoint location (finds index given value)
+!
+! INTERFACES:
+!   - spline_interp: Overloaded for 1-4 dimensions
+!   - grid_Val_Inv: Single/multiple point inversion
+!
+! ALGORITHM:
+!   Uses tridiagonal matrix solver for spline coefficient computation.
+!   Natural boundary conditions (second derivatives = 0 at endpoints) by default.
+!
+! DEPENDENCIES:
+!   - assertions: For array dimension checking (assert_eq)
+!   - errwarn: Error/warning message handling
+!
+! NOTES:
+!   Alternative to linint.f90 when smoothness required. Rarely used in main
+!   PFI loop due to computational cost; reserved for post-processing/plotting.
+!
+! COPYRIGHT:
+!   Fabian Kindermann, University of Wuerzburg
+!   kindermann.fabian@uni-wuerzburg.de
 !##############################################################################
 module splines
 

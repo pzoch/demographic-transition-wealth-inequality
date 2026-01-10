@@ -1,3 +1,50 @@
+!===============================================================================
+! FILE: Initial_values_DB.f90
+!
+! DESCRIPTION:
+!   Initializes transition path arrays with steady-state values. Provides starting
+!   guess for iterative solution by interpolating between old and new steady states.
+!
+! SCRIPT (included code fragment)
+!   Executed once before transition_iterations.f90 loop begins.
+!
+! INITIALIZATION STRATEGY:
+!   - Period 1: Use old steady state (k_ss_1, l_ss_j_1, c_ss_j_1, etc.)
+!   - Period 2: Also old steady state (or could blend)
+!   - Periods 3 to bigT: Use new steady state (k_ss_2, l_ss_j_2, c_ss_j_2, etc.)
+!   
+!   This creates a "step" initial guess - economy jumps from old to new equilibrium.
+!   Iteration refines this into smooth transition path.
+!
+! VARIABLES INITIALIZED:
+!   From old steady state (_ss_1):
+!   - k(1): Capital
+!   - l_j(:,:,1), c_j(:,:,1), sv_j(:,:,1): Cohort policies
+!   - b_j, b1_j, b2_j: Pension benefits
+!   - pillarI_j, pillarII_j: Pension system variables
+!   - bequest_left_j: Bequests
+!   
+!   From new steady state (_ss_2):
+!   - Same variables for t ∈ [3, bigT]
+!
+! TRANSITION PERIOD HANDLING:
+!   For t=2 and transition periods (commented as n_p+1):
+!   Uses old steady state with conditional logic:
+!   - b1_j, b2_j: Only for ages j ≥ jbar_t(i) (retirement age at time i)
+!
+! NOTES:
+!   "DB" likely stands for "Defined Benefit" (pension system type).
+!   Jump initialization converges faster than linear interpolation if shocks discrete.
+!   Refinement: Could use linear blend k(i) = λ*k_ss_1 + (1-λ)*k_ss_2 where λ(i)℘0.
+!
+! DEPENDENCIES:
+!   Requires steady state solutions computed beforehand:
+!   - steady(param_ss=0) → *_ss_1 variables
+!   - steady(param_ss=1) → *_ss_2 variables
+!
+! INCLUDED BY:
+!   transition_path_DB in transition.f90 (before main iteration loop)
+!===============================================================================
 ! WHAT   :  First guess for transition_db
 ! TAKE   :  values from steady_1 and steady_2  
 ! DO     :  read them for first guess at the end of the transition path, jump wise with data from steady state
