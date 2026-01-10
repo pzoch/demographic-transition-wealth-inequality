@@ -1,0 +1,33 @@
+# Results folder - model output, never commit
+Results/
+
+# Temporary files
+*_temp.f90
+*_NEW.f90
+*.tmp
+
+# Compiled binaries and build artifacts
+*.exe
+*.obj
+*.mod
+*.o
+*.smod
+x64/
+Debug/
+Release/
+
+# Intel Fortran specific
+*.suo
+*.user
+*.sln.docstates
+*.opensdf
+*.sdf
+*.ipch
+
+# Visual Studio profiler results
+Intel® VTune™ Profiler Results/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
