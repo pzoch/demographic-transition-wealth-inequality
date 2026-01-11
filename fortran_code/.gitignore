@@ -12,17 +12,27 @@ Results/
 *.mod
 *.o
 *.smod
+*.pdb
+*.ilk
+*.idb
 x64/
 Debug/
 Release/
 
-# Intel Fortran specific
+# Visual Studio
+.vs/
 *.suo
 *.user
 *.sln.docstates
 *.opensdf
 *.sdf
 *.ipch
+*.VC.db
+*.VC.opendb
+
+# Intel Fortran specific
+*.log
+__pycache__/
 
 # Visual Studio profiler results
 Intel® VTune™ Profiler Results/
