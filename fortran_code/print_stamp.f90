@@ -9,7 +9,7 @@
 !   Executed once at beginning of transition path computation.
 !
 ! OUTPUT FILE:
-!   version//experiment//closure//"information.txt" (unit 666)
+!   "information.txt" in scenario subfolder (unit 666)
 !
 ! INFORMATION WRITTEN:
 !   1. Switch settings (30+ binary/integer flags):
@@ -36,7 +36,7 @@
 !===============================================================================
 
     
-    OPEN (unit=666, FILE = version//experiment//closure//"information.txt")
+    OPEN (unit=666, FILE = "information.txt")
     
     
         write(666, '(A)') '******* INFORMATION *******'

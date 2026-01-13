@@ -55,7 +55,7 @@ IMPLICIT NONE
     character(4) :: experiment
     character(4) :: no_steady
     
-    character(128) :: cwd, cwd_r, cwd_w, cwd_i, cwd_p
+    character(128) :: cwd, cwd_r, cwd_w, cwd_i, cwd_p, cwd_scenario
     
     integer :: switch_ss_write                              ! 0 - do not save big csv files with steady state, 1 save
     

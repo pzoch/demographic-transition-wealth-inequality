@@ -270,7 +270,7 @@ call chdir(cwd_p)
     tax_c_db = 0
     r_db = 0 
 
-call chdir(cwd_w)
+call chdir(cwd_scenario)
 
 end subroutine globals
 

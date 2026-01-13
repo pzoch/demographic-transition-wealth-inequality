@@ -49,8 +49,12 @@ program olg2
     version = 'base_' ! these three strings allow us to load a correct version
     experiment = 'all_'
     closure = 'govt__'
-    
-    call globals         ! globals is a subroutine in global_vars2 module             
+
+    ! Construct scenario output folder path and create it
+    cwd_scenario = trim(cwd_w)//'/'//trim(version)//trim(experiment)//trim(closure)
+    call system('mkdir "'//trim(cwd_scenario)//'" 2>nul')  ! Creates subfolder (ignores error if exists)
+
+    call globals         ! globals is a subroutine in global_vars2 module
     call clear_globals
                                                    
 
