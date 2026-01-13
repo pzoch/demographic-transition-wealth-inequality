@@ -8,14 +8,14 @@
 ! SCRIPT (included code fragment)
 !   Executed at end of transition path solution to save results.
 !
-! OUTPUT FILES (all prefixed with version//experiment//closure):
+! OUTPUT FILES (saved to scenario subfolder Results/{version}{experiment}{closure}/):
 !   Time series (bigT vectors):
 !   - *_trans.txt: Aggregates (y, capital, rate, bigl, debt_share, g_share, etc.)
 !   - *_tax_revenue_trans.txt: Tax revenues by type (tC, tL, tK)
-!   
+!
 !   Cohort profiles (bigJ x bigT matrices):
 !   - *_j_trans.csv: Life-cycle profiles (u, l, c, b, sv by age and time)
-!   
+!
 !   Additional:
 !   - gamma_trans.txt, lambda_trans.txt: Demographics/productivity
 !   - replacement*_trans.txt: Pension replacement rates
@@ -31,75 +31,75 @@
 !
 ! NOTES:
 !   Part of transition_path_DB output sequence. Controlled by switch_small_write.
-!   File paths constructed from version/experiment/closure strings set in main.f90.
+!   Working directory is set to scenario subfolder via chdir in set_globals.f90.
 !   Some units reused (e.g., unit 22) - ensure CLOSE before reopening.
 !===============================================================================
   ! save in files
 
-    OPEN (unit=1,  FILE = version//experiment//closure//"u_init_old_trans.txt")
-    OPEN (unit=2,  FILE = version//experiment//closure//"u_all_trans.txt")
-    OPEN (unit=3,  FILE = version//experiment//closure//"u20_trans.txt")
-    OPEN (unit=4,  FILE = version//experiment//closure//"y_trans.txt")
-    OPEN (unit=5,  FILE = version//experiment//closure//"capital_trans.txt")
-    OPEN (unit=6,  FILE = version//experiment//closure//"rate_trans.txt") 
-    OPEN (unit=8,  FILE = version//experiment//closure//"subsidy_share_trans.txt")
-    OPEN (unit=9,  FILE = version//experiment//closure//"benefits_trans.txt")
+    OPEN (unit=1,  FILE ="u_init_old_trans.txt")
+    OPEN (unit=2,  FILE ="u_all_trans.txt")
+    OPEN (unit=3,  FILE ="u20_trans.txt")
+    OPEN (unit=4,  FILE ="y_trans.txt")
+    OPEN (unit=5,  FILE ="capital_trans.txt")
+    OPEN (unit=6,  FILE ="rate_trans.txt") 
+    OPEN (unit=8,  FILE ="subsidy_share_trans.txt")
+    OPEN (unit=9,  FILE ="benefits_trans.txt")
     
-    OPEN (unit=10, FILE = version//experiment//closure//"bigl_trans.txt")
-    OPEN (unit=11, FILE = version//experiment//closure//"replacement_trans.txt")
+    OPEN (unit=10, FILE ="bigl_trans.txt")
+    OPEN (unit=11, FILE ="replacement_trans.txt")
     ! upsilon removed - always 0
-    OPEN (unit=13, FILE = version//experiment//closure//"tC_trans.txt")
-    OPEN (unit=14, FILE = version//experiment//closure//"tL_trans.txt")
-    OPEN (unit=15, FILE = version//experiment//closure//"tK_trans.txt")
-    OPEN (unit=16, FILE = version//experiment//closure//"contrib_to_gdp_trans.txt")
-    OPEN (unit=17, FILE = version//experiment//closure//"debt_share_trans.txt")
-    OPEN (unit=18, FILE = version//experiment//closure//"debt_cost_share_trans.txt")
+    OPEN (unit=13, FILE ="tC_trans.txt")
+    OPEN (unit=14, FILE ="tL_trans.txt")
+    OPEN (unit=15, FILE ="tK_trans.txt")
+    OPEN (unit=16, FILE ="contrib_to_gdp_trans.txt")
+    OPEN (unit=17, FILE ="debt_share_trans.txt")
+    OPEN (unit=18, FILE ="debt_cost_share_trans.txt")
     
     ! upsilon removed - always 0
-    OPEN (unit=21, FILE = version//experiment//closure//"replacement2_trans.txt") !rozumiane jako pierwsza emerytura do ostatniej placy
-    OPEN (unit=22, FILE = version//experiment//closure//"bigL_trans.txt")
-    OPEN (unit=23, FILE = version//experiment//closure//"Nt_trans.txt")
-    OPEN (unit=24, FILE = version//experiment//closure//"g_share_trans.txt")
-    OPEN (unit=25, FILE = version//experiment//closure//"rbar_trans.txt")
+    OPEN (unit=21, FILE ="replacement2_trans.txt") !rozumiane jako pierwsza emerytura do ostatniej placy
+    OPEN (unit=22, FILE ="bigL_trans.txt")
+    OPEN (unit=23, FILE ="Nt_trans.txt")
+    OPEN (unit=24, FILE ="g_share_trans.txt")
+    OPEN (unit=25, FILE ="rbar_trans.txt")
     
-    OPEN (unit=26, FILE = version//experiment//closure//"tC_tax_revenue_trans.txt")
-    OPEN (unit=27, FILE = version//experiment//closure//"tL_tax_revenue_trans.txt")
-    OPEN (unit=28, FILE = version//experiment//closure//"tK_tax_revenue_trans.txt")
+    OPEN (unit=26, FILE ="tC_tax_revenue_trans.txt")
+    OPEN (unit=27, FILE ="tL_tax_revenue_trans.txt")
+    OPEN (unit=28, FILE ="tK_tax_revenue_trans.txt")
     
     
-    OPEN (unit=22, FILE = version//experiment//closure//"u_j_trans.csv")
-    OPEN (unit=60, FILE = version//experiment//closure//"l_j_trans.csv")
-    OPEN (unit=61, FILE = version//experiment//closure//"c_j_trans.csv")
-    OPEN (unit=62, FILE = version//experiment//closure//"b_j_trans.csv")
-    OPEN (unit=63, FILE = version//experiment//closure//"sv_j_trans.csv")
+    OPEN (unit=22, FILE ="u_j_trans.csv")
+    OPEN (unit=60, FILE ="l_j_trans.csv")
+    OPEN (unit=61, FILE ="c_j_trans.csv")
+    OPEN (unit=62, FILE ="b_j_trans.csv")
+    OPEN (unit=63, FILE ="sv_j_trans.csv")
 
-    OPEN (unit=64, FILE = version//experiment//closure//"gamma_trans.txt")
+    OPEN (unit=64, FILE ="gamma_trans.txt")
     
-    OPEN (unit=65, FILE = version//experiment//closure//"cy_ratio_trans.txt")
-    OPEN (unit=66, FILE = version//experiment//closure//"ky_ratio_trans.txt")
+    OPEN (unit=65, FILE ="cy_ratio_trans.txt")
+    OPEN (unit=66, FILE ="ky_ratio_trans.txt")
     
-    OPEN (unit=67, FILE = version//experiment//closure//"bigK_trans.txt")
-    OPEN (unit=68, FILE = version//experiment//closure//"bigY_trans.txt")
-    OPEN (unit=69, FILE = version//experiment//closure//"lambda_trans.txt")
-    OPEN (unit=70, FILE = version//experiment//closure//"lifeexp_trans.txt")
-    OPEN (unit=71, FILE = version//experiment//closure//"nu_trans.txt")
-    OPEN (unit=72, FILE = version//experiment//closure//"depend_ratio_trans.txt")
+    OPEN (unit=67, FILE ="bigK_trans.txt")
+    OPEN (unit=68, FILE ="bigY_trans.txt")
+    OPEN (unit=69, FILE ="lambda_trans.txt")
+    OPEN (unit=70, FILE ="lifeexp_trans.txt")
+    OPEN (unit=71, FILE ="nu_trans.txt")
+    OPEN (unit=72, FILE ="depend_ratio_trans.txt")
     
-    OPEN (unit=73,  FILE = version//experiment//closure//"r_pretax_trans_1y.txt")
-    OPEN (unit=74,  FILE = version//experiment//closure//"r_afterax_trans_1y.txt")
-    OPEN (unit=75,  FILE = version//experiment//closure//"r_trans.txt")
-    OPEN (unit=76,  FILE = version//experiment//closure//"sum_b_weight_trans.txt")
-    OPEN (unit=77,  FILE = version//experiment//closure//"zet_trans.txt")
-    OPEN (unit=78,  FILE = version//experiment//closure//"gdp_trans.txt")
-    OPEN (unit=79,  FILE = version//experiment//closure//"ky_ratio_trans_1y.txt")
-    OPEN (unit=80,  FILE = version//experiment//closure//"irr_trans_1y.txt")
-    OPEN (unit=81,  FILE = version//experiment//closure//"iy_ratio_trans.txt")
-    OPEN (unit=82,  FILE = version//experiment//closure//"gdp_pc_trans.txt")
-    OPEN (unit=83,  FILE = version//experiment//closure//"star_tinc_trans.txt")
-    OPEN (unit=84,  FILE = version//experiment//closure//"star_linc_trans.txt")
-    OPEN (unit=85,  FILE = version//experiment//closure//"star_pop_trans.txt")
-    OPEN (unit=86,  FILE = version//experiment//closure//"beq_gdp_trans.txt")
-    OPEN (unit=87,  FILE = version//experiment//closure//"avg_hours_trans.txt")
+    OPEN (unit=73,  FILE ="r_pretax_trans_1y.txt")
+    OPEN (unit=74,  FILE ="r_afterax_trans_1y.txt")
+    OPEN (unit=75,  FILE ="r_trans.txt")
+    OPEN (unit=76,  FILE ="sum_b_weight_trans.txt")
+    OPEN (unit=77,  FILE ="zet_trans.txt")
+    OPEN (unit=78,  FILE ="gdp_trans.txt")
+    OPEN (unit=79,  FILE ="ky_ratio_trans_1y.txt")
+    OPEN (unit=80,  FILE ="irr_trans_1y.txt")
+    OPEN (unit=81,  FILE ="iy_ratio_trans.txt")
+    OPEN (unit=82,  FILE ="gdp_pc_trans.txt")
+    OPEN (unit=83,  FILE ="star_tinc_trans.txt")
+    OPEN (unit=84,  FILE ="star_linc_trans.txt")
+    OPEN (unit=85,  FILE ="star_pop_trans.txt")
+    OPEN (unit=86,  FILE ="beq_gdp_trans.txt")
+    OPEN (unit=87,  FILE ="avg_hours_trans.txt")
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -245,8 +245,8 @@
      CLOSE(86)
      CLOSE(87)
 ! pension system closure
-    OPEN (unit=1, FILE = version//experiment//closure//"b_scale_factor.txt")
-    OPEN (unit=2, FILE = version//experiment//closure//"t1_additional_contrib.txt")
+    OPEN (unit=1, FILE ="b_scale_factor.txt")
+    OPEN (unit=2, FILE ="t1_additional_contrib.txt")
     ! upsilon removed - always 0
         do i = 1,n_p+1,1
             write(1, '(F20.10)')  b_scale_factor(i) 
@@ -259,8 +259,8 @@
     CLOSE(3)
     
 
-    OPEN (unit=202,  FILE = version//experiment//closure//"savings_trans.txt")
-    OPEN (unit=203,  FILE = version//experiment//closure//"debt_trans.txt")
+    OPEN (unit=202,  FILE ="savings_trans.txt")
+    OPEN (unit=203,  FILE ="debt_trans.txt")
     write(202,  '(F20.10)') (savings(1))/(nu(1)*gam_t(1))
     write(203,  '(F20.10)') (debt(1))/(nu(1)*gam_t(1))
     do i = 2,n_p+1,1 
@@ -274,7 +274,7 @@
 
 
 
-OPEN (unit=1, FILE = version//experiment//closure//"gini_weight_trans.txt")
+OPEN (unit=1, FILE ="gini_weight_trans.txt")
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
             do ia = 0, n_a, 1
@@ -285,7 +285,7 @@ OPEN (unit=1, FILE = version//experiment//closure//"gini_weight_trans.txt")
 close(1)
 
 
-open(unit = 106, FILE = version//experiment//closure//"gini_weight_trans.csv")
+open(unit = 106, FILE ="gini_weight_trans.csv")
 write(106, '(A)') "weight;year;age;assets"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
@@ -301,7 +301,7 @@ write(106, '(A)') "weight;year;age;assets"
 close(106)
 
 
-open(unit = 107, FILE = version//experiment//closure//"prob_trans.csv")
+open(unit = 107, FILE ="prob_trans.csv")
 write(107, '(A)') "prob;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
@@ -330,7 +330,7 @@ write(107, '(A)') "prob;year;age;asset;aime;inc_shock;ret_shock;disc_shock"
     
 close(107)
 if (switch_small_write == 0) then
-open(unit = 108, FILE = version//experiment//closure//"mass_trans.csv")
+open(unit = 108, FILE ="mass_trans.csv")
 write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
@@ -368,7 +368,7 @@ write(108, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
     close(108)
     
     else
-open(unit = 108, FILE = version//experiment//closure//"mass_trans_small.csv")
+open(unit = 108, FILE ="mass_trans_small.csv")
 write(108, '(A)') "mass;labinc_pretax;sav;year;age;asset;aime;inc_shock;ret_shock;disc_shock;type"
     do i = 1, bigT, 1
         do j = 1, bigJ, 1
@@ -402,7 +402,7 @@ write(108, '(A)') "mass;labinc_pretax;sav;year;age;asset;aime;inc_shock;ret_shoc
         
     endif
     
-    open(unit = 109, FILE = version//experiment//closure//"mass_trans_beq.csv")
+    open(unit = 109, FILE ="mass_trans_beq.csv")
     
     if (switch_unequal_bequest == 2) then
 write(109, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav;year;beq;asset;aime;inc_shock;ret_shock;disc_shock;type"

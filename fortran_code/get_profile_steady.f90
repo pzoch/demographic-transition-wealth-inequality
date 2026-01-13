@@ -242,7 +242,7 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
             exit
         endif
         enddo
-   open(unit = 107, FILE = version//experiment//closure//variant//"profiles.csv")
+   open(unit = 107, FILE = variant//"profiles.csv")
      write(107, '(A)') "type;age;s;c;l;asset;lab_inc;lab_inc_pre;tot_inc;tot_inc_pre;lab_tax;pension"
    
             do j = 1, bigJ, 1
@@ -267,7 +267,7 @@ if (param_ss == 0) then ! 0 = with old parameters;  1 = with new parameters
              close(107)
              
     if (switch_ss_write == 1) then  
-             open(unit = 108, FILE = version//experiment//closure//variant//"profiles_full.csv")
+             open(unit = 108, FILE = variant//"profiles_full.csv")
     write(108, '(A)') "value;mass;sav;asset;cons;hours;labinc;labinc_pretax;totinc;totinc_pretax;pension;disposable;srate;age;asset_ind;aime;inc_shock;ret_shock;type;disc_shock"
         do m = 1, bigM, 1
             do j = 1, bigJ, 1

@@ -43,7 +43,7 @@
         write(*,*) '********************************************'
 
 !   
-    OPEN (unit=666, FILE = version//experiment//closure//variant//"information_run.txt")
+    OPEN (unit=666, FILE = variant//"information_run.txt")
          write(666, '(A)') '******* INFORMATION *******'
          write(666, '(A)')
          write(666, '(A)') '*********************************'

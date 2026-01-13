@@ -60,8 +60,7 @@
 				<File RelativePath=".\clock.f90"/>
 				<File RelativePath=".\errwarn.f90"/>
 				<File RelativePath=".\gaussian_int.f90"/>
-				<File RelativePath=".\geompack3.f90"/>
-				<File RelativePath=".\gini.f90"/>
+					<File RelativePath=".\gini.f90"/>
 				<File RelativePath=".\linint.f90"/>
 				<File RelativePath=".\matrixtools.f90"/>
 				<File RelativePath=".\minimization.f90"/>
