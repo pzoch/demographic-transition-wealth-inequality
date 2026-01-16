@@ -2,40 +2,141 @@
 ! FILE: data.f90
 !
 ! DESCRIPTION:
-!   Module for loading external data files containing demographic projections,
-!   economic time series, and policy parameters. Processes raw data and prepares
-!   time-varying arrays for steady state and transition path computations.
+!   Module for loading and processing external data files containing demographic
+!   projections, economic time series, and policy parameters. Transforms raw data
+!   into model-ready time-varying arrays for steady state and transition path
+!   computations. Central data interface for the OLG model replication.
 !
 ! MODULE: get_data
-!   Contains data reading and processing routines
+!   Contains all data reading and processing routines
 !
 ! SUBROUTINES:
-!   - read_data: Master data loading routine that reads all external data files
+!   - read_data: Master data loading routine that reads, processes, and validates
+!                all external data files. Returns intent(out) arrays for use in
+!                set_globals.f90 initialization.
 !
 ! DATA FILES READ (from Data/ directory):
-!   - _data_Nn_US_*.txt: Population by age and time
-!   - _data_gamma*.txt: TFP growth rates
-!   - _data_pi_*.txt: Conditional survival probabilities
-!   - _data_omega_*.txt: Age-efficiency profiles
-!   - _data_sigma2eps_*.txt: Earnings shock variances
-!   - _data_tau*.txt: Tax rate time series (L, K, C)
-!   - _data_lambda.txt: Bequest tax rates
-!   - _data_skill_premium.txt: College wage premium
-!   - _data_college_share.txt: Population share by education
-!   - _data_contrib*.txt: Pension contribution rates
-!   - _data_depr.txt: Depreciation rates
-!   - _data_rho_*.txt: Pension replacement rates
-!   - _data_exog_rate_*.txt: Exogenous interest rates
-!   - _data_gy_*.txt: Government spending ratios
+!   DEMOGRAPHICS:
+!   - _data_Nn_US_1935_2100.txt: Population by age, 1935-2067 (33 periods available)
+!   - _data_pi_cond_US_since1935.txt: Conditional survival probabilities π(j|j-1)
+!   - _data_het_pi_US_since1935_all.txt: Education-specific mortality (if switch_het_mortality=1)
 !
-! PROCESSING:
-!   - Extends data series to full transition horizon using last available values
-!   - Calculates implied survival probabilities from population data
-!   - Computes cumulative TFP growth and labor efficiency measures
-!   - Applies cohort and period-specific shocks and mortality patterns
+!   PRODUCTIVITY:
+!   - _data_omega_mostdrop_hhslabinc_avghourlyhh.txt: Age-efficiency profiles by type
+!   - _data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt: Earnings shock variances σ²_ε(t)
+!   - _data_gamma.txt: Total factor productivity (TFP) growth rates
+!   - _data_skill_premium.txt: College wage premium (type multiplier) by year
+!   - _data_college_share.txt: Education type shares (college vs non-college)
 !
-! RETURNS:
-!   Time-varying arrays (*_d suffix) for all demographic and policy variables
+!   FISCAL POLICY:
+!   - _data_tauL.txt: Labor income tax rates τ_L(t)
+!   - _data_tauK.txt: Capital income tax rates τ_K(t)
+!   - _data_tauC.txt: Consumption tax rates τ_C(t)
+!   - _data_lambda.txt: Bequest tax rates λ(t)
+!   - _data_labsh.txt: Labor share in GDP (1 - α)
+!
+!   PENSION SYSTEM:
+!   - _data_contrib_to_gdp.txt: Social Security contributions as % of GDP
+!   - _data_rho_1935.txt: Pension replacement rates ρ(t)
+!
+!   OTHER:
+!   - _data_depr.txt: Depreciation rates δ(t)
+!   - _data_exog_rate_1935.txt: Exogenous interest rates (if switch_exog_rate=1)
+!
+! DATA AVAILABILITY AND EXTENSION:
+!   - start_year = 1935 (model t=1)
+!   - break_index = 5 (year 1955, used for freezing parameters)
+!   - last_data_* variables define end of available data for each series
+!   - Series extended to bigT using last observed value (constant extrapolation)
+!   - Example: last_data_demo = 33 → 1935 + 5×(33-1) = 2095
+!
+! KEY PROCESSING STEPS:
+!   1. RAW DATA LOADING:
+!      - Read text files into temporary arrays (1:last_data_*)
+!      - Extend to full horizon (1:bigT) by repeating last value
+!
+!   2. CONDITIONAL FREEZING (based on switch_* settings):
+!      - If switch_change_X == 0: Freeze at break_index (1955 value)
+!      - If switch_change_X == 1: Use full time series
+!      - Applies to: gamma, tauL, tauK, tauC, lambda, depr, rho, contrib, sl
+!
+!   3. DEMOGRAPHIC PROCESSING:
+!      - Convert conditional survival π(j|j-1) to cumulative π(j|1)
+!      - Calculate population Nn(j,t) from Nn(1,t) and survival rates
+!      - Split by education type using type_share_d(m,t)
+!      - Apply mortality variants (switch_mortality = 0,1,3,4,5,6,7,8)
+!
+!   4. TFP AND LABOR EFFICIENCY:
+!      - Read raw TFP growth gam_d(t)
+!      - Compute effective labor: eff_labor(t) = [∑_j,m (type_mult × ω_j × l)^ρ]^(1/ρ)
+!      - Convert to labor-augmenting: a_d(t) = zet_d(t)^(1/(1-α)) / efficiency_t(t)
+!      - Recalculate gam_d(t) = a_d(t) / a_d(t-1) (accounts for CES aggregation)
+!
+!   5. SKILL PREMIUM AND TYPE SHARES:
+!      - Load type_multiplier_d(m,t): College wage premium relative to non-college
+!      - Load type_share_d(m,t): Fraction of population with college education
+!      - Ensure type_share_d sums to 1 in each period
+!      - Freeze if switch_change_premium == 0 or switch_change_type_share == 0
+!
+!   6. PENSION CONTRIBUTIONS:
+!      - Read as % of GDP: t1_raw(t)
+!      - Convert to rate on labor income: t1_d(t) = t1_raw(t) / (1 - α(t))
+!
+!   7. SPECIAL CALIBRATIONS (switch_keep_fixed == 1):
+!      - Freeze ALL time-varying parameters at initial values
+!      - Set nu_ss_new = nu_ss_old = 1.0 (no population growth)
+!      - Used for counterfactual "no change" scenarios
+!
+!   8. OUTPUT IMPLIED SURVIVAL:
+!      - Write implied_pi.txt: π(j,t) = Nn(j,t) / Nn(j-1,t-1)
+!      - Diagnostic for checking demographic consistency
+!
+! RETURNS (intent(out) arrays):
+!   - omega_ss_d(bigJ, bigM): Age-efficiency profiles by type
+!   - gam_d(bigT): TFP growth factors (gross)
+!   - gam_cum_d(bigT): Cumulative TFP growth from t=1
+!   - zet_d(bigT): Labor-augmenting technology level
+!   - pi_d_big(bigJ, bigM, bigT): Survival probabilities (cumulative from age 1)
+!   - pi_big_weight_d(bigJ, bigM, bigT): Survival weights for steady state
+!   - Nn_d_big(bigJ, bigM, bigT): Population by age, type, time
+!   - jbar_d(bigT): Retirement age (constant in current setup)
+!   - t1_d(bigT): Pension contribution rates
+!   - tauL_d, tauK_d, tauC_d(bigT): Tax rates
+!   - lambda_d(bigT): Bequest tax rates
+!   - debt_constr_d(bigT): Debt-to-GDP constraint (set to 0)
+!   - alpha_d(bigT): Capital share in production
+!   - type_multiplier_d(bigM, bigT): Skill premium
+!   - gy_factor_d(bigT): Government spending adjustment (not used)
+!   - type_share_d(bigM, bigT): Education composition
+!   - depr_d(bigT): Depreciation rates
+!   - rho_d(bigT): Pension replacement rates
+!   - exog_rate_d(bigT): Exogenous interest rates (if used)
+!
+! DEPENDENCIES:
+!   - global_vars: For bigJ, bigM, bigT, zbar, switch_* parameters
+!   - Directory management: cwd_r (Data/), cwd_w (Results/)
+!
+! NOTES FOR REPLICATION:
+!   - All data files use simple text format (one value per line, no headers)
+!   - Data availability differs by series (check last_data_* variables)
+!   - Extension to bigT is automatic but may not reflect true projections
+!   - break_index = 5 (1955) is key year for parameter freezing
+!   - Education heterogeneity: bigM = 2 (non-college, college)
+!   - Survival heterogeneity controlled by switch_het_mortality
+!   - TFP calculation accounts for CES labor aggregation (rho_subst ≠ 1)
+!   - Population dynamics: Nn(j+1,t+1) = π(j+1,t+1)/π(j,t) × Nn(j,t)
+!   - Initial population (t=1) can use steady demographics (switch_steady_demo=1)
+!
+! VALIDATION:
+!   - Check implied_pi.txt for demographic consistency
+!   - Verify type_share_d sums to 1
+!   - Ensure no negative or missing values after extension
+!   - Compare gam_cum_d with raw TFP data to verify transformation
+!
+! PERFORMANCE:
+!   - File I/O dominates (50+ files read)
+!   - Processing loops are O(bigT × bigJ × bigM) ≈ 10^4 operations
+!   - Called once at initialization (not performance-critical)
 !===============================================================================
 
 MODULE get_data

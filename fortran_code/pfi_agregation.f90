@@ -2,51 +2,109 @@
 ! FILE: pfi_agregation.f90
 !
 ! DESCRIPTION:
-!   Aggregates individual policy functions over distribution to compute cohort-level
-!   and economy-wide statistics. Integrates micro decisions into macro variables.
+!   Aggregates individual policy functions over the state space distribution to
+!   compute cohort-level and economy-wide statistics. Bridges the micro household
+!   problem with macro equilibrium conditions by integrating heterogeneous decisions.
+!
+! PURPOSE:
+!   Given solved policy functions {c, l, a'} and equilibrium distribution prob(j,⋅),
+!   this module computes:
+!   1. Age-specific averages for life-cycle profiles
+!   2. Economy-wide aggregates for market clearing
+!   3. Distributional statistics (Gini, wealth shares, etc.)
+!   4. Euler equation residuals for solution accuracy checks
 !
 ! SUBROUTINES:
 !   - aggregation_ss: Steady-state aggregation
-!                     Computes ∑_{states} prob(j,⋅) * policy(j,⋅) for all j
-!   - aggregation_trans: Transition path aggregation (cohort-time tracking)
+!       Computes: cohort_avg(j) = ∑_{a,aime,ε,δ,r} prob_ss(j,⋅) * policy_ss(j,⋅)
+!       For all ages j=1,...,bigJ and all policy/value functions
+!
+!   - aggregation_trans: Transition path aggregation (cohort-period tracking)
+!       Same as aggregation_ss but for each period i=2,...,bigT
+!       Accounts for cohort-specific shocks (time-varying σ²_ε, skill premium, etc.)
 !
 ! COHORT AGGREGATES (steady state):
-!   For each age j, computes:
+!   For each age j ∈ {1,...,bigJ}, computes expected values:
 !   - c_ss_j_vfi(j): Average consumption
-!   - l_ss_j_vfi(j): Average labor supply
-!   - s_pom_ss_j_vfi(j): Average savings
-!   - V_ss_j_vfi(j): Average value
-!   - lab_income_ss_j_vfi(j): Average labor income (gross)
-!   - asset_pom_ss_j_vfi(j): Average assets
-!   - pension_ss_j_vfi(j): Average pension benefits
+!   - l_ss_j_vfi(j): Average labor supply (efficiency units)
+!   - lab_ss_j_vfi(j): Average labor hours (raw)
+!   - s_pom_ss_j_vfi(j): Average savings (next period assets)
+!   - asset_pom_ss_j_vfi(j): Average current assets
+!   - V_ss_j_vfi(j): Average lifetime utility
+!   - lab_income_ss_j_vfi(j): Average after-tax labor income
+!   - lab_income_pretax_ss_j_vfi(j): Average pre-tax labor income
+!   - pension_ss_j_vfi(j): Average pension benefits received
 !   - labor_tax_ss_j_vfi(j): Average labor tax paid
+!   - lw_ss_j_vfi(j): Average labor income (w*ε*l)
+!   - lw_lambda_ss_j_vfi(j): Average (w*ε*l)^(1-λ) for progressive tax
 !
 ! ECONOMY-WIDE AGGREGATES:
-!   Weighted by cohort size N_ss_j:
+!   Weighted by cohort size N_ss_j_vfi(j) to get totals:
 !   - bigC_ss = ∑_j N_ss_j * c_ss_j_vfi(j): Total consumption
-!   - bigL_ss = ∑_j N_ss_j * l_ss_j_vfi(j): Total labor supply
-!   - bigK_ss = ∑_j N_ss_j * s_pom_ss_j_vfi(j): Total capital
-!   - bequest_ss_vfi: Total bequests left
+!   - bigL_ss = ∑_j N_ss_j * l_ss_j_vfi(j): Total effective labor supply
+!   - bigK_ss = ∑_j N_ss_j * s_pom_ss_j_vfi(j): Total capital stock
+!   - bequest_ss_vfi: Total bequests left by decedents
+!   (Economy totals computed in steady_state.f90, not here)
 !
-! INEQUALITY MEASURES:
-!   - gini_*: Gini coefficients for wealth/consumption (calls gini_calc module)
-!   - top_ten, top_100: Wealth shares of top decile/percentile
-!   - share_0_sav, share_neg, share_nonpos: Fraction at/below zero savings
+! DISTRIBUTIONAL STATISTICS:
+!   - gini_weight_sv(j,ia): Wealth distribution weights for Gini calculation
+!   - gini_weight_consumption(j,ia,i_aime,ip,ir,id): Consumption weights
+!   - gini_income(j,ia,i_aime,ip,ir,id): Labor income for Gini
+!   - top_ten(10): Wealth held by each decile from top down
+!   - top_100(100): Wealth held by each percentile from top down
+!   - savings_top_ten(10), savings_top_100(100): Total wealth in each group
+!   - savings_cohort_ten(1:3,j): Top 10%, bottom 10%, all (by age)
+!   - consumption_top_ten(1:3,j): Same for consumption
+!   - share_0_sav: Fraction of working-age (j=2-9) at zero savings
+!   - share_neg: Fraction with negative wealth (a < 0)
+!   - share_nonpos: Fraction with non-positive wealth (a ≤ 0)
 !
-! ALGORITHM:
-!   For each cohort j:
-!     Initialize aggregates to zero
-!     Loop over all states (ia, i_aime, ip, ir, id):
-!       aggregate(j) += prob_ss(j,ia,i_aime,ip,ir,id) * policy_ss(j,ia,i_aime,ip,ir,id)
-!     Scale by cohort size N_ss_j for economy totals
+! AGGREGATION ALGORITHM:
+!   For steady state (similar for transition):
+!   1. Initialize all aggregates to zero
+!   2. Loop over ages j = 1,...,bigJ:
+!      a. Loop over all states (ia, i_aime, ip, ir, id):
+!         - Add prob_ss(j,ia,i_aime,ip,ir,id) * policy_ss(j,ia,i_aime,ip,ir,id)
+!           to corresponding cohort average
+!         - Accumulate distributional statistics (Gini weights, top shares)
+!      b. Cohort averages are now E[policy | age=j]
+!   3. Economy-wide totals computed in calling routine (steady_state.f90)
+!
+! STATE SPACE:
+!   Five-dimensional heterogeneity (plus age):
+!   - ia ∈ {0,...,n_a}: Asset holdings
+!   - i_aime ∈ {0,...,n_aime}: Average indexed monthly earnings (Social Security)
+!   - ip ∈ {1,...,n_sp}: Permanent/persistent productivity shock
+!   - ir ∈ {1,...,n_sr}: Return shock (portfolio return heterogeneity)
+!   - id ∈ {1,...,n_sd}: Discount factor shock (preference heterogeneity)
+!
+! ACCURACY DIAGNOSTICS:
+!   - check_e(j): Euler equation error at each age (sum over all states)
+!   - euler_max(j): Maximum absolute Euler error by age
+!   - Euler residuals written to euler_ss.csv (steady state only)
 !
 ! DEPENDENCIES:
-!   - global_vars: Distributions (prob_ss), policies (c_ss, l_ss, etc.)
-!   - gini_calc: For gini() function
+!   - global_vars: All policy functions (c_ss, l_ss, svplus_ss, etc.),
+!                  distributions (prob_ss, prob_trans), grids (sv, aime),
+!                  parameters (N_ss_j_vfi, omega_ss, n_sp_value, etc.)
+!   - gini_calc: For gini() function (called in steady_state.f90, not here)
+!   - linint: For linear_int() to find zero-wealth point
 !
-! NOTES:
-!   Called after distribution and policy functions converge. Provides moments for
-!   market clearing checks and welfare analysis. Euler equation errors computed here.
+! NOTES FOR REPLICATION:
+!   - Aggregation loops are performance-critical (5D state space × bigJ ages)
+!   - Distributional statistics computed top-down (wealth-ordered) for efficiency
+!   - Cohort averages include both workers (j < jbar) and retirees (j ≥ jbar)
+!   - pension_ss_j_vfi uses AIME-dependent replacement rate (US Social Security formula)
+!   - Top wealth shares accumulate probability mass until threshold reached (0.1, 0.01)
+!   - Transition aggregation handles cohort-specific parameters via year_birth indexing
+!   - sum_b_weight_ss_vfi: Average AIME replacement rate at retirement (jbar_ss_vf)
+!
+! OUTPUT:
+!   All aggregates stored in global_vars module. Key variables:
+!   - *_ss_j_vfi: Cohort averages (steady state)
+!   - *_j_vfi(*,i): Cohort averages by period (transition)
+!   - gini_weight_*, top_*, share_*: Distributional moments
+!   - check_euler_trans(*,1): Euler errors (written to CSV)
 !===============================================================================
 !***************************************************************************************
 ! find aggegate variables for steady state

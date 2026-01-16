@@ -2,98 +2,235 @@
 ! FILE: pfi.f90
 !
 ! DESCRIPTION:
-!   Policy Function Iteration (PFI) module for solving household dynamic
-!   optimization problem. Uses Right-Hand Side (RHS) method with interpolation
-!   to find optimal consumption, labor supply, and savings decisions.
+!   Master module for Policy Function Iteration (PFI) in heterogeneous-agent OLG
+!   model. Solves household dynamic optimization problem using Euler equation method
+!   with progressive taxation, endogenous labor, AIME-dependent pensions, and multiple
+!   shocks. Includes distribution computation and aggregation routines.
 !
 ! MODULE: pfi_trans
-!   Master module containing all household problem solving routines
+!   Comprehensive module containing all household problem solving routines, utility
+!   functions, distribution methods, and aggregation procedures.
 !
-! ALGORITHM:
-!   Policy Function Iteration (PFI) / Endogenous Grid Method variant:
-!   1. Guess value/policy functions on discrete grids
-!   2. Solve Euler equations at each grid point
-!   3. Interpolate to get continuous policy functions
-!   4. Iterate until convergence
+! PURPOSE:
+!   Central computational workhorse for the OLG model. Takes prices {r, w, tc} and
+!   policy {τ, λ, ρ, b} as given, then:
+!   1. Solves household optimization → policy functions {c, l, a'}
+!   2. Computes equilibrium distribution → prob(j,a,aime,ε,δ,r)
+!   3. Aggregates to get macro variables → {C, L, K, Tax, Pensions}
+!
+! MAIN ALGORITHM - POLICY FUNCTION ITERATION:
+!   Backward iteration over ages j = bigJ,...,1:
+!   1. Terminal period (j=bigJ): Simple consumption-savings problem
+!   2. Working ages (j < jbar): Labor-leisure choice with progressive taxes
+!   3. Retirement (j ≥ jbar): Pension income with AIME-dependent benefits
+!
+!   At each (j,a,aime,ε,δ,r):
+!   a. Compute RHS of Euler equation: E[δ(1+r)u'(c',l')|ε]
+!   b. Invert to get optimal consumption: c* s.t. u'(c*,l*) = RHS
+!   c. Find labor l* from intra-temporal FOC: u_l/u_c = w(1-τ')
+!   d. Back out savings: a' = (1+r)a + wεl + b - c - tax
+!   e. Update AIME: aime' = f(aime, wεl) [US Social Security formula]
+!   f. Store: c(j,a,aime,ε,δ,r), l(⋅), a'(⋅), aime'(⋅), V(⋅)
+!
+! KEY FEATURES:
+!   - Progressive taxation: τ(income) = 1 - (1-τ)×(income/avg)^(-λ)
+!   - Endogenous labor: u(c,l) with intra-temporal optimality
+!   - AIME tracking: Average indexed monthly earnings for Social Security
+!   - Multiple shocks: Permanent (ε_p), persistent (ε_r), discount (δ), return (r)
+!   - Bequest receipt: Optional mid-life wealth transfer (switch_unequal_bequest=2)
+!   - Hand-to-mouth risk: Optional binding borrowing constraint shocks
 !
 ! KEY FUNCTIONS:
-!   - euler_trans, euler_transsec: Solve Euler equations for transition
-!   - euler_ss, eulersec_ss: Solve Euler equations for steady state
-!   - margu: Marginal utility of consumption
-!   - year: Time/cohort index calculations
+!   - margu(c,l,tc): Marginal utility ∂u/∂c = φ(c^φ×(1-l)^(1-φ))^(1-θ)/c
+!   - valuefunc(_trans): Lifetime utility V(j,a,aime,ε) = u(c,l) + δπE[V(j+1,⋅)]
+!   - year(it,ij,ijj): Time index conversion for cohort tracking
+!   - optimal_labor(c,w,⋅): Newton-Raphson solver for labor given consumption
+!   - optimal_consumption_and_labor_new: Joint (c,l) optimizer using bisection+Newton
 !
 ! KEY SUBROUTINES:
-!   - household_ss: Solve household problem in steady state
-!   - household_trans: Solve household problem along transition
-!   - interpolate_ss, interpolate_trans: Interpolate RHS/value functions
-!   - get_distribution_ss, get_distribution_trans: Compute distributions
-!   - aggregation_ss, aggregation_trans: Aggregate individual decisions
-!   - output: Write results to CSV files
+!   HOUSEHOLD PROBLEM:
+!   - household_ss: Solve for steady state (included from pfi_household_problem.f90)
+!   - household_trans_endo: Solve for transition path (included file)
+!   - agent_vf: Wrapper for steady state solve + distribution + aggregation
+!   - get_transition: Wrapper for transition solve + distribution + aggregation
 !
-! STATE SPACE:
-!   Individual state: (age, assets, AIME, permanent shock, persistent shock, 
-!                      discount shock, type)
-!   - age j ∈ {1,...,bigJ}
-!   - assets a ∈ [a_l, a_u] (n_a grid points)
-!   - AIME aime ∈ [aime_l, aime_u] (n_aime grid points for pension calculation)
-!   - permanent shock s_p ∈ {1,...,n_sp}
-!   - persistent shock s_r ∈ {1,...,n_sr}
-!   - discount shock s_d ∈ {1,...,n_sd}
-!   - type m ∈ {1,...,bigM}
+!   DISTRIBUTION:
+!   - get_distribution_ss: Forward simulation to get prob_ss(j,⋅) (pfi_distribution.f90)
+!   - get_distribution_trans: Same for transition path (pfi_distribution.f90)
 !
-! HOUSEHOLD PROBLEM:
-!   max E[sum_{j} beta^j * pi(j) * u(c_j, l_j)]
-!   s.t. 
-!     a_{j+1} = (1+r)*a_j + w*epsilon*l_j + b_j + bequest_j - c_j - tax
-!     a_{j+1} >= 0 (no borrowing)
-!     l_j ∈ [0,1] (labor supply)
-!     c_j > 0
+!   AGGREGATION:
+!   - aggregation_ss: Compute cohort averages and distributional stats (pfi_agregation.f90)
+!   - aggregation_trans: Same for transition (pfi_agregation.f90)
 !
-! UTILITY:
-!   u(c,l) = [c^(1-1/sigma) * phi^(1/sigma) * (1-l)^((sigma-1)/sigma)]^(1-1/theta) / (1-1/theta)
-!   - theta: inter-temporal elasticity of substitution
-!   - sigma: intra-temporal elasticity (consumption-leisure)
-!   - phi: weight on leisure
+!   UTILITY:
+!   - initialize_trans: Set up grids (sv, aime), survival probabilities, AIME formula
+!   - comptax: Compute tax paid and marginal rate given progressive schedule
+!   - foc_intratemp: Solve intra-temporal FOC for (c,l) given available resources
+!
+! STATE SPACE (6-dimensional + age):
+!   Individual state s = (j, a, aime, ip, ir, id):
+!   - j ∈ {1,...,bigJ}: Age (5-year periods, typically bigJ=16 for ages 20-99)
+!   - a ∈ [a_l, a_u]: Assets, discretized to ia ∈ {0,...,n_a} (n_a ≈ 50-100)
+!   - aime ∈ [aime_l, aime_u]: AIME for Social Security, grid i_aime ∈ {0,...,n_aime}
+!   - ip ∈ {1,...,n_sp}: Permanent/persistent productivity shock index
+!   - ir ∈ {1,...,n_sr}: Return shock index (portfolio heterogeneity)
+!   - id ∈ {1,...,n_sd}: Discount factor shock index (preference heterogeneity)
+!
+! HOUSEHOLD PROBLEM (BELLMAN EQUATION):
+!   V(j,a,aime,ε,δ,r) = max_{c,l,a'} u(c,l) + (δ+δ_shock)×π(j)×E[V(j+1,a',aime',ε')]
+!   subject to:
+!     Budget: c + a' = (1+r+r_shock)×a + w×ε×l + b(aime) + bequest - tax(w×ε×l)
+!     Borrowing: a' ≥ a_l (typically 0, no borrowing)
+!     Labor: l ∈ [0,1] if j < jbar (working age), l=0 if j ≥ jbar (retired)
+!     Consumption: c > 0
+!     AIME: aime' = update_aime(aime, w×ε×l, j) [Social Security formula]
+!
+! UTILITY SPECIFICATION:
+!   Nested CES (Generalized Cobb-Douglas):
+!   u(c,l) = [(c^φ × (1-l)^(1-φ))^(1-θ)]^(1-1/θ) / (1-1/θ)
+!   where:
+!   - θ: Coefficient of relative risk aversion (CRRA), 1/θ = EIS
+!   - φ: Weight on consumption (Cobb-Douglas between c and leisure 1-l)
+!   - rho_subst: Elasticity of substitution for CES aggregation (not directly in utility)
+!
+!   Special cases:
+!   - θ=1: u = φ×log(c) + (1-φ)×log(1-l) [log utility]
+!   - φ=1, switch_fix_labor>0: Exogenous labor (no leisure utility)
+!
+! PROGRESSIVE TAXATION (Heathcote et al. 2017):
+!   Tax on labor income:
+!   tax(income) = income - (1-τ)×(income/LabIncAVG)^(1-λ)×LabIncAVG
+!   where:
+!   - τ: Average tax rate at mean income
+!   - λ: Progressivity (λ=0 → flat tax, λ>0 → progressive)
+!   - LabIncAVG: Average labor income (normalizing constant)
+!   Marginal rate: τ'(income) = 1 - (1-τ)×(1-λ)×(income/LabIncAVG)^(-λ)
+!
+! SOCIAL SECURITY (AIME-BASED):
+!   Pension benefit: b(aime) = ρ × replacement_rate(aime)
+!   where:
+!   - AIME: Average indexed monthly earnings (updated each working year)
+!   - replacement_rate(aime): Progressive formula with two bend points
+!     = 0.90×aime if aime < bend1
+!     = 0.90×bend1 + 0.32×(aime-bend1) if bend1 ≤ aime < bend2
+!     = 0.90×bend1 + 0.32×(bend2-bend1) + 0.15×(aime-bend2) if aime ≥ bend2
+!   - ρ: Aggregate replacement rate (calibrated to match contribution/benefit ratio)
 !
 ! SHOCKS:
-!   - Permanent (s_p): Affects productivity throughout life
-!   - Persistent (s_r): AR(1) process for transitory productivity
-!   - Discount factor (s_d): Heterogeneous time preferences
-!   - Mortality: Age-specific survival probabilities pi(j)
+!   1. Permanent/persistent productivity (ip):
+!      - AR(1) process: log(ε_t) = ζ_p×log(ε_{t-1}) + ν_t, ν ~ N(0,σ²_ε)
+!      - Discretized to n_sp states with transition matrix pi_ip
+!      - Affects labor income: w×ε×l
+!
+!   2. Return shock (ir):
+!      - AR(1) process: r_t = r̄ + ζ_r×(r_{t-1}-r̄) + η_t, η ~ N(0,σ²_r)
+!      - Discretized to n_sr states with transition matrix pi_ir
+!      - Affects asset returns: (1+r+r_shock)×a
+!
+!   3. Discount factor shock (id):
+!      - AR(1) process: δ_t = δ̄ + ζ_d×(δ_{t-1}-δ̄) + ξ_t, ξ ~ N(0,σ²_d)
+!      - Discretized to n_sd states with transition matrix pi_id
+!      - Affects patience: (δ+δ_shock)×π×E[V']
+!
+!   4. Mortality risk:
+!      - Conditional survival probability π(j,t) varies by age, time, education
+!      - Incorporated in value function via π×E[V(j+1,⋅)]
+!
+! GRIDS:
+!   - Asset grid sv(0:n_a): Exponentially spaced from a_l to a_u
+!     sv(ia) = grid_cons(a_l, a_u, n_a, a_grow) [power function]
+!     Denser near borrowing constraint for accuracy
+!
+!   - AIME grid aime(0:n_aime): Exponentially spaced from aime_l to aime_u
+!     Captures Social Security benefit heterogeneity
 !
 ! INTERPOLATION:
-!   - Linear interpolation for assets within grid
-!   - Handles boundary constraints (no borrowing, no negative consumption)
-!   - Extrapolation rules for off-grid points
+!   - Linear interpolation for off-grid policies: linear_int(a', ial, iar, dist, sv, ⋅)
+!   - Returns bracket [ial, iar] and weight dist ∈ [0,1]
+!   - Distributes probability mass across neighboring points in distribution step
 !
-! DISTRIBUTION:
-!   - Forward simulation from age 1
-!   - Transition probabilities for shocks
-!   - Population weights by age and type
-!   - Tracks joint distribution over full state space
+! DISTRIBUTION COMPUTATION:
+!   Forward simulation (Young's method):
+!   1. Initialize prob(1,⋅) from bequest distribution
+!   2. Forward iterate: prob(j+1,⋅) = ∑ prob(j,⋅) × Pr[a'|policy] × Pr[ε'|ε] × π(j)
+!   3. Linear interpolation for off-grid a' distributes mass to neighbors
+!   See pfi_distribution.f90 for details
 !
 ! AGGREGATION:
-!   - Integrates individual decisions over distribution
-!   - Computes: aggregate C, L, K, tax revenue, pension contributions
-!   - By age, type, and time
+!   Integrate over distribution:
+!   - Cohort average: var_j = ∑_{a,aime,ε,δ,r} prob(j,⋅) × policy(j,⋅)
+!   - Economy total: VAR = ∑_j N(j) × var_j
+!   - Inequality: Gini, top wealth shares, etc.
+!   See pfi_agregation.f90 for details
+!
+! MODULE VARIABLES:
+!   GRIDS:
+!   - sv(0:n_a): Asset grid
+!   - aime(0:n_aime): AIME grid
+!   - aime_replacement_rate(0:n_aime): Social Security benefit formula
+!
+!   STEADY STATE (6D arrays):
+!   - V_ss, EV_ss: Value function and expected continuation value
+!   - c_ss, l_ss, lab_ss: Consumption, effective labor, raw hours
+!   - svplus_ss: Savings (next period assets)
+!   - aime_plus_ss: Updated AIME
+!   - prob_ss: Equilibrium distribution
+!   - labor_tax, lab_income_ss, tot_income_ss: Tax and income variables
+!   - RHS_ss: Right-hand side of Euler equation
+!
+!   TRANSITION PATH (7D arrays, +time dimension):
+!   - Same variables with _trans suffix and extra dimension i ∈ {1,...,bigT}
+!
+!   AGGREGATES:
+!   - *_ss_j_vfi(bigJ): Cohort averages (steady state)
+!   - *_j_vfi(bigJ,bigT): Cohort averages (transition)
+!   - gini_weight_*, top_*, share_*: Distributional moments
+!
+! INCLUDED FILES:
+!   - pfi_household_problem.f90: Household optimization routines (backward iteration)
+!   - pfi_distribution.f90: Distribution computation (forward simulation)
+!   - pfi_agregation.f90: Aggregation and distributional statistics
+!   - pfi_print.f90: Output routines for CSV files
 !
 ! DEPENDENCIES:
-!   Utility modules for numerical methods:
+!   Toolbox modules (Kindermann library):
 !   - linint: Linear interpolation
-!   - splines: Spline interpolation
-!   - rootfinding: Equation solvers
-!   - minimization: Optimization routines
-!   - gaussian_int, normalProb: Integration and distributions
-!   - AR_discrete: Discretize AR(1) processes
-!   - matrixtools, polynomial, simplex: Linear algebra and optimization
-!   - assertions, errwarn: Error handling
+!   - splines: Cubic spline interpolation
+!   - rootfinding: Equation solvers (Brent, Newton)
+!   - minimization: Optimization (golden section, Powell)
+!   - gaussian_int: Gauss-Legendre quadrature
+!   - normalProb: Normal CDF/PDF/quantile
+!   - AR_discrete: AR(1) discretization (Rouwenhorst, Tauchen)
+!   - matrixtools: Matrix operations
+!   - polynomial: Polynomial evaluation
+!   - simplex: Simplex optimization
+!   - assertions: Assert equality/positivity
+!   - errwarn: Error/warning messages
 !   - clock: Timing utilities
+!   - global_vars: Model parameters and arrays
 !
-! NOTES:
-!   - Large state space requires significant memory
-!   - Parallelization possible over grid points
-!   - Convergence can be slow for high curvature utility
-!   - AIME tracking complicates state space (pension calculation)
+! PERFORMANCE:
+!   - State space: bigJ × n_a × n_aime × n_sp × n_sr × n_sd ≈ 16×60×40×9×5×5 = 4.3M points
+!   - Steady state: ~10-50 iterations × 4.3M evaluations ≈ 50-200M operations
+!   - Transition: bigT iterations × bigJ ages × 4.3M points ≈ 2-10 billion operations
+!   - Memory: ~50 GB for full transition arrays (8 bytes × 7 dimensions × multiple policies)
+!   - Parallelization: Grid points are independent within age (OpenMP candidate)
+!
+! NOTES FOR REPLICATION:
+!   - Convergence criteria: max|V^{n+1} - V^n| < tol (value function)
+!   - Update: Dampened (mix old and new): V^{n+1} = up×V_new + (1-up)×V^n
+!   - Borrowing constraint: a' ≥ a_l handled by restricting choice set
+!   - Corner solutions: l=0 (retired), l=1 (rare, utility → -∞ as l→1)
+!   - AIME cap: Maximum taxable earnings (e.g., $168,600 in 2024 dollars)
+!   - Progressive tax calibration: {τ, λ} chosen to match average and marginal rates
+!   - Bequest timing: Can occur at birth (switch_unequal_bequest=1) or mid-life (=2)
+!   - Transition path: Backward from bigT (final SS) to 1 (initial SS), then forward distribution
+!
+! VALIDATION:
+!   - Check Euler equation errors: Should be < 0.01% (0.0001) of consumption
+!   - Verify budget constraint: c + a' ≈ (1+r)a + wεl + b - tax (within roundoff)
+!   - Distribution sums to 1: ∑ prob(j,⋅) = 1 for all j
+!   - Asset market clearing: ∑_j N(j)×a_j = K (checked in steady_state.f90)
 !===============================================================================
 
 module pfi_trans
