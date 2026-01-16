@@ -37,9 +37,9 @@
         write(*,'(A30,F10.3,A)') ' delta = ', delta
         write(*,'(A30,F10.3,A)') ' b_scale_factor_ss = ', b_scale_factor_ss
         write(*,'(A30,F10.3,A)') ' contribution rate = ',  t1_ss
-        write(*,'(A30,F10.3,A)') ' lambda = ',  lambda
-        write(*,'(A30,F10.3,A)') ' replacement = ',  replacement_ss
-        write(*,'(A30,F10.6,A)') ' feasibility = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
+        write(*,'(A30,F10.3,A)') ' lambda (tax progress.) = ',  lambda
+        write(*,'(A30,F10.3,A)') ' replacement rate = ',  replacement_ss
+        write(*,'(A30,F10.6,A)') ' feasibility (frac. GDP) = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
         write(*,*) '********************************************'
 
 !   
@@ -119,9 +119,9 @@
         write(666,'(A30,F10.3,A)') ' tl = ',  tl_ss
 
         write(666,'(A30,F10.3,A)') ' contribution rate = ',  t1_ss
-        write(666,'(A30,F10.3,A)') ' lambda = ',  lambda
-        write(666,'(A30,F10.3,A)') ' replacement = ',  replacement_ss
-        write(666,'(A30,F10.6,A)') ' feasibility = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
+        write(666,'(A30,F10.3,A)') ' lambda (tax progress.) = ',  lambda
+        write(666,'(A30,F10.3,A)') ' replacement rate = ',  replacement_ss
+        write(666,'(A30,F10.6,A)') ' feasibility (frac. GDP) = ', abs((y_ss - consumption_ss_gross - g_ss)/y_ss - ((nu_ss*gam_ss+depr-1)*k_ss)/y_ss) 
         
          write(666, '(A)')
          write(666, '(A)') 'OPTIONS THAT WERE USED:' 
