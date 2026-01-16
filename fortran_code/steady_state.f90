@@ -805,8 +805,8 @@ endif
     !include 'utility_ss.f90' 
             
             replacement_ss = 0.0d0
-      do m = 1,bigM,1      
-        replacement_ss  = replacement_ss + type_share_ss(m) * sum_b_weight_ss*b_ss_j(jbar_ss,m)/((1 - t1_ss - t2_ss)*w_bar_ss(m)*l_ss_pen_j(jbar_ss-1,m)) 
+      do m = 1,bigM,1
+        replacement_ss  = replacement_ss + type_share_ss(m) * sum_b_weight_vec_ss(m)*b_ss_j(jbar_ss,m)/((1 - t1_ss - t2_ss)*w_bar_ss(m)*l_ss_pen_j(jbar_ss-1,m))
     enddo
     if (switch_print == 1) then
         include 'Print_steady_db.f90'

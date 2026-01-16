@@ -101,28 +101,6 @@ interface log_normal_discrete
 end interface
 
 
-interface simulate_uniform
-
-    ! define methods used
-    module procedure simulate_uniform_1, simulate_uniform_n
-        
-end interface
-
-
-interface simulate_normal
-
-    ! define methods used
-    module procedure simulate_normal_1, simulate_normal_n
-        
-end interface
-
-interface simulate_log_normal
-
-    ! define methods used
-    module procedure simulate_log_normal_1, simulate_log_normal_n
-        
-end interface
-
 contains
 
 

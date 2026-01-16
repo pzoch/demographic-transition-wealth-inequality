@@ -74,21 +74,12 @@ program olg2
     ! Construct scenario output folder path and create it
     cwd_scenario = trim(cwd_w)//'/'//trim(version)//trim(experiment)//trim(closure)
 
-    ! Cross-platform directory creation (Windows and Unix/Linux/macOS)
-#ifdef _WIN32
+    ! Create directory (Windows-style mkdir works on Windows, will fail silently with 2>nul on error)
     call system('mkdir "'//trim(cwd_scenario)//'" 2>nul')
-#else
-    call system('mkdir -p "'//trim(cwd_scenario)//'"')
-#endif
 
     ! Copy instructions and parameters files to results folder for reproducibility
-#ifdef _WIN32
     call system('copy "'//trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
     call system('copy "'//trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
-#else
-    call system('cp "'//trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt" "'//trim(cwd_scenario)//'"')
-    call system('cp "'//trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt" "'//trim(cwd_scenario)//'"')
-#endif
 
     call globals         ! globals is a subroutine in global_vars2 module
     call clear_globals
@@ -117,6 +108,16 @@ allocate(l_beq_trans_big, lab_beq_trans_big,labor_tax_beq_trans_big, c_beq_trans
 
     switch_print = 1
 
+        include 'main_base_transition.f90'
+     write (*,*) 'computations completed'
+
+call toc()
+!deallocate(svplus_trans)
+deallocate(svplus_trans, l_trans, labor_tax_trans, c_trans, RHS_trans,  tot_income_trans, tot_income_pretax_trans, lab_income_trans, lab_income_pretax_trans,  &
+           sv_tempo_trans, V_trans, EV_trans, prob_trans, aime_plus_trans, bequest_j_trans)
+
+
+read*
 
 
 contains
@@ -148,11 +149,7 @@ subroutine validate_config_files(cwd_i, cwd_p, version, experiment, closure)
         print *, 'Expected file: ', trim(instructions_file)
         print *, ''
         print *, 'Available scenarios in Instructions folder:'
-#ifdef _WIN32
         call system('dir /B "'//trim(cwd_i)//'\*instructions.txt"')
-#else
-        call system('ls -1 "'//trim(cwd_i)//'/"*instructions.txt')
-#endif
         print *, ''
         stop 1
     endif
@@ -167,11 +164,7 @@ subroutine validate_config_files(cwd_i, cwd_p, version, experiment, closure)
         print *, 'Expected file: ', trim(parameters_file)
         print *, ''
         print *, 'Available scenarios in Parameters folder:'
-#ifdef _WIN32
         call system('dir /B "'//trim(cwd_p)//'\*parameters.txt"')
-#else
-        call system('ls -1 "'//trim(cwd_p)//'/"*parameters.txt')
-#endif
         print *, ''
         stop 1
     endif
@@ -222,14 +215,4 @@ subroutine validate_config_files(cwd_i, cwd_p, version, experiment, closure)
 
 end subroutine validate_config_files
 
-        include 'main_base_transition.f90'
-     write (*,*) 'computations completed' 
-
-call toc()
-!deallocate(svplus_trans)
-deallocate(svplus_trans, l_trans, labor_tax_trans, c_trans, RHS_trans,  tot_income_trans, tot_income_pretax_trans, lab_income_trans, lab_income_pretax_trans,  &
-           sv_tempo_trans, V_trans, EV_trans, prob_trans, aime_plus_trans, bequest_j_trans)
-
-
-read*
 endprogram olg2
