@@ -149,17 +149,22 @@ call chdir(cwd_r)
     close(3)
     
 ! -------------------------------- rho -------------------------------
-        Open(unit = 5, FILE = "_data_rho_1935.txt")  
+        Open(unit = 5, FILE = "_data_rho_1935.txt")
 
-        
-     if (switch_change_rho == 1) then 
+
+     if (switch_change_rho == 1) then
+        ! Read all available data (allows rho to change over time)
+        do i = 1, last_data_rho, 1
+            read(5,*) rho_d(i)
+        enddo
+        rho_d(last_data_rho+1:) = rho_d(last_data_rho)
+
+     else
+        ! Freeze at break_index (no change after 1955)
         do i = 1, break_index, 1
             read(5,*) rho_d(i)
         enddo
         rho_d(break_index+1:) = rho_d(break_index)
-            
-     else
-         rho_d(:) = rho_d(1)
 
     endif
 
@@ -209,11 +214,11 @@ call chdir(cwd_r)
     enddo
 
 ! -------------------------------- type multiplier - load --------------------
-     Open(unit = 8, FILE = "_data_skill_premium.txt")  
+     Open(unit = 8, FILE = "_data_skill_premium.txt")
 
-    ! reading type_mutliplier
-    
-     
+    ! reading type_mutliplier (skill premium)
+    ! Always read all available data - freeze happens later if switch_change_premium == 0
+
         do m = 1,bigM,1
             do i = 1, last_data_type_multiplier, 1
                 read(8,*) type_multiplier_d(m,i)
@@ -224,11 +229,11 @@ call chdir(cwd_r)
     close(8)
 
     ! -------------------------------- type share - load --------------------
-        Open(unit = 8, FILE = "_data_college_share.txt")  
+        Open(unit = 8, FILE = "_data_college_share.txt")
 
-    ! reading type_share
-    
-     
+    ! reading type_share (education composition)
+    ! Always read all available data - freeze happens later if switch_change_type_share == 0
+
         do m = 1,bigM,1
             do i = 1, last_data_type_share, 1
                 read(8,*) type_share_d(m,i)
@@ -236,9 +241,9 @@ call chdir(cwd_r)
             type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)
         enddo
 
-     
 
-        
+
+
   ! ensure it sums up to 1
      do i = 1,bigT,1
      type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
@@ -252,96 +257,100 @@ call chdir(cwd_r)
 
      
  ! -------------------------------- LABOR SHARE -------------------------------
-        Open(unit = 5, FILE = "_data_labsh.txt")  
+        Open(unit = 5, FILE = "_data_labsh.txt")
 
+    ! Always read all available data - freeze happens later if switch_change_sl == 0
          do i = 1, last_data_sl, 1
             read(5,*) alpha_d(i)
          enddo
-         
          alpha_d(last_data_sl+1:) = alpha_d(last_data_sl)
         close(5)
-     
-    
+
+
     alpha_d = 1.0d0 - alpha_d / 100.0d0
     
     
     ! -------------------------------- DEPRECIATION RATE -------------------------------
-    
-        Open(unit = 5, FILE = "_data_depr.txt")  
-    
-        
-    if (switch_change_depr == 1) then 
-        do i = 1, last_data_sl, 1
+
+        Open(unit = 5, FILE = "_data_depr.txt")
+
+
+    if (switch_change_depr == 1) then
+        ! Read all available data (allows depr to change over time)
+        do i = 1, last_data_depr, 1
             read(5,*) depr_d(i)
         enddo
         depr_d(last_data_depr+1:) = depr_d(last_data_depr)
-            
-     elseif (switch_change_depr == 0) then
-         last_data_depr = break_index
-         do i = 1, last_data_depr, 1
+
+     else  ! switch_change_depr == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
             read(5,*) depr_d(i)
         enddo
-        depr_d(last_data_depr+1:) = depr_d(last_data_depr) 
+        depr_d(break_index+1:) = depr_d(break_index)
     endif
     
 
-    ! -------------------------------- TAU_K -------------------------------    
+    ! -------------------------------- TAU_K -------------------------------
 
-        Open(unit = 7, FILE = "_data_tauK.txt")  
-        
-     if (switch_change_tauK == 1) then 
+        Open(unit = 7, FILE = "_data_tauK.txt")
+
+     if (switch_change_tauK == 1) then
+        ! Read all available data (allows tauK to change over time)
         do i = 1, last_data_tauK, 1
             read(7,*) tauK_d(i)
         enddo
         tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)
-            
-     elseif (switch_change_tauK == 0) then
-        last_data_tauK = break_index
-        do i = 1, last_data_tauK, 1
+
+     else  ! switch_change_tauK == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
             read(7,*) tauK_d(i)
         enddo
-        tauK_d(last_data_tauK+1:) = tauK_d(last_data_tauK)  
+        tauK_d(break_index+1:) = tauK_d(break_index)
     endif
     close(7)
 
 ! -------------------------------- TAU_L -------------------------------
-        Open(unit = 5, FILE = "_data_tauL.txt")  
-        
-     if (switch_change_tauL == 1) then 
+        Open(unit = 5, FILE = "_data_tauL.txt")
+
+     if (switch_change_tauL == 1) then
+        ! Read all available data (allows tauL to change over time)
         do i = 1, last_data_tauL, 1
             read(5,*) tauL_d(i)
         enddo
         tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL)
-            
-     elseif (switch_change_tauL == 0) then
-         last_data_tauL = break_index
-         do i = 1, last_data_tauL, 1
+
+     else  ! switch_change_tauL == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
             read(5,*) tauL_d(i)
         enddo
-        tauL_d(last_data_tauL+1:) = tauL_d(last_data_tauL) 
+        tauL_d(break_index+1:) = tauL_d(break_index)
     endif
-        
+
 
     close(5)
     
 ! -------------------------------- TAU_C -------------------------------
-  
-        Open(unit = 5, FILE = "_data_tauC.txt")  
-        
-     if (switch_change_tauC == 1) then 
+
+        Open(unit = 5, FILE = "_data_tauC.txt")
+
+     if (switch_change_tauC == 1) then
+        ! Read all available data (allows tauC to change over time)
         do i = 1, last_data_tauC, 1
             read(5,*) tauC_d(i)
         enddo
         tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC)
-            
-     elseif (switch_change_tauC == 0) then
-         last_data_tauC = break_index
-         do i = 1, last_data_tauC, 1
+
+     else  ! switch_change_tauC == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
             read(5,*) tauC_d(i)
         enddo
-        tauC_d(last_data_tauC+1:) = tauC_d(last_data_tauC) 
+        tauC_d(break_index+1:) = tauC_d(break_index)
     endif
-        
+
     close(5)
     
   !    -------------------------------- DEBT/GDP -------------------------------
@@ -350,23 +359,24 @@ call chdir(cwd_r)
 
     
  ! -------------------------------- LAMBDA -------------------------------
-  
 
-        Open(unit = 6, FILE = "_data_lambda.txt")      
-        
-    
-     if (switch_change_lambda == 1) then 
+
+        Open(unit = 6, FILE = "_data_lambda.txt")
+
+
+     if (switch_change_lambda == 1) then
+        ! Read all available data (allows lambda to change over time)
         do i = 1, last_data_lambda, 1
             read(6,*) lambda_d(i)
         enddo
         lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
-            
-     elseif (switch_change_lambda == 0) then
-        last_data_lambda = break_index
-        do i = 1, last_data_lambda+1, 1
+
+     else  ! switch_change_lambda == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
             read(6,*) lambda_d(i)
         enddo
-        lambda_d(last_data_lambda+1:) = lambda_d(last_data_lambda)
+        lambda_d(break_index+1:) = lambda_d(break_index)
     endif
         
     close(6)
@@ -574,34 +584,35 @@ call chdir(cwd_r)
     
     
 ! --------------------------------end calculating GAMMA  -------------------------------
-    
-    
-         
 
-! -------------------------------- fix type multiplier
-     if (switch_change_premium == 0) then   
-        do m = 1,bigM,1
-        last_data_type_multiplier = break_index
-             type_multiplier_d(m,last_data_type_multiplier+1:) = type_multiplier_d(m,last_data_type_multiplier)  
-        enddo
-     endif
-    
-! -------------------------------- fix type share
-     
-     
-    if (switch_change_type_share == 0) then   
-            last_data_type_share = break_index
-            do m = 1,bigM,1
-                type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)  
-            enddo
-     endif
-     
+
+
+
+
   ! ensure it sums up to 1
      do i = 1,bigT,1
      type_share_d(:,i) = type_share_d(:,i)/sum(type_share_d(:,i))
      enddo
- 
-  
+
+! -------------------------------- fix type multiplier (skill premium)
+     if (switch_change_premium == 0) then
+        do m = 1,bigM,1
+            type_multiplier_d(m,break_index+1:) = type_multiplier_d(m,break_index)
+        enddo
+     endif
+
+! -------------------------------- fix type share (education composition)
+    if (switch_change_type_share == 0) then
+        do m = 1,bigM,1
+            type_share_d(m,break_index+1:) = type_share_d(m,break_index)
+        enddo
+     endif
+
+! -------------------------------- fix labor share
+    if (switch_change_sl == 0) then
+        alpha_d(break_index+1:) = alpha_d(break_index)
+    endif
+
 ! recalculate population to adjust to fixed type shares
       ! -------------------------------- BIGJ = 16 - US
 
@@ -724,34 +735,23 @@ close(123)
     ! along the transition path these masses are handled by N
     pi_big_weight_d = pi_d_big
     !pi_weight_d = pi_d
-    
-! -------------------------------- fix labor share    
-    
-    Open(unit = 5, FILE = "_data_labsh.txt")    
-    if (switch_change_sl == 0) then
-         last_data_sl = break_index
-         do i = 1, last_data_sl, 1
-            read(5,*) alpha_d(i)
-        enddo
-        alpha_d(last_data_sl+1:) = alpha_d(last_data_sl) 
-        alpha_d = 1.0d0 - alpha_d / 100.0d0
-    endif
      
     
  ! -------------------------------- SOCIAL SECURITY CONTRIBUTIONS -------------------------------
-     OPEN (unit=5, FILE = "_data_contrib_to_gdp.txt")    
-     if (switch_change_contrib == 1) then 
+     OPEN (unit=5, FILE = "_data_contrib_to_gdp.txt")
+     if (switch_change_contrib == 1) then
+        ! Read all available data (allows contrib to change over time)
         do i = 1, last_data_t1, 1
-            read(5,*) t1_d(i) 
-        enddo
-        t1_d(last_data_t1+1:) = t1_d(last_data_t1)
-            
-     elseif (switch_change_contrib == 0) then
-         last_data_t1 = break_index
-         do i = 1, last_data_t1, 1
             read(5,*) t1_d(i)
         enddo
-        t1_d(last_data_t1+1:) = t1_d(last_data_t1) 
+        t1_d(last_data_t1+1:) = t1_d(last_data_t1)
+
+     else  ! switch_change_contrib == 0
+        ! Freeze at break_index (no change after 1955)
+        do i = 1, break_index, 1
+            read(5,*) t1_d(i)
+        enddo
+        t1_d(break_index+1:) = t1_d(break_index) 
     endif
     
     ! the above were contributions to gdp, now obtain contrib. rates:

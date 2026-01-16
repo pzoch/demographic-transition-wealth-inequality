@@ -36,23 +36,59 @@ program olg2
  
     
     implicit none
+    integer :: num_args
+    character(len=256) :: arg_buffer
 
     ! set paths for inputs and outputs
     call getcwd(cwd)
     cwd_i = trim(cwd)//"/Instructions"
     cwd_r = trim(cwd)//"/Data"
-    cwd_w = trim(cwd)//"/Results"    
+    cwd_w = trim(cwd)//"/Results"
     cwd_p = trim(cwd)//"/Parameters"
-    
 
-        
-    version = 'base_' ! these three strings allow us to load a correct version
-    experiment = 'all_'
-    closure = 'govt__'
+    ! Read scenario from command line or use defaults
+    num_args = command_argument_count()
+
+    if (num_args >= 3) then
+        ! Read version, experiment, closure from command line
+        call get_command_argument(1, arg_buffer)
+        version = trim(arg_buffer)
+        call get_command_argument(2, arg_buffer)
+        experiment = trim(arg_buffer)
+        call get_command_argument(3, arg_buffer)
+        closure = trim(arg_buffer)
+        print *, "Running scenario: ", trim(version)//trim(experiment)//trim(closure)
+    else
+        ! Use default scenario
+        version = 'psid_'
+        experiment = 'all_'
+        closure = 'govt__'
+        print *, "No command-line arguments provided. Using default scenario: ", trim(version)//trim(experiment)//trim(closure)
+        print *, "Usage: 5Gtrans.exe <version> <experiment> <closure>"
+        print *, "Example: 5Gtrans.exe psid_ all_ govt__"
+    endif
+
+    ! Validate that required configuration files exist
+    call validate_config_files(cwd_i, cwd_p, version, experiment, closure)
 
     ! Construct scenario output folder path and create it
     cwd_scenario = trim(cwd_w)//'/'//trim(version)//trim(experiment)//trim(closure)
-    call system('mkdir "'//trim(cwd_scenario)//'" 2>nul')  ! Creates subfolder (ignores error if exists)
+
+    ! Cross-platform directory creation (Windows and Unix/Linux/macOS)
+#ifdef _WIN32
+    call system('mkdir "'//trim(cwd_scenario)//'" 2>nul')
+#else
+    call system('mkdir -p "'//trim(cwd_scenario)//'"')
+#endif
+
+    ! Copy instructions and parameters files to results folder for reproducibility
+#ifdef _WIN32
+    call system('copy "'//trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
+    call system('copy "'//trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
+#else
+    call system('cp "'//trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt" "'//trim(cwd_scenario)//'"')
+    call system('cp "'//trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt" "'//trim(cwd_scenario)//'"')
+#endif
 
     call globals         ! globals is a subroutine in global_vars2 module
     call clear_globals
@@ -82,6 +118,109 @@ allocate(l_beq_trans_big, lab_beq_trans_big,labor_tax_beq_trans_big, c_beq_trans
     switch_print = 1
 
 
+
+contains
+
+!===============================================================================
+! SUBROUTINE: validate_config_files
+!
+! Validates that required configuration files exist and have correct format
+!===============================================================================
+subroutine validate_config_files(cwd_i, cwd_p, version, experiment, closure)
+    implicit none
+
+    character(len=*), intent(in) :: cwd_i, cwd_p, version, experiment, closure
+    character(len=512) :: instructions_file, parameters_file
+    logical :: file_exists
+    integer :: ios, line_num, switch_val, unit_test
+
+    ! Construct file paths
+    instructions_file = trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt'
+    parameters_file = trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt'
+
+    ! Check instructions file exists
+    inquire(file=trim(instructions_file), exist=file_exists)
+    if (.not. file_exists) then
+        print *, ''
+        print *, '=========================================='
+        print *, 'FATAL ERROR: Instructions file not found!'
+        print *, '=========================================='
+        print *, 'Expected file: ', trim(instructions_file)
+        print *, ''
+        print *, 'Available scenarios in Instructions folder:'
+#ifdef _WIN32
+        call system('dir /B "'//trim(cwd_i)//'\*instructions.txt"')
+#else
+        call system('ls -1 "'//trim(cwd_i)//'/"*instructions.txt')
+#endif
+        print *, ''
+        stop 1
+    endif
+
+    ! Check parameters file exists
+    inquire(file=trim(parameters_file), exist=file_exists)
+    if (.not. file_exists) then
+        print *, ''
+        print *, '========================================='
+        print *, 'FATAL ERROR: Parameters file not found!'
+        print *, '========================================='
+        print *, 'Expected file: ', trim(parameters_file)
+        print *, ''
+        print *, 'Available scenarios in Parameters folder:'
+#ifdef _WIN32
+        call system('dir /B "'//trim(cwd_p)//'\*parameters.txt"')
+#else
+        call system('ls -1 "'//trim(cwd_p)//'/"*parameters.txt')
+#endif
+        print *, ''
+        stop 1
+    endif
+
+    ! Validate instructions file format (should have exactly 35 lines of integers)
+    unit_test = 999
+    open(unit=unit_test, file=trim(instructions_file), action='read', status='old', iostat=ios)
+
+    if (ios /= 0) then
+        print *, 'FATAL ERROR: Cannot open instructions file for validation'
+        print *, 'File: ', trim(instructions_file)
+        stop 1
+    endif
+
+    ! Read and validate 35 switch lines
+    do line_num = 1, 35
+        read(unit_test, *, iostat=ios) switch_val
+        if (ios /= 0) then
+            print *, ''
+            print *, '============================================='
+            print *, 'FATAL ERROR: Instructions file format error!'
+            print *, '============================================='
+            print *, 'File: ', trim(instructions_file)
+            print *, 'Line:', line_num
+            print *, 'Expected: Integer value (0, 1, or 2)'
+            print *, 'Problem: Could not read integer value'
+            print *, ''
+            print *, 'Instructions files must have exactly 35 lines,'
+            print *, 'each containing an integer followed by optional comment.'
+            print *, 'Format: VALUE // comment'
+            print *, ''
+            close(unit_test)
+            stop 1
+        endif
+
+        ! Warn about unusual values (most switches are 0, 1, or 2)
+        if (switch_val < 0 .or. switch_val > 6) then
+            print *, 'WARNING: Line', line_num, 'has unusual value:', switch_val
+            print *, 'File: ', trim(instructions_file)
+            print *, 'Expected range: 0-6 (most switches use 0-2)'
+        endif
+    enddo
+
+    close(unit_test)
+
+    print *, 'Configuration files validated successfully.'
+    print *, ''
+
+end subroutine validate_config_files
 
         include 'main_base_transition.f90'
      write (*,*) 'computations completed' 

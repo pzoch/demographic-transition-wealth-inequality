@@ -95,6 +95,7 @@ IMPLICIT NONE
     integer :: switch_change_rho
     integer :: switch_small_write                           ! 0 - write large matrixes, 1 - write small matrices
     integer :: switch_exog_rate                             ! 0 - GE model, 1 - use exog. path of returns
+    integer :: switch_full_csv_write                        ! 0 - write only minimal CSV (svplus, prob), 1 - write all CSV files
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam

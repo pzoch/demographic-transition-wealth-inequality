@@ -6,7 +6,9 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Project Overview
 
-This is a replication package for an economics paper submitted to the Review of Economic Studies. The code implements an **Overlapping Generations (OLG) model** with heterogeneous agents in Fortran. The model simulates pension system transitions, demographic changes, and policy reforms.
+This is a replication package for an economics paper submitted to the Economic Journal. The code implements an **Overlapping Generations (OLG) model** with heterogeneous agents in Fortran. The model simulates pension system transitions, demographic changes, and policy reforms.
+
+**Baseline model**: The PSID-calibrated version (`psid_*` scenarios) is the primary baseline model. The `base_*` scenarios represent an alternative calibration.
 
 ## Repository Structure
 
@@ -17,9 +19,12 @@ emeryt/
 ├── Parameters/        # Scenario parameter files
 ├── Data/              # Input data files (demographics, tax rates, etc.)
 ├── Results/           # Output files organized in scenario subfolders
-│   ├── base_all_govt__/    # Results for base_all_govt__ scenario
+│   ├── psid_all_govt__/    # Results for psid_all_govt__ scenario (baseline)
 │   ├── psid_ndm_govt__/    # Results for psid_ndm_govt__ scenario
 │   └── ...
+├── run_scenarios.bat         # Batch script to run predefined scenarios
+├── run_scenarios_from_list.bat  # Batch script to run scenarios from list
+├── scenarios.txt             # Scenario list for batch processing
 ├── 5Gtrans.sln        # Visual Studio solution file
 └── 5Gtrans.vfproj     # Intel Fortran project file
 ```
@@ -30,8 +35,8 @@ Configuration and output files follow the pattern: `xxxx_yyy_govt__suffix.txt`
 
 Where:
 - **xxxx** = Version identifier (scenario type)
-  - `base` = Baseline scenario
-  - `psid` = PSID-calibrated model
+  - `psid` = PSID-calibrated model (primary baseline)
+  - `base` = Alternative calibration
   - `busn` = Business income variant
   - `beqs`/`beqx` = Bequest variants
   - `time` = Time-varying parameters
@@ -116,9 +121,16 @@ Line 31: switch_ss_write              (write steady state output)
 Line 32: switch_profile               (profiling mode)
 Line 33: switch_small_write           (write compact output)
 Line 34: switch_exog_rate             (exogenous interest rate)
+Line 35: switch_full_csv_write        (CSV output mode: 1=full, 0=minimal)
 ```
 
 Format per line: `VALUE // comment`
+
+**Important**: `switch_full_csv_write` controls CSV output detail:
+- `1` = Full CSV output (all variables) - use for `psid_all_govt__` (baseline) scenario
+- `0` = Compact CSV output - use for all other scenarios
+  - If `switch_small_write == 0`: Medium CSV (`mass_trans_medium.csv` with svplus, prob, and all index variables)
+  - If `switch_small_write == 1`: Minimal CSV (`mass_trans_minimal.csv` with svplus, prob, year only)
 
 ## Parameters Files Format
 
@@ -206,18 +218,74 @@ Located in `Data/` folder. Key files include:
 
 ## Running the Model
 
-1. **Configure scenario**: Set `version`, `experiment`, `closure` strings in `main.f90`
-2. **Ensure matching files exist**:
-   - `Instructions/{version}{experiment}{closure}instructions.txt`
-   - `Parameters/{version}{experiment}{closure}parameters.txt`
-3. **Compile**: Use Intel Fortran Compiler (ifort) via Visual Studio solution
-4. **Run**: Execute compiled binary; results appear in `Results/{scenario}/` subfolder
+### Single Scenario Run
+
+**Command-line usage** (recommended):
+```bash
+5Gtrans.exe <version> <experiment> <closure>
+```
+
+Examples:
+```bash
+5Gtrans.exe psid_ all_ govt__
+5Gtrans.exe base_ ndm_ govt__
+5Gtrans.exe busn_ all_ govt__
+```
+
+**Default scenario**: If no arguments provided, runs `psid_all_govt__`
+
+### Multiple Scenario Runs
+
+**Option 1: Predefined batch script**
+```bash
+run_scenarios.bat
+```
+Runs a predefined set of scenarios (base_all, base_ndm, psid_all, psid_ndm). Edit the file to add/remove scenarios.
+
+**Option 2: Run from list file**
+```bash
+run_scenarios_from_list.bat
+```
+Reads scenarios from `scenarios.txt` (one per line: `version experiment closure`). Easy to customize without editing the script.
+
+### Compilation
+
+#### Windows (Primary Platform)
+1. **Compile**: Use Intel Fortran Compiler (ifort/ifx) via Visual Studio solution (`5Gtrans.sln`)
+2. **Output**: Creates `5Gtrans.exe` in `x64\Release\` directory (or project root)
+3. **Preprocessor**: Automatically defines `_WIN32` for Windows-specific code paths
+
+#### Linux/macOS (Cross-Platform Support)
+1. **Compile**: Use Intel Fortran Compiler (ifort/ifx) or GNU gfortran
+2. **Command**: `ifort -D_UNIX -O2 -o 5Gtrans *.f90` (or equivalent)
+3. **Preprocessor**: Define `-D_UNIX` (or omit `-D_WIN32`) for Unix/Linux code paths
+4. **Note**: Cross-platform support added for file operations (mkdir, copy)
+
+The code uses preprocessor directives (`#ifdef _WIN32`) to handle platform differences:
+- Windows: Uses `mkdir` and `copy` commands
+- Linux/macOS: Uses `mkdir -p` and `cp` commands
+
+### Prerequisites
+
+Before running, ensure matching files exist:
+- `Instructions/{version}{experiment}{closure}instructions.txt`
+- `Parameters/{version}{experiment}{closure}parameters.txt`
+
+The program **validates configuration files at startup** and will display helpful error messages if files are missing or malformed.
+
+Results appear in `Results/{version}{experiment}{closure}/` subfolder.
+
+**Note**: The program automatically copies the instructions and parameters files to the results folder for reproducibility.
 
 ## Output Files
 
 Output files are written to scenario-specific subfolders: `Results/{version}{experiment}{closure}/`
 
-Example: Running `base_all_govt__` scenario creates `Results/base_all_govt__/` containing:
+Example: Running `psid_all_govt__` scenario creates `Results/psid_all_govt__/` containing:
+
+### Configuration Files (copied for reproducibility)
+- `{version}{experiment}{closure}instructions.txt` - Switch settings used for this run
+- `{version}{experiment}{closure}parameters.txt` - Parameter values used for this run
 
 ### Time Series Outputs (`*_trans.txt`)
 - `gdp_trans.txt` - GDP over transition
@@ -231,8 +299,16 @@ Example: Running `base_all_govt__` scenario creates `Results/base_all_govt__/` c
 - `c_j_trans.csv` - Consumption by age
 - `l_j_trans.csv` - Labor by age
 - `b_j_trans.csv` - Benefits by age
-- `mass_trans_small.csv` - Population distribution
 - `gini_weight_trans.csv` - Gini coefficient weights
+- Micro-level distribution files (depends on `switch_full_csv_write` and `switch_small_write`):
+  - **Full output** (`switch_full_csv_write=1`, e.g., psid_all_govt__):
+    - `prob_trans.csv` - Probability distributions
+    - `mass_trans.csv` or `mass_trans_small.csv` - Full distribution with consumption, hours, income, wealth
+    - `mass_trans_beq.csv` - Bequest distribution (if `switch_unequal_bequest=2`)
+  - **Medium output** (`switch_full_csv_write=0`, `switch_small_write=0`):
+    - `mass_trans_medium.csv` - Savings, probabilities, and all index variables
+  - **Minimal output** (`switch_full_csv_write=0`, `switch_small_write=1`):
+    - `mass_trans_minimal.csv` - Savings, probabilities, and year only
 
 ### Steady State Outputs
 - `steadys_old_information_run.txt` - Initial steady state info
@@ -250,6 +326,7 @@ Example: Running `base_all_govt__` scenario creates `Results/base_all_govt__/` c
 5. **Mixed indexing**: Age uses `1:bigJ`, assets use `0:n_a`, time uses `1:bigT`
 6. **Steady state pairs**: Variables have `_ss_old` and `_ss_new` versions
 7. **Switch values**: Usually 0=off, 1=on, but some have multiple values (e.g., `switch_mortality` can be 1 or 6)
+8. **Reproducibility**: Model uses **deterministic discretization** (Rouwenhorst method) for all shock processes. No random number generation in main computation path. All stochastic simulation functions removed from AR_discrete.f90 and normalProb.f90 modules.
 
 ## Copilot Instructions Reference
 

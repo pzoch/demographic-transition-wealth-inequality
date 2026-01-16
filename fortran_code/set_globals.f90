@@ -105,8 +105,9 @@ call chdir(cwd_i)
         read(3,*) ! switch_param_2 (always 1, hardcoded)
         read(3,*) switch_ss_write
         read(3,*) switch_profile 
-        read(3,*) switch_small_write 
+        read(3,*) switch_small_write
         read(3,*) switch_exog_rate
+        read(3,*) switch_full_csv_write
         CLOSE(3) 
 
 
