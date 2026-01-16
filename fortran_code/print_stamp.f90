@@ -71,6 +71,9 @@
         write(666,'(A30,I5.1)') 'switch_param_2 =', 1
         write(666,'(A30,I5.1)') 'switch_ss_write =', switch_ss_write
         write(666,'(A30,I5.1)') 'switch_profile =', switch_profile
+        write(666,'(A30,I5.1)') 'switch_small_write =', switch_small_write
+        write(666,'(A30,I5.1)') 'switch_exog_rate =', switch_exog_rate
+        write(666,'(A30,I5.1)') 'switch_full_csv_write =', switch_full_csv_write
         write(666,'(A30,I5.1)') 'beq_age =', beq_age
         write(666, '(A)') '*********************************'
         write(666, '(A)') 'GRIDS ARE INITIALIZED AS' 

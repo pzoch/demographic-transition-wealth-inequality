@@ -1,0 +1,17 @@
+# Scenario list for run_scenarios_from_list.bat
+# Format: version experiment closure
+# Lines starting with # are comments
+# Example: psid_ all_ govt__
+
+# PSID scenarios (baseline model)
+psid_ ndm_ govt__
+
+# Base scenarios (alternative calibration)
+# base_ all_ govt__
+# base_ ndm_ govt__
+
+# Add more scenarios below as needed:
+# busn_ all_ govt__
+# busn_ ndm_ govt__
+# beqs_ all_ govt__
+# beqs_ ndm_ govt__
