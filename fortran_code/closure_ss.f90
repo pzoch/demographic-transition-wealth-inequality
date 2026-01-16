@@ -2,52 +2,111 @@
 ! FILE: closure_ss.f90
 !
 ! DESCRIPTION:
-!   Government budget closure rule for steady state equilibrium. Ensures
-!   government budget balances by adjusting fiscal instrument (typically
-!   government spending g). Included in steady_state.f90.
+!   Government budget closure rule for steady state equilibrium. Balances the
+!   government budget by adjusting government spending (g_ss) as the residual.
+!   Included in steady_state.f90 via include statement.
 !
 ! PURPOSE:
-!   Calculate government budget constraint and adjust residual fiscal variable
-!   to achieve budget balance in steady state.
+!   Enforce government budget constraint in steady state by computing spending
+!   g_ss that satisfies the intertemporal budget balance condition, given tax
+!   revenues, debt service, and pension subsidies.
 !
-! BUDGET CONSTRAINT:
-!   g_ss + (debt_ss / (gam_ss*nu_ss)) + subsidy_ss = 
-!     tauC_ss * consumption_ss + tauK_ss * r_bar_ss * k_ss + tauL_ss * labor_inc + debt_ss * (1 + r_bar_ss)/(gam_ss*nu_ss)
+! GOVERNMENT BUDGET CONSTRAINT (steady state):
+!   Sources (revenues):
+!     + Consumption tax revenue: tauC_ss * consumption_ss_gross
+!     + Capital tax revenue: tauK_ss * r_bar_ss * k_ss (or on gross returns)
+!     + Labor tax revenue: tauL_ss * labor_income_ss
+!     + New debt issuance: debt_ss
+!
+!   Uses (expenditures):
+!     + Government spending: g_ss (RESIDUAL, adjusts to balance budget)
+!     + Debt service: debt_ss * (1 + r_bar_ss) / (gam_ss * nu_ss)
+!     + Pension subsidy: subsidy_ss (benefits - contributions)
+!
+!   Balance condition:
+!     g_ss + debt_service + subsidy_ss = tax_revenues + new_debt
+!
+! STEADY STATE DEBT DYNAMICS:
+!   In steady state, debt per effective labor is constant:
+!     debt_ss(t) = debt_ss(t-1) * (1 + r_bar_ss) / (gam_ss * nu_ss)
+!
+!   This implies deficit equals growth-adjusted debt service:
+!     deficit_ss = debt_ss - debt_ss/(gam_ss*nu_ss)
+!                = debt_ss * [1 - 1/(gam_ss*nu_ss)]
+!                = debt_ss * [(gam_ss*nu_ss - 1)/(gam_ss*nu_ss)]
+!
+!   If gam_ss*nu_ss > 1 (economy growing): deficit_ss > 0 (can run deficit)
+!   If gam_ss*nu_ss = 1 (no growth): deficit_ss = 0 (balanced budget)
 !
 ! CLOSURE RULE (Case 6 - hardcoded):
-!   Government spending (g_ss) adjusts to balance budget:
-!   g_ss = tax_revenue - (subsidy_ss - deficit_ss - capital_tax - labor_tax)
+!   Government spending (g_ss) is the RESIDUAL:
+!     g_ss = tax_revenues - [subsidy_ss - deficit_ss - capital_tax - labor_tax]
 !
-! TAXES:
-!   - Consumption tax: tc_ss * consumption_ss_gross
-!   - Capital tax: tk_ss * r_bar_ss * k_ss (if net) or tk_ss*(r_bar_ss+depr)*k_ss (if gross)
-!   - Labor tax: labor_tax_revenue_ss/bigl_ss
+!   Rearranged:
+!     g_ss = tc_ss*consumption_ss_gross + tk_ss*r_bar_ss*k_ss + labor_tax_revenue_ss/bigl_ss
+!          - subsidy_ss + deficit_ss
 !
-! DEBT DYNAMICS:
-!   deficit_ss = debt_ss * (1 - (1+r_bar_ss)/(gam_ss*nu_ss))
-!   Debt grows at rate gam_ss*nu_ss (TFP * population growth)
+!   This ensures budget constraint holds exactly in steady state.
 !
-! SWITCH_TAUК_GROSS:
-!   0 = Capital tax on net returns (r_bar_ss)
-!   1 = Capital tax on gross returns (r_bar_ss + depr)
+! TAX REVENUES:
+!   1. Consumption tax: tc_ss * consumption_ss_gross
+!      where consumption_ss_gross = aggregate consumption before taxes
+!
+!   2. Capital tax:
+!      IF switch_tauK_gross = 0 (tax on net returns):
+!        Capital tax revenue = tk_ss * r_bar_ss * k_ss
+!      IF switch_tauK_gross = 1 (tax on gross returns):
+!        Capital tax revenue = tk_ss * (r_bar_ss + depr) * k_ss
+!
+!   3. Labor tax: labor_tax_revenue_ss / bigl_ss
+!      Computed as: sum over (j,m) of tauL_ss * w_bar_ss * l_ss_j * N_big_ss_j
+!
+! SWITCH_TAUK_GROSS:
+!   0 = Capital tax on net returns r_bar_ss (interest only)
+!   1 = Capital tax on gross returns r_bar_ss + depr (interest + depreciation)
+!   Affects both tax revenue and after-tax return to households
 !
 ! VARIABLES:
-!   INPUT:
-!     - consumption_ss_gross: Aggregate consumption
-!     - k_ss: Capital stock
-!     - debt_ss: Government debt
-!     - r_bar_ss, r_ss: Interest rates
-!     - tc_ss, tk_ss: Tax rates
-!     - labor_tax_ss_j: Labor tax by age and type
-!     - N_big_ss_j: Population by age and type
-!     - subsidy_ss: Pension subsidy
-!     - gam_ss, nu_ss: Growth rates
-!     - bigl_ss, y_ss, N_ss: Aggregates
+!   INPUT (from steady state iteration):
+!     - consumption_ss_gross: Aggregate consumption per effective labor
+!     - k_ss: Capital stock per effective labor
+!     - debt_ss: Government debt per effective labor = debt_constr * y_ss
+!     - r_bar_ss: Pre-tax gross interest rate (marginal product of capital)
+!     - r_ss: After-tax net interest rate
+!     - tc_ss, tk_ss, tl_ss: Tax rates (consumption, capital, labor)
+!     - labor_tax_ss_j(j,m): Labor tax paid by age-type cell
+!     - N_big_ss_j(j,m): Population by age and type
+!     - subsidy_ss: Pension subsidy per effective labor (benefits - contributions)
+!     - gam_ss: TFP growth rate (e.g., 1.015 for 1.5% annual growth)
+!     - nu_ss: Labor productivity growth rate
+!     - bigl_ss: Aggregate effective labor
+!     - y_ss: Output per effective labor = zbar * k_ss^alpha
+!     - N_ss: Total population
+!     - depr: Depreciation rate (if switch_tauK_gross = 1)
+!
 !   OUTPUT:
-!     - g_ss: Government spending (residual)
-!     - g_per_capita_ss: Per capita government spending
-!     - g_share_ss: Government spending as share of GDP
-!     - deficit_ss: Budget deficit
+!     - g_ss: Government spending per effective labor (RESIDUAL)
+!     - g_per_capita_ss: Per capita government spending = g_ss*bigl_ss/N_ss
+!     - g_share_ss: Government spending as share of GDP = g_ss/y_ss
+!     - deficit_ss: Budget deficit per effective labor
+!
+! PENSION SUBSIDY:
+!   subsidy_ss = (pension benefits paid) - (pension contributions received)
+!   Can be positive (benefits exceed contributions, government transfers to system)
+!   or negative (contributions exceed benefits, system runs surplus)
+!
+! ECONOMIC INTERPRETATION:
+!   - Higher debt => higher debt service => lower g_ss (crowding out)
+!   - Higher pension subsidy => lower g_ss (fiscal burden of pensions)
+!   - Growing economy (gam*nu > 1) => can sustain positive deficit_ss
+!   - Tax revenues increase with capital deepening (higher k_ss, r_bar_ss)
+!
+! NOTES:
+!   - Case 6 (g residual) is hardcoded and most commonly used
+!   - Alternative closures possible: adjust tauC, tauL, debt, or transfers
+!   - Included at end of steady state iteration, after all other variables computed
+!   - Ensures exact budget balance (no approximation error)
+!   - Parallel to closures.f90 for transition path
 !===============================================================================
 
     labor_tax_revenue_ss = 0.0d0

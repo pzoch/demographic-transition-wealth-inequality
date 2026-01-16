@@ -2,50 +2,132 @@
 ! FILE: pfi_household_problem.f90
 !
 ! DESCRIPTION:
-!   Solves household optimization problem via policy function iteration (PFI).
-!   Core routine for computing value and policy functions in steady state.
+!   Solves household optimization problem via policy function iteration (PFI)
+!   using backward induction. Computes value functions and policy functions for
+!   consumption, labor supply, and savings decisions across the lifecycle.
+!   Core computational routine for steady state equilibrium.
 !
-! SUBROUTINES:
+! KEY SUBROUTINES:
 !   - household_endo: Main PFI solver for endogenous labor choice
-!                     Backward induction over age j, iterating until V_ss converges
-!   - household_exo: Variant with exogenous labor supply (if switch_labor_choice==0)
-!   - foc_solver: Solves first-order conditions for {c, l} given state (a, aime, ε, δ, r)
+!   - household_exo: Variant with exogenous/fixed labor supply
+!   - foc_solver: Solves first-order conditions for {c, l} given state
+!
+! HOUSEHOLD PROBLEM:
+!   Agent maximizes expected lifetime utility:
+!     V(j,a,aime,ε,δ,r) = max_{c,l,a'} u(c,l,j) + β(j,δ)*pi(j)*E[V(j+1,a',aime',ε',δ',r')]
+!   Subject to:
+!     Budget: (1+tauC)*c + a' = (1+r(r))*a/gam + (1-tauL)*(1-t1)*w*omega(j)*ε*l + b(j) + beq(j)
+!     Borrowing: a' >= 0 (or small negative value)
+!     Labor: 0 <= l <= 1 (if j < jbar), l = 0 (if j >= jbar, retired)
+!     AIME: aime' = update based on wage history (for pension calculation)
+!
+!   Where:
+!     u(c,l,j) = utility function (CRRA with labor disutility)
+!     β(j,δ) = time preference (possibly age-dependent, shock δ)
+!     pi(j) = survival probability to age j+1
+!     r(r) = return shock (affects asset returns)
+!     ε = income shock (productivity)
+!     δ = discount factor shock
+!     omega(j) = age-efficiency profile
+!     b(j) = pension benefits (0 before retirement)
+!     beq(j) = bequest receipts (typically at young ages)
 !
 ! STATE SPACE:
-!   Dimensions: (j, a, aime, ip, ir, id) where
-!   - j: Age (1:bigJ)
-!   - a: Assets (0:n_a)
-!   - aime: Average indexed monthly earnings (0:n_aime)
-!   - ip: Income shock state (1:n_sp)
-!   - ir: Return shock state (1:n_sr)
-!   - id: Discount factor shock state (1:n_sd)
+!   6-dimensional state: (j, a, aime, ip, ir, id)
+!   - j: Age (1:bigJ, where bigJ ≈ 16 corresponding to age 80 in 5-year periods)
+!   - a: Assets (0:n_a, typically n_a=50-100 grid points)
+!   - aime: Average Indexed Monthly Earnings for pension (0:n_aime, typically 20-40)
+!   - ip: Income shock state (1:n_sp, e.g., n_sp=7 for permanent shocks)
+!   - ir: Return shock state (1:n_sr, e.g., n_sr=3 for return heterogeneity)
+!   - id: Discount factor shock state (1:n_sd, e.g., n_sd=3 for preference heterogeneity)
 !
 ! POLICY FUNCTIONS (output):
-!   - svplus_ss(j,a,aime,ip,ir,id): Savings a' = s(j,a,aime,ε,δ,r)
-!   - c_ss(j,a,aime,ip,ir,id): Consumption c(⋅)
-!   - l_ss(j,a,aime,ip,ir,id): Labor supply l(⋅)
-!   - V_ss(j,a,aime,ip,ir,id): Value function V(⋅)
+!   - c_ss(j,a,aime,ip,ir,id): Consumption c(state)
+!   - l_ss(j,a,aime,ip,ir,id): Labor supply l(state) in [0,1]
+!   - svplus_ss(j,a,aime,ip,ir,id): Savings a'(state)
+!   - V_ss(j,a,aime,ip,ir,id): Value function V(state)
+!   - lab_ss(j,a,aime,ip,ir,id): Labor participation indicator
+!   - srate_ss(j,a,aime,ip,ir,id): Savings rate
+!   - lab_income_ss(j,a,aime,ip,ir,id): After-tax labor income
+!   - tot_income_ss(j,a,aime,ip,ir,id): Total income (labor + capital + transfers)
 !
-! ALGORITHM:
-!   1. Initialize terminal condition: V(bigJ,⋅) from bequest motive
-!   2. Backward induction: For j=bigJ-1 down to 1:
-!      a. Compute EV'(a',⋅) by integrating over future shocks
-!      b. For each (a,aime,ip,ir,id), solve:
-!         max_{c,l,a'} u(c,l) + β*E[V'(a',aime',ε',δ',r') | ε,δ,r]
-!         s.t. budget constraint, borrowing limit, etc.
-!      c. Store optimal {c*,l*,a'*,V}
-!   3. Iterate until sup|V_new - V_old| < tolerance
+! ALGORITHM (backward induction):
+!   1. TERMINAL CONDITION (age bigJ):
+!      V(bigJ,a,aime,ε,δ,r) = u(consume all) + warm_glow(a')
+!      (or continuation value from bequest motive)
+!
+!   2. BACKWARD INDUCTION (j = bigJ-1 down to 1):
+!      a. Compute expected continuation value (EV):
+!         EV(j+1,a',aime',ip,ir,id) = sum over (ip',ir',id') of
+!           pi_eps(ip,ip') * pi_r(ir,ir') * pi_delta(id,id') * V(j+1,a',aime',ip',ir',id')
+!
+!      b. For each state (a,aime,ip,ir,id):
+!         - Compute cash-on-hand: coh = (1+r)*a/gam + after_tax_income + benefits + bequests
+!         - IF j >= jbar (retired): l = 0, solve for c and a'
+!         - IF j < jbar (working): solve FOCs for optimal {c, l, a'}
+!         - Store: c_ss(j,⋅), l_ss(j,⋅), svplus_ss(j,⋅), V_ss(j,⋅)
+!
+!      c. Interpolate EV(a') for off-grid points using linear interpolation
+!
+!   3. CONVERGENCE CHECK:
+!      After full backward pass, check if V_ss has converged
+!      (typically converges in first pass with good terminal condition)
+!
+! FIRST-ORDER CONDITIONS (interior solution):
+!   1. Consumption Euler equation:
+!      u_c(c,l) = β*pi(j)*(1+r)/(gam*(1+tauC))*E[u_c(c',l')]
+!
+!   2. Labor supply:
+!      -u_l(c,l) / u_c(c,l) = (1-tauL)*(1-t1)*w*omega(j)*ε
+!
+!   3. Envelope condition:
+!      V_a(j,a,aime,ε,δ,r) = u_c(c,l)*(1+r)/gam
+!
+! UTILITY FUNCTION:
+!   u(c,l,j) = [c^(1-sigma) / (1-sigma)] - disutil(j) * [l^(1+1/frisch) / (1+1/frisch)]
+!   Where:
+!     sigma = risk aversion parameter (typically 1.5-3)
+!     frisch = Frisch elasticity of labor supply (typically 0.5-1.0)
+!     disutil(j) = age-dependent disutility weight
 !
 ! BEQUEST HANDLING:
-!   If switch_unequal_bequest==2: Distributes bequests via Zipf law across n_beq classes
+!   If switch_unequal_bequest == 2:
+!     - Bequests distributed via Zipf law across n_beq quantiles
+!     - beq_zipf_ss(ibeq) = bequest amount for quantile ibeq
+!     - p_beq(ibeq) = probability of being in quantile ibeq
+!     - Introduces wealth inequality at young ages
+!     - Separate value function V_beq_ss for bequest recipients
+!
+! AIME UPDATING:
+!   AIME (Average Indexed Monthly Earnings) used for Social Security benefits:
+!   - Tracks earnings history during working years
+!   - Updated each period: aime' = f(aime, current_earnings, j)
+!   - Capped at maximum (aime_cap)
+!   - Used to calculate pension benefits at retirement
+!
+! OPTIMIZATION METHOD:
+!   - Grid search over savings a' in discrete grid
+!   - For each a', solve FOCs for {c, l} given budget constraint
+!   - Choose a' that maximizes V(j,a,aime,ε,δ,r)
+!   - Handles corner solutions (l=0, l=1, a'=0)
 !
 ! DEPENDENCIES:
-!   - global_vars: All model parameters and grids
-!   - linint: For interpolating EV' between grid points
+!   - global_vars: All model parameters, grids, and transition matrices
+!   - linint: Linear interpolation for off-grid value function
 !
-! NOTES:
-!   Critical performance bottleneck - optimize loops. Uses pre-computed transition
-!   matrices (pi_ip_risk, pi_ir, pi_id) for expectation operator.
+! PERFORMANCE NOTES:
+!   - Critical computational bottleneck (called for each type m)
+!   - Loops over 6-dimensional state space (j × a × aime × ip × ir × id)
+!   - Pre-computed transition matrices (pi_ip, pi_ir, pi_id) speed up expectations
+!   - Parallelization possible over (a, aime, ip, ir, id) at each age j
+!
+! ECONOMIC INTERPRETATION:
+!   - Agents face uncertainty: income shocks, return shocks, mortality
+!   - Lifecycle savings: accumulate during working years, decumulate in retirement
+!   - Labor-leisure tradeoff: higher wages increase labor supply (substitution)
+!                             but also increase wealth (income effect)
+!   - Precautionary savings: uncertainty increases savings
+!   - Pension system: reduces need for retirement savings (crowd-out effect)
 !===============================================================================
 !*******************************************************************************************
 ! find futur assets for every age, assets grid point, state  

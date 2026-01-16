@@ -2,37 +2,108 @@
 ! FILE: transition.f90
 !
 ! DESCRIPTION:
-!   Module for computing transition path between two steady states in the OLG
-!   model. Solves for time-varying general equilibrium given demographic changes,
-!   policy reforms, and productivity shocks over the transition horizon.
+!   Module for computing transition path between two steady states in the
+!   overlapping generations (OLG) model. Solves for time-varying general
+!   equilibrium with demographic transitions, policy reforms, and TFP shocks
+!   from period t=1 (old steady state) to t=bigT (new steady state).
 !
 ! MODULE: transition_DB
 !   Contains transition path computation routine
 !
-! SUBROUTINE:
+! KEY SUBROUTINE:
 !   - transition_path_DB: Main iterative solver for transition path equilibrium
 !
-! ALGORITHM:
-!   1. Initialize guess for capital path {k(t)} from steady states
-!   2. For each period t = 1,...,bigT:
-!      a. Compute factor prices r(t), w(t) from production
-!      b. Calculate pension benefits for all cohorts alive at t
-!      c. Solve household problem via backward induction PFI
-!      d. Aggregate decisions across cohorts and types
-!      e. Compute bequests and government budget for period t
-!   3. Update capital path based on aggregate savings
-!   4. Iterate until convergence: sum_t |k_new(t) - k_old(t)| < tol
+! TRANSITION PATH EQUILIBRIUM:
+!   For each period t = 1 to bigT, find:
+!   1. Prices: {r(t), w(m,t)} that clear markets
+!   2. Household decisions: {c(j,m,t), l(j,m,t), s(j,m,t)} for all cohorts
+!   3. Government policy: {g(t), debt(t)} satisfying budget constraint
+!   4. Pension benefits: {b(j,m,t)} from PAYG or funded system
+!   Such that:
+!   - Households optimize given prices, policy, and expectations
+!   - Firms maximize profits period-by-period
+!   - Markets clear each period: K(t) + Debt(t) = savings(t-1)
+!   - Government budget balances each period (via closure rule)
+!   - Terminal conditions: converge to new steady state
+!
+! COHORT STRUCTURE (key complication):
+!   At time t, bigJ cohorts are alive (ages j=1 to bigJ)
+!   - Cohort born at calendar time (t-j+1)
+!   - Faces demographic conditions from its birth year
+!   - Different cohorts have different retirement ages (jbar_t_yob)
+!   - Must track cohort-specific pension accumulations
+!
+! ITERATIVE ALGORITHM:
+!   FOR iter_t = 1 TO n_iter_t:
+!     1. Compute prices from capital path k(t):
+!        r_bar(t) = zbar*alpha*k(t)^(alpha-1) - depr
+!        w_bar(m,t) = CES wages from labor aggregation
+!
+!     2. Calculate pension benefits for all cohorts (include pension_system.f90):
+!        - Track wage histories for each cohort
+!        - Apply valorization (wage indexation)
+!        - Compute benefits at retirement, index post-retirement
+!
+!     3. Solve household problem via backward induction:
+!        - Start from terminal period bigT (use new SS value function)
+!        - Work backward: For t = bigT-1 down to 1, j = bigJ down to 1
+!        - At each (t,j), solve for optimal {c,l,s} given EV(t+1,j+1)
+!        - Handle bequest receipt at specified age (beq_age)
+!
+!     4. Simulate forward to get distributions:
+!        - Start from initial distribution at t=1
+!        - Use policy functions to evolve prob(j,a,aime,ε,m,t)
+!
+!     5. Aggregate across all households:
+!        bigl(t) = CES aggregate of labor by type
+!        consumption(t) = sum over (j,m) of N(j,m,t) * c(j,m,t)
+!        savings(t) = sum over (j,m) of N(j,m,t) * s(j,m,t)
+!
+!     6. Compute bequests from mortality (include bequest.f90):
+!        Deaths between t-1 and t leave assets to survivors
+!
+!     7. Government budget closure (include closures.f90):
+!        g(t) = residual to balance budget (case 6 hardcoded)
+!
+!     8. Update capital path:
+!        k_new(t+1) = [savings(t) - debt(t)] / [nu(t+1)*gam(t+1)]
+!        cum_err = sum over t of |k_new(t) - k(t)|
+!
+!     9. Convergence check:
+!        IF cum_err < err_tol: EXIT
+!        ELSE: k(t) = up_t*k(t) + (1-up_t)*k_new(t) (damping)
+!   END FOR
+!
+! TIME-VARYING INPUTS (demographic and policy changes):
+!   - N_big_t_j(j,m,t): Population by age, type, time (from data)
+!   - gam_t(t): TFP growth rate over time
+!   - tauL_t(t), tauK_t(t), tauC_t(t): Tax rates over time
+!   - rho_t(t): Pension replacement rate over time
+!   - jbar_t(t): Retirement age by period (may change with reforms)
+!   - jbar_t_yob(yob): Cohort-specific retirement ages
 !
 ! DEPENDENCIES:
 !   - get_data: Data structures and utilities
 !   - global_vars: Parameter and variable declarations
 !   - pfi_trans: Policy function iteration for transition
 !
+! INCLUDES (via include statements):
+!   - Initial_values_db.f90: Initialize transition path guesses
+!   - ces_production.f90: CES production function (time-varying)
+!   - bequest.f90: Bequest distribution calculation
+!   - pension_system.f90: Pension benefit calculation (transition)
+!   - closures.f90: Government budget closure (transition)
+!   - transition_iterations.f90: Main iteration loop
+!   - Print_db.f90: Diagnostic output
+!
 ! NOTES:
-!   - Initial conditions from "old" steady state (t=1)
-!   - Terminal conditions approach "new" steady state (t=bigT)
-!   - Cohorts overlap across periods creating complex dynamics
-!   - Handles demographic transitions, policy reforms, TFP shocks simultaneously
+!   - Transition horizon bigT typically 250-400 periods (1250-2000 years)
+!   - Convergence tolerance err_tol typically 1e-4 to 1e-6
+!   - Damping parameter up_t typically 0.5-0.7
+!   - Initial capital k(1) from old steady state
+!   - Terminal capital k(bigT) should converge to new steady state
+!   - Handles heterogeneous agents: income shocks, return shocks, discount shocks
+!   - Computes superstar labor income shares for top earners
 !===============================================================================
 
 MODULE transition_DB
@@ -47,87 +118,154 @@ CONTAINS
 ! SUBROUTINE: transition_path_DB
 !
 ! PURPOSE:
-!   Computes full transition path from initial to terminal steady state.
-!   Solves for time-varying general equilibrium with demographic changes,
-!   policy reforms, and aggregate shocks.
+!   Computes full transition path equilibrium from initial steady state (t=1)
+!   to terminal steady state (t=bigT). Solves for time-varying general
+!   equilibrium with demographic transitions, policy reforms, TFP changes,
+!   and cohort overlaps. Core solver for analyzing transition dynamics.
 !
-! ARGUMENTS (selected key inputs/outputs):
-!   INPUT:
+! ARGUMENTS:
+!   INPUT (control parameters):
 !     - switch_tauK_gross: Capital tax treatment (0=net, 1=gross)
-!     - switch_unequal_bequest: Bequest distribution mechanism (0/1/2)
-!   OUTPUT:
-!     - l_j(j,m,t): Labor supply by age, type, and time
-!     - c_j(j,m,t): Consumption by age, type, and time
-!     - sv_j(j,m,t): Savings by age, type, and time
-!     - lab_j(j,m,t): Labor hours by age, type, and time
-!     - tax_c(t): Consumption tax revenue path
+!     - switch_unequal_bequest: Bequest distribution mechanism
+!         0 = Equal within age cohort
+!         1 = Pooled to newborns
+!         2 = Unequal via Zipf law
+!
+!   OUTPUT (equilibrium paths):
+!     - l_j(j,m,t): Labor supply by age j, type m, period t
+!     - c_j(j,m,t): Consumption by age, type, period
+!     - sv_j(j,m,t): End-of-period savings by age, type, period
+!     - lab_j(j,m,t): Labor participation by age, type, period
+!     - tax_c(t): Consumption tax rate path
 !     - r_f(t): After-tax interest rate path
-!     - g_per_capita(t): Government spending per capita path
+!     - g_per_capita(t): Per capita government spending path
 !
-! LOCAL VARIABLES (key transition paths):
-!   - k(t): Capital stock per effective labor
-!   - r(t), r_bar(t): Net and gross interest rates
-!   - w_bar(m,t): Average wage by type
-!   - bigl(t): Aggregate effective labor
-!   - y(t): Output per effective labor
-!   - g(t): Government spending
-!   - debt(t): Government debt
-!   - Tax(t): Total tax revenue
-!   - b_j(j,m,t): Pension benefits
-!   - bequest(m,t): Aggregate bequests by type
-!   - N_t_j(j,t): Population by age
+! KEY LOCAL VARIABLES (transition paths):
+!   Prices:
+!     - k(t): Capital stock per effective labor unit
+!     - r(t): After-tax net interest rate
+!     - r_bar(t): Pre-tax gross interest rate (marginal product of capital)
+!     - w_bar(m,t): Pre-tax wage per efficiency unit by education type
 !
-! ALGORITHM DETAILS:
-!   Outer loop (up to n_iter_t iterations):
-!     For t = 1 to bigT:
-!       1. Compute factor prices from k(t) via production function
-!       2. Calculate pension benefits for all cohorts using past wages
-!       3. Solve household problem via backward PFI:
-!          - Start from terminal period with known terminal SS value
-!          - Work backward computing value/policy functions
-!          - Handle bequest shocks at specified age
-!       4. Simulate forward to get distributions
-!       5. Aggregate to get macro variables: bigl(t), savings, consumption
-!       6. Compute bequests using mortality and bequest rules
-!       7. Apply government budget closure to balance budget
-!       8. Update k(t+1) from aggregate savings and population growth
-!     
-!     Check convergence:
-!       err = sum over t of |k_new(t) - k_old(t)|
-!       If err < err_tol, exit; else damp update and continue
+!   Aggregates:
+!     - bigl(t): Aggregate effective labor (CES aggregate)
+!     - y(t): Output per effective labor = zbar*k(t)^alpha
+!     - bigY(t): Total output = y(t)*bigl(t)
+!     - consumption(t): Aggregate consumption
+!     - savings(t): Aggregate savings
 !
-! PENSION SYSTEM:
-!   - Calculates benefits using earnings history (AIME)
-!   - Handles both PAYG and funded pillars
-!   - Applies valorization and indexation rules
-!   - Cohort-specific retirement ages via jbar_t_yob array
+!   Government:
+!     - g(t): Government spending per effective labor
+!     - debt(t): Government debt per effective labor
+!     - Tax(t): Total tax revenue
+!     - deficit(t): Budget deficit
 !
-! GOVERNMENT BUDGET:
-!   Multiple closure rules (via switch_residual):
-!     0: Lump-sum transfers adjust (upsilon residual)
-!     1: Consumption tax adjusts (tauC residual)
-!     2: Debt adjusts (debt residual)
-!     6: Spending adjusts (g residual)
+!   Pension system:
+!     - b_j(j,m,t): Pension benefits by age, type, time
+!     - subsidy(t): Pension subsidy (benefits - contributions)
+!     - valor_mult(t): Valorization factor for benefit indexation
 !
-! CONVERGENCE:
-!   - Tolerance: err_tol (typically 1e-6)
+!   Bequests:
+!     - bequest(m,t): Aggregate bequests by type and time
+!     - bequest_j(j,m,t): Bequest receipts by age, type, time
+!     - bequest_left_j(j,m,t): Bequests left by deaths
+!
+!   Demographics:
+!     - N_t_j(j,t): Population by age and time
+!     - N_big_t_j(j,m,t): Population by age, type, time
+!     - nu(t): Labor productivity growth = bigl(t)/bigl(t-1)
+!
+! ALGORITHM (outer iteration loop):
+!   FOR iter_t = 1 TO n_iter_t:
+!
+!     1. COMPUTE PRICES (for all t):
+!        IF switch_exog_rate == 1:
+!          r_bar(t) = exogenous rate, k(t) backed out
+!        ELSE:
+!          r_bar(t) = zbar*alpha*k(t)^(alpha-1) - depr
+!        END IF
+!        y(t) = zbar*k(t)^alpha
+!        w_bar(m,t) = CES production (include ces_production.f90)
+!
+!     2. PENSION BENEFITS (include pension_system.f90):
+!        - Compute avg_wl(t) = average wage at retirement
+!        - At retirement: b1_j(jbar,m,t) = rho(t)*avg_wl(t)
+!        - Post-retirement: b1_j(j,m,t) = valor_mult(t)*b1_j(j-1,m,t-1)
+!        - Subsidy: difference between benefits and contributions
+!
+!     3. SOLVE HOUSEHOLD PROBLEM (include transition_iterations.f90):
+!        a. Backward induction over time and age:
+!           FOR t = bigT DOWN TO 1:
+!             FOR j = bigJ DOWN TO 1:
+!               Solve: max u(c,l) + beta*E[V(t+1,j+1,a',aime',ε')]
+!               Subject to: budget constraint, borrowing limit
+!               Store: c(j,a,aime,ε,m,t), l(⋅), svplus(⋅), V(⋅)
+!             END FOR
+!           END FOR
+!        b. Forward simulation for distribution:
+!           prob(j,a,aime,ε,m,t) evolves using policy functions
+!
+!     4. AGGREGATE:
+!        bigl(t) = [sum_m theta(m,t) * bigl_type(m,t)^rho]^(1/rho)
+!        consumption(t) = sum_{j,m} N(j,m,t) * c(j,m,t) / bigl(t)
+!        savings(t) = sum_{j,m} N(j,m,t) * sv(j,m,t) / bigl(t)
+!
+!     5. COMPUTE BEQUESTS (include bequest.f90):
+!        Deaths: bequest_left(j,m,t) = [N(j,m,t) - N(j+1,m,t+1)] * r * sv(j,m,t) / gam
+!        Distribute according to switch_unequal_bequest rule
+!
+!     6. GOVERNMENT BUDGET (include closures.f90):
+!        g(t) = taxes(t) - [subsidy(t) + debt_service(t) - new_debt(t)]
+!
+!     7. UPDATE CAPITAL PATH:
+!        k_new(t+1) = [savings(t) - debt(t)] / [nu(t+1) * gam(t+1)]
+!        cum_err = sum_{t=1}^{bigT} |k_new(t) - k(t)|
+!
+!     8. CONVERGENCE CHECK:
+!        IF cum_err < err_tol: EXIT
+!        ELSE: k(t) = up_t*k(t) + (1-up_t)*k_new(t)
+!   END FOR
+!
+! CONVERGENCE CRITERIA:
+!   - Tolerance: err_tol (typically 1e-4 to 1e-6)
 !   - Maximum iterations: n_iter_t (typically 100-500)
-!   - Damping: up_t parameter smooths capital path updates
+!   - Damping parameter: up_t (typically 0.5-0.7)
 !   - Prints cumulative error each iteration if switch_print=1
 !
-! INITIAL/TERMINAL CONDITIONS:
-!   - k(1) initialized from old steady state
-!   - k(bigT) should converge to new steady state
-!   - Value functions at bigT use terminal steady state
-!   - Population N_t_j from demographic projections
+! INITIAL CONDITIONS (t=1):
+!   - Capital k(1) from old steady state
+!   - Distribution prob(...,1) from old steady state
+!   - Policy parameters from old steady state
+!
+! TERMINAL CONDITIONS (t=bigT):
+!   - Capital k(bigT) should converge to new steady state
+!   - Value function V(...,bigT) uses new steady state continuation
+!   - Policy parameters approach new steady state
+!
+! TIME-VARYING PARAMETERS:
+!   - Demographics: N_big_t_j(j,m,t), pi(j,m,t), jbar_t(t)
+!   - TFP growth: gam_t(t)
+!   - Taxes: tauL_t(t), tauK_t(t), tauC_t(t)
+!   - Pension: rho_t(t), t1_t(t)
+!   - Type productivity: type_multiplier_t(m,t)
+!
+! COHORT TRACKING:
+!   - jbar_t_yob(yob): Retirement age by year of birth
+!   - Cohort at age j in period t was born in period (t-j+1)
+!   - Different cohorts face different lifetime parameters
+!
+! OUTPUT CALCULATIONS:
+!   - Gini coefficients for labor income, total income, wealth
+!   - Superstar shares (top earners): labor income, population
+!   - Replacement rates: benefits / pre-retirement earnings
 !
 ! NOTES:
-!   - Handles cohort overlaps: at time t, ages 1 to bigJ are alive
-!   - Each cohort born at different calendar time with different parameters
-!   - Bequests distributed according to switch_unequal_bequest rule
-!   - Supports heterogeneous mortality (switch_het_mortality)
-!   - Can fix labor supply (switch_fix_labor) or solve endogenously
-!   - Includes "superstar" workers with higher productivity
+!   - Most computationally intensive routine in the model
+!   - Transition horizon bigT typically 250-400 periods (1250-2000 years)
+!   - Each iteration solves bigT general equilibria
+!   - Backward induction ensures perfect foresight
+!   - Handles heterogeneous agents across multiple dimensions
+!   - Calls output() subroutine at end to write results to files
 !-------------------------------------------------------------------------------
 subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, l_j, c_j, sv_j, tax_c, r_f, g_per_capita, lab_j)
 
