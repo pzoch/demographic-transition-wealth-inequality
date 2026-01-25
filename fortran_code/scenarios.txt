@@ -4,7 +4,7 @@
 # Example: psid_ all_ govt__
 
 # PSID scenarios (baseline model)
-psid_ ndm_ govt__
+psid_ all_ govt__
 
 # Base scenarios (alternative calibration)
 # base_ all_ govt__
