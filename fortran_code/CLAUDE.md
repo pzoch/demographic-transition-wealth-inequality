@@ -122,9 +122,14 @@ Line 32: switch_profile               (profiling mode)
 Line 33: switch_small_write           (write compact output)
 Line 34: switch_exog_rate             (exogenous interest rate)
 Line 35: switch_full_csv_write        (CSV output mode: 1=full, 0=minimal)
+Line 36: switch_print_macro           (macro time series output: 1=write, 0=skip)
 ```
 
 Format per line: `VALUE // comment`
+
+**Important**: `switch_print_macro` controls macro time series output:
+- `1` = Write all macro time series files (gdp_trans.txt, rate_trans.txt, etc.) - use for `psid_all_govt__` (baseline) scenario only
+- `0` = Skip macro time series files - use for all other scenarios (saves disk space and time)
 
 **Important**: `switch_full_csv_write` controls CSV output detail:
 - `1` = Full CSV output (all variables) - use for `psid_all_govt__` (baseline) scenario

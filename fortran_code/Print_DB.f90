@@ -36,6 +36,8 @@
 !===============================================================================
   ! save in files
 
+! Macro time series output - only written if switch_print_macro == 1 (baseline scenario)
+if (switch_print_macro == 1) then
     OPEN (unit=1,  FILE ="u_init_old_trans.txt")
     OPEN (unit=2,  FILE ="u_all_trans.txt")
     OPEN (unit=3,  FILE ="u20_trans.txt")
@@ -244,6 +246,7 @@
      CLOSE(85)
      CLOSE(86)
      CLOSE(87)
+
 ! pension system closure
     OPEN (unit=1, FILE ="b_scale_factor.txt")
     OPEN (unit=2, FILE ="t1_additional_contrib.txt")
@@ -272,6 +275,7 @@
     CLOSE(202)
     CLOSE(203)
 
+endif  ! end of switch_print_macro block
 
 
 OPEN (unit=1, FILE ="gini_weight_trans.txt")
@@ -507,6 +511,11 @@ write(109, '(A)') "mass;cons;hours;labinc;labinc_pretax;totinc_pretax;wealth;sav
     enddo
 close(109)
 endif
-    
 
-
+! Write Gini coefficient of savings by year
+open(unit = 120, FILE = "gini_trans.csv")
+write(120, '(A)') "year;gini_sav"
+do i = 1, bigT, 1
+    write(120, '(I5,A,F20.10)') i, ";", gini_sav_trans(i)
+enddo
+close(120)

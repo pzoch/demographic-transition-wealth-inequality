@@ -30,12 +30,13 @@
 !   Line order MUST match the read sequence in this file (critical!)
 !
 !   INSTRUCTIONS FILE (version//experiment//closure//"instructions.txt"):
-!   35 lines of switch settings (0/1 or specific integer values):
+!   36 lines of switch settings (0/1 or specific integer values):
 !     Line 1:  switch_mortality (demographic projection method)
 !     Line 2:  switch_go_to_lower_gamma (TFP convergence)
 !     Line 3:  switch_change_tauL (labor tax changes)
 !     ...
 !     Line 35: switch_full_csv_write (CSV output detail level)
+!     Line 36: switch_print_macro (macro time series output: 0=skip, 1=write)
 !   See CLAUDE.md for complete line-by-line documentation
 !
 !   PARAMETERS FILE (version//experiment//closure//"parameters.txt"):
@@ -246,6 +247,7 @@ call chdir(cwd_i)
         read(3,*) switch_small_write
         read(3,*) switch_exog_rate
         read(3,*) switch_full_csv_write
+        read(3,*) switch_print_macro
         CLOSE(3) 
 
 
