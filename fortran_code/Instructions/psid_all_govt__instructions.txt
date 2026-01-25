@@ -33,3 +33,4 @@
 1 // switch_small_write
 0 // switch_exog_rate
 1 // switch_full_csv_write
+1 // switch_print_macro

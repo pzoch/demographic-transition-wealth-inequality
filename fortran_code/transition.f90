@@ -110,6 +110,7 @@ MODULE transition_DB
 use get_data
 use global_vars
 use pfi_trans
+use gini_calc
 
 IMPLICIT NONE 
 CONTAINS
@@ -304,9 +305,13 @@ subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, l_j, c_
     real(dp),	dimension(bigJ, bigM, -bigJ:bigT)	:: w_pom_j
     integer :: is, ii, si
 
+    ! Gini coefficient calculation variables
+    real(dp), dimension(bigT) :: gini_sav_trans
+    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav
+    integer :: counter
 
-    
-        
+
+
     tl = tauL_t
     tk = tauK_t
     tc = tauC_t
@@ -575,7 +580,29 @@ superstar_totinc_share_trans(i) = totinc_superstar_trans(i) / totinc_aggregate_t
 superstar_pop_share_trans(i) = pop_superstar_trans(i) / sum(N_big_t_j(1:(jbar_t_vfi(i)-1),:,i))
 enddo
 
-
+! Calculate Gini coefficient of savings for each year
+do i = 1, bigT, 1
+    counter = 1
+    do j = 1, bigJ, 1
+        do m = 1, bigM, 1
+            do ia = 0, n_a, 1
+                do i_aime = 0, n_aime, 1
+                    do ip = 1, n_sp, 1
+                        do ir = 1, n_sr, 1
+                            do id = 1, n_sd, 1
+                                vec_prob(counter) = prob_trans_big(j, ia, i_aime, ip, ir, id, m, i) * &
+                                    N_big_t_j(j, m, i) / sum(N_big_t_j(:, :, i))
+                                vec_sav(counter) = svplus_trans_big(j, ia, i_aime, ip, ir, id, m, i)
+                                counter = counter + 1
+                            enddo
+                        enddo
+                    enddo
+                enddo
+            enddo
+        enddo
+    enddo
+    gini_sav_trans(i) = gini(vec_sav, vec_prob)
+enddo
 
 
 if (switch_print == 1) then
