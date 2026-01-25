@@ -57,16 +57,21 @@ program olg2
         experiment = trim(arg_buffer)
         call get_command_argument(3, arg_buffer)
         closure = trim(arg_buffer)
-        print *, "Running scenario: ", trim(version)//trim(experiment)//trim(closure)
     else
         ! Use default scenario
         version = 'psid_'
         experiment = 'all_'
         closure = 'govt__'
-        print *, "No command-line arguments provided. Using default scenario: ", trim(version)//trim(experiment)//trim(closure)
+        print *, "No command-line arguments. Using default scenario."
         print *, "Usage: 5Gtrans.exe <version> <experiment> <closure>"
-        print *, "Example: 5Gtrans.exe psid_ all_ govt__"
     endif
+
+    ! Display scenario name prominently
+    print *, ""
+    print *, "============================================================"
+    print *, "  SCENARIO: ", trim(version)//trim(experiment)//trim(closure)
+    print *, "============================================================"
+    print *, ""
 
     ! Validate that required configuration files exist
     call validate_config_files(cwd_i, cwd_p, version, experiment, closure)
