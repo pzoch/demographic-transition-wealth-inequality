@@ -239,7 +239,11 @@ call chdir(cwd_r)
         
 
 ! -------------------------------- OMEGA -------------------------------
-        Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt")
+        if (switch_drop_psid_superstars == 0) then
+            Open(unit = 3, FILE = "_data_omega_mostdrop_hhslabinc_avghourlyhh.txt")
+        else
+            Open(unit = 3, FILE = "_data_omega_busno_drop_hhslabinc_avghourlyhh.txt")
+        endif
      
      do m = 1, bigM, 1
        do j = 1, bigJ, 1
@@ -286,7 +290,11 @@ call chdir(cwd_r)
     
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------
-        Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")
+        if (switch_drop_psid_superstars == 0) then
+            Open(unit = 8, FILE = "_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt")
+        else
+            Open(unit = 8, FILE = "_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt")
+        endif
     
     
     ! reading sigma2_epsilon_t

@@ -123,6 +123,7 @@ Line 33: switch_small_write           (write compact output)
 Line 34: switch_exog_rate             (exogenous interest rate)
 Line 35: switch_full_csv_write        (CSV output mode: 1=full, 0=minimal)
 Line 36: switch_print_macro           (macro time series output: 1=write, 0=skip)
+Line 37: switch_drop_psid_superstars  (0=mostdrop files, 1=busno_drop files for nstr)
 ```
 
 Format per line: `VALUE // comment`
@@ -130,6 +131,10 @@ Format per line: `VALUE // comment`
 **Important**: `switch_print_macro` controls macro time series output:
 - `1` = Write all macro time series files (gdp_trans.txt, rate_trans.txt, etc.) - use for `psid_all_govt__` (baseline) scenario only
 - `0` = Skip macro time series files - use for all other scenarios (saves disk space and time)
+
+**Important**: `switch_drop_psid_superstars` controls income process data files:
+- `0` = Use `mostdrop` files (`_data_omega_mostdrop_hhslabinc_avghourlyhh.txt`, `_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt`) - default for all scenarios
+- `1` = Use `busno_drop` files (`_data_omega_busno_drop_hhslabinc_avghourlyhh.txt`, `_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt`) - use for `nstr_*` scenarios (Appendix F.4 robustness check)
 
 **Important**: `switch_full_csv_write` controls CSV output detail:
 - `1` = Full CSV output (all variables) - use for `psid_all_govt__` (baseline) scenario
