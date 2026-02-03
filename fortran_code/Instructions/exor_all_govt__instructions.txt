@@ -34,3 +34,4 @@
 0 // switch_exog_rate
 1 // switch_full_csv_write
 0 // switch_print_macro
+0 // switch_drop_psid_superstars

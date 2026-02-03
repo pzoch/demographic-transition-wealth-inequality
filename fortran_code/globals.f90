@@ -97,6 +97,7 @@ IMPLICIT NONE
     integer :: switch_exog_rate                             ! 0 - GE model, 1 - use exog. path of returns
     integer :: switch_full_csv_write                        ! 0 - write only minimal CSV (svplus, prob), 1 - write all CSV files
     integer :: switch_print_macro                           ! 0 - skip macro time series output, 1 - write all macro output files
+    integer :: switch_drop_psid_superstars                  ! 0 - use mostdrop files, 1 - use busno_drop files (for nstr scenario)
     real(dp), dimension(bigJ) :: omega_ss 
     real(dp), dimension(bigJ,bigM) :: omega_ss_big
     real(dp), dimension(n_p)  :: gam

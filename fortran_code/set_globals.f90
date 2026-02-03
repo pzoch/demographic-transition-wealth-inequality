@@ -248,6 +248,7 @@ call chdir(cwd_i)
         read(3,*) switch_exog_rate
         read(3,*) switch_full_csv_write
         read(3,*) switch_print_macro
+        read(3,*) switch_drop_psid_superstars
         CLOSE(3) 
 
 
