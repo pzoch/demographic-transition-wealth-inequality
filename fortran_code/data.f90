@@ -1004,9 +1004,6 @@ do i = 1,bigT,1
     enddo
 enddo
 
-  !!!!PZ: HACK 
-      type_share_d(1,:) = 0.0d0  
-
 call chdir(cwd_w)
 open(unit = 1, file= version//experiment//closure//"population.csv")
     do i = 1,bigT,1
