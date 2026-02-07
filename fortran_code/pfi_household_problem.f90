@@ -175,15 +175,15 @@ real*8 :: EV_prim_after_beq
                     beq_zipf_ss(1) = 0d0
                 enddo
                 endif
-    
+
 !p_beq(1) = 1.0d0 / float(n_beq)
 !p_beq(2) = 0.1d0
 !p_beq(3) = 1.0d0 - p_beq(2) - p_beq(1)
 !beq_zipf_ss(1) = 0.0d0
 !beq_zipf_ss(2) = 0.1d0
 !beq_zipf_ss(n_beq) = (bequest_ss_vfi - p_beq(2) *  beq_zipf_ss(2)) / p_beq(3)
-                
-do ia = 0, n_a, 1 
+
+do ia = 0, n_a, 1
     do i_aime=0, n_aime,1
         do ip=1, n_sp, 1
             do ir =1, n_sr,1
