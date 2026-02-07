@@ -22,7 +22,7 @@
 !   - cy_ratio, ky_ratio: Consumption/capital to output ratios
 !
 ! FILE UNITS:
-!   Uses Fortran unit numbers 1-72 for different output streams.
+!   Uses Fortran unit numbers 1-87 for different output streams.
 !   All files written as formatted text (human-readable).
 !
 ! VARIABLES WRITTEN:
@@ -32,7 +32,6 @@
 ! NOTES:
 !   Part of transition_path_DB output sequence. Controlled by switch_small_write.
 !   Working directory is set to scenario subfolder via chdir in set_globals.f90.
-!   Some units reused (e.g., unit 22) - ensure CLOSE before reopening.
 !===============================================================================
   ! save in files
 
@@ -69,7 +68,7 @@ if (switch_print_macro == 1) then
     OPEN (unit=28, FILE ="tK_tax_revenue_trans.txt")
     
     
-    OPEN (unit=22, FILE ="u_j_trans.csv")
+    OPEN (unit=59, FILE ="u_j_trans.csv")
     OPEN (unit=60, FILE ="l_j_trans.csv")
     OPEN (unit=61, FILE ="c_j_trans.csv")
     OPEN (unit=62, FILE ="b_j_trans.csv")
@@ -174,8 +173,8 @@ if (switch_print_macro == 1) then
 
     !do j = 1,bigJ,1
     !    do i = 1,bigT-1,1
-    !        write(22, '(F20.10)', advance='no') u_j(j,i)
-    !        write(22, '(A)', advance='no')";"
+    !        write(59, '(F20.10)', advance='no') u_j(j,i)
+    !        write(59, '(A)', advance='no')";"
     !        write(60, '(F20.10)', advance='no') l_j(j,i)
     !        write(60, '(A)', advance='no')";"
     !        write(61, '(F20.10)', advance='no') c_j(j,i)
@@ -185,7 +184,7 @@ if (switch_print_macro == 1) then
     !        write(63, '(F20.10)', advance='no') sv_j(j,i)
     !        write(63, '(A)', advance='no')";"
     !    enddo
-    !    write(22, '(F20.10)') u_j(j,bigT)
+    !    write(59, '(F20.10)') u_j(j,bigT)
     !    write(60, '(F20.10)') l_j(j,bigT)
     !    write(61, '(F20.10)') c_j(j,bigT)
     !    write(62, '(F20.10)') b_j(j,bigT)
@@ -212,6 +211,7 @@ if (switch_print_macro == 1) then
     CLOSE(20)
     CLOSE(21)
     CLOSE(22)
+    CLOSE(59)
     CLOSE(23)
     CLOSE(24)
     CLOSE(25)
@@ -409,8 +409,8 @@ if (switch_full_csv_write == 1) then
         enddo
         close(108)
     endif
-else
-    ! Compact CSV write mode (all scenarios except psid_all_govt__)
+elseif (switch_full_csv_write == 2) then
+    ! Compact CSV write mode (optional, use switch_full_csv_write=2 to enable)
     if (switch_small_write == 0) then
         ! Medium CSV: svplus, prob, and all index variables
         open(unit = 108, FILE ="mass_trans_medium.csv")
