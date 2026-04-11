@@ -468,8 +468,8 @@ Runtime estimates on the system specified above (8-core processor, 16 GB RAM):
 |----------|---------|-------------|-------------|
 | `psid_all_govt__` | ~[X] hours | ~[Y] GB | **PRIMARY BASELINE** - Full model with all transitions |
 | `psid_ndm_govt__` | ~[X] hours | ~[Y] GB | Counterfactual: No demographic changes |
-| `crr3_all_govt__` | ~[X] hours | ~[Y] GB | Sensitivity: higher risk aversion (theta = 3) |
-| `hrat_all_govt__` | ~[X] hours | ~[Y] GB | Sensitivity: heterogeneous rates of return (requires `5Gtrans_het.exe`) |
+| `psid_nds_govt__` | ~[X] hours | ~[Y] GB | Counterfactual: Population structure fixed at 1955 |
+| `psid_ntx_govt__` | ~[X] hours | ~[Y] GB | Counterfactual: Tax system fixed at 1955 |
 | [Other scenarios] | ~[X] hours | ~[Y] GB | [Description] |
 
 **Total for all scenarios in scenarios.txt**: ~[X] hours
