@@ -1,0 +1,34 @@
+# Root-level ignores for the EJ replication repository.
+# Fortran-specific ignores live in fortran_code/.gitignore.
+
+# IDE / editor clutter
+.vs/
+.claude/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Stata temp / log output
+*.log
+*.bak
+*.smcl
+
+# ---------------------------------------------------------------------------
+# Large raw data — kept on disk, not in git.
+# Pull these from the original sources (see input-data-file-provenance.md).
+# ---------------------------------------------------------------------------
+
+# Raw PSID and SCF extracts
+data/PSID/
+data/SCF/
+
+# Baseline model-ready panel (200 MB)
+data/model_psid_all_govt__.dta
+
+# ACS college-share extract (2 GB)
+inputs_stata_code/skill_premium/ACS_college/ACS_college.dta
+
+# UN World Population Prospects mortality table (180 MB)
+inputs_stata_code/demography/mortality/WPP2022_MORT_F07_1_ABRIDGED_LIFE_TABLE_BOTH_SEXES.xlsx
