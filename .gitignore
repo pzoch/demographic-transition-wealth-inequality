@@ -5,11 +5,6 @@
 .vs/
 .claude/
 
-# Archived orphan income_process/ repo (pre-monorepo copy of the
-# MATLAB+Stata income-process pipeline). Kept on disk for the .mat /
-# .dta intermediate outputs it contains; the source lives under
-# inputs_stata_code/income_process/ now.
-_archive_income_process_orphan/
 *.suo
 *.user
 .DS_Store
