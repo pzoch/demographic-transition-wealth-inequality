@@ -4,6 +4,12 @@
 # IDE / editor clutter
 .vs/
 .claude/
+
+# Archived orphan income_process/ repo (pre-monorepo copy of the
+# MATLAB+Stata income-process pipeline). Kept on disk for the .mat /
+# .dta intermediate outputs it contains; the source lives under
+# inputs_stata_code/income_process/ now.
+_archive_income_process_orphan/
 *.suo
 *.user
 .DS_Store
@@ -23,6 +29,10 @@ desktop.ini
 # Raw PSID and SCF extracts
 data/PSID/
 data/SCF/
+
+# Root-level PSID extract (psid.dta, ~98 MB) consumed by
+# inputs_stata_code/income_process/estimate_income_process.do
+psid/
 
 # Baseline model-ready panel (200 MB)
 data/model_psid_all_govt__.dta
