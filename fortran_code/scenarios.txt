@@ -10,60 +10,65 @@
 # ============================================================================
 
 # --- Baseline (all figures) ---
-# psid_ all_ govt__
+psid_ all_ govt__
 
 # --- Main Text Figures 2-4: Demographic decomposition ---
-# psid_ ndm_ govt__
-# psid_ nds_ govt__
-# psid_ ndo_ govt__
+psid_ ndm_ govt__
+psid_ nds_ govt__
+psid_ ndo_ govt__
 
 # --- Main Text Figure 4: All-factor decomposition ---
-# psid_ nlb_ govt__
-# psid_ ntx_ govt__
-# psid_ nts_ govt__
+psid_ nlb_ govt__
+psid_ ntx_ govt__
+psid_ nts_ govt__
 
 # --- Appendix E.1: Income inequality decomposition ---
-# psid_ ncs_ govt__
-# psid_ ncp_ govt__
-# psid_ nsh_ govt__
+psid_ ncs_ govt__
+psid_ ncp_ govt__
+psid_ nsh_ govt__
 
 # --- Appendix E.2: Tax decomposition ---
-# psid_ ntl_ govt__
-# psid_ ntc_ govt__
-# psid_ ntk_ govt__
-# psid_ ntp_ govt__
+psid_ ntl_ govt__
+psid_ ntc_ govt__
+psid_ ntk_ govt__
+psid_ ntp_ govt__
 
 # --- Appendix E.3: Technology decomposition ---
-# psid_ nls_ govt__
-# psid_ nga_ govt__
-# psid_ ndp_ govt__
+psid_ nls_ govt__
+psid_ nga_ govt__
+psid_ ndp_ govt__
 
 # --- Appendix F.1: Higher risk aversion / lower IES (theta=3) ---
-# crr3_ all_ govt__
-# crr3_ ndm_ govt__
+crr3_ all_ govt__
+crr3_ ndm_ govt__
 
 # --- Appendix F.3: No discount factor shocks ---
-# ndel_ all_ govt__
-# ndel_ ndm_ govt__
+ndel_ all_ govt__
+ndel_ ndm_ govt__
 
 # --- Appendix F.4: No superstars ---
-# nstr_ all_ govt__
-# nstr_ ndm_ govt__
+nstr_ all_ govt__
+nstr_ ndm_ govt__
 
 # --- Appendix F.5: CBO productivity growth ---
-# gcbo_ all_ govt__
-# gcbo_ ndm_ govt__
+gcbo_ all_ govt__
+gcbo_ ndm_ govt__
 
 # --- Appendix F.6: Exogenous interest rate ---
 exor_ all_ govt__
 
 # --- Appendix F.7: Unequal bequests ---
-# beqs_ all_ govt__
-# beqs_ ndm_ govt__
+beqs_ all_ govt__
+beqs_ ndm_ govt__
 
 # --- Appendix F.2: Heterogeneous returns ---
 # IMPORTANT: These require 5Gtrans_het.exe (Release_HetRate build),
-# NOT the standard 5Gtrans.exe. See README for build instructions.
-# Run separately: x64\Release_HetRate\5Gtrans_het.exe hrat_ all_ govt__
-# hrat_ all_ govt__
-# hrat_ ndm_ govt__
+# NOT the standard 5Gtrans.exe. run_scenarios_from_list.bat will attempt
+# them with the standard binary and will produce incorrect results — run
+# them manually via:
+#     x64\Release_HetRate\5Gtrans_het.exe hrat_ all_ govt__
+#     x64\Release_HetRate\5Gtrans_het.exe hrat_ ndm_ govt__
+# Kept uncommented below so the scenario set is complete; comment them
+# out again if you want run_scenarios_from_list.bat to skip them.
+hrat_ all_ govt__
+hrat_ ndm_ govt__
