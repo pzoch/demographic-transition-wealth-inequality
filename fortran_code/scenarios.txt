@@ -1,17 +1,69 @@
-# Scenario list for run_scenarios_from_list.bat
+# ============================================================================
+# REPLICATION SCENARIOS
+# ============================================================================
+# Complete list of Fortran scenarios required to reproduce all paper figures.
+# Uncomment scenarios to run them via run_scenarios_from_list.bat.
+# See SCENARIOS.md for full documentation of each scenario.
+#
 # Format: version experiment closure
-# Lines starting with # are comments
-# Example: psid_ all_ govt__
+# Lines starting with # are skipped.
+# ============================================================================
 
-# PSID scenarios (baseline model)
-psid_ ndm_ govt__
+# --- Baseline (all figures) ---
+# psid_ all_ govt__
 
-# Base scenarios (alternative calibration)
-# base_ all_ govt__
-# base_ ndm_ govt__
+# --- Main Text Figures 2-4: Demographic decomposition ---
+# psid_ ndm_ govt__
+# psid_ nds_ govt__
+# psid_ ndo_ govt__
 
-# Add more scenarios below as needed:
-# busn_ all_ govt__
-# busn_ ndm_ govt__
+# --- Main Text Figure 4: All-factor decomposition ---
+# psid_ nlb_ govt__
+# psid_ ntx_ govt__
+# psid_ nts_ govt__
+
+# --- Appendix E.1: Income inequality decomposition ---
+# psid_ ncs_ govt__
+# psid_ ncp_ govt__
+# psid_ nsh_ govt__
+
+# --- Appendix E.2: Tax decomposition ---
+# psid_ ntl_ govt__
+# psid_ ntc_ govt__
+# psid_ ntk_ govt__
+# psid_ ntp_ govt__
+
+# --- Appendix E.3: Technology decomposition ---
+# psid_ nls_ govt__
+# psid_ nga_ govt__
+# psid_ ndp_ govt__
+
+# --- Appendix F.1: Higher risk aversion / lower IES (theta=3) ---
+# crr3_ all_ govt__
+# crr3_ ndm_ govt__
+
+# --- Appendix F.3: No discount factor shocks ---
+# ndel_ all_ govt__
+# ndel_ ndm_ govt__
+
+# --- Appendix F.4: No superstars ---
+# nstr_ all_ govt__
+# nstr_ ndm_ govt__
+
+# --- Appendix F.5: CBO productivity growth ---
+# gcbo_ all_ govt__
+# gcbo_ ndm_ govt__
+
+# --- Appendix F.6: Exogenous interest rate ---
+exor_ all_ govt__
+
+# --- Appendix F.7: Unequal bequests ---
 # beqs_ all_ govt__
 # beqs_ ndm_ govt__
+
+# --- Appendix F.2: Heterogeneous returns ---
+# IMPORTANT: These require 5Gtrans_het.exe (Release_HetRate build),
+# NOT the standard 5Gtrans.exe. See README for build instructions.
+# Run separately: x64\Release_HetRate\5Gtrans_het.exe hrat_ all_ govt__
+# hrat_ all_ govt__
+# hrat_ ndm_ govt__
