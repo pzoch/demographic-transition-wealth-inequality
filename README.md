@@ -8,6 +8,62 @@ Krzysztof Makarski, Joanna Tyrowicz, and Piotr Żoch. (forthcoming). "Demographi
 
 ---
 
+## Repository Layout
+
+```
+demographic-transition-wealth-inequality/
+├── README.md                    This file
+├── LICENSE.txt                  MIT license
+├── SCENARIOS.md                 Full scenario catalogue
+│
+├── fortran_code/                Fortran OLG model (main solver)
+│   ├── *.f90                    Source files
+│   ├── 5Gtrans.sln              Visual Studio solution
+│   ├── Data/                    Calibration inputs consumed by the model
+│   ├── Instructions/            Per-scenario switch files
+│   ├── Parameters/              Per-scenario parameter files
+│   ├── Results/                 Per-scenario output (gitignored, regenerated)
+│   ├── scenarios.txt            Scenario list for batch runs
+│   └── run_scenarios*.bat       Batch drivers
+│
+├── inputs_stata_code/           Stata (and MATLAB) code that produces
+│                                the calibration inputs in fortran_code/Data/
+│   ├── demography/
+│   ├── depreciation/
+│   ├── income_process/          Stata + MATLAB income-process pipeline
+│   │   ├── estimate_income_process.do
+│   │   ├── estimate_parameters.m
+│   │   ├── matlab/              Helper .m files
+│   │   └── run_estimation.bat   End-to-end driver (Stata → MATLAB → plot)
+│   ├── labor_share/
+│   ├── skill_premium/
+│   ├── social_security/
+│   ├── tax_rate/
+│   └── tfp/
+│
+├── outputs_stata_code/          Stata code that produces paper tables/figures
+│                                from Fortran output
+│
+├── sensitivity_stata_code/      Robustness-check Stata code
+│
+├── graphs/                      Generated figures (inputs/ and outputs/)
+│
+├── data/                        Raw microdata and model-ready panels
+│                                (PSID, SCF, etc. — gitignored, see below)
+│
+├── psid/                        Root-level PSID extract consumed by
+│                                inputs_stata_code/income_process/
+│                                (gitignored, ~98 MB)
+│
+└── docs/                        Internal docs (brainstorms, solutions)
+```
+
+**Pipeline at a glance**: `data/` + `psid/` → `inputs_stata_code/` (Stata/MATLAB) → `fortran_code/Data/` → `fortran_code/` (OLG model solver) → `fortran_code/Results/` → `outputs_stata_code/` (tables and figures) → `graphs/outputs/`.
+
+> **All shell commands in the replication steps below assume you are in the `fortran_code/` subdirectory unless the step explicitly says otherwise.** File paths in prose (e.g. `fortran_code/Data/_data_*.txt`, `fortran_code/Results/psid_all_govt__/`) are likewise relative to `fortran_code/` unless qualified with another prefix.
+
+---
+
 ## Authors
 
 - **Krzysztof Makarski** - SGH Warsaw School of Economics and FAME|GRAPE - kmakar@sgh.waw.pl
@@ -61,8 +117,8 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Public domain, freely redistributable under UN terms of use
 
 **Files in this package**:
-- `Data/_data_Nn_US_1935_2100.txt` - Main population series (1935-2100)
-- `Data/_data_Nn_US_1935_init_old.txt` - Initial population distribution for 1935
+- `fortran_code/Data/_data_Nn_US_1935_2100.txt` - Main population series (1935-2100)
+- `fortran_code/Data/_data_Nn_US_1935_init_old.txt` - Initial population distribution for 1935
 
 **Notes**: Population data aggregated into 5-year periods (model periods). Historical data (1935-2020) combined with UN medium-variant projections (2020-2100) for future periods.
 
@@ -81,11 +137,11 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Published data, freely available for research use
 
 **Files in this package**:
-- `Data/_data_pi_cond_US_since1935.txt` - Conditional survival probabilities (overall population)
-- `Data/_data_pi_cond_het_US_since1935.txt` - Heterogeneous survival (by education, 1990-2018)
-- `Data/_data_pi_US_since1935_col.txt` - College-educated survival probabilities
-- `Data/_data_pi_US_since1935_no_col.txt` - Non-college-educated survival probabilities
-- `Data/_data_het_pi_US_since1935_all.txt` - Comprehensive heterogeneous mortality data
+- `fortran_code/Data/_data_pi_cond_US_since1935.txt` - Conditional survival probabilities (overall population)
+- `fortran_code/Data/_data_pi_cond_het_US_since1935.txt` - Heterogeneous survival (by education, 1990-2018)
+- `fortran_code/Data/_data_pi_US_since1935_col.txt` - College-educated survival probabilities
+- `fortran_code/Data/_data_pi_US_since1935_no_col.txt` - Non-college-educated survival probabilities
+- `fortran_code/Data/_data_het_pi_US_since1935_all.txt` - Comprehensive heterogeneous mortality data
 
 **Notes**:
 - Case and Deaton (2021) provide mortality data by education for cohorts reaching age 50 between 1935-1990 (historical) and 1990-2065 (projections).
@@ -108,10 +164,10 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: PSID data subject to data use agreement. **Raw microdata cannot be redistributed**. Estimated age profiles (included here) can be shared.
 
 **Files in this package** (all are **derived/analysis data**):
-- `Data/_data_omega_deaton_avghourly.txt` - Baseline age-efficiency profile
-- `Data/_data_omega_deaton_avghourlyhh.txt` - Household-level profile
-- `Data/_data_omega_busno_drop_hhslabinc_avghourlyhh.txt` - Excluding business income
-- `Data/_data_omega_mostdrop_hhslabinc_avghourlyhh.txt` - Alternative specification
+- `fortran_code/Data/_data_omega_deaton_avghourly.txt` - Baseline age-efficiency profile
+- `fortran_code/Data/_data_omega_deaton_avghourlyhh.txt` - Household-level profile
+- `fortran_code/Data/_data_omega_busno_drop_hhslabinc_avghourlyhh.txt` - Excluding business income
+- `fortran_code/Data/_data_omega_mostdrop_hhslabinc_avghourlyhh.txt` - Alternative specification
 - [Additional omega files for robustness specifications]
 
 **Notes**:
@@ -139,8 +195,8 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Both public domain / freely available for research
 
 **Files in this package**:
-- `Data/_data_gamma.txt` - Baseline TFP growth series (1935-2100)
-- `Data/_data_gamma_robustness.txt` - Alternative TFP for robustness checks
+- `fortran_code/Data/_data_gamma.txt` - Baseline TFP growth series (1935-2100)
+- `fortran_code/Data/_data_gamma_robustness.txt` - Alternative TFP for robustness checks
 
 **Notes**:
 - TFP from PWT adjusted to be labor-augmenting using time-varying capital share α_t
@@ -163,7 +219,7 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Published academic paper, parameters can be used with citation
 
 **Files in this package**:
-- `Data/_data_lambda.txt` - Tax progressivity parameter over time (1935-2100)
+- `fortran_code/Data/_data_lambda.txt` - Tax progressivity parameter over time (1935-2100)
 
 **Notes**:
 - λ_t governs progressivity in tax function: T(y) = y - (1-τ)(y/ȳ)^(1-λ)ȳ
@@ -185,7 +241,7 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Public domain
 
 **Files in this package**:
-- `Data/_data_rho_1935.txt` - Replacement rate parameter series (1935-2100)
+- `fortran_code/Data/_data_rho_1935.txt` - Replacement rate parameter series (1935-2100)
 
 **Notes**: Model replicates observed pension expenditure/GDP ratio well, with future path matching CBO projections
 
@@ -208,7 +264,7 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Public domain (Census/ACS), published academic series (skill premium)
 
 **Files in this package**:
-- `Data/_data_college_share.txt` - Share with college degree by cohort (1885-2050)
+- `fortran_code/Data/_data_college_share.txt` - Share with college degree by cohort (1885-2050)
 
 **Notes**:
 - College shares calculated for each entry cohort and projected forward
@@ -229,8 +285,8 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: OECD data freely available for research
 
 **Files in this package**:
-- `Data/_data_contrib.txt` - Empty file (contributions calculated endogenously in model)
-- `Data/_data_contrib_to_gdp.txt` - Historical contributions as share of GDP
+- `fortran_code/Data/_data_contrib.txt` - Empty file (contributions calculated endogenously in model)
+- `fortran_code/Data/_data_contrib_to_gdp.txt` - Historical contributions as share of GDP
 
 **Notes**: Model uses contributions/GDP ratio. Effective contribution rate τ_ss calculated using labor share (1-α)
 
@@ -249,7 +305,7 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **License/Terms**: Public domain
 
 **Files in this package**:
-- `Data/_data_depr.txt` - Depreciation rate series (1935-2100)
+- `fortran_code/Data/_data_depr.txt` - Depreciation rate series (1935-2100)
 
 **Notes**: Depreciation rates from BEA aggregated across asset types, adjusted to model periodicity (5 years)
 
@@ -265,9 +321,9 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 - **Interest rates**: Various (used for counterfactual scenarios only)
 
 **Files in this package**:
-- `Data/_data_labsh.txt` - Labor share of income (=1-α)
-- `Data/_data_gy_1935.txt` - Government spending relative to GDP (empty - calculated endogenously)
-- `Data/_data_exog_rate_1935.txt` - Exogenous interest rates (for sensitivity analysis)
+- `fortran_code/Data/_data_labsh.txt` - Labor share of income (=1-α)
+- `fortran_code/Data/_data_gy_1935.txt` - Government spending relative to GDP (empty - calculated endogenously)
+- `fortran_code/Data/_data_exog_rate_1935.txt` - Exogenous interest rates (for sensitivity analysis)
 
 **Access**: https://www.bea.gov/
 
@@ -520,13 +576,13 @@ This replication package contains a **computational general equilibrium model** 
 ### Data and Configuration
 
 - **`data.f90`**: Data loading and processing
-  - Reads all external data files from `Data/` folder
+  - Reads all external data files from `fortran_code/Data/` folder
   - Processes demographics, taxes, productivity, mortality
   - Extends time series to full transition horizon
   - **140-line documented header** listing all data files
 
 - **`set_globals.f90`**: Parameter initialization
-  - Reads configuration from `Instructions/` and `Parameters/` files
+  - Reads configuration from `fortran_code/Instructions/` and `fortran_code/Parameters/` files
   - Sets up model parameters, switches, and arrays
   - Discretizes stochastic processes (AR(1) for shocks)
   - **160-line documented header** with 7-step initialization sequence
@@ -623,7 +679,7 @@ This replication package contains a **computational general equilibrium model** 
 
 ## Configuration Files
 
-### Instructions Files (`Instructions/` folder)
+### Instructions Files (`fortran_code/Instructions/` folder)
 
 Files named: `{version}{experiment}{closure}instructions.txt`
 
@@ -634,7 +690,7 @@ Format: 35 lines, each containing an integer switch value followed by comment
 
 Example: `psid_all_govt__instructions.txt`
 
-### Parameters Files (`Parameters/` folder)
+### Parameters Files (`fortran_code/Parameters/` folder)
 
 Files named: `{version}{experiment}{closure}parameters.txt`
 
@@ -649,7 +705,7 @@ Example: `psid_all_govt__parameters.txt`
 
 ## Output Files
 
-Results are written to scenario-specific subfolders: `Results/{version}{experiment}{closure}/`
+Results are written to scenario-specific subfolders: `fortran_code/Results/{version}{experiment}{closure}/`
 
 ### Time Series Outputs
 
@@ -730,20 +786,20 @@ Before beginning, ensure you have:
 ### Step 1: Download the Repository
 
 ```bash
-git clone https://github.com/[username]/[repository].git
-cd [repository]
+git clone https://github.com/pzoch/demographic-transition-wealth-inequality.git
+cd demographic-transition-wealth-inequality
 ```
 
-Or download as ZIP and extract to `d:\Emeryt_local\emeryt` (or your preferred location).
+Or download as ZIP and extract to any local path — no hardcoded locations are assumed.
 
 ---
 
 ### Step 2: Verify Data Files
 
-Check that all data files are present in the `Data/` folder:
+Check that all calibration input files are present in `fortran_code/Data/`:
 
 ```bash
-dir Data\
+dir fortran_code\Data\
 ```
 
 You should see ~40 data files including:
@@ -752,6 +808,25 @@ You should see ~40 data files including:
 - _data_omega_*.txt (productivity)
 - _data_gamma*.txt (TFP)
 - And others listed in the Data Availability section above
+
+These files ship with the repository, so the Fortran model can be run directly **without** re-running the calibration pipeline. If you want to regenerate them from raw sources, see "Optional: Regenerate Calibration Inputs" below.
+
+#### Optional: Regenerate Calibration Inputs
+
+The files in `fortran_code/Data/` are produced by the Stata (and MATLAB) code under `inputs_stata_code/`. Re-running the pipeline requires:
+
+- **Stata 16+** with the `psmatch2`, `mat2txt`, and `egenmore` packages
+- **MATLAB R2018b+** (only for `inputs_stata_code/income_process/`)
+- The raw PSID extract at `psid/psid.dta` (root of the repository; not redistributed — obtain it through the PSID Data Center)
+
+To regenerate the income-process calibration (the `_data_omega_*` and `_data_sigma2eps_*` series consumed by the Fortran model):
+
+```bash
+cd inputs_stata_code\income_process
+run_estimation.bat
+```
+
+This runs Stata (`estimate_income_process.do`) → MATLAB (`estimate_parameters.m`) → plotting (`matlab/plot_estimates.m`), and copies the resulting `.txt` files into `fortran_code/Data/`. The other `inputs_stata_code/` subfolders (`demography/`, `tax_rate/`, `tfp/`, …) each contain their own `.do` files that produce the rest of the calibration inputs; consult the sub-folder README (or the top-of-file comments in each `.do` file) for their individual entry points.
 
 **If any files are missing**: See Data Availability section for download instructions.
 
@@ -762,7 +837,7 @@ You should see ~40 data files including:
 #### Option A: Using Visual Studio (Recommended)
 
 1. **Open the solution**:
-   - Double-click `5Gtrans.sln` (opens Visual Studio)
+   - Double-click `fortran_code/5Gtrans.sln` (opens Visual Studio)
    - Visual Studio will load the project
 
 2. **Set build configuration**:
@@ -786,10 +861,10 @@ You should see ~40 data files including:
 
 #### Option B: Using Command Line
 
-Open Intel Fortran Compiler command prompt:
+Open the Intel Fortran Compiler command prompt and switch into `fortran_code/`:
 
 ```bash
-cd d:\Emeryt_local\emeryt
+cd fortran_code
 ifort /O2 /Qipo /exe:5Gtrans.exe *.f90
 ```
 
@@ -803,9 +878,10 @@ ifx /O2 /Qipo /exe:5Gtrans.exe *.f90
 
 ### Step 4: Run a Single Scenario (Test)
 
-Test the installation by running the main baseline scenario:
+From `fortran_code/`, test the installation by running the main baseline scenario:
 
 ```bash
+cd fortran_code
 5Gtrans.exe psid_ all_ govt__
 ```
 
@@ -817,11 +893,11 @@ x64\Release\5Gtrans.exe psid_ all_ govt__
 
 **Expected behavior**:
 - Program prints "Running scenario: psid_all_govt__"
-- Creates `Results/psid_all_govt__/` folder
+- Creates `fortran_code/Results/psid_all_govt__/` folder
 - Prints iteration progress for initial steady state
 - Prints iteration progress for final steady state
 - Prints iteration progress for transition path
-- Writes output files to `Results/psid_all_govt__/`
+- Writes output files to `fortran_code/Results/psid_all_govt__/`
 - Prints "computations completed"
 
 **Runtime**: ~[X] hours on recommended system (see Runtime Requirements)
@@ -843,7 +919,7 @@ When `err < tol` (typically 1e-7), the iteration converges.
 Check that output files were created:
 
 ```bash
-dir Results\psid_all_govt__\
+dir fortran_code\Results\psid_all_govt__\
 ```
 
 You should see:
@@ -866,16 +942,17 @@ See "Verification" section below for how to compare results to paper tables/figu
 
 ### Step 6: Run All Scenarios
 
-To reproduce all results in the paper:
+To reproduce all results in the paper, from `fortran_code/`:
 
 ```bash
+cd fortran_code
 run_scenarios_from_list.bat
 ```
 
 This script:
 1. Reads `scenarios.txt` (list of all scenarios)
 2. Runs each scenario sequentially
-3. Saves output to separate subfolders in `Results/`
+3. Saves output to separate subfolders in `fortran_code/Results/`
 
 **Runtime for all scenarios**: ~[X] hours (see Runtime Requirements)
 
@@ -896,7 +973,7 @@ Edit `run_scenarios_from_list.bat` to run scenarios in parallel, or open multipl
 5Gtrans.exe psid_ ndm_ govt__
 
 # Window 3:
-5Gtrans.exe base_ all_ govt__
+5Gtrans.exe psid_ nds_ govt__
 ```
 
 Scenarios are independent and can run in parallel.
@@ -935,10 +1012,10 @@ Use the mapping table below to find which output file corresponds to each paper 
 
 | Paper Item | Output File(s) | Expected Value | Tolerance |
 |------------|----------------|----------------|-----------|
-| Table 1, Row 1 (Initial SS GDP) | `Results/psid_all_govt__/steadys_old_information_run.txt`, line [X] | [Value] | ±0.001 |
-| Table 1, Row 2 (Final SS GDP) | `Results/psid_all_govt__/steadys_new_information_run.txt`, line [X] | [Value] | ±0.001 |
-| Table 2 (Transition path) | `Results/psid_all_govt__/gdp_trans.txt` | [Range] | ±0.01 |
-| Figure 1 (Interest rate) | `Results/psid_all_govt__/r_trans.txt` | [Description] | Visual inspection |
+| Table 1, Row 1 (Initial SS GDP) | `fortran_code/Results/psid_all_govt__/steadys_old_information_run.txt`, line [X] | [Value] | ±0.001 |
+| Table 1, Row 2 (Final SS GDP) | `fortran_code/Results/psid_all_govt__/steadys_new_information_run.txt`, line [X] | [Value] | ±0.001 |
+| Table 2 (Transition path) | `fortran_code/Results/psid_all_govt__/gdp_trans.txt` | [Range] | ±0.01 |
+| Figure 1 (Interest rate) | `fortran_code/Results/psid_all_govt__/r_trans.txt` | [Description] | Visual inspection |
 | [Continue for all tables/figures] | | | |
 
 ### Numerical Precision
@@ -978,7 +1055,7 @@ Results should match the paper within numerical precision:
 ### Runtime Errors
 
 **Error**: "Configuration file not found"
-- **Solution**: Check that `Instructions/` and `Parameters/` folders contain the required files
+- **Solution**: Check that `fortran_code/Instructions/` and `fortran_code/Parameters/` folders contain the required files
 - Verify file names exactly match: `{version}{experiment}{closure}instructions.txt`
 
 **Error**: "Stack overflow" or "Access violation"
@@ -1028,7 +1105,7 @@ To create a new scenario:
    5Gtrans.exe custom_ all_ govt__
    ```
 
-4. **Results** will be saved to `Results/custom_all_govt__/`
+4. **Results** will be saved to `fortran_code/Results/custom_all_govt__/`
 
 ### Modifying Model Parameters
 
@@ -1092,15 +1169,15 @@ The provided code reproduces:
 
 | Item | Description | Program/File | Output File(s) | Notes |
 |------|-------------|--------------|----------------|-------|
-| **Table 1** | Steady State Comparison | `steady_state.f90` | `Results/psid_all_govt__/steadys_old_information_run.txt` and `steadys_new_information_run.txt` | Compare "Initial SS" vs. "Final SS" values |
-| **Table 2** | Transition Path Statistics | `transition.f90` | `Results/psid_all_govt__/gdp_trans.txt`, `r_trans.txt`, `bigK_trans.txt` | Aggregate statistics over transition |
+| **Table 1** | Steady State Comparison | `steady_state.f90` | `fortran_code/Results/psid_all_govt__/steadys_old_information_run.txt` and `steadys_new_information_run.txt` | Compare "Initial SS" vs. "Final SS" values |
+| **Table 2** | Transition Path Statistics | `transition.f90` | `fortran_code/Results/psid_all_govt__/gdp_trans.txt`, `r_trans.txt`, `bigK_trans.txt` | Aggregate statistics over transition |
 | **Table 3** | Welfare Analysis | `pfi_household_problem.f90` | [Requires post-processing of consumption and labor files] | Calculate consumption-equivalent variation |
 | **Table 4** | Decomposition | Multiple scenarios | Compare `psid_all_govt__` vs. `psid_ndm_govt__` vs. other counterfactuals | Run all scenarios in `scenarios.txt` |
-| **Figure 1** | Interest Rate Path | `transition.f90` | `Results/psid_all_govt__/r_trans.txt` | Plot time series (years 1935-2100) |
-| **Figure 2** | Capital Stock Path | `transition.f90` | `Results/psid_all_govt__/bigK_trans.txt` | Plot time series |
-| **Figure 3** | Life-Cycle Consumption | `pfi_agregation.f90` | `Results/psid_all_govt__/c_j_trans.csv` | Plot age profiles for selected years |
-| **Figure 4** | Life-Cycle Labor Supply | `pfi_agregation.f90` | `Results/psid_all_govt__/l_j_trans.csv` | Plot age profiles for selected years |
-| **Figure 5** | Wealth Distribution | `pfi_distribution.f90` | `Results/psid_all_govt__/gini_weight_trans.csv`, `mass_trans.csv` | Compute Gini coefficient and wealth shares |
+| **Figure 1** | Interest Rate Path | `transition.f90` | `fortran_code/Results/psid_all_govt__/r_trans.txt` | Plot time series (years 1935-2100) |
+| **Figure 2** | Capital Stock Path | `transition.f90` | `fortran_code/Results/psid_all_govt__/bigK_trans.txt` | Plot time series |
+| **Figure 3** | Life-Cycle Consumption | `pfi_agregation.f90` | `fortran_code/Results/psid_all_govt__/c_j_trans.csv` | Plot age profiles for selected years |
+| **Figure 4** | Life-Cycle Labor Supply | `pfi_agregation.f90` | `fortran_code/Results/psid_all_govt__/l_j_trans.csv` | Plot age profiles for selected years |
+| **Figure 5** | Wealth Distribution | `pfi_distribution.f90` | `fortran_code/Results/psid_all_govt__/gini_weight_trans.csv`, `mass_trans.csv` | Compute Gini coefficient and wealth shares |
 | [Continue for all tables/figures...] | | | | |
 
 ---
@@ -1109,7 +1186,7 @@ The provided code reproduces:
 
 | Item | Description | Program/File | Output File(s) | Notes |
 |------|-------------|--------------|----------------|-------|
-| **Table A.1** | Robustness: Alternative Calibration | `steady_state.f90` | `Results/base_all_govt__/steadys_new_information_run.txt` | Compare to baseline `psid_all_govt__` |
+| **Table A.1** | Robustness: Alternative Calibration | `steady_state.f90` | `fortran_code/Results/base_all_govt__/steadys_new_information_run.txt` | Compare to baseline `psid_all_govt__` |
 | **Table A.2** | Robustness: TFP Assumptions | Multiple scenarios | Compare scenarios with different `_data_gamma*.txt` files | Run scenarios with different TFP files |
 | [Continue for appendix items...] | | | | |
 
@@ -1119,7 +1196,7 @@ The provided code reproduces:
 
 | Location | Description | Source |
 |----------|-------------|--------|
-| Page X, para Y | "GDP grows by Z%" | `Results/psid_all_govt__/gdp_trans.txt`, compare year 1935 to year 2100 |
+| Page X, para Y | "GDP grows by Z%" | `fortran_code/Results/psid_all_govt__/gdp_trans.txt`, compare year 1935 to year 2100 |
 | Page X, para Y | "Welfare gain of W%" | Calculate from consumption equivalent variation |
 | [Continue for all in-text numbers...] | | |
 
