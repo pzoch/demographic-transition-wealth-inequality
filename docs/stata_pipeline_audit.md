@@ -103,6 +103,26 @@ __main.do
 |---|---|---|---|
 | `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma` | [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) | [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do) | **P1** — would crash `__main.do` at Appendix F.5 |
 
+**The P1 fix is *not* a one-line path change.** A second-pass review of [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do) showed two further dependencies that the call site at [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) does not satisfy:
+
+1. **cwd assumption.** The script opens `use tfp/gamma.dta` and `merge 1:1 year using bone1y` with paths relative to cwd. At line 164, cwd is `outputs_stata_code/` (last `cd ..\outputs_stata_code` was at line 87), so `tfp/gamma.dta` resolves to the wrong folder and the script crashes on its first `use`. The Appendix B prep scripts work around this by wrapping their calls in `cd ..\inputs_stata_code` … `cd ..\outputs_stata_code` (lines 57–80); the robustness call needs the same wrapping.
+2. **`bone1y.dta` is not present.** The Appendix B re-runs at lines 63–75 use `global bsource "../outputs_stata_code/"` together with the pre-seeded `bone.dta`/`bone1y.dta` in `outputs_stata_code/`, then `erase $bsource/bone.dta` and `erase $bsource/bone1y.dta` at lines 77–78. By the time line 164 executes, both bone files are gone, and `M02robustness_prepare_gamma` has no `bone1y` to merge against. A correct fix has to recreate them (e.g. by re-running `_prepare_programs.do`) before invoking the script, then erase them again.
+
+A complete fix therefore looks roughly like this (subject to interactive-Stata verification):
+
+```stata
+* Higher productivity growth
+cd ..\inputs_stata_code
+global bsource "../outputs_stata_code/"
+do _prepare_programs.do
+do tfp/M02robustness_prepare_gamma
+erase $bsource/bone.dta
+erase $bsource/bone1y.dta
+cd ..\outputs_stata_code
+```
+
+This audit does **not** apply that fix — it cannot be tested without launching `__replication_graphs.stpr` interactively, and the audit is read-only by charter. The TODO in §6 is updated to reflect the larger scope.
+
 **Note on `$bsource=""`** — an earlier draft of this audit flagged `merge 1:1 year using $bsource/bone` in [inputs_stata_code/depreciation/M01prepare_depr.do:28](../inputs_stata_code/depreciation/M01prepare_depr.do#L28) as a P0 bug because the empty `$bsource` expands to `/bone` and crashes in batch mode. **That is not a bug.** The pipeline is designed to be executed by opening [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) in interactive Stata, which establishes the project root. Inside that session, `/bone` resolves relative to the project cwd and the merge succeeds. The finding is an artifact of running the driver via `stata /e do ...` outside the project context — see §4.1 for the retraction.
 
 ## 3. Per-file status table
@@ -224,7 +244,7 @@ Each item is scoped for a **future** session. Nothing in this list is actioned i
 
 ### P1 — blocks a specific branch of the pipeline
 
-- [ ] **Fix the broken `M02robustness_prepare_gamma` path in the output driver.** [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) calls `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma`, but the file lives at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do). This means Appendix F.5 (the CBO productivity-growth robustness run) fails on any clean execution. Fix is a one-line path change in `__main.do`. Verify by opening `__replication_graphs.stpr` in interactive Stata and running the driver through Appendix F.
+- [ ] **Fix the broken `M02robustness_prepare_gamma` invocation in the output driver.** [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) calls `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma`, but the file lives at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do), so Appendix F.5 (the CBO productivity-growth robustness run) fails on any clean execution. **A path change alone is not enough**: the script also assumes cwd=`inputs_stata_code/` for `use tfp/gamma.dta`, and it needs `bone1y.dta` which Appendix B has already erased by the time line 164 runs. The fix has to (a) `cd ..\inputs_stata_code`, (b) re-run `_prepare_programs.do` to recreate `bone.dta`/`bone1y.dta` under `$bsource="../outputs_stata_code/"`, (c) `do tfp/M02robustness_prepare_gamma`, (d) erase the bone files, (e) `cd ..\outputs_stata_code`. See §2.3 for the full sketch. Verify by opening `__replication_graphs.stpr` in interactive Stata and running the driver through Appendix F.
 
 - [ ] **Complete runtime verification through the `.stpr` entry points.** This audit deferred the actual run because the first attempt launched the drivers via `stata /e` (the wrong mode). The follow-up must open `inputs_stata_code/main.stpr` and then `outputs_stata_code/__replication_graphs.stpr` in interactive Stata — in a sandbox copy outside the repo — and record which steps succeed and which fail. The P1 above is expected to surface during that run.
 
