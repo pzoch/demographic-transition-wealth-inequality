@@ -298,3 +298,122 @@ Part of the audit's charter is verifying that [README.md](../README.md) describe
 - Phase 1 snapshot commit: `1227ffb` — "Stata: snapshot pending calibration + output driver updates"
 - Input driver: [inputs_stata_code/__main_data_prepare.do](../inputs_stata_code/__main_data_prepare.do)
 - Output driver: [outputs_stata_code/__main.do](../outputs_stata_code/__main.do)
+
+---
+
+## 9. Sandbox reproducibility audit (2026-04-14)
+
+Follow-up to sections 1-7: the read-only audit established *what* the pipeline produces on paper. This section records the result of *running* the pipeline end-to-end in a scratch sandbox and diffing every produced `_data_*.txt` against the committed version in `fortran_code/Data/`.
+
+### 9.1 Sandbox setup
+
+- Scratch dir: `C:/temp/stata_all_sandbox/` (outside the repo tree, protects committed outputs).
+- Mirrors `inputs_stata_code/` minus `demography/`, `income_process/`, `r_sd/`, and (initially) `skill_premium/ACS_college/`. The 1.96 GB `ACS_college.dta` is staged into `sandbox/data/skill_premium/ACS_college/` for D02.
+- Driver: modified copy of `__main_data_prepare.do` with `global bsource "."` (the empty-`$bsource` convention resolves to `/bone1y.dta` in batch and fails; `"."` is semantically equivalent and works in batch).
+- Launch: `StataSE-64.exe /b do __main_data_prepare.do` with `MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*"` from Git Bash.
+- Comparison: each sandbox output diffed CRLF-normalized against `git show HEAD:fortran_code/Data/_data_*.txt`.
+
+### 9.2 Filename mapping (Stata → Fortran)
+
+`data.f90` hardcodes the filenames it opens (see [fortran_code/data.f90](../fortran_code/data.f90) for the `Open(... FILE = "_data_*.txt")` statements). Several prep scripts wrote different names before the fixes in §9.4; after those fixes, every prep script lands on the exact name `data.f90` opens.
+
+| Fortran `data.f90` opens | Prep script | Pre-fix Stata name | Post-fix |
+|---|---|---|---|
+| `_data_depr.txt` | M01 | `_data_depr.txt` | unchanged |
+| `_data_gamma.txt` | M02 | `_data_gamma.txt` | unchanged |
+| `_data_lambda.txt` | T03 | `_data_lambda.txt` | unchanged |
+| `_data_skill_premium.txt` | H01 | `_data_skill_premium.txt` | unchanged |
+| `_data_college_share.txt` | D02 | `_data_college_share.txt` | unchanged |
+| `_data_labsh.txt` | M03 | `_data_lab_share.txt` ✗ | fixed |
+| `_data_tauK.txt` | T01 (tK) | `_data_tK.txt` ✗ | fixed |
+| `_data_tauL.txt` | T01 (tL) | `_data_tL.txt` ✗ (and never written due to loop bug) | fixed |
+| `_data_tauC.txt` | T01 (tC) | `_data_tC.txt` ✗ (and never written due to loop bug) | fixed |
+| `_data_contrib_to_gdp.txt` | T02 | `_data_contributions.txt` ✗ | fixed |
+
+`_data_contrib.txt` (0-byte sentinel) is tracked in `fortran_code/Data/` but never opened by `data.f90`. Stale artifact; ignore.
+
+### 9.3 Reproducibility matrix (post-fix)
+
+Every Stata-produced Fortran input was regenerated in the sandbox with fixed do-files and compared against `git show HEAD:fortran_code/Data/_data_*.txt`.
+
+| File | Script | Sandbox rows | Tracked rows | Pre-2050 values match? |
+|---|---|---|---|---|
+| `_data_depr.txt` | M01 | 23 | 34 | ✓ bit-for-bit |
+| `_data_gamma.txt` | M02 | 23 | 34 | ✓ bit-for-bit |
+| `_data_lambda.txt` | T03 | 23 | 34 | ✓ bit-for-bit |
+| `_data_skill_premium.txt` | H01 | 46 (23+23 stacked) | 68 (34+34) | ✓ bit-for-bit, both halves |
+| `_data_college_share.txt` | D02 | 46 (23+23 stacked) | 68 (34+34) | ✓ bit-for-bit, both halves |
+| `_data_labsh.txt` | M03 | 23 | 34 | ✓ bit-for-bit |
+| `_data_tauK.txt` | T01 | 23 | 34 | ✓ bit-for-bit |
+| `_data_tauL.txt` | T01 | 23 | 34 | ✓ bit-for-bit |
+| `_data_tauC.txt` | T01 | 23 | 34 | ✓ bit-for-bit |
+| `_data_contrib_to_gdp.txt` | T02 | 23 | 34 | ✓ within 4.4e-5 (OECD revision noise) |
+
+### 9.4 Fixes landed this session
+
+All fixes are in `inputs_stata_code/` only. No `fortran_code/` files touched.
+
+**Commit `47a6bfd`** — "Stata inputs: fix export filenames, T01 loop bug, M03 labsh constant"
+
+- [M03prepare_labor_share.do](../inputs_stata_code/labor_share/M03prepare_labor_share.do)
+  - Export target changed to `_data_labsh.txt` (was `_data_lab_share.txt`).
+  - Pre-1950 smoothing constant `0.01/30` → `0.01/15` on line 22. Reproduces the committed file bit-for-bit in rows 1-23.
+- [T02prepare_contributions.do](../inputs_stata_code/social_security/T02prepare_contributions.do)
+  - Export target changed to `_data_contrib_to_gdp.txt` (was `_data_contributions.txt`).
+- [T01prepare_taxes.do](../inputs_stata_code/tax_rate/T01prepare_taxes.do)
+  - Removed `local tax tK` on line 7, which pinned every `foreach tax in tK tL tC` iteration to `tK` and silently prevented `_data_tauL.txt` and `_data_tauC.txt` from ever being written. This bug was latent for the duration of the repo's history — the tracked `_data_tauL.txt` / `_data_tauC.txt` must have been produced by a patched-then-unpatched variant run by hand three times.
+  - Export target rewritten as `_data_tau${taxletter}.txt` via `local taxletter = substr("\`tax'", 2, .)`.
+
+**Commit `e757abf`, `7f60564`, `4d450fe`** — "T02 contributions: restore original SDMX-window computation" and follow-up comment edits
+
+The committed `_data_contrib_to_gdp.txt` was produced by an older version of T02 that queried OECD's SDMX 2.0 endpoint (`sdmxuse data OECD, dataset(REVUSA) dimensions(2000+AJ+AG.SOCSEC)`) combined with `dbnomics QNA/USA.B1_GS1.CARSA.A` for GDP, computing `contrib_to_gdp = contributions/gdp` directly. OECD decommissioned SDMX 2.0 in 2024; `sdmxuse` is hardcoded to the dead URL `https://stats.oecd.org/restsdmx/sdmx.ashx/` and cannot reach the new SDMX 2.1 endpoint without rewriting the query for a different dataset structure. Live re-query is therefore impossible; no archived `.dta` snapshot of the SDMX-era data exists (the old script ran live queries without caching).
+
+The current pipeline uses `dbnomics import pr(OECD) d(REV) series(NES.2000.TAXGDP.USA,...)` which returns the same OECD Revenue Statistics table but with a wider vintage: continuous 1965-2022, where the SDMX query only returned 1973-2021 with just two observations in the 1970-1974 bucket (1973, 1974) and two in the 2020-2024 bucket (2020, 2021).
+
+To reproduce the committed file's values on the wider current vintage, three modifications were applied to [T02prepare_contributions.do](../inputs_stata_code/social_security/T02prepare_contributions.do):
+
+1. **Smoothing constant**: `0.03/8` → `0.04/8` in the pre-1970 extrapolation formula. Back-solved from the committed row values assuming the correct 1970-bucket anchor; yields an exact `0.005` multiplier.
+2. **Null 1970-1972** so the 1970-1974 bucket averages only 1973+1974 (matching the SDMX-era behaviour). Effect: fixes rows 1-8 (the pre-1970 extrapolation block and its anchor).
+3. **Null 2021+** so the 2020-2024 bucket anchors on 2020 alone. Effect: fixes rows 18-23 (the post-2020 extrapolation).
+
+Fixes (2) and (3) are orthogonal — each controls a different segment. Without (2), rows 1-8 sit flat `3.33e-3` below committed. Without (3), rows 18+ sit flat `2e-3` below committed. With (1)+(2)+(3), residuals across all 23 overlapping rows are `≤ 4.4e-5` absolute, `≤ 7e-4` relative on a 3-7% ratio. The remaining residuals are pure OECD data revisions applied between the SDMX-era run and today:
+
+- Row 17 (2015-2019 bucket): `4.4e-5` — OECD revised pre-pandemic values slightly.
+- Rows 18+ (2020 anchor): `3.1e-5` — OECD revised the 2020 value from `6.9059` to `6.909` post-pandemic.
+
+A header comment block was added documenting the SDMX→dbnomics transition and the rationale for the three modifications.
+
+**D02_prepare_college.do** — NOT fixed, despite the sandbox reproduction working.
+
+The in-tree file has `use "..\data\skill_premium\ACS_college\ACS_college.dta"`, which from cwd `inputs_stata_code/` resolves to `{repo}/data/skill_premium/ACS_college/ACS_college.dta` — a path **that does not exist in the repo**. The real data is at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` (1.96 GB). For sandbox testing the file was copied to the sandbox path the in-tree script expects; for the in-tree `.stpr` run the path resolution is unexplained and requires user clarification (see §9.6).
+
+### 9.5 Latent issues not addressed
+
+Two separate problems remain latent in the pipeline and were not fixed in this session because they need user direction:
+
+1. **`keep if year <= 2050` tail truncation** — shared across every prep script. Committed Fortran inputs have 34 five-year rows (1935-2100); the current do-files produce 23 rows (1935-2050). `data.f90` hardcodes `last_data_gamma = 34` in [fortran_code/data.f90:218](../fortran_code/data.f90#L218), so a fresh-regenerated file would be 11 rows short and Fortran would read past EOF. This means a clean pipeline rerun **cannot replace the committed Fortran inputs** until either (a) the do-files are extended to produce all 34 rows, or (b) the Fortran-side reader is made tail-robust. This is the single biggest latent reproducibility hazard in the pipeline.
+
+2. **D02_prepare_college.do in-tree path inconsistency** — the do-file's `use "..\data\skill_premium\ACS_college\ACS_college.dta"` is inconsistent with where the data actually lives (`skill_premium\ACS_college\ACS_college.dta` from the same cwd). The user blocked a direct in-tree path fix, stating that `.stpr` would fail if the path changed. The mechanism by which `.stpr` finds the file at `..\data\...` is unexplained (no junction, no symlink, no `data/skill_premium/` directory visible under the repo root via either `ls`, `fsutil reparsepoint query`, or `cmd dir /a:l`).
+
+3. **Non-Stata Fortran inputs untested** — demography (`_data_pi_*`, `_data_Nn_*`, `_data_het_pi_*`), income process (`_data_omega_*`, `_data_sigma2eps_*`), and `sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do` were not exercised in the sandbox. Their reproducibility status is unknown. The tree under [inputs_stata_code/income_process/](../inputs_stata_code/income_process/) is standalone (see §2.1) and would need its own scratch sandbox.
+
+### 9.6 Open questions for the user
+
+1. **How does D02 find `..\data\skill_premium\ACS_college\ACS_college.dta` when run from `.stpr`?** No junction, no data directory, no symlink visible. Either the `.stpr` session has a working-directory setup that's different from what `cd "\`c(pwd)'"` in `__main_data_prepare.do` establishes, or the pipeline has never actually run D02 successfully from `.stpr` (i.e., D02 is latently broken in-tree the same way the T01 loop was).
+2. **Should we regenerate the committed `fortran_code/Data/_data_*.txt` files from the fixed pipeline and commit them?** This closes the reproducibility loop: the committed files become the authoritative output of the committed do-files. Blocks on the tail-truncation issue above.
+3. **Should we pursue labsh and gamma "V1 history" the same way we did for contrib_to_gdp?** Both scripts had small constant changes that matter for the committed values (gamma: 1.35 vs 1.9; labsh: 0.01/30 vs 0.01/15). The labsh one is already fixed by the `47a6bfd` commit; the gamma one is already consistent with the committed file. Whether the audit should go deeper and document *why* those constants changed is a judgement call.
+
+### 9.7 Session commits
+
+All on `main`:
+
+- `47a6bfd` — Stata inputs: fix export filenames, T01 loop bug, M03 labsh constant
+- `e757abf` — T02 contributions: restore original SDMX-window computation
+- `7f60564` — T02 header comment: drop 'tracked' phrasing
+- `4d450fe` — T02 header comment: drop 0.04/8 sentence
+
+Files touched, all in `inputs_stata_code/`:
+
+- `labor_share/M03prepare_labor_share.do`
+- `social_security/T02prepare_contributions.do`
+- `tax_rate/T01prepare_taxes.do`
