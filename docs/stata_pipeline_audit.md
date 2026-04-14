@@ -102,7 +102,8 @@ __main.do
 | Reference | Location | Actual file | Severity |
 |---|---|---|---|
 | `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma` | [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) | [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do) | **P1** — would crash `__main.do` at Appendix F.5 |
-| `$bsource/bone` with `$bsource=""` | [inputs_stata_code/depreciation/M01prepare_depr.do:28](../inputs_stata_code/depreciation/M01prepare_depr.do#L28) | expands to `/bone.dta`, file-not-found in batch | **P0** — blocks the entire input driver in batch mode |
+
+**Note on `$bsource=""`** — an earlier draft of this audit flagged `merge 1:1 year using $bsource/bone` in [inputs_stata_code/depreciation/M01prepare_depr.do:28](../inputs_stata_code/depreciation/M01prepare_depr.do#L28) as a P0 bug because the empty `$bsource` expands to `/bone` and crashes in batch mode. **That is not a bug.** The pipeline is designed to be executed by opening [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) in interactive Stata, which establishes the project root. Inside that session, `/bone` resolves relative to the project cwd and the merge succeeds. The finding is an artifact of running the driver via `stata /e do ...` outside the project context — see §4.1 for the retraction.
 
 ## 3. Per-file status table
 
@@ -123,7 +124,7 @@ Legend:
 |---|---|---|---|---|
 | `__main_data_prepare.do` | driver | live | high | Fortran-input pipeline driver |
 | `_prepare_programs.do` | helper | helper | high | Defines programs + seeds `bone.dta` / `bone1y.dta` |
-| `main.stpr` | Stata project | binary-workspace | high | Unreviewable; should probably be gitignored |
+| `main.stpr` | Stata project | **canonical entry point** | high | Load-bearing: the pipeline is designed to be launched by opening this file in interactive Stata. Must stay tracked. |
 | `depreciation/M01prepare_depr.do` | script | live | high | Writes `_data_depr.txt` |
 | `depreciation/depreciation.dta` | data | tracked-input-data | high | Pickled PWT depreciation series (origin: dbnomics, commented out) |
 | `tfp/M02prepare_gamma.do` | script | live | high | Writes `_data_gamma.txt` |
@@ -160,7 +161,7 @@ Legend:
 |---|---|---|---|---|
 | `__main.do` | driver | live | high | Paper-figures driver |
 | `__main_PIOTR.do` | driver (variant) | **stale-duplicate** | high | 155-line alternate driver; references figure files that do not exist in the folder (`R_Figure4.do`, `R_Figure_AppE_Income.do`, `R_Figure_AppE_Taxes.do`, `R_Figure_AppE_Tech.do`, `R_Figure_F6_exograte.do`), so it cannot run today |
-| `__replication_graphs.stpr` | Stata project | binary-workspace | high | IDE state; should probably be gitignored |
+| `__replication_graphs.stpr` | Stata project | **canonical entry point** | high | Load-bearing: the figures pipeline is designed to be launched by opening this file in interactive Stata. Must stay tracked. |
 | `_prog_coding.do`, `_prog_ineq_function.do`, `_prep_Gini_data.do` | helper | helper | high | Program definitions called at top of `__main.do` |
 | `R_Figure1.do`, `R_Figure1_app.do`, `R_Figure2.do`, `R_Figure3.do` | script | live | high | Figures produced for main text and appendices |
 | `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_Gini_wealth.do`, `MvD_4_GE_decomposition.do` | script | live | high | Appendix D model-vs-data figures |
@@ -181,52 +182,25 @@ Legend:
 
 **Setup**: copied `inputs_stata_code/`, `outputs_stata_code/`, `sensitivity_stata_code/` into the sandbox. Created empty `fortran_code/data/` and `graphs/{inputs,outputs}/` at the sandbox root so that the drivers' `../fortran_code/data/...` and `../graphs/inputs/...` writes resolve inside the sandbox. No files in the real repo tree were written during the run.
 
-**Absolute-path pre-check**: `grep -r '[A-Za-z]:[\\/]' *.do` on the sandbox returned only URLs in comments. No hard-coded drive letters. Safe to run.
+**Absolute-path pre-check**: `grep -r '[A-Za-z]:[\\/]' *.do` on the sandbox returned only URLs in comments. No hard-coded drive letters.
 
-**Stata version**: StataSE 16, single-user perpetual license, `C:\Program Files\Stata16\StataSE-64.exe`. Invoked in batch mode with `/e do ...`, with `MSYS_NO_PATHCONV=1` to stop Git Bash from rewriting `/e` into `E:/`.
+### 4.1 Dry-run retraction — wrong execution mode
 
-### 4.1 `__main_data_prepare.do` — **FAILED**
+An earlier draft of this section reported that `__main_data_prepare.do` "failed" in the sandbox. **That finding is retracted.** The sandbox run was launched via `StataSE-64 /e do __main_data_prepare.do` (headless batch), which is not how the pipeline is designed to be executed. The canonical entry point is [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) — opening the project file in interactive Stata establishes the project root and working directory that the helper scripts rely on. Inside that session, `global bsource ""` combined with `merge 1:1 year using $bsource/bone` in `M01prepare_depr.do` resolves correctly against cwd. Outside of it, the empty `$bsource` produces a literal `/bone` path that Stata treats as root-absolute and rejects.
 
-Executed from `<sandbox>/inputs_stata_code/`. Full log: `<sandbox>/inputs_stata_code/__main_data_prepare.log`. Relevant tail:
+The observed `file /bone.dta not found; r(601)` error from the batch run is therefore an artifact of the wrong execution mode, not a pipeline bug. No action is required on the `.do` files for this issue.
 
-```
-. do depreciation/M01prepare_depr
+**Concrete evidence the sandbox did not touch the real tree**: `git status` on the repo after the retracted run showed the same pre-existing modifications as before the run, and no new files under `fortran_code/Data/`, `graphs/`, or any of the Stata folders. The sandbox remained self-contained even though the dry-run was run the wrong way.
 
-. use depreciation/depreciation.dta, clear
-. periods
-        time variable:  year, 1950 to 2019
-. tsfilter hp delta_cycle = delta, smooth($lam) trend(delta_trend)
-. gen l_retain = log(1 - delta_trend)
-. collapse (mean) l_retain (first) year, by(fiveyear)
-. replace l_retain = l_retain*5
-(14 real changes made)
-. replace year = year + 5
-(14 real changes made)
-. gen depr_5 = 1 - exp(l_retain)
-. drop l_retain
+### 4.2 Runtime verification deferred
 
-. merge 1:1 year using $bsource/bone
-file /bone.dta not found
-r(601);
-end of do-file
-r(601);
-```
+Running the drivers through the `.stpr` project is an interactive-Stata operation that cannot be scripted cleanly from a command-line batch. This audit therefore leaves runtime verification **deferred** rather than attempting it in the wrong mode. A follow-up session should:
 
-**Root cause** — `__main_data_prepare.do:15` sets `global bsource ""`. Then `M01prepare_depr.do:28` does `merge 1:1 year using $bsource/bone`, which expands to `using /bone`. Stata on Windows treats the leading `/` as an absolute path and fails to find `/bone.dta`. In the Appendix-B rerun from `__main.do`, the same M01 script works because `$bsource` is set to `"../outputs_stata_code/"`, producing the valid path `../outputs_stata_code//bone`. The standalone input driver has been silently broken for this setting for some time.
+1. Open [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) in interactive Stata, run `__main_data_prepare.do`, and confirm all `fortran_code/Data/_data_*.txt` inputs regenerate without error. (This must happen in a sandbox copy — see the memory note on sandboxing before executing.)
+2. Open [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr) and run `__main.do`. Expect it to crash at Appendix F.5 because of the P1 path bug in 2.3; everything upstream of that should succeed.
+3. Record the results back into this document.
 
-**Workaround** (do not commit in this session): set `global bsource "./"` or change M01 to handle an empty `$bsource`.
-
-**Scope of failure**: `__main_data_prepare.do` crashes at step 1 of 10. None of the `fortran_code/data/_data_*.txt` inputs are regenerated. A handful of earlier artifacts are produced in the sandbox before the crash: `inputs_stata_code/bone.dta`, `inputs_stata_code/bone1y.dta` (both written by `_prepare_programs.do`).
-
-### 4.2 `__main.do` — **NOT EXECUTED**
-
-Not attempted in this audit. Reasons:
-
-1. The input driver's failure (4.1) already demonstrates the pipeline is not runnable end-to-end in batch without manual fixes. Attempting the output driver adds no new information for the TODO list.
-2. `__main.do` reads `..\fortran_code\Results\psid_all_govt__\mass_trans_small.csv` and references twenty-plus additional Fortran `Results/` scenarios. Staging these into the sandbox would require copying on the order of gigabytes of Fortran output, and each copy is a chance to accidentally diverge from the tracked state. The user's read-only / no-overwrite policy argues against a half-prepared run.
-3. The Appendix-B section of `__main.do` re-invokes the same input helpers that crashed in 4.1 — but with a different `$bsource`, so it would actually succeed there. Documenting the asymmetry is more valuable than observing it again.
-
-Verification: `git status` on the real tree after the sandbox run shows no new modifications to any file under `fortran_code/Data/`, `graphs/`, `inputs_stata_code/`, `outputs_stata_code/`, or `sensitivity_stata_code/`. The sandbox is self-contained.
+Until that is done, the only runtime signal we have is static analysis plus the P1 broken path call in `__main.do`.
 
 ## 5. Known asymmetries (documented, not bugs)
 
@@ -248,15 +222,11 @@ The Stata scripts write to `../fortran_code/data/_data_*.txt` (lowercase). The F
 
 Each item is scoped for a **future** session. Nothing in this list is actioned in the current one.
 
-### P0 — blocks end-to-end pipeline
-
-- [ ] **Fix `$bsource` resolution in the standalone input driver.** [inputs_stata_code/__main_data_prepare.do:15](../inputs_stata_code/__main_data_prepare.do#L15) sets `global bsource ""`, which expands to the invalid path `/bone` inside [inputs_stata_code/depreciation/M01prepare_depr.do:28](../inputs_stata_code/depreciation/M01prepare_depr.do#L28) (and likely the other input helpers that share the `$bsource/bone` pattern). Two acceptable fixes: set `global bsource "."` in the driver, or drop the `$bsource/` prefix in the helpers so they merge directly against `bone.dta` in cwd. Either way, verify all helpers that touch `$bsource` after the fix.
-
 ### P1 — blocks a specific branch of the pipeline
 
-- [ ] **Fix the broken `M02robustness_prepare_gamma` path in the output driver.** [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) calls `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma`, but the file lives at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do). This means Appendix F.5 (the CBO productivity-growth robustness run) fails on any clean execution. Fix is a one-line path change in `__main.do`.
+- [ ] **Fix the broken `M02robustness_prepare_gamma` path in the output driver.** [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) calls `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma`, but the file lives at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do). This means Appendix F.5 (the CBO productivity-growth robustness run) fails on any clean execution. Fix is a one-line path change in `__main.do`. Verify by opening `__replication_graphs.stpr` in interactive Stata and running the driver through Appendix F.
 
-- [ ] **Commit the full output driver to a dry-run.** Once the P0 fix lands, stage a scratch run of `__main.do` with a copy of `fortran_code/Results/` in the sandbox, and record which figures build cleanly versus which still error. This audit deferred that run on purpose; the follow-up should not.
+- [ ] **Complete runtime verification through the `.stpr` entry points.** This audit deferred the actual run because the first attempt launched the drivers via `stata /e` (the wrong mode). The follow-up must open `inputs_stata_code/main.stpr` and then `outputs_stata_code/__replication_graphs.stpr` in interactive Stata — in a sandbox copy outside the repo — and record which steps succeed and which fail. The P1 above is expected to surface during that run.
 
 ### P2 — integration hygiene (not blocking, but fragile)
 
@@ -272,13 +242,36 @@ Each item is scoped for a **future** session. Nothing in this list is actioned i
 
 - [ ] **Delete or justify `outputs_stata_code/asi_aux.dta`.** Zero references anywhere in the Stata code.
 
-- [ ] **Gitignore `.stpr` IDE workspaces.** [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) and [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr) are Java-serialized Stata project files. They store open tabs and cursor positions, not pipeline logic. Keeping them tracked adds binary churn every time someone opens Stata. Recommend adding `*.stpr` to `.gitignore` and `git rm --cached` them.
+- [ ] **Document the `.stpr` files as the canonical entry points in README.md.** [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) and [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr) are the designed launch points for the Stata pipeline — not IDE workspace noise. The README should say, explicitly: "open `main.stpr` in Stata, then run `__main_data_prepare.do` from inside that project" (and similarly for the outputs project). Without this note, a future replicator following the intuition "it's Stata, just `do __main_data_prepare.do`" will hit the same false-alarm crash this audit's first draft hit.
 
 - [ ] **Decide `r_sd/R01compare_r_sd.do` disposition.** It is exploratory code comparing Fed Reserve wealth-share SDs to HKS calibration targets. Produces a single diagnostic line graph, no Fortran inputs. Either wire it into a documentation/diagnostics flow, move it under `docs/exploratory/`, or delete.
 
 - [ ] **Document the income-process split in `README.md`.** The current README references the monorepo layout but does not make clear that `inputs_stata_code/income_process/` is driven separately from `__main_data_prepare.do`. A three-line pointer would save the next replicator an hour.
 
-## 7. References
+## 7. README accuracy review
+
+Part of the audit's charter is verifying that [README.md](../README.md) describes the Stata workflow accurately. The following inaccuracies were found and corrected in the same commit that lands this document.
+
+| Location | Claim (before) | Reality | Action |
+|---|---|---|---|
+| Step 2 Stage A run command | `cd inputs_stata_code && stata -e do __main_data_prepare.do` | Pipeline must be launched via [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) in interactive Stata; `stata -e` crashes on the first `merge` | Replaced with `.stpr`-based launch steps |
+| Step 2 Stage A file list | `_data_labsh.txt` | Script writes `_data_lab_share.txt` (from `global var lab_share`) | Corrected |
+| Step 2 Stage A file list | `_data_contrib.txt` | Script writes `_data_contributions.txt` (from `global var contributions`) | Corrected |
+| Step 2 Stage A file list | `_data_exog_rate.txt, _data_irr.txt` from M04 | M04 writes only `_data_irr.txt`; `_data_exog_rate_1935.txt` is a frozen hand-written input | Dropped the `_data_exog_rate.txt` claim |
+| Step 2 Stage C description | "hand-held demography prep produces the `_data_Nn_*.txt` population series and `_data_pi_*.txt` survival series" | No Stata script produces `_data_Nn_*.txt` — those are frozen hand-written inputs. Mortality/hetero_pi scripts write to `inputs_stata_code/demography/<sub>/output/`, not directly to `fortran_code/Data/`, and are copied over by hand | Rewritten to separate frozen series from scripted outputs and to name the subfolder-to-Data/ hand-copy step |
+| Step 2 Stage C | (no mention of orphan files) | ~15 `_data_*.txt` files in `fortran_code/Data/` have no Stata producer: `_data_tau{C,K,L}.txt`, `_data_contrib{,_to_gdp}.txt`, `_data_{exog_rate,gy,rho}_1935.txt`, `_data_type_*.txt`, `_data_het_pi_US_since1935.txt`, `_data_pi_cond_het_US_since1935.txt`, `_data_gamma_robustness.txt` | Added an inventory paragraph flagging them as frozen source data |
+| Step 7 run command | `cd outputs_stata_code && stata -e do __main.do` | Must be launched via [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr) | Replaced with `.stpr`-based launch steps |
+| Step 7 Appendix F bullet | `sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma.do` | That path does not exist — file is at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do); Appendix F.5 crashes here on a clean run (P1 in §6) | Added a warning pointing at the broken path and linking to this audit |
+| Step 2 Stage A path | "writes the following `.txt` files into `../fortran_code/Data/`" (capital D) | Scripts actually write to `../fortran_code/data/` (lowercase). Works on Windows, breaks on case-sensitive filesystems | Added a case-sensitivity note |
+
+**Not verified in this pass** (left for a follow-up if relevant):
+
+- The README's Stata package list (`psmatch2`, `mat2txt`, `egenmore` at line ~813) is not cross-referenced against actual `ssc install` calls or helper imports in the scripts.
+- Step 7's "Appendix B re-runs the Stage-A prep scripts... with a plotting source switched on" phrasing is not precise about the `$bsource="../outputs_stata_code/"` mechanism, but is not wrong. Left as-is.
+- The Stage B (income-process) file list at lines ~849–854 was not cross-checked against `estimate_income_process.do` in this pass; spot-check showed the names look right.
+- Mapping from paper table/figure → output file in the "List of Tables and Figures" section is out of scope.
+
+## 8. References
 
 - Brainstorm: [docs/brainstorms/2026-04-13-stata-pipeline-audit-brainstorm.md](brainstorms/2026-04-13-stata-pipeline-audit-brainstorm.md)
 - Plan: [docs/plans/2026-04-13-refactor-stata-pipeline-audit-plan.md](plans/2026-04-13-refactor-stata-pipeline-audit-plan.md)
