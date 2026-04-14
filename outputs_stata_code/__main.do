@@ -4,7 +4,6 @@ global datapath 	"..\data\"
 
 global year_start 1935
 global year_stop 2100 
-global lam=500 
 
 do _prog_coding.do
 do _prog_ineq_function.do
@@ -60,7 +59,6 @@ global year_start 1935 // set initial year
 global year_stop  2100 // set final year
 
 * PWT inputs;
-global lam=500
 global bsource "../outputs_stata_code/"
 do ../inputs_stata_code/depreciation/M01prepare_depr			
 do ../inputs_stata_code/tfp/M02prepare_gamma					

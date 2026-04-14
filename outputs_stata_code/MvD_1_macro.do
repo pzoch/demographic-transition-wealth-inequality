@@ -125,6 +125,7 @@ drop _merge
 
 
 
+
 ************************************************
 ***** GRAPHING *********************************
 ************************************************
@@ -160,17 +161,17 @@ graph export $graphspath\\`v'_trans_levels.svg, replace
 
 foreach v in  avghours  { 
 	sum `v'_data 
-	local low  = floor(`r(min)') - floor(1* `r(sd)')
-	local high = floor(`r(max)') + floor(1* `r(sd)')
+	local low  = floor(`r(min)') - floor(`r(sd)')
+	local high = floor(`r(max)') + floor(2* `r(sd)')
 twoway		(tsline `v'_data, lcolor(gs12) lwidth(thick)) ///
 			(tsline `v'_model, lcolor(black) lwidth(medthick))  ///
-if inrange(year,1950,2020) , /// 
+if inrange(year,1950,2015) , /// 
 		legend(cols(2) order(1 "Data"  2 "Baseline model")  position(11) ) ///
-	 	xlabel(1950[15]2020, labsize(*1.2) ) ///
+	 	xlabel(1950[15]2015, labsize(*1.2) ) ///
 		xtitle("") ///
-		xscale(range(1950 2020)) ///
+		xscale(range(1950 2015)) ///
 		yscale(range(`low' `high')) yline(100, lcolor(black)) ///
-		ylabel(`low'[1]`high', labsize(*1.2)) xtitle(, size(*1.2)) xtitle(, size(*1.2))  ///
+		ylabel(`low'[2]`high', labsize(*1.2)) xtitle(, size(*1.2)) xtitle(, size(*1.2))  ///
 		xsize(7.5) ysize(3)  ylabel(, labsize(*1.2)  angle(h) gstyle(dot) glcolor(grey)) ///
 		name(`v', replace)
 		

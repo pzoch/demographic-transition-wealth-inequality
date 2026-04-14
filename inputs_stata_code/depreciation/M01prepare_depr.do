@@ -13,6 +13,8 @@ save depreciation/depreciation.dta, replace */
 use depreciation/depreciation.dta, clear
 periods
 
+global lam = 500
+
 tsfilter hp delta_cycle = delta, smooth($lam) trend(delta_trend)
 gen l_retain = log(1 - delta_trend)
 

@@ -12,6 +12,8 @@ save tfp/gamma.dta, replace  */
 	
 use tfp/gamma.dta, clear
 
+global lam = 1600
+
 merge 1:1 year using $bsource/bone1y // data on DBnomics start in 1954, but the file starts in 1950
 gen data = _merge==3
 replace data = 0 if inrange(year,1950,1954)

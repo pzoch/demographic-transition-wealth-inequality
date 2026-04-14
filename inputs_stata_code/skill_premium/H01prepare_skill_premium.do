@@ -6,6 +6,8 @@ keep wprem2_17 year
 merge 1:1 year using $bsource/bone1y
 ipolate wprem2_17 year, generate(wprem2)
 
+global lam = 500
+
 keep if year >= 1935
 tsset year
 tsline wprem2

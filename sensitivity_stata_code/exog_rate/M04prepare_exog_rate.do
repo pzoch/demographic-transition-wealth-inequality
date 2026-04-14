@@ -11,6 +11,8 @@ save ../sensitivity_stata_code/exog_rate/irr.dta, replace 		*/
 use ../sensitivity_stata_code/exog_rate/irr.dta , clear
 merge 1:1 year using bone1y
 
+global lam = 500
+
 //Smooth-out the irr
 tsset year
 foreach var in  irr  {

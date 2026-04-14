@@ -12,7 +12,6 @@ global f_results "" // paste here the path for your results output from Fortran 
 
 *** PROCESS DATA - FORTRAN INPUTS;
 * PWT inputs;
-global lam=500 	
 global bsource ""				
 do depreciation/M01prepare_depr			
 do tfp/M02prepare_gamma					
