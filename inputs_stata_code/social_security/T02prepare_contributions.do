@@ -64,4 +64,4 @@ twoway	 ///
 
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/data/_data_contrib_to_gdp.txt", delimiter(tab) novarnames nolabel replace

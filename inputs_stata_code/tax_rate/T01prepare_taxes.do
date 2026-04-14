@@ -2,9 +2,8 @@
 
 foreach tax in  tK tL tC{
 
-* load McDaniel's data 
-* data downaloaded from from https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia 
-local tax tK
+* load McDaniel's data
+* data downaloaded from from https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia
 import delimited tax_rate/updateorig`tax'.csv, clear
 
 rename v1 year
@@ -49,5 +48,6 @@ global ye 2015
 special_drawing
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+local taxletter = substr("`tax'", 2, .)
+export delimited $var using "../fortran_code/data/_data_tau`taxletter'.txt", delimiter(tab) novarnames nolabel replace
 }
