@@ -12,8 +12,7 @@
 * computation consistent with the original, we restrict the series to the
 * original window before collapsing by five-year bucket: null 1970-1972 so
 * the 1970-1974 bucket averages only 1973 and 1974, and null 2021 onward
-* so the 2020-2024 bucket anchors on 2020 alone. The pre-1970 smoothing
-* constant is 0.04/8 (also inherited from the original script).
+* so the 2020-2024 bucket anchors on 2020 alone.
 
 /*capture dbnomics import, pr(OECD) d(REV) series(NES.2000.TAXGDP.USA,NES.AG.TAXGDP.USA,NES.AJ.TAXGDP.USA) clear
 	keep period tax value 
