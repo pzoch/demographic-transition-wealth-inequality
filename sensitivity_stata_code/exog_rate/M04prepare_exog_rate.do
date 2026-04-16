@@ -45,3 +45,4 @@ tsline $var, yscale(range(5 11) )
 
 ///for partial-equilibrium model input
 export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/data/_data_exog_rate_1935.txt", delimiter(tab) novarnames nolabel replace
