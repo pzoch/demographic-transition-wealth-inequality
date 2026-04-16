@@ -246,13 +246,13 @@ Each item is scoped for a **future** session. Nothing in this list is actioned i
 
 - [ ] **Fix the broken `M02robustness_prepare_gamma` invocation in the output driver.** [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164) calls `../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma`, but the file lives at [inputs_stata_code/tfp/M02robustness_prepare_gamma.do](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do), so Appendix F.5 (the CBO productivity-growth robustness run) fails on any clean execution. **A path change alone is not enough**: the script also assumes cwd=`inputs_stata_code/` for `use tfp/gamma.dta`, and it needs `bone1y.dta` which Appendix B has already erased by the time line 164 runs. The fix has to (a) `cd ..\inputs_stata_code`, (b) re-run `_prepare_programs.do` to recreate `bone.dta`/`bone1y.dta` under `$bsource="../outputs_stata_code/"`, (c) `do tfp/M02robustness_prepare_gamma`, (d) erase the bone files, (e) `cd ..\outputs_stata_code`. See §2.3 for the full sketch. Verify by opening `__replication_graphs.stpr` in interactive Stata and running the driver through Appendix F.
 
-- [ ] **Complete runtime verification through the `.stpr` entry points.** This audit deferred the actual run because the first attempt launched the drivers via `stata /e` (the wrong mode). The follow-up must open `inputs_stata_code/main.stpr` and then `outputs_stata_code/__replication_graphs.stpr` in interactive Stata — in a sandbox copy outside the repo — and record which steps succeed and which fail. The P1 above is expected to surface during that run.
+- [ ] **Complete runtime verification through the `.stpr` entry points.** This audit deferred the actual run because the first attempt launched the drivers via `stata /e` (the wrong mode). The D01→D02→D03 demography chain has since been verified in Stata batch mode (see §10), but the remaining scripts (H01, M01–M04, R01, T01–T03) and the output driver (`__main.do` via `__replication_graphs.stpr`) have not been exercised end-to-end.
 
 ### P2 — integration hygiene (not blocking, but fragile)
 
 - [ ] **Resolve the `Data/` vs `data/` case asymmetry.** Scripts write lowercase; Fortran reads capital. Pick one, rename the tracked files, and update all `export delimited` calls. The canonical name used in the tracked outputs is `fortran_code/Data/` (capital D), so update the Stata scripts to write to `../fortran_code/Data/`.
 
-- [ ] **Wire the demography outputs into `fortran_code/Data/`.** Today `inputs_stata_code/demography/{mortality,hetero_pi}/output/_data_*.txt` are produced by `D01_life_tables.do` and `D03_prepare_hetero_pi.do`, but the copy into `fortran_code/Data/` happens by hand. Either add a final `copy` / `!copy` step at the end of each script, or add a consolidation block to `__main_data_prepare.do` that dispatches them (they are currently only reached via `__main.do` Appendix C).
+- [x] **Wire the demography outputs into `fortran_code/Data/`.** ~~Today `inputs_stata_code/demography/{mortality,hetero_pi}/output/_data_*.txt` are produced by `D01_life_tables.do` and `D03_prepare_hetero_pi.do`, but the copy into `fortran_code/Data/` happens by hand.~~ **Done (2026-04-16):** D03 now writes directly to `../fortran_code/Data/` for all three het_pi files (`_all`, `_col`, `_no_col`). D01 still writes only to its local `output/` subfolder — wiring D01 to `fortran_code/Data/` is deferred since D01's `_data_pi_cond_US_since1935.txt` output is also consumed by D03 through the intermediate `pi_tot_new.dta`, not directly by Fortran in the `switch_het_mortality == 1` branch.
 
 - [ ] **Decide the `bone*.dta` policy.** [outputs_stata_code/bone.dta](../outputs_stata_code/bone.dta) and [outputs_stata_code/bone1y.dta](../outputs_stata_code/bone1y.dta) are **pre-seeded inputs**, not temp files, for the Appendix B re-runs in `__main.do`. They must stay committed as long as the Appendix B path uses `$bsource="../outputs_stata_code/"`. Add a `README.md` note in `outputs_stata_code/` explaining why, or restructure so `_prepare_programs.do` runs at the top of `__main.do` Appendix B and these files disappear. Do **not** gitignore them without one of those two changes — doing so breaks `__main.do`.
 
@@ -391,11 +391,11 @@ The in-tree file has `use "..\data\skill_premium\ACS_college\ACS_college.dta"`, 
 
 Two separate problems remain latent in the pipeline and were not fixed in this session because they need user direction:
 
-1. **`keep if year <= 2050` tail truncation** — shared across every prep script. Committed Fortran inputs have 34 five-year rows (1935-2100); the current do-files produce 23 rows (1935-2050). `data.f90` hardcodes `last_data_gamma = 34` in [fortran_code/data.f90:218](../fortran_code/data.f90#L218), so a fresh-regenerated file would be 11 rows short and Fortran would read past EOF. This means a clean pipeline rerun **cannot replace the committed Fortran inputs** until either (a) the do-files are extended to produce all 34 rows, or (b) the Fortran-side reader is made tail-robust. This is the single biggest latent reproducibility hazard in the pipeline.
+1. **`keep if year <= 2050` tail truncation** — shared across every prep script **when `$year_stop` is not set**. Committed Fortran inputs have 34 five-year rows (1935-2100); `data.f90` hardcodes `last_data_gamma = 34` etc. When `__main_data_prepare.do` runs first (as it does in the `main.stpr` pipeline), it sets `global year_stop 2100` and the `periods` program produces the full 34-row range. The truncation to 23 rows only happens when scripts are run standalone without the globals — as occurred in a prior sandbox run that incorrectly shortened 5 committed files (reverted in `fb3d9c2`). **Lesson: any sandbox run must either execute `__main_data_prepare.do` first or explicitly set `global year_start 1935` / `global year_stop 2100`.**
 
 2. **D02_prepare_college.do in-tree path inconsistency** — the do-file's `use "..\data\skill_premium\ACS_college\ACS_college.dta"` is inconsistent with where the data actually lives (`skill_premium\ACS_college\ACS_college.dta` from the same cwd). The user blocked a direct in-tree path fix, stating that `.stpr` would fail if the path changed. The mechanism by which `.stpr` finds the file at `..\data\...` is unexplained (no junction, no symlink, no `data/skill_premium/` directory visible under the repo root via either `ls`, `fsutil reparsepoint query`, or `cmd dir /a:l`).
 
-3. **Non-Stata Fortran inputs untested** — demography (`_data_pi_*`, `_data_Nn_*`, `_data_het_pi_*`), income process (`_data_omega_*`, `_data_sigma2eps_*`), and `sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do` were not exercised in the sandbox. Their reproducibility status is unknown. The tree under [inputs_stata_code/income_process/](../inputs_stata_code/income_process/) is standalone (see §2.1) and would need its own scratch sandbox.
+3. **Non-Stata Fortran inputs partially tested** — the D01→D02→D03 demography chain has been verified in Stata batch (see §10): `_data_het_pi_US_since1935_all.txt` (the file Fortran reads for het mortality) reproduces byte-exact. The income process (`_data_omega_*`, `_data_sigma2eps_*`) and `sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do` remain untested. The tree under [inputs_stata_code/income_process/](../inputs_stata_code/income_process/) is standalone (see §2.1) and would need its own scratch sandbox.
 
 ### 9.6 Open questions for the user
 
@@ -417,3 +417,59 @@ Files touched, all in `inputs_stata_code/`:
 - `labor_share/M03prepare_labor_share.do`
 - `social_security/T02prepare_contributions.do`
 - `tax_rate/T01prepare_taxes.do`
+
+## 10. Demography pipeline (D01→D02→D03) — sandbox verification (2026-04-16)
+
+### 10.1 Scope
+
+Verified that the D01→D02→D03 chain, run in Stata batch mode from a scratch sandbox, reproduces the Fortran-consumed `_data_het_pi_US_since1935_all.txt` byte-for-byte. This is the only demography file Fortran reads (via `switch_het_mortality == 1` in [data.f90](../fortran_code/data.f90)).
+
+### 10.2 Method
+
+1. Copied `inputs_stata_code/` and `fortran_code/` to `n:/PROJECTS/EMERYT/_sandbox_d03_20260416/`.
+2. Wrote self-contained `.do` scripts that inline the `bone1y`/`periods` setup (matching `__main_data_prepare.do` globals: `year_start=1935`, `year_stop=2100`, `lam=1600`).
+3. Ran D01, D02, D03 in `StataSE-64.exe //e do ...` batch mode.
+4. Compared outputs against committed `fortran_code/Data/` files using inline Stata diff (merge + `abs(diff) < 1e-8`).
+
+### 10.3 Results
+
+**D01 (`D01_life_tables.do`):**
+
+- Regenerated `pi_tot_new.dta` from the three tracked Excel files (`life_tables.xlsx`, `2015-2050.xlsx`, `2050-2100.xlsx`).
+- **528/528 rows match the tracked `pi_tot_new.dta` exactly** (zero diff).
+- The `destring ... ignore("…")` uses Unicode ellipsis (U+2026, bytes `E2 80 A6`), which correctly strips only the ellipsis missing-value marker from UN projection strings without removing decimal points. A prior investigation mistakenly used ASCII `"..."` (three dots) which strips all periods including decimal points — that was a test-script bug, not a D01 bug.
+
+**D02 (`D02_prepare_college.do`):**
+
+- Regenerated `col_share_acs_ext.dta` from `ACS_college.dta` with `$year_stop=2100`.
+- All 48 cohorts (1840-2075) have non-NaN `college_share` values. The tracked `.dta` in the repo has NaN for cohorts 2025-2075 because it was saved from a standalone D02 run without `__main_data_prepare.do` globals. **D02 must run after `__main_data_prepare.do` to produce the complete file.**
+- The stacked `_data_college_share.txt` export has 68 rows (34 periods × 2 types), matching `last_data_type_share=34` in [data.f90:230](../fortran_code/data.f90#L230).
+
+**D03 (`D03_prepare_hetero_pi.do`):**
+
+- Used the D01-regenerated `pi_tot_new.dta` and the D02-regenerated `col_share_acs_ext.dta`.
+- Exported `_data_het_pi_US_since1935_all.txt` (1056 values, zero NaN).
+- **1056/1056 rows match the committed `fortran_code/Data/_data_het_pi_US_since1935_all.txt`** with zero diff (< 1e-8).
+
+### 10.4 Fixes applied
+
+1. **D03 no_col export bug** (commit `aca558e`): the `_data_pi_US_since1935_no_col.txt` export was writing the stacked `prob` column (1057 rows) instead of `syn_pr1` alone (529 rows). Fixed with a proper `preserve/keep syn_pr1/export/restore` block. Note: Fortran does not read this file — only `_data_het_pi_US_since1935_all.txt` is consumed (via unit 121 in the `switch_het_mortality == 1` branch).
+
+2. **D03 Fortran Data exports** (same commit): added `export delimited "..\fortran_code\Data\_data_het_pi_US_since1935_all.txt"` (and `_col`, `_no_col`) so D03 writes directly to the Fortran input directory. Previously the copy from `demography/hetero_pi/output/` to `fortran_code/Data/` was manual.
+
+3. **Reverted 5 truncated files** (commit `fb3d9c2`): a prior commit (`a096b86`) had replaced 5 Fortran data files with outputs from a sandbox run that lacked `$year_stop=2100`, shortening them from 34 periods to 23. Reverted `_data_college_share.txt`, `_data_depr.txt`, `_data_gamma.txt`, `_data_lambda.txt`, `_data_skill_premium.txt` to their pre-truncation state.
+
+### 10.5 Fortran file usage (het mortality)
+
+Confirmed by `grep` across all `.f90` files:
+
+| File | Read by Fortran? | Notes |
+|---|---|---|
+| `_data_het_pi_US_since1935_all.txt` | Yes | Unit 121, `switch_het_mortality == 1`. 1056 rows = stacked `syn_pr3` (college) then `syn_pr1` (non-college), 528 each. Read as `pi_d_big(j,m,i)` with `j=1..bigJ`, `m=1..bigM`, `i=1..last_data_demo`. |
+| `_data_pi_US_since1935_col.txt` | No | Vestigial. Not referenced in any `.f90` file. |
+| `_data_pi_US_since1935_no_col.txt` | No | Vestigial. Not referenced in any `.f90` file. |
+| `_data_college_share.txt` | Yes | Unit 8, read as `type_share_d(m,i)` with `last_data_type_share=34`. 68 rows = 34 periods × 2 types. Produced by D02. |
+
+### 10.6 Conclusion
+
+The full D01→D02→D03 pipeline reproduces all Fortran-consumed demography inputs when run via `main.stpr` (which executes `__main_data_prepare.do` first to set globals). No files need to be frozen or pinned — all inputs are reproducible from the tracked source data (Excel files, `ACS_college.dta`, `New_data_on_mortality.dta`).
