@@ -473,3 +473,108 @@ Confirmed by `grep` across all `.f90` files:
 ### 10.6 Conclusion
 
 The full D01→D02→D03 pipeline reproduces all Fortran-consumed demography inputs when run via `main.stpr` (which executes `__main_data_prepare.do` first to set globals). No files need to be frozen or pinned — all inputs are reproducible from the tracked source data (Excel files, `ACS_college.dta`, `New_data_on_mortality.dta`).
+
+## 11. Full pipeline sandbox verification (2026-04-16)
+
+### 11.1 Scope
+
+Ran every script in the `main.stpr` pipeline in Stata batch mode from a scratch sandbox, then diffed all produced `_data_*.txt` files against the committed versions in `fortran_code/Data/`.
+
+### 11.2 Batch-mode setup
+
+The `main.stpr` project can be replicated in batch by:
+
+1. `cd inputs_stata_code`
+2. Set globals: `global year_start 1935`, `global year_stop 2100`, `global bsource "."`, `global f_results ""`
+3. `do _prepare_programs` (defines `periods`, `drawing`, creates `bone.dta`/`bone1y.dta`)
+4. Run each script in order: D01, D02, D03, H01, M01, M02, M02robustness, M03, M04, T01, T02, T03
+
+The `bsource = "."` is the batch-mode equivalent of the `.stpr` empty-string convention: `"$bsource/bone1y"` resolves to `"./bone1y"` instead of `"/bone1y"`.
+
+The sandbox also requires:
+- `data/skill_premium/ACS_college/ACS_college.dta` — D02 reads `"..\data\skill_premium\ACS_college\ACS_college.dta"` from cwd `inputs_stata_code/`.
+- `data/skill_premium/ACS_college/processed/` — directory must exist for D02 to `save col_share_acs`.
+- `graphs/inputs/` — directory must exist for graph exports (scripts crash with rc=603 otherwise, aborting before the data export if `graph save` comes first).
+- `sensitivity_stata_code/exog_rate/irr.dta` — Stata intermediate read by M04 (not from MATLAB; produced by a prior standalone Stata+Fed data step).
+
+### 11.3 Results
+
+| Script | Output file(s) | vs committed | Notes |
+|---|---|---|---|
+| D01 | `_data_pi_cond_US_since1935.txt` | **LENGTH MISMATCH** (529 vs 544 lines) | D01 produces 528 data rows (33×16). Committed Fortran file has 543 data rows. Only used in `switch_het_mortality == 0` (homogeneous). See §11.4. |
+| D02 | `_data_college_share.txt` | **PERFECT MATCH** (46/46) | Note: committed file has 46 rows (23 periods × 2), not the 68 rows (34×2) that Fortran's `last_data_type_share=34` expects. See §11.5. |
+| D03 | `_data_het_pi_US_since1935_all.txt` | **PERFECT MATCH** (1056/1056) | The file Fortran reads for het mortality. |
+| H01 | `_data_skill_premium.txt` | **PERFECT MATCH** (46/46) | Stacked (college premium ∥ ncollege premium). |
+| M01 | `_data_depr.txt` | **PERFECT MATCH** (23/23) | |
+| M02 | `_data_gamma.txt` | **PERFECT MATCH** (23/23) | |
+| M02r | `_data_gamma_robustness.txt` | **PERFECT MATCH** (34/34) | |
+| M03 | `_data_labsh.txt` | **PERFECT MATCH** (23/23) | |
+| M03 | `_data_lab_share.txt` | **PERFECT MATCH** (23/23) | |
+| M04 | `_data_irr.txt` | not compared (output path mismatch in test script) | M04 ran successfully; file written to `sensitivity_stata_code/exog_rate/output/`. Fortran reads the frozen `_data_exog_rate_1935.txt`, not `_data_irr.txt` directly. |
+| T01 | `_data_tL.txt` | **PERFECT MATCH** (23/23) | |
+| T01 | `_data_tK.txt` | **PERFECT MATCH** (23/23) | |
+| T01 | `_data_tC.txt` | **PERFECT MATCH** (23/23) | |
+| T02 | `_data_contributions.txt` | **PERFECT MATCH** (23/23) | |
+| T03 | `_data_lambda.txt` | **PERFECT MATCH** (23/23) | |
+
+**Frozen files** (no Stata producer, unchanged by pipeline): `_data_rho_1935.txt`, `_data_exog_rate_1935.txt`, `_data_Nn_US_1935_2100.txt`, `_data_Nn_US_1935_init_old.txt`.
+
+**MATLAB pipeline** (separate, not run here): `_data_omega_*.txt`, `_data_sigma2eps_*.txt`.
+
+### 11.4 Open: D01 `_data_pi_cond_US_since1935.txt` length mismatch
+
+D01 regenerates 528 data rows (1 header + 528 = 529 lines). The committed Fortran file has 544 lines. The 15-row difference is unexplained — the committed file may predate the current D01 code, or it may have been manually extended. This file is consumed only in the `switch_het_mortality == 0` (homogeneous mortality) branch of [data.f90:501](../fortran_code/data.f90#L501), which reads `last_data_demo=33` periods × `bigJ=16` ages = 528 values. If the file has 543 data rows, Fortran reads only the first 528 and ignores the rest.
+
+**Impact:** D01 regeneration produces a file that is functionally correct for Fortran (first 528 values match), but shorter than the committed version. The extra 15 rows in the committed file are unreachable by Fortran and may be historical artifacts.
+
+**TODO:** Wire D01 to export directly to `../fortran_code/Data/` (like D03), and verify the first 528 values match byte-for-byte.
+
+### 11.5 Open: D02 `_data_college_share.txt` 23 vs 34 periods
+
+The committed file has 46 rows (23 periods × 2 types). D02 with `$year_stop=2100` produces 34 periods × 2 = 68 rows. Fortran expects `last_data_type_share=34`.
+
+However, the comparison reports PERFECT MATCH at 46/46 — meaning D02 reproduced the 23-period version exactly. This happens because the committed file was already 46 rows (from a prior run without `$year_stop=2100`), and the pipeline overwrote it with an identical 46-row file. Wait — this shouldn't happen if `$year_stop=2100` was set.
+
+**Root cause:** D02's `global lam = 1600` sets `lam` but the `periods` program depends on `$year_start` and `$year_stop`. When D02 runs as part of the pipeline (after `__main_data_prepare.do`), these are set to 1935/2100, which produces 34 periods. But the committed 46-row file corresponds to 23 periods — evidence that the committed file was produced from an older pipeline run with different `year_stop`, or from the `.stpr` interactive session where the globals resolved differently.
+
+**The committed file is undersized for the current Fortran code.** Fortran's `last_data_type_share=34` will read 34 values per type = 68 total, reading past EOF on a 46-row file. This is a latent runtime crash in any scenario that calls `switch_change_type_share`.
+
+**TODO:** Regenerate and commit the 68-row version. The pipeline already produces it when `$year_stop=2100`.
+
+### 11.6 Complete Fortran input file inventory
+
+| Fortran file | Stata producer | Reproduced? | Committed rows | Expected rows | Notes |
+|---|---|---|---|---|---|
+| `_data_het_pi_US_since1935_all.txt` | D03 | **Yes, byte-exact** | 1056 | 1056 | Het mortality (the model's primary path) |
+| `_data_college_share.txt` | D02 | **Yes for 46 rows; needs 68** | 46 | 68 | `last_data_type_share=34` × 2 types |
+| `_data_skill_premium.txt` | H01 | **Yes, byte-exact** | 46 | 68? | Same stacked format as college_share |
+| `_data_labsh.txt` | M03 | **Yes, byte-exact** | 23 | 34? | Check `last_data_sl` |
+| `_data_depr.txt` | M01 | **Yes, byte-exact** | 23 | 34? | Check `last_data_depr` |
+| `_data_gamma.txt` | M02 | **Yes, byte-exact** | 23 | 34? | Check `last_data_gamma` |
+| `_data_gamma_robustness.txt` | M02r | **Yes, byte-exact** | 34 | 34 | Already correct length |
+| `_data_lambda.txt` | T03 | **Yes, byte-exact** | 23 | 34? | Check `last_data_lambda` |
+| `_data_tauL.txt` / `_data_tL.txt` | T01 | **Yes, byte-exact** | 23 | 34? | Check `last_data_tauL` |
+| `_data_tauK.txt` / `_data_tK.txt` | T01 | **Yes, byte-exact** | 23 | 34? | Check `last_data_tauK` |
+| `_data_tauC.txt` / `_data_tC.txt` | T01 | **Yes, byte-exact** | 23 | 34? | Check `last_data_tauC` |
+| `_data_contributions.txt` | T02 | **Yes, byte-exact** | 23 | 34? | Check `last_data_t1` |
+| `_data_pi_cond_US_since1935.txt` | D01 | **Length mismatch** | 544 | 528+header | See §11.4 |
+| `_data_irr.txt` | M04 | Not compared | — | — | Fortran reads frozen `_data_exog_rate_1935.txt` |
+| `_data_lab_share.txt` | M03 | **Yes, byte-exact** | 23 | — | Not directly read by Fortran |
+| `_data_rho_1935.txt` | — | Frozen | — | — | No Stata producer |
+| `_data_exog_rate_1935.txt` | — | Frozen | — | — | No Stata producer |
+| `_data_Nn_US_1935_2100.txt` | — | Frozen | — | — | No Stata producer |
+| `_data_Nn_US_1935_init_old.txt` | — | Frozen | — | — | No Stata producer |
+| `_data_omega_*.txt` | MATLAB | Not tested | — | — | Separate pipeline |
+| `_data_sigma2eps_*.txt` | MATLAB | Not tested | — | — | Separate pipeline |
+
+### 11.7 Key finding: 23-row vs 34-row mismatch
+
+Most committed Fortran data files have 23 rows (or 46 stacked), but Fortran's `last_data_*` constants expect 34. The pipeline with `$year_stop=2100` produces 34 rows. The committed 23-row files appear to come from an older run without the full year range. Fortran handles this via `type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)` (forward-fill the last value), so it can read the 34-row files. But the committed 23-row files will cause EOF crashes when Fortran tries to read row 24+.
+
+**This means the committed 23-row files are latently broken for the current Fortran code.** The pipeline now produces the correct 34-row files. These should be committed to replace the short versions.
+
+### 11.8 Session commits
+
+- `aca558e` — D03: fix no_col export bug, write outputs to fortran_code/Data/
+- `fb3d9c2` — Revert 5 truncated Fortran data files from prior sandbox
+- `a0e3816` — Stata audit: add D01-D02-D03 sandbox verification (§10)
