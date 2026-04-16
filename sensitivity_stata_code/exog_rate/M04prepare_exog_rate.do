@@ -1,12 +1,12 @@
 //Prepare data for exogenous irr
-/*
-capture dbnomics import , provider(GGDC) dataset(penn10/irr.USA) clear
+if $download_data == 1 {
+	capture dbnomics import , provider(GGDC) dataset(penn10/irr.USA) clear
 	ren period year
 	ren value irr
 	keep year irr
 	destring _all, replace ignore(NA)
-
-save ../sensitivity_stata_code/exog_rate/irr.dta, replace 		*/
+	save ../sensitivity_stata_code/exog_rate/irr.dta, replace
+}
 
 use ../sensitivity_stata_code/exog_rate/irr.dta , clear
 merge 1:1 year using bone1y

@@ -604,6 +604,7 @@ To run the full pipeline in Stata batch mode from a sandbox:
 cd inputs_stata_code
 global year_start 1935
 global year_stop 2100
+global download_data 0
 global bsource "."
 global f_results ""
 do _prepare_programs

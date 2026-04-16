@@ -1,6 +1,7 @@
 * set initial and final years
 global year_start 1935
 global year_stop 2100
+global download_data 0		// 0 = load local .dta (default), 1 = re-download from dbnomics
 
 cd "`c(pwd)'"
 clear

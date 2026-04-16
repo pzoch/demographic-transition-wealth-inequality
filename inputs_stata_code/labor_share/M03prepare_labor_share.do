@@ -1,11 +1,13 @@
 
 
-/*capture dbnomics import , provider(GGDC) dataset(penn10/labsh.USA) clear
+if $download_data == 1 {
+	capture dbnomics import , provider(GGDC) dataset(penn10/labsh.USA) clear
 	ren period year
 	ren value labsh
 	keep year labsh
 	destring _all, replace ignore(NA)
-save labor_share/labor_share.dta, replace */	
+	save labor_share/labor_share.dta, replace
+}
 
 use labor_share/labor_share.dta, clear
 merge 1:1 year using $bsource/bone1y

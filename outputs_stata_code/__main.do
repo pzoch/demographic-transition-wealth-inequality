@@ -3,7 +3,8 @@ global graphspath 	"..\graphs\outputs\"
 global datapath 	"..\data\"
 
 global year_start 1935
-global year_stop 2100 
+global year_stop 2100
+global download_data 0		// 0 = load local .dta (default), 1 = re-download from dbnomics 
 
 do _prog_coding.do
 do _prog_ineq_function.do

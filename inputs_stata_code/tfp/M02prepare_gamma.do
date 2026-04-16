@@ -2,14 +2,16 @@
 * so for example to get gamma(1960) we do take A(1960)/A(1955);
 
 
-/*capture dbnomics import , provider(GGDC) dataset(penn10/rtfpna.USA) clear
+if $download_data == 1 {
+	capture dbnomics import , provider(GGDC) dataset(penn10/rtfpna.USA) clear
 	ren period year
 	ren value rtfpna
 	keep year rtfpna
 	destring _all, replace ignore(NA)
 	replace rtfpna = ln(rtfpna)
-save tfp/gamma.dta, replace  */	
-	
+	save tfp/gamma.dta, replace
+}
+
 use tfp/gamma.dta, clear
 
 global lam = 1600

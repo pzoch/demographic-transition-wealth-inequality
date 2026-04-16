@@ -831,6 +831,8 @@ To run Step 2:
 
 The helpers in this folder use relative paths (`$bsource/bone`, `../fortran_code/data/_data_$var.txt`, etc.) that rely on Stata's project-scoped working directory. Launching the same script via `stata -e do __main_data_prepare.do` from a shell will fail on the first `merge` because the empty `$bsource` global expands to a root-absolute `/bone` path outside the project session.
 
+**Data download switch (`$download_data`)**: The driver sets `global download_data 0` at the top. With the default value of 0, every prep script loads source data from committed `.dta` snapshots (e.g. `depreciation/depreciation.dta`, `tfp/gamma.dta`). This pins the pipeline to the data vintage used in the paper and ensures reproducibility without network access. To refresh the source data from dbnomics/OECD, change the global to `global download_data 1` before running — each script will re-download its series and overwrite the local `.dta`. The same switch is set in `outputs_stata_code/__main.do` for the model-vs-data figures.
+
 This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes the following `.txt` files into `../fortran_code/data/` (lowercase — see note below):
 
 - `_data_depr.txt` (depreciation) — `depreciation/M01prepare_depr.do`

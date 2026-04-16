@@ -14,8 +14,9 @@
 * the 1970-1974 bucket averages only 1973 and 1974, and null 2021 onward
 * so the 2020-2024 bucket anchors on 2020 alone.
 
-/*capture dbnomics import, pr(OECD) d(REV) series(NES.2000.TAXGDP.USA,NES.AG.TAXGDP.USA,NES.AJ.TAXGDP.USA) clear
-	keep period tax value 
+if $download_data == 1 {
+	capture dbnomics import, pr(OECD) d(REV) series(NES.2000.TAXGDP.USA,NES.AG.TAXGDP.USA,NES.AJ.TAXGDP.USA) clear
+	keep period tax value
 	reshape wide value, i(period) j(tax) string
 	rename period year
 	rename value2000 contributions
@@ -24,9 +25,8 @@
 	replace contributions = contributions + voluntary_contributions + imputed_contributions if voluntary_contributions!=.
 	keep year contributions
 	destring year contributions, replace
-	
-save social_security/contributions.dta, replace */
-
+	save social_security/contributions.dta, replace
+}
 
 use social_security/contributions.dta, clear
 //So that the periods start properly:
