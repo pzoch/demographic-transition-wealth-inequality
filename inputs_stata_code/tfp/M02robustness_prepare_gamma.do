@@ -36,7 +36,6 @@ tsfilter hp tfp_cycle	= rtfpna, smooth($lam) trend(tfp_trend)
 tsfilter hp gamma_cycle	= gamma_raw, smooth($lam) trend(gamma)
 collapse (mean)  gamma (first) year data, by(fiveyear) //  
 tsset fiveyear
-keep if year <= 2050
 * do something with the initial period
 replace gamma = gamma[2] in 1
 

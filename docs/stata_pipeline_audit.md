@@ -521,13 +521,15 @@ The sandbox also requires:
 
 **MATLAB pipeline** (separate, not run here): `_data_omega_*.txt`, `_data_sigma2eps_*.txt`.
 
-### 11.4 Open: D01 `_data_pi_cond_US_since1935.txt` length mismatch
+### 11.4 Resolved: D01 `_data_pi_cond_US_since1935.txt` — dead code, no action needed
 
-D01 regenerates 528 data rows (1 header + 528 = 529 lines). The committed Fortran file has 544 lines. The 15-row difference is unexplained — the committed file may predate the current D01 code, or it may have been manually extended. This file is consumed only in the `switch_het_mortality == 0` (homogeneous mortality) branch of [data.f90:501](../fortran_code/data.f90#L501), which reads `last_data_demo=33` periods × `bigJ=16` ages = 528 values. If the file has 543 data rows, Fortran reads only the first 528 and ignores the rest.
+D01 regenerates 528 data rows (33 periods × 16 ages). The committed Fortran file has 544 rows (34 periods × 16 ages). The extra 16 rows are the UN WPP "2010-2015" overlap period that D01 currently drops via `drop if Period == "2010-2015"` at line 65. The committed file was produced by an older D01 that kept this period.
 
-**Impact:** D01 regeneration produces a file that is functionally correct for Fortran (first 528 values match), but shorter than the committed version. The extra 15 rows in the committed file are unreachable by Fortran and may be historical artifacts.
+**However, this file is never read in practice.** All 30 instruction files in `fortran_code/Instructions/` set `switch_het_mortality=1`. The `_data_pi_cond_US_since1935.txt` file is only opened in the `switch_het_mortality == 0` branch ([data.f90:501](../fortran_code/data.f90#L501)), which is dead code for this paper. The model always uses `_data_het_pi_US_since1935_all.txt` (the education-specific survival file produced by D03, already verified byte-exact).
 
-**TODO:** Wire D01 to export directly to `../fortran_code/Data/` (like D03), and verify the first 528 values match byte-for-byte.
+**Root cause of the 16-row difference:** The UN WPP xlsx includes both an observed "2010-2015" period and projected "2015-2020" onward. The HMD data ends at "2010-2014". The historical D01 kept the overlap (34 periods); the current D01 drops it via `drop if Period == "2010-2015"` to avoid having two near-duplicate periods for the 2010-2015 window. Removing that line would reproduce the committed file exactly (first 256 HMD rows match byte-exact, the extra period at rows 257-272 is the UN "2010-2015", and the remaining 272 rows match byte-exact with a 16-row offset).
+
+**No fix needed** — the file is unused in all scenarios.
 
 ### 11.5 Open: D02 `_data_college_share.txt` 23 vs 34 periods
 
@@ -567,14 +569,68 @@ However, the comparison reports PERFECT MATCH at 46/46 — meaning D02 reproduce
 | `_data_omega_*.txt` | MATLAB | Not tested | — | — | Separate pipeline |
 | `_data_sigma2eps_*.txt` | MATLAB | Not tested | — | — | Separate pipeline |
 
-### 11.7 Key finding: 23-row vs 34-row mismatch
+### 11.7 Resolved: 23-row vs 34-row mismatch
 
-Most committed Fortran data files have 23 rows (or 46 stacked), but Fortran's `last_data_*` constants expect 34. The pipeline with `$year_stop=2100` produces 34 rows. The committed 23-row files appear to come from an older run without the full year range. Fortran handles this via `type_share_d(m,last_data_type_share+1:) = type_share_d(m,last_data_type_share)` (forward-fill the last value), so it can read the 34-row files. But the committed 23-row files will cause EOF crashes when Fortran tries to read row 24+.
+The pipeline previously produced 23-period files because of two truncation mechanisms:
 
-**This means the committed 23-row files are latently broken for the current Fortran code.** The pipeline now produces the correct 34-row files. These should be committed to replace the short versions.
+1. **`drawing`/`special_drawing`/`special_drawing2` programs** in [_prepare_programs.do](../inputs_stata_code/_prepare_programs.do) contained `keep if year < 2050` which truncated the caller's dataset. Since the export came AFTER the drawing call in most scripts, the exports received the truncated data. **Fix:** added `preserve`/`restore` inside all three drawing programs so graphing no longer destroys the data.
 
-### 11.8 Session commits
+2. **Hard `keep if year <= 2050`** in [M02prepare_gamma.do:41](../inputs_stata_code/tfp/M02prepare_gamma.do#L41) and [M02robustness_prepare_gamma.do:39](../inputs_stata_code/tfp/M02robustness_prepare_gamma.do#L39). These explicit truncations were independent of the drawing programs. **Fix:** removed both lines. The HP filter and extrapolation already cover the full 1935-2100 range; the truncation only discarded post-2050 rows. First 24 rows of regenerated output match committed values byte-exact.
+
+3. **D02→D03 path disconnect**: D02 saved `col_share_acs_ext.dta` to `../data/skill_premium/.../processed/` but D03 read from `skill_premium/.../processed/` (inside `inputs_stata_code/`). These are different directories. The tracked intermediate at D03's read path had NaN for cohorts 2025-2075 (from a truncated D02 run), causing D03 to fill those cells with 0.9999 via Stata's `replace prob = 0.9999 if prob >= 1` (which catches missing values because `.` > any number in Stata). **Fix:** added a second `save` in D02 to also write to D03's read path, so D03 always gets the complete version.
+
+After all three fixes, the full pipeline (D01→D02→D03→H01→M01→M02→M02r→M03→M04→T01→T02→T03) produces **byte-exact matches** for all 12 Stata-produced Fortran input files:
+
+| File | Rows | Match |
+|---|---|---|
+| `_data_het_pi_US_since1935_all.txt` | 1056 | MATCH |
+| `_data_college_share.txt` | 68 | MATCH |
+| `_data_skill_premium.txt` | 68 | MATCH |
+| `_data_depr.txt` | 34 | MATCH |
+| `_data_gamma.txt` | 34 | MATCH |
+| `_data_gamma_robustness.txt` | 33 | MATCH |
+| `_data_labsh.txt` | 34 | MATCH |
+| `_data_lambda.txt` | 34 | MATCH |
+| `_data_tauL.txt` | 34 | MATCH |
+| `_data_tauK.txt` | 34 | MATCH |
+| `_data_tauC.txt` | 34 | MATCH |
+| `_data_contributions.txt` | 23 | MATCH |
+
+### 11.8 Batch-mode recipe (complete)
+
+To run the full pipeline in Stata batch mode from a sandbox:
+
+```
+cd inputs_stata_code
+global year_start 1935
+global year_stop 2100
+global bsource "."
+global f_results ""
+do _prepare_programs
+do demography\mortality\D01_life_tables
+do skill_premium\D02_prepare_college
+do demography\hetero_pi\D03_prepare_hetero_pi
+do skill_premium\H01prepare_skill_premium
+do depreciation\M01prepare_depr
+do tfp\M02prepare_gamma
+do tfp\M02robustness_prepare_gamma
+do labor_share\M03prepare_labor_share
+do ..\sensitivity_stata_code\exog_rate\M04prepare_exog_rate
+do tax_rate\T01prepare_taxes
+do social_security\T02prepare_contributions
+do tax_rate\T03prepare_tax_lambda
+```
+
+Sandbox requirements:
+- `data/skill_premium/ACS_college/ACS_college.dta` — D02 reads from `../data/...`
+- `data/skill_premium/ACS_college/processed/` — directory must exist for D02 save
+- `graphs/inputs/` — directory must exist for graph exports
+- `sensitivity_stata_code/exog_rate/irr.dta` — Stata intermediate for M04
+- `global bsource "."` — batch equivalent of the `.stpr` empty-string convention
+
+### 11.9 Session commits
 
 - `aca558e` — D03: fix no_col export bug, write outputs to fortran_code/Data/
 - `fb3d9c2` — Revert 5 truncated Fortran data files from prior sandbox
 - `a0e3816` — Stata audit: add D01-D02-D03 sandbox verification (§10)
+- `4bc1ed9` — Stata audit: full pipeline sandbox results (§11)
