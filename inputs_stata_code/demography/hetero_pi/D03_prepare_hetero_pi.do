@@ -103,17 +103,21 @@ stack syn_pr3 syn_pr1, into (prob) clear
 replace prob = round(prob, .00001)
 replace prob= 0.9999 if prob >= 1
 
-
 keep prob
-export delimited "demography\hetero_pi\output\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace 
-
-
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_no_col.txt", replace 
+export delimited "demography\hetero_pi\output\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace
+export delimited "..\fortran_code\Data\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace
 restore
 
-preserve 
-keep syn_pr3 
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_col.txt", replace 
+preserve
+keep syn_pr1
+export delimited "demography\hetero_pi\output\_data_pi_US_since1935_no_col.txt", replace
+export delimited "..\fortran_code\Data\_data_pi_US_since1935_no_col.txt", replace
+restore
+
+preserve
+keep syn_pr3
+export delimited "demography\hetero_pi\output\_data_pi_US_since1935_col.txt", replace
+export delimited "..\fortran_code\Data\_data_pi_US_since1935_col.txt", replace
 restore
 
 ******************************Calculating LE50 for heterogenous pi*************************************
