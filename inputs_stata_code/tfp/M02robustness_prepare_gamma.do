@@ -26,7 +26,7 @@ gen drtfpna = d.rtfpna
 sum drtfpna , det
 local mgrowth =  `r(mean)'
 sum rtfpna 	if year == 1954 
-replace rtfpna = `r(mean)' -  (1.9 * `mgrowth' * (1954 - year))  if mi(rtfpna) & year<1954
+replace rtfpna = `r(mean)' -  (1.35 * `mgrowth' * (1954 - year))  if mi(rtfpna) & year<1954
 * to expand the inputs after 2015, we gradually smoothen out the rate of depreciation to flat levels
 sum rtfpna 	if year == 2019 
 replace rtfpna = `r(mean)' + 0.9* `mgrowth' * (year - 2019)   if mi(rtfpna) & year>2019
