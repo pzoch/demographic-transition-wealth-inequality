@@ -15,6 +15,12 @@
         write(*,*)
         write(*,'(A30,F10.3,A)') ' err_ss = ', err_ss
         write(*,'(A30,F10.3,A)') ' k_ss = ', k_ss
+        if (any(rate_adj /= 0.0d0)) then
+            write(*,'(A30,F10.5,A)') ' r_low_ss = ', r_low_ss
+            do m = 1,bigM,1
+                write(*,'(A25,I2,A3,F10.5,A)') ' r_type_ss(', m, ') = ', r_type_ss(m)
+            enddo
+        endif
         write(*,'(A30,F10.3,A)') ' y_ss = ', y_ss
         write(*,'(A30,F10.3,A)') ' K_ss = ', k_ss*bigl_ss/N_ss_j(1)
         write(*,'(A30,F10.3,A)') ' L_ss = ', bigl_ss/N_ss_j(1)
@@ -101,6 +107,12 @@
         write(666,*)
         write(666,'(A30,F10.3,A)') ' err_ss = ', err_ss
         write(666,'(A30,F10.3,A)') ' k_ss = ', k_ss
+        if (any(rate_adj /= 0.0d0)) then
+            write(666,'(A30,F10.5,A)') ' r_low_ss = ', r_low_ss
+            do m = 1,bigM,1
+                write(666,'(A25,I2,A3,F10.5,A)') ' r_type_ss(', m, ') = ', r_type_ss(m)
+            enddo
+        endif
         write(666,'(A30,F10.3,A)') ' y_ss = ', y_ss
         write(666,'(A30,F10.3,A)') ' K_ss = ', k_ss*bigl_ss/N_ss_j(1)
         write(666,'(A30,F10.3,A)') ' L_ss = ', bigl_ss/N_ss_j(1)

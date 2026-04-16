@@ -2,109 +2,16 @@
 ! FILE: pfi_agregation.f90
 !
 ! DESCRIPTION:
-!   Aggregates individual policy functions over the state space distribution to
-!   compute cohort-level and economy-wide statistics. Bridges the micro household
-!   problem with macro equilibrium conditions by integrating heterogeneous decisions.
+!   Sums individual policy functions weighted by the distribution to produce
+!   cohort-level averages, economy-wide aggregates, and distributional
+!   statistics (Gini weights, wealth shares, Euler equation residuals).
 !
-! PURPOSE:
-!   Given solved policy functions {c, l, a'} and equilibrium distribution prob(j,⋅),
-!   this module computes:
-!   1. Age-specific averages for life-cycle profiles
-!   2. Economy-wide aggregates for market clearing
-!   3. Distributional statistics (Gini, wealth shares, etc.)
-!   4. Euler equation residuals for solution accuracy checks
+! INCLUDED IN: pfi.f90 (module pfi_trans)
 !
-! SUBROUTINES:
-!   - aggregation_ss: Steady-state aggregation
-!       Computes: cohort_avg(j) = ∑_{a,aime,ε,δ,r} prob_ss(j,⋅) * policy_ss(j,⋅)
-!       For all ages j=1,...,bigJ and all policy/value functions
+! SUBROUTINES: aggregation_ss, aggregation_trans
 !
-!   - aggregation_trans: Transition path aggregation (cohort-period tracking)
-!       Same as aggregation_ss but for each period i=2,...,bigT
-!       Accounts for cohort-specific shocks (time-varying σ²_ε, skill premium, etc.)
-!
-! COHORT AGGREGATES (steady state):
-!   For each age j ∈ {1,...,bigJ}, computes expected values:
-!   - c_ss_j_vfi(j): Average consumption
-!   - l_ss_j_vfi(j): Average labor supply (efficiency units)
-!   - lab_ss_j_vfi(j): Average labor hours (raw)
-!   - s_pom_ss_j_vfi(j): Average savings (next period assets)
-!   - asset_pom_ss_j_vfi(j): Average current assets
-!   - V_ss_j_vfi(j): Average lifetime utility
-!   - lab_income_ss_j_vfi(j): Average after-tax labor income
-!   - lab_income_pretax_ss_j_vfi(j): Average pre-tax labor income
-!   - pension_ss_j_vfi(j): Average pension benefits received
-!   - labor_tax_ss_j_vfi(j): Average labor tax paid
-!   - lw_ss_j_vfi(j): Average labor income (w*ε*l)
-!   - lw_lambda_ss_j_vfi(j): Average (w*ε*l)^(1-λ) for progressive tax
-!
-! ECONOMY-WIDE AGGREGATES:
-!   Weighted by cohort size N_ss_j_vfi(j) to get totals:
-!   - bigC_ss = ∑_j N_ss_j * c_ss_j_vfi(j): Total consumption
-!   - bigL_ss = ∑_j N_ss_j * l_ss_j_vfi(j): Total effective labor supply
-!   - bigK_ss = ∑_j N_ss_j * s_pom_ss_j_vfi(j): Total capital stock
-!   - bequest_ss_vfi: Total bequests left by decedents
-!   (Economy totals computed in steady_state.f90, not here)
-!
-! DISTRIBUTIONAL STATISTICS:
-!   - gini_weight_sv(j,ia): Wealth distribution weights for Gini calculation
-!   - gini_weight_consumption(j,ia,i_aime,ip,ir,id): Consumption weights
-!   - gini_income(j,ia,i_aime,ip,ir,id): Labor income for Gini
-!   - top_ten(10): Wealth held by each decile from top down
-!   - top_100(100): Wealth held by each percentile from top down
-!   - savings_top_ten(10), savings_top_100(100): Total wealth in each group
-!   - savings_cohort_ten(1:3,j): Top 10%, bottom 10%, all (by age)
-!   - consumption_top_ten(1:3,j): Same for consumption
-!   - share_0_sav: Fraction of working-age (j=2-9) at zero savings
-!   - share_neg: Fraction with negative wealth (a < 0)
-!   - share_nonpos: Fraction with non-positive wealth (a ≤ 0)
-!
-! AGGREGATION ALGORITHM:
-!   For steady state (similar for transition):
-!   1. Initialize all aggregates to zero
-!   2. Loop over ages j = 1,...,bigJ:
-!      a. Loop over all states (ia, i_aime, ip, ir, id):
-!         - Add prob_ss(j,ia,i_aime,ip,ir,id) * policy_ss(j,ia,i_aime,ip,ir,id)
-!           to corresponding cohort average
-!         - Accumulate distributional statistics (Gini weights, top shares)
-!      b. Cohort averages are now E[policy | age=j]
-!   3. Economy-wide totals computed in calling routine (steady_state.f90)
-!
-! STATE SPACE:
-!   Five-dimensional heterogeneity (plus age):
-!   - ia ∈ {0,...,n_a}: Asset holdings
-!   - i_aime ∈ {0,...,n_aime}: Average indexed monthly earnings (Social Security)
-!   - ip ∈ {1,...,n_sp}: Permanent/persistent productivity shock
-!   - ir ∈ {1,...,n_sr}: Return shock (portfolio return heterogeneity)
-!   - id ∈ {1,...,n_sd}: Discount factor shock (preference heterogeneity)
-!
-! ACCURACY DIAGNOSTICS:
-!   - check_e(j): Euler equation error at each age (sum over all states)
-!   - euler_max(j): Maximum absolute Euler error by age
-!   - Euler residuals written to euler_ss.csv (steady state only)
-!
-! DEPENDENCIES:
-!   - global_vars: All policy functions (c_ss, l_ss, svplus_ss, etc.),
-!                  distributions (prob_ss, prob_trans), grids (sv, aime),
-!                  parameters (N_ss_j_vfi, omega_ss, n_sp_value, etc.)
-!   - gini_calc: For gini() function (called in steady_state.f90, not here)
-!   - linint: For linear_int() to find zero-wealth point
-!
-! NOTES FOR REPLICATION:
-!   - Aggregation loops are performance-critical (5D state space × bigJ ages)
-!   - Distributional statistics computed top-down (wealth-ordered) for efficiency
-!   - Cohort averages include both workers (j < jbar) and retirees (j ≥ jbar)
-!   - pension_ss_j_vfi uses AIME-dependent replacement rate (US Social Security formula)
-!   - Top wealth shares accumulate probability mass until threshold reached (0.1, 0.01)
-!   - Transition aggregation handles cohort-specific parameters via year_birth indexing
-!   - sum_b_weight_ss_vfi: Average AIME replacement rate at retirement (jbar_ss_vf)
-!
-! OUTPUT:
-!   All aggregates stored in global_vars module. Key variables:
-!   - *_ss_j_vfi: Cohort averages (steady state)
-!   - *_j_vfi(*,i): Cohort averages by period (transition)
-!   - gini_weight_*, top_*, share_*: Distributional moments
-!   - check_euler_trans(*,1): Euler errors (written to CSV)
+! KEY OUTPUTS: *_ss_j_vfi (cohort averages), gini_weight_*, top_ten, top_100,
+!   share_0_sav, bequest_ss_vfi
 !===============================================================================
 !***************************************************************************************
 ! find aggegate variables for steady state
@@ -131,6 +38,8 @@
         s_pom_ss_j_vfi(:) = 0d0
         lab_ss_j_vfi(:) = 0d0
         asset_pom_ss_j_vfi(:) = 0d0
+        asset_income_ss_j_vfi(:) = 0d0
+        asset_base_ss_j_vfi(:) = 0d0
         l_ss_pen_j_vfi(:) = 0d0
         w_sum(0) = 0d0
         ERHS_ss = 0d0
@@ -229,6 +138,8 @@
                                     endif
                                     pension_ss_j_vfi(j) = pension_ss_j_vfi(j) + aime_replacement_rate(i_aime)*b_ss_j_vfi(j)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     c_ss_j_vfi(j) = c_ss_j_vfi(j) + c_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                    asset_income_ss_j_vfi(j) = asset_income_ss_j_vfi(j) + asset_income_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
+                                    asset_base_ss_j_vfi(j) = asset_base_ss_j_vfi(j) + asset_base_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     lab_income_ss_j_vfi(j) = lab_income_ss_j_vfi(j) + lab_income_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     lab_income_pretax_ss_j_vfi(j) = lab_income_pretax_ss_j_vfi(j) + lab_income_pretax_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
                                     tot_income_ss_j_vfi(j) = tot_income_ss_j_vfi(j) + tot_income_ss(j, ia, i_aime, ip, ir, id)*prob_ss(j, ia, i_aime, ip,ir, id)
@@ -319,6 +230,8 @@
         lw_j_vfi(:,i) = 0d0
         l_pen_j_vfi(:,i) = 0d0
         s_pom_j_vfi(:,i) = 0d0
+        asset_income_j_vfi(:,i) = 0d0
+        asset_base_j_vfi(:,i) = 0d0
         lab_j_vfi(:,i) = 0d0
         labor_tax_j_vfi(:,i) = 0d0
         asset_trans(:,i) = 0d0
@@ -341,7 +254,6 @@
             do i_aime = n_aime, 0 , -1
                 do j = 1, bigJ
                     
-                                ! this is new, NEED TO ADD TIME-SPECIFIC VARIANCES
                                 year_birth = i - j + 1  ! get year of birth to assign correct sigma2_epsilon
 
 
@@ -376,10 +288,10 @@
                                     V_j_vfi(j,i)   =   V_j_vfi(j,i) + V_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i) 
                                 !endif 
                                 gini_weight_trans(j,ia, i) = gini_weight_trans(j,ia,i) + prob_trans(j, ia, i_aime, ip,ir, id, i)*N_t_j_vfi(j,i)/sum_n
-                                asset_trans(j,i) = asset_trans(j,i) + sv(ia)*prob_trans(j, ia, i_aime, ip, ir, id,i)    
+                                asset_trans(j,i) = asset_trans(j,i) + sv(ia)*prob_trans(j, ia, i_aime, ip, ir, id,i)
+                                asset_income_j_vfi(j,i) = asset_income_j_vfi(j,i) + asset_income_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
+                                asset_base_j_vfi(j,i) = asset_base_j_vfi(j,i) + asset_base_trans(j, ia, i_aime, ip, ir, id, i)*prob_trans(j, ia, i_aime, ip, ir, id,i)
 
-                                
-                                
                                 if(ip<6)then
                                     l_pen_j_vfi(j,i) = l_pen_j_vfi(j,i) + omega(j,i)*n_sp_value_trans(ip,tp)*l_trans(j, ia, i_aime, ip, ir, id,i)*prob_trans(j, ia, i_aime, ip, ir, id,i)/p_1_5_trans(j,i)
                                 endif

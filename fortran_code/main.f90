@@ -1,29 +1,13 @@
 !===============================================================================
 ! FILE: main.f90
-! 
+!
 ! DESCRIPTION:
-!   Main entry point for the overlapping generations (OLG) model with heterogeneous
-!   agents. This program computes steady states and transition paths for a PAYG
-!   pension system with demographic changes, productivity shocks, and policy reforms.
+!   Main entry point (program olg2). Sets up paths, loads parameters and data,
+!   allocates transition arrays, then includes main_base_transition.f90 for
+!   steady-state and transition-path computation.
 !
-! PROGRAM:
-!   olg2 - Main execution program that:
-!          1. Sets up file paths for inputs/outputs
-!          2. Loads parameters and data
-!          3. Allocates memory for transition path arrays
-!          4. Executes steady state and transition computations via included file
-!          5. Cleans up and reports timing
-!
-! DEPENDENCIES:
-!   - global_vars: Global variable declarations
-!   - global_vars2: Parameter loading and initialization (globals subroutine)
-!   - steady_state: Steady state computation module
-!   - transition_DB: Transition path computation module
-!   - get_data: Data loading routines
-!   - clock: Timing utilities
-!
-! INCLUDED FILES:
-!   - main_base_transition.f90: Contains main computational logic
+! USAGE: 5Gtrans.exe <version> <experiment> <closure>
+!   e.g.: 5Gtrans.exe psid_ all_ govt__
 !===============================================================================
 
 program olg2
@@ -98,16 +82,19 @@ allocate(svplus_beq_trans_big(n_beq, 0:n_a, 0:n_aime, n_sp, n_sr, n_sd, bigM, bi
 
 allocate(l_trans, labor_tax_trans, c_trans, RHS_trans, prob_trans, lab_income_trans, tot_income_trans, tot_income_pretax_trans, lab_income_pretax_trans, bequest_j_trans,  &
          sv_tempo_trans, V_trans, EV_trans, aime_plus_trans, source = svplus_trans)
+allocate(asset_income_trans, asset_base_trans, source = svplus_trans)
 
 allocate(l_beq_trans, labor_tax_beq_trans, c_beq_trans, RHS_beq_trans, prob_beq_trans, lab_income_beq_trans, tot_income_beq_trans, tot_income_pretax_beq_trans, lab_income_pretax_beq_trans,  &
          sv_tempo_beq_trans, V_beq_trans, V_after_beq_trans, EV_beq_trans, EV_after_beq_trans, ERHS_beq_trans, aime_plus_beq_trans, RHS_after_beq_trans, source = svplus_beq_trans)
-
+allocate(asset_income_beq_trans, asset_base_beq_trans, source = svplus_beq_trans)
 
 allocate(l_trans_big, lab_trans_big,labor_tax_trans_big, c_trans_big, RHS_trans_big, prob_trans_big, lab_income_trans_big, tot_income_trans_big, tot_income_pretax_trans_big, lab_income_pretax_trans_big, bequest_j_trans_big,  &
          sv_tempo_trans_big, V_trans_big, EV_trans_big, aime_plus_trans_big, source = svplus_trans_big)
+allocate(asset_income_trans_big, asset_base_trans_big, source = svplus_trans_big)
 
 allocate(l_beq_trans_big, lab_beq_trans_big,labor_tax_beq_trans_big, c_beq_trans_big, RHS_beq_trans_big, lab_income_beq_trans_big, tot_income_beq_trans_big, tot_income_pretax_beq_trans_big, lab_income_pretax_beq_trans_big,  &
          sv_tempo_beq_trans_big, V_beq_trans_big, V_after_beq_trans_big, EV_beq_trans_big, EV_after_beq_trans_big, ERHS_beq_trans_big, aime_plus_beq_trans_big, source = svplus_beq_trans_big)
+allocate(asset_income_beq_trans_big, asset_base_beq_trans_big, source = svplus_beq_trans_big)
     sv_tempo_trans = 0.0d0
 
 
@@ -118,11 +105,13 @@ allocate(l_beq_trans_big, lab_beq_trans_big,labor_tax_beq_trans_big, c_beq_trans
 
 call toc()
 !deallocate(svplus_trans)
+deallocate(asset_income_trans, asset_base_trans, asset_income_trans_big, asset_base_trans_big)
+deallocate(asset_income_beq_trans, asset_base_beq_trans, asset_income_beq_trans_big, asset_base_beq_trans_big)
 deallocate(svplus_trans, l_trans, labor_tax_trans, c_trans, RHS_trans,  tot_income_trans, tot_income_pretax_trans, lab_income_trans, lab_income_pretax_trans,  &
            sv_tempo_trans, V_trans, EV_trans, prob_trans, aime_plus_trans, bequest_j_trans)
 
 
-read*
+! read*  ! Commented out to allow batch processing without user input
 
 
 contains
@@ -205,11 +194,11 @@ subroutine validate_config_files(cwd_i, cwd_p, version, experiment, closure)
             stop 1
         endif
 
-        ! Warn about unusual values (most switches are 0, 1, or 2)
-        if (switch_val < 0 .or. switch_val > 6) then
+        ! Warn about unusual values (most switches are 0, 1, or 2; switch_mortality allows up to 8)
+        if (switch_val < 0 .or. switch_val > 8) then
             print *, 'WARNING: Line', line_num, 'has unusual value:', switch_val
             print *, 'File: ', trim(instructions_file)
-            print *, 'Expected range: 0-6 (most switches use 0-2)'
+            print *, 'Expected range: 0-8 (most switches use 0-2)'
         endif
     enddo
 

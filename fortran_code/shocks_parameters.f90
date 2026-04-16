@@ -2,37 +2,11 @@
 ! FILE: shocks_parameters.f90
 !
 ! DESCRIPTION:
-!   Initializes shock distributions and transition probabilities for income,
-!   discount factor, and return risk in the OLG model. Sets up discrete grids.
+!   Sets up discretized income shock parameters (Rouwenhorst method), discount
+!   factor shocks, and return shocks. Initializes transition matrices and
+!   discrete state grids for all shock processes.
 !
-! SCRIPT (not a module)
-!   Included/executed during globals initialization to populate shock arrays.
-!
-! KEY OPERATIONS:
-!   - Defines initial distributions for income (ε), discount (δ), return (r) shocks
-!   - Sets n_sp_initial, n_sr_initial, n_sd_initial (starting grid points)
-!   - Constructs pi_ip_risk (income transition matrix)
-!   - Builds n_sp_risk_value, n_sr_value, n_sd_value (discrete state values)
-!   - Implements epsilon correction: ensures E[ε] = 0 accounting for persistence
-!   - Handles superstar state (n_superstar > 0) if enabled
-!
-! KEY VARIABLES:
-!   - n_sp_risk_ordinary: Regular income states (excludes superstar)
-!   - pi_ir_init, pi_id_init: Initial probability vectors for return/discount shocks
-!   - sigma2_epsilon_*_big: Variance arrays by cohort/time/type
-!   - epsilon_correction_*: Mean correction terms for log-normal transformation
-!
-! SWITCHES:
-!   - switch_discount_risk: Enables discount factor heterogeneity (0/1/2)
-!   - n_superstar: Number of superstar states in income distribution
-!
-! DEPENDENCIES:
-!   - global_vars: All shock grid parameters (n_sp, n_sr, n_sd, bigM, bigT, bigJ)
-!
-! NOTES:
-!   This is an included script, not a standalone module. Executed inside
-!   globals/set_globals setup. Order-dependent - must run after grid sizes defined.
-!   Epsilon correction critical for correct wage level in equilibrium.
+! INCLUDED IN: set_globals.f90 (globals subroutine)
 !===============================================================================
 ! shocks    
 
@@ -53,7 +27,6 @@ if (n_superstar>0) then
     endif
     
         
-! temporary
         do ir = 1 , n_sr, 1
                 pi_ir_init(ir) = 1.0d0 / n_sr
         enddo 
@@ -127,7 +100,6 @@ if (n_superstar>0) then
             
             ! note that we divide by type_mutliplier because later it is multiplied by type multiplier
             
-            ! these numbers are hard coded - need to modify it
             !if (m == 1) then
             !n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) = n_sp_risk_value_trans(n_sp_risk_ordinary+i,:) * superstar_factor_mat(m,1)
             !else
@@ -237,7 +209,6 @@ if (n_superstar>0) then
     
 elseif (n_sp_risk>1)  then
 
-    ! need to decide whether to do it here or later
     do m = 1,bigM,1
             epsilon_correction_t =  epsilon_correction_t_big(:,m)
             sigma2_epsilon_t     =  sigma2_epsilon_t_big(:,m)
@@ -348,8 +319,6 @@ else
 
  endif
  
-    ! switch_persistent_delta removed - was always 0 (AR1 shocks to patience)
-    ! The discretize_AR call above handles delta shocks when n_sd > 1
     
 
     
@@ -403,7 +372,7 @@ endif
             pi_id(n_sd,n_sd) = htm_shock_freq
             pi_id(n_sd,n_sd_initial) = 1-htm_shock_freq
             
-            ! this is a new one, verify it it works!
+            ! this is a new one, verify it works!
             pi_id(n_sd,:) = pi_id_init
             !pi_id(2,1) = 1.0d0 - htm_shock_freq
             !pi_id(2,2) = htm_shock_freq        
@@ -452,7 +421,6 @@ endif
             pi_ip_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_old_big(:,:,m)
             pi_ip_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,(i-1)*n_sp_risk+1:i*n_sp_risk,m)  =  pi_ip_risk_ss_new_big(:,:,m)
          
-            ! switch_income_fixed_effect removed - was always 0 (no income fixed effects)
             n_sp_value_trans_big((i-1)*n_sp_risk+1:i*n_sp_risk,m,:) = n_sp_risk_value_trans_big(:,m,:)
             n_sp_value_ss_old_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_old_big(:,m) 
             n_sp_value_ss_new_big((i-1)*n_sp_risk+1:i*n_sp_risk,m) = n_sp_risk_value_ss_new_big(:,m)

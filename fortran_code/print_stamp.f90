@@ -2,37 +2,12 @@
 ! FILE: print_stamp.f90
 !
 ! DESCRIPTION:
-!   Records simulation metadata and switch configuration to "information.txt".
-!   Provides run documentation for reproducibility and result interpretation.
+!   Writes run metadata (all switch settings, grid dimensions, and numerical
+!   parameters) to information.txt for reproducibility.
 !
-! SCRIPT (included code fragment)
-!   Executed once at beginning of transition path computation.
+! INCLUDED IN: main_base_transition.f90
 !
-! OUTPUT FILE:
-!   "information.txt" in scenario subfolder (unit 666)
-!
-! INFORMATION WRITTEN:
-!   1. Switch settings (30+ binary/integer flags):
-!      - Demographic: switch_mortality, switch_steady_demo, switch_het_mortality
-!      - Tax policy: switch_change_tauL/tauK/tauC, switch_tauK_gross
-!      - Risk/heterogeneity: switch_income_risk, switch_discount_risk, switch_return_risk
-!      - Labor: switch_labor_choice, switch_fix_labor, switch_cohort_ps
-!      - Other: switch_unequal_bequest, switch_epsilon_corr, etc.
-!   
-!   2. Grid configuration:
-!      - n_a, n_aime, n_sp, n_sd, n_sr (state space dimensions)
-!   
-!   3. Numerical parameters:
-!      - err_tol: Convergence tolerance
-!      (Additional parameters follow in actual code)
-!
-! USAGE:
-!   Include this script after switch initialization, before main computation.
-!   Facilitates result comparison across runs and parameter sensitivity analysis.
-!
-! NOTES:
-!   Format: Left-aligned labels (A30), integer values (I5.1) for switches.
-!   File remains open (unit 666) for additional writes if needed.
+! KEY OUTPUTS: information.txt (unit 666)
 !===============================================================================
 
     
@@ -102,7 +77,6 @@
          write(666,'(A30,F9.5 )') 'rho_subst =',     rho_subst  
          write(666,'(A30,F9.5 )') 'delta =',     delta  
          write(666,'(A30,F9.5 )') 'phi =',     phi  
-         ! t1_ss and t2_ss removed - loaded from data files
          write(666,'(A30,F9.5 )') 'delta_half_width =',     delta_half_width  
          write(666, '(A)') 'NOTE: ' 
          write(666, '(A)') 'THIS DOES NOT MEAN IT RUNS WITH THESE PARAMETERS ' 

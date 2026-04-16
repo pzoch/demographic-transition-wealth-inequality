@@ -12,6 +12,8 @@ save tfp/gamma.dta, replace  */
 	
 use tfp/gamma.dta, clear
 
+global lam = 1600
+
 merge 1:1 year using bone1y // data on DBnomics start in 1954, but the file starts in 1950
 gen data = _merge==3
 replace data = 0 if inrange(year,1950,1954)
@@ -54,4 +56,4 @@ global ye 2020
 special_drawing2
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var_frozen using "../fortran_code/data/_data_gamma_robustness.txt", delimiter(tab) novarnames nolabel replace

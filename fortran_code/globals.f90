@@ -2,36 +2,14 @@
 ! FILE: globals.f90
 !
 ! DESCRIPTION:
-!   Global variable declarations for the OLG model with heterogeneous agents.
-!   Contains all parameters, switches, and state variables accessible throughout
-!   the program. Defines model dimensions, numerical parameters, demographic data,
-!   policy variables, and computational settings.
+!   Global variable declarations for the OLG model. Contains all parameters,
+!   switches, state variables, and grid definitions used throughout the program.
 !
 ! MODULE: global_vars
-!   Master declaration module used by all computational routines
 !
-! KEY PARAMETERS:
-!   - bigJ: Number of age groups (16 periods of 5 years each = 80 years)
-!   - bigM: Number of permanent agent types (2: college/non-college)
-!   - n_p: Number of transition periods (140)
-!   - bigT: Total time dimension = n_p + bigJ + 1
-!   - zbar: Period length scaling factor (5 years)
-!
-! VARIABLE CATEGORIES:
-!   1. Model dimensions and indices (bigJ, bigM, bigT, n_a, n_aime, etc.)
-!   2. Switches controlling model behavior (switch_mortality, switch_labor_choice, etc.)
-!   3. Numerical parameters (delta, theta, alpha, phi, rho, etc.)
-!   4. Demographic data (pi_big, omega_ss_big, Nn_big, life_exp, etc.)
-!   5. Policy variables (tauL, tauK, tauC, lambda, jbar, t1, t2, etc.)
-!   6. State variables for steady state and transition (k, r, w, l, c, s, b, etc.)
-!   7. Grid definitions (a_grid, aime_grid, shock grids)
-!   8. File paths and I/O settings (cwd_*, switch_ss_write, etc.)
-!
-! NOTE:
-!   All variables declared with 'save' attribute to preserve values across calls.
-!   Variables with suffix _ss denote steady state, _t denote time-varying transition.
-!   Suffix _old/_new distinguish initial vs final steady state parameters.
-!   Suffix _j denotes age dimension, _m denotes type dimension.
+! KEY DIMENSIONS: bigJ=16 (ages), bigM=2 (types), bigT=n_p+bigJ+1 (time)
+! NAMING: _ss=steady state, _t=transition, _old/_new=initial/final SS,
+!         _j=by age, _m=by type
 !===============================================================================
 
 MODULE global_vars
@@ -109,8 +87,11 @@ IMPLICIT NONE
     real(dp) :: debt_constr
     real*8 :: pi_i_6, pi_6_6, pi_6_7, pi_7_7 ! super stars 
 
-    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, t1_ss_1, g_per_capita_ss_1 
+    real(dp) :: k_ss_1, r_ss_1, r_bar_ss_1, t1_ss_1, g_per_capita_ss_1
     real(dp) :: k_ss_2, r_ss_2, r_bar_ss_2, t1_ss_2, g_per_capita_ss_2
+    real(dp) :: r_low_ss_1, r_low_ss_2
+    real(dp), dimension(bigJ,bigM) :: asset_income_ss_j_1, asset_base_ss_j_1
+    real(dp), dimension(bigJ,bigM) :: asset_income_ss_j_2, asset_base_ss_j_2
     
     real(dp), dimension(bigM) :: w_bar_ss_1
     real(dp), dimension(bigM) :: w_bar_ss_2
@@ -160,9 +141,12 @@ IMPLICIT NONE
     real*8 :: zipf
     real*8, dimension(bigM) :: zeta_p
     real*8, dimension(bigM) :: sigma2_fix
-        
 
-    
+    ! Heterogeneous rates of return: type-specific rate adjustments
+    real*8, dimension(bigM) :: rate_adj
+    real(dp), dimension(bigM) :: r_type_ss
+    real(dp), dimension(bigT) :: r_low
+
     real*8 :: a_l, a_u, a_grow, aime_l, aime_u, aime_grow, poss_ass_sum_ss(bigJ), sigma_nu_r, n_sr_initial,&
                 zeta_r, r_ss_, zeta_d, n_sd_initial, sigma_nu_d, n_sp_initial,&
                pi_ir(n_sr,n_sr), n_sr_value(n_sr), pi_id(n_sd,n_sd), n_sd_value(n_sd), prob_norm(n_sr), prob_norm_fix(n_sp_fix),  prob_norm_d(n_sd), pi_id_init(n_sd), pi_ir_init(n_sr)
@@ -188,11 +172,11 @@ IMPLICIT NONE
     real*8   :: pi_ip_ss_old_big(n_sp,n_sp,bigM), n_sp_value_ss_old_big(n_sp,bigM), pi_ip_ss_new_big(n_sp,n_sp,bigM), n_sp_value_ss_new_big(n_sp,bigM), pi_ip_init_ss_old_big(n_sp,bigM), pi_ip_init_ss_new_big(n_sp,bigM) ! steady state shock 
     real*8   :: pi_ip_ss_old(n_sp,n_sp), n_sp_value_ss_old(n_sp), pi_ip_ss_new(n_sp,n_sp), n_sp_value_ss_new(n_sp), pi_ip_init_ss_old(n_sp), pi_ip_init_ss_new(n_sp) ! steady state shock realizations and transition probabilities
     
-    real*8   :: pi_ip_risk_big(n_sp_risk,n_sp_risk,bigM), n_sp_risk_value_big(n_sp_risk,bigM), pi_ip_risk_init_big(n_sp_risk,bigM) ! holder to make this code compatibile with older subroutines
-    real*8   :: pi_ip_risk(n_sp_risk,n_sp_risk), n_sp_risk_value(n_sp_risk), pi_ip_risk_init(n_sp_risk)! holder to make this code compatibile with older subroutines
+    real*8   :: pi_ip_risk_big(n_sp_risk,n_sp_risk,bigM), n_sp_risk_value_big(n_sp_risk,bigM), pi_ip_risk_init_big(n_sp_risk,bigM)
+    real*8   :: pi_ip_risk(n_sp_risk,n_sp_risk), n_sp_risk_value(n_sp_risk), pi_ip_risk_init(n_sp_risk)! holder to make this code compatible with older subroutines
     
-    real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM), pi_ip_init_big(n_sp,bigM) ! holder to make this code compatibile with older subroutines
-    real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp), pi_ip_init(n_sp)! holder to make this code compatibile with older subroutines
+    real*8   :: pi_ip_big(n_sp,n_sp,bigM), n_sp_value_big(n_sp,bigM), pi_ip_init_big(n_sp,bigM)
+    real*8   :: pi_ip(n_sp,n_sp), n_sp_value(n_sp), pi_ip_init(n_sp)! holder to make this code compatible with older subroutines
     
     
     real*8, dimension(bigJ, bigM) ::   pillar1_ss_j_1, pillar2_ss_j_1, pillar1_ss_j_2, pillar2_ss_j_2
@@ -229,9 +213,8 @@ IMPLICIT NONE
     real*8  :: tau, lambda, lambda_trans(bigT),  debt_constr_trans(bigT)
     integer :: i_temp
     real*8  :: tl_com, lambda_com
-    !real*8  :: lambda_old = 0.15d0, lambda_new = 0.15d0, progression_param= 0.15d0
-    
-! partial 
+
+! partial
     real*8  :: avg_aime_replacement_rate(bigJ, bigT)
     integer :: switch_partial_efficiency = 0d0 , iter_theta, if_border, time_iter
     

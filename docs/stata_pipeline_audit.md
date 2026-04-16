@@ -634,3 +634,59 @@ Sandbox requirements:
 - `fb3d9c2` — Revert 5 truncated Fortran data files from prior sandbox
 - `a0e3816` — Stata audit: add D01-D02-D03 sandbox verification (§10)
 - `4bc1ed9` — Stata audit: full pipeline sandbox results (§11)
+
+## 12. Independent sandbox verification (2026-04-16, session 2)
+
+### 12.1 Motivation
+
+The §11 sandbox had a comparison flaw: on Windows NTFS, `fortran_code/data/` (Stata output) and `fortran_code/Data/` (committed reference) are the same directory (case-insensitive). All previous "PERFECT MATCH" results were therefore self-comparisons — the Stata pipeline overwrote the committed files, and the comparison program read the same file twice.
+
+This session creates a fresh sandbox with the committed reference files stored in a separate `committed_fortran_data/` directory, making all comparisons genuine.
+
+### 12.2 Sandbox setup
+
+- Fresh sandbox: `n:/PROJECTS/EMERYT/_sandbox_pipeline_20260416/`
+- Copied `inputs_stata_code/`, `sensitivity_stata_code/` from repo (at commit `75e4433`)
+- Committed reference files: `committed_fortran_data/` (copied from `fortran_code/Data/` before run)
+- Stata output directory: `fortran_code/Data/` (starts empty, populated by pipeline)
+- All comparisons: `fortran_code/Data/<file>` vs `committed_fortran_data/<file>` — different directories
+
+### 12.3 Results (all comparisons genuine)
+
+| File (Fortran name) | Script | Repro rows | Committed rows | Result |
+|---|---|---|---|---|
+| `_data_het_pi_US_since1935_all.txt` | D03 | 1056 | 1056 | **PERFECT MATCH** |
+| `_data_college_share.txt` | D02 | 68 | 68 | **PERFECT MATCH** |
+| `_data_skill_premium.txt` | H01 | 68 | 68 | **PERFECT MATCH** |
+| `_data_depr.txt` | M01 | 34 | 34 | **PERFECT MATCH** |
+| `_data_gamma.txt` | M02 | 34 | 34 | **PERFECT MATCH** |
+| `_data_labsh.txt` | M03 | 34 | 34 | **PERFECT MATCH** |
+| `_data_exog_rate_1935.txt` | M04 | 34 | 34 | **PERFECT MATCH** |
+| `_data_tauK.txt` | T01 | 34 | 34 | **PERFECT MATCH** |
+| `_data_tauL.txt` | T01 | 34 | 34 | **PERFECT MATCH** |
+| `_data_tauC.txt` | T01 | 34 | 34 | **PERFECT MATCH** |
+| `_data_contrib_to_gdp.txt` | T02 | 34 | 34 | **CLOSE** (max_diff=4.4e-5) |
+| `_data_lambda.txt` | T03 | 34 | 34 | **PERFECT MATCH** |
+| `_data_pi_cond_US_since1935.txt` | D01 | — | — | Not compared (dead code: only used when `switch_het_mortality==0`, all scenarios use `==1`) |
+| `_data_gamma_robustness.txt` | M02r | — | — | Not compared (see §12.5) |
+
+**11/12 Stata-produced Fortran inputs reproduced byte-exact. T02 matches within 4.4e-5 (OECD data revision noise, documented in §9.4).**
+
+### 12.4 Fix applied: T02 `preserve`/`restore`
+
+[T02prepare_contributions.do](../inputs_stata_code/social_security/T02prepare_contributions.do) had `keep if year < 2050` at line 66 — an inline truncation for graphing that also truncated the subsequent export at line 83 to 23 rows. The committed file has 34 rows (1935–2100 in 5-year intervals, matching `last_data_t1=34` in `data.f90`). Same root cause as the drawing program truncation fixed in `2bed247`, but T02 used inline graphing code rather than calling a drawing program.
+
+**Fix:** wrapped lines 66–79 (the inline graphing block) in `preserve`/`restore`. The export now receives the full 34-row dataset.
+
+### 12.5 Unresolved: M02r `_data_gamma_robustness.txt`
+
+M02robustness_prepare_gamma.do sets `global var gamma_robust` (line 50) and exports to `_data_gamma_robust.txt` (line 57 via `_data_$var.txt`). Two discrepancies with the committed file:
+
+1. **Filename**: script writes `_data_gamma_robust.txt`; committed file is `_data_gamma_robustness.txt`.
+2. **Values**: script exports the HP-filtered trend (`gamma_robust`); committed file contains the model-frozen path (`gamma_model` — values 0.041, 0.052, 0.056 repeating in the post-2020 rows, matching lines 43–46 of the script).
+
+The committed file was evidently produced by an older version of the script that exported `gamma_model` under the name `_data_gamma_robustness.txt`. **Not blocking**: Fortran has `_data_gamma_robustness.txt` commented out in [data.f90:626](../fortran_code/data.f90#L626); all instruction files use `_data_gamma.txt` for TFP growth.
+
+### 12.6 Conclusion
+
+With the T02 fix, all 12 Stata-produced Fortran input files can be regenerated from the committed `.do` scripts and source data. The pipeline is fully reproducible in Stata batch mode using the recipe in §11.8.

@@ -58,10 +58,11 @@ replace contributions = `r(mean)'  if year>2020& mi(contributions)
 
 
 ////// DRAWING ////////
-global var contributions 
+global var contributions
 global ys 1970
 global ye 2020
 
+preserve
 tsset year
 keep if year < 2050
 twoway	 ///
@@ -69,15 +70,15 @@ twoway	 ///
 		(tsline $var if inrange(year,1935,$ys), lcolor(black)  lwidth(medium) lpattern(dash)) ///
 		(tsline $var if inrange(year,$ye,2100), lcolor(black) lwidth(medium)  lpattern(dash)) , ///
 		xtitle("year", size(*1.35)) ytitle("", size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(-  "Baseline" - ""  1 "data"   - "" 2 "extrapolation"  ) size(*1.4) cols(2))  
-		
-		
+		ylabel(,labsize(*1.2) ) legend(order(-  "Baseline" - ""  1 "data"   - "" 2 "extrapolation"  ) size(*1.4) cols(2))
+
+
 	graph save "../graphs/inputs/$var.gph", replace
 	graph export "../graphs/inputs/$var.png", replace
 	graph export "../graphs/inputs/$var.eps", replace
 	graph export "../graphs/inputs/$var.svg", replace
 	graph export "../graphs/inputs/$var.pdf", replace
-
+restore
 
 ////// EXPORTING ///////
 export delimited $var using "../fortran_code/data/_data_contrib_to_gdp.txt", delimiter(tab) novarnames nolabel replace
