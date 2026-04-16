@@ -192,7 +192,6 @@ append using `all'
 
 seperate LE50, by(college)
 
-di 2015 - (95-50) 
 gen fixed_col 	= LE501 if year<=1955
 sum fixed_col if year==1955
 replace fixed_col = `r(mean)'  if year>1955

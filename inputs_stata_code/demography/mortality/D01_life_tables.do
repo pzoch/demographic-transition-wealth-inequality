@@ -1,7 +1,7 @@
 capture mkdir demography\mortality\processed
 capture mkdir demography\mortality\output
 
-////////////////// Improt data from the Human Mortality database //////////////////
+////////////////// Import data from the Human Mortality database //////////////////
 clear
 import excel "demography\mortality\life_tables.xlsx", sheet("Sheet1") firstrow
 rename Age Agex

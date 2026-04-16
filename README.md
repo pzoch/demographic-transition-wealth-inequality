@@ -837,12 +837,12 @@ This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes th
 
 - `_data_depr.txt` (depreciation) — `depreciation/M01prepare_depr.do`
 - `_data_gamma.txt` (TFP growth path) — `tfp/M02prepare_gamma.do`
-- `_data_lab_share.txt` (labor share) — `labor_share/M03prepare_labor_share.do`
-- `_data_irr.txt` (exogenous rate series for the `exor_` scenario) — `../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do`
+- `_data_labsh.txt` (labor share) — `labor_share/M03prepare_labor_share.do`
+- `_data_irr.txt`, `_data_exog_rate_1935.txt` (exogenous rate series for the `exor_` scenario) — `../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do`
 - `_data_skill_premium.txt` — `skill_premium/H01prepare_skill_premium.do`
 - `_data_college_share.txt` — `skill_premium/D02_prepare_college.do`
-- `_data_tC.txt`, `_data_tK.txt`, `_data_tL.txt` (consumption, capital, labor tax rates) — `tax_rate/T01prepare_taxes.do`
-- `_data_contributions.txt` (pension contributions) — `social_security/T02prepare_contributions.do`
+- `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt` (consumption, capital, labor tax rates) — `tax_rate/T01prepare_taxes.do`
+- `_data_contrib_to_gdp.txt` (pension contributions / GDP) — `social_security/T02prepare_contributions.do`
 - `_data_lambda.txt` (tax progressivity) — `tax_rate/T03prepare_tax_lambda.do`
 
 **Case-sensitivity note**: every helper above calls `export delimited ... using "../fortran_code/data/_data_$var.txt"` with a **lowercase** `data/`. The Fortran sources read from `fortran_code/Data/` with a **capital** `D`. On Windows these resolve to the same directory and the pipeline works; on case-sensitive filesystems (Linux, case-sensitive macOS, many CI runners) the scripts write files the Fortran code cannot find. If replicating on Linux, either rename the tracked folder to `data/`, create a symlink, or update every `export delimited` call to use `Data/`.
@@ -872,9 +872,9 @@ Plots are saved to `../../graphs/inputs/`.
 Demography is split across two mechanisms, neither of which is driven by `__main_data_prepare.do`:
 
 1. **Frozen population series** — `_data_Nn_US_1935_2100.txt` and `_data_Nn_US_1935_init_old.txt` in `fortran_code/Data/` are **hand-written frozen inputs**. No Stata script in the repository regenerates them. They should be treated as source data, not pipeline output.
-2. **Mortality / heterogeneous-survival scripts** — `inputs_stata_code/demography/mortality/D01_life_tables.do` and `inputs_stata_code/demography/hetero_pi/D03_prepare_hetero_pi.do` produce `_data_pi_cond_US_since*.txt`, `_data_pi_US_since1935_{no_}col.txt`, and `_data_het_pi_US_since1935_all.txt`. **These scripts write to `inputs_stata_code/demography/<subfolder>/output/`, not to `fortran_code/Data/` directly** — the files are then copied over by hand. The scripts are dispatched from `outputs_stata_code/__main.do` (Appendix C), not from `__main_data_prepare.do`.
+2. **Mortality / heterogeneous-survival scripts** — `inputs_stata_code/demography/mortality/D01_life_tables.do` and `inputs_stata_code/demography/hetero_pi/D03_prepare_hetero_pi.do` produce `_data_pi_cond_US_since*.txt`, `_data_pi_US_since1935_{no_}col.txt`, and `_data_het_pi_US_since1935_all.txt`. D01 writes to `inputs_stata_code/demography/mortality/output/` only. D03 writes to both its local `output/` subfolder and directly to `fortran_code/Data/`. The scripts are dispatched from `outputs_stata_code/__main.do` (Appendix C), not from `__main_data_prepare.do`.
 
-Other `_data_*.txt` files present in `fortran_code/Data/` — including `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt`, `_data_contrib.txt`, `_data_contrib_to_gdp.txt`, `_data_exog_rate_1935.txt`, `_data_gy_1935.txt`, `_data_rho_1935.txt`, `_data_type_multiplier*.txt`, `_data_type_share.txt`, `_data_het_pi_US_since1935.txt`, `_data_pi_cond_het_US_since1935.txt`, and `_data_gamma_robustness.txt` — are **frozen inputs** with no Stata script producing them today. Treat them as source data alongside the population series.
+Other `_data_*.txt` files present in `fortran_code/Data/` — including `_data_gy_1935.txt`, `_data_rho_1935.txt`, `_data_type_multiplier*.txt`, `_data_type_share.txt`, `_data_het_pi_US_since1935.txt`, `_data_pi_cond_het_US_since1935.txt`, `_data_contrib.txt` — are **frozen inputs** with no Stata script producing them today. Treat them as source data alongside the population series. Note: `_data_gamma_robustness.txt` is produced by `M02robustness_prepare_gamma.do` (called from `outputs_stata_code/__main.do`).
 
 #### Verify
 

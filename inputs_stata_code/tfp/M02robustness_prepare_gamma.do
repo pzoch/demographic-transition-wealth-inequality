@@ -1,15 +1,7 @@
 * we want gamma(period) = A(period)/A(period-1)
 * so for example to get gamma(1960) we do take A(1960)/A(1955);
+* Uses same tfp/gamma.dta as M02prepare_gamma.do (downloaded there via $download_data)
 
-
-/*capture dbnomics import , provider(GGDC) dataset(penn10/rtfpna.USA) clear
-	ren period year
-	ren value rtfpna
-	keep year rtfpna
-	destring _all, replace ignore(NA)
-	replace rtfpna = ln(rtfpna)
-save tfp/gamma.dta, replace  */	
-	
 use tfp/gamma.dta, clear
 
 global lam = 1600
@@ -27,7 +19,7 @@ sum drtfpna , det
 local mgrowth =  `r(mean)'
 sum rtfpna 	if year == 1954 
 replace rtfpna = `r(mean)' -  (1.35 * `mgrowth' * (1954 - year))  if mi(rtfpna) & year<1954
-* to expand the inputs after 2015, we gradually smoothen out the rate of depreciation to flat levels
+* to expand the inputs after 2019, we gradually smoothen out TFP growth to flat levels
 sum rtfpna 	if year == 2019 
 replace rtfpna = `r(mean)' + 0.9* `mgrowth' * (year - 2019)   if mi(rtfpna) & year>2019
 tsline rtfpna

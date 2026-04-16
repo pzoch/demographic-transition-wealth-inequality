@@ -22,7 +22,7 @@ drop _merge
 * to expand the inputs before 1955, we take the first value (seems legit)
 sum labsh 	if inrange(year,1950,1955)
 replace labsh = `r(mean)' +  0.01/15 * (1950 - year)^(1/2)  if mi(labsh) & year<1950
-* to expand the inputs after 2015, we gradually smoothen out the rate of depreciation to flat levels
+* to expand the inputs after 2019, we gradually smoothen out labor share to flat levels
 sum labsh 	if inrange(year,2015,2020)
 replace labsh = `r(mean)' - 0.2/80 * (year - 2019)^(1/2)  if mi(labsh) & year>2019
 
