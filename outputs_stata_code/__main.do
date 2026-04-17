@@ -162,7 +162,13 @@ do R_Figure2.do 		//  Figure F.4
 graph export $graphspath\\AppF_Gini_counterfactuals_nosuperstars.png, replace 
 
 * Higher productivity growth
-do ../sensitivity_stata_code/exog_rate/M02robustness_prepare_gamma //prepare inputs for simulation
+cd ..\inputs_stata_code
+global bsource "../outputs_stata_code/"
+do _prepare_programs
+do tfp/M02robustness_prepare_gamma
+erase $bsource/bone.dta
+erase $bsource/bone1y.dta
+cd ..\outputs_stata_code
 
 global variant_base "gcbo_all_govt__" 
 global variant_comp "gcbo_ndm_govt__" 
