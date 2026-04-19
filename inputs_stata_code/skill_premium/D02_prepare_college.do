@@ -70,4 +70,3 @@ replace year = cohort + 25
 replace data = 0 if mi(data)
 replace ncollege_share = 1- college_share if mi(ncollege_share)
 save "skill_premium\ACS_college\processed\col_share_acs_ext", replace
-save "skill_premium\ACS_college\processed\col_share_acs_ext", replace

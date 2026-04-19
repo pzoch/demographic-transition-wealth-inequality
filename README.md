@@ -256,12 +256,12 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 - **Skill premium**: Autor, David and Dorn, David. 2020. "Changes in the occupational skill-intensity of U.S. manufacturing employment: 1980-1995." Updated series from Goldin and Katz (2008), extended to 1914-2020.
 
 **Access**:
-- Census/ACS: https://www.census.gov/programs-surveys/acs
+- Census/ACS: most convenient via [IPUMS USA](https://usa.ipums.org/usa/). The Stata script expects an extract at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` with variables `age`, `higrade`, `educd`, `perwt`, `year` (~2 GB, 1970-present). File is gitignored; replicators must register with IPUMS and generate the extract.
 - Skill premium data: Updated series available from Autor-Dorn research pages
 
 **Date Accessed**: 2020-2021
 
-**License/Terms**: Public domain (Census/ACS), published academic series (skill premium)
+**License/Terms**: Public domain (Census/ACS; IPUMS redistribution subject to their terms of use), published academic series (skill premium)
 
 **Files in this package**:
 - `fortran_code/Data/_data_college_share.txt` - Share with college degree by cohort (1885-2050)
@@ -269,6 +269,7 @@ Some estimates were derived from **restricted-access PSID microdata** (Panel Stu
 **Notes**:
 - College shares calculated for each entry cohort and projected forward
 - Skill premium series smoothed using Hodrick-Prescott filter (λ=6.25), assumed constant after 2020
+- Raw IPUMS ACS extract (`ACS_college.dta`, ~2 GB) NOT included — replicators provide their own extract (see Access above)
 
 ---
 
@@ -865,7 +866,30 @@ This runs Stata (`estimate_income_process.do`) → MATLAB (`estimate_parameters.
 - `_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt` — transitory shock variance (mostdrop)
 - `_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt` — transitory shock variance (busno_drop)
 
-Plots are saved to `../../graphs/inputs/`.
+Plots are saved to `../../graphs/inputs/` (`sigma2eps_{variant}.eps`, `.png`).
+
+**Required inputs**:
+- `psid/psid.dta` at the repository root (~98 MB, gitignored; obtain through the PSID Data Center — see the Data Availability section).
+- `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` (~2 GB, gitignored; obtain via [IPUMS USA](https://usa.ipums.org/usa/) — an American Community Survey 1970-present extract with `age`, `higrade`, `educd`, `perwt`, `year`). This file is also read by `D02_prepare_college.do` in Stage A.
+
+**Software paths** — the batch file defaults to `C:\Program Files\Stata16\StataSE-64.exe` and `C:\Program Files\MATLAB\R2018b\bin\matlab.exe`. Override before running if your install differs:
+
+```bat
+set STATA_EXE=C:\Program Files\Stata17\StataSE-64.exe
+set MATLAB_EXE=C:\Program Files\MATLAB\R2023a\bin\matlab.exe
+run_estimation.bat
+```
+
+**Bootstrap for confidence bands** — the default run computes point estimates only (`N_REPS=0`, ~5–10 minutes). To produce the 95% confidence bands in the paper's Figure 6, set the `N_REPS` environment variable before running. For the paper we use 1000 repetitions (**~12 hours wall time**: ~1 h Stata PSID resampling + covariance matrices, ~11 h MATLAB `lsqnonlin` per rep × 1000 reps × 2 types × 2 variants, sequential):
+
+```bat
+set N_REPS=1000
+run_estimation.bat
+```
+
+The `output/<variant>/{H,L}.mat` workspace files produced by this run contain the bootstrap arrays (`sigma2_epsilon_bs`, shape `(12, N_REPS)`) that `matlab/plot_estimates.m` uses to compute the shaded 95% bands. These four `.mat` files are **tracked in the repository** (~690 KB total); a fresh clone ships with the authors' 1000-rep bootstrap outputs so the figure replicates without re-running the 12-hour bootstrap. Re-running `run_estimation.bat` with the default `N_REPS=0` will overwrite them with point-only versions — keep a backup if you want to preserve the committed bootstrap results locally.
+
+**Expected bootstrap convergence rate**: of 1000 reps, ~10 may fail `lsqnonlin` convergence (9 H, 1 L in the authors' run). `plot_estimates.m` drops failed reps before computing percentiles.
 
 #### Stage C — Population and Mortality
 

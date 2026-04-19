@@ -24,8 +24,12 @@ for ivar = 1:length(variants)
     try
         H_bs = load(fullfile(result_dir, 'H.mat'), 'sigma2_epsilon_bs');
         sig2_H_bs = H_bs.sigma2_epsilon_bs;
-        prc0975H  = prctile(sig2_H_bs', 97.5);
-        prc0025H  = prctile(sig2_H_bs', 2.5);
+        % Drop bootstrap reps where any bin failed to converge (all-NaN
+        % propagates through prctile; reps are failed per-column not per-bin).
+        valid_H   = ~any(isnan(sig2_H_bs), 1);
+        prc0975H  = prctile(sig2_H_bs(:, valid_H)', 97.5);
+        prc0025H  = prctile(sig2_H_bs(:, valid_H)', 2.5);
+        fprintf('  H bootstrap: %d valid / %d total reps.\n', sum(valid_H), numel(valid_H));
         has_bootstrap = true;
     catch
         fprintf('  No bootstrap data for H — plotting point estimates only.\n');
@@ -39,8 +43,10 @@ for ivar = 1:length(variants)
         try
             L_bs = load(fullfile(result_dir, 'L.mat'), 'sigma2_epsilon_bs');
             sig2_L_bs = L_bs.sigma2_epsilon_bs;
-            prc0975L  = prctile(sig2_L_bs', 97.5);
-            prc0025L  = prctile(sig2_L_bs', 2.5);
+            valid_L   = ~any(isnan(sig2_L_bs), 1);
+            prc0975L  = prctile(sig2_L_bs(:, valid_L)', 97.5);
+            prc0025L  = prctile(sig2_L_bs(:, valid_L)', 2.5);
+            fprintf('  L bootstrap: %d valid / %d total reps.\n', sum(valid_L), numel(valid_L));
         catch
             fprintf('  No bootstrap data for L — plotting point estimates only.\n');
             has_bootstrap = false;
