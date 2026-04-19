@@ -691,3 +691,88 @@ The committed file was evidently produced by an older version of the script that
 ### 12.6 Conclusion
 
 With the T02 fix, all 12 Stata-produced Fortran input files can be regenerated from the committed `.do` scripts and source data. The pipeline is fully reproducible in Stata batch mode using the recipe in §11.8.
+
+## 13. Interactive `.stpr` + `__main_data_prepare.do` audit (2026-04-17/18)
+
+This section records a second reproducibility pass run through Stata's Project Manager (`.stpr`), which is how the replicator is expected to launch the pipeline per the README. A fresh worktree `EJ_sandbox` was created off `main` and all work happened there; no changes landed in the tracked repo until the commits at the end of the section.
+
+### 13.1 `.stpr` sidebar audit
+
+**File:** `outputs_stata_code/__replication_graphs.stpr` — a Java-serialized `com.stata.projmanager.Tree`. Static comparison against what `__main.do` actually calls (post `c796dd0` fix):
+
+- **Missing from Appendix F sidebar**: `M02robustness_prepare_gamma.do` (called at [outputs_stata_code/__main.do:164](../outputs_stata_code/__main.do#L164)) and `R_Figure1_app.do` (called at [__main.do:177](../outputs_stata_code/__main.do#L177)).
+- **Misplaced**: `M04prepare_exog_rate.do` listed under `2.appendixB`, but `__main.do` no longer calls it in Appendix B (only in Appendix F at line 175).
+
+The `.stpr` is purely a GUI sidebar — it does not drive execution, so these gaps do not break the pipeline. They only affect what's clickable in the Project Manager when a replicator opens the file.
+
+**Fix applied** (committed as `6d0bbea` on `ej-sandbox`): added the two missing entries to Appendix F, removed misplaced M04 from Appendix B, and rewrote three sandbox-escape paths (`..\..\_Paper_16_EJ_replication\...`) to clean relative paths consistent with the rest of the file. See `tools/inspect_stpr.py` (read-only tree dump) and `tools/patch_stpr_paths.py` (TC_STRING-level path patcher) for the method — both checked in so future `.stpr` edits don't require opening Stata GUI.
+
+### 13.2 `__main_data_prepare.do` interactive run
+
+Running the inputs driver via `main.stpr` hit three problems that batch mode (`stata -e do`) had masked. Each is a real committed-code bug, not a sandbox artefact:
+
+1. **`global bsource ""` → empty** ([__main_data_prepare.do:16](../inputs_stata_code/__main_data_prepare.do#L16) as committed at `c796dd0`). Every downstream script reads `using $bsource/bone`, which expands to the root-absolute `/bone.dta` and fails with `r(601)`. Fix: `global bsource "."`. Already sitting uncommitted in main repo's working tree at session start; now committed on `ej-sandbox`.
+2. **D02 hardcoded to a non-existent path**. [D02_prepare_college.do:6](../inputs_stata_code/skill_premium/D02_prepare_college.do#L6) reads `..\data\skill_premium\ACS_college\ACS_college.dta` — a path that does not exist in either tree. The real file lives at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` (1.96 GB, gitignored at `.gitignore:43`). Lines 63, 67, 72 have the same wrong-prefix pattern for the `processed/` write targets. This means D02 has **never run end-to-end from the committed codebase**; only via unchecked local paths. Fix: rewrote all 4 path strings to the correct `skill_premium\ACS_college\...` layout.
+3. **`erase bone.dta` halts cleanup on second invocations**. If `_prepare_programs.do` does not recreate the bone files for any reason (cwd drift, prior failure), the terminal `erase` statements hard-error. Fix: `capture erase` on lines 34–35.
+
+Also added `set more off` to the top of the driver so interactive Stata runs don't stall on the scroll-pager prompt.
+
+### 13.3 Inputs replicate byte-exact via `.stpr`
+
+With the fixes in §13.2 applied and `ACS_college.dta` copied into the sandbox, the full `__main_data_prepare.do` pipeline ran to completion via `main.stpr`. Of 34 files in `fortran_code/data/` after the run:
+
+- **31 byte-identical** to the committed `_Paper_16_EJ_replication/fortran_code/data/` baseline.
+- **2 differ** (`_data_sigma2eps_*`): not produced by this driver — they come from the standalone income-process pipeline (§13.4). The committed copies are stale bytes from a separate earlier run and are untracked in git.
+- **1 differs** (`_data_contrib_to_gdp.txt`): max relative diff 0.07%, max absolute 4.4×10⁻⁵. **Sandbox is correct, main repo's committed copy is pre-fix stale** (Jan 16 mtime, predating commit `e757abf` "T02 contributions: restore original SDMX-window computation"). The fix nulls PSID observations in 1970-72 and 2021+ before the 5-year collapse so the extremal buckets aren't skewed; the extrapolated early/late tails shift by ~3×10⁻⁶ and ~3×10⁻⁵ respectively — exactly the signature in the diff. `fortran_code/data/*.txt` is untracked, so the committed T02 fix does not automatically propagate to the committed output.
+
+### 13.4 Income-process pipeline — full-bootstrap replication
+
+The income-process pipeline (`inputs_stata_code/income_process/run_estimation.bat` → Stata `estimate_income_process.do` → MATLAB `estimate_parameters.m` → MATLAB `plot_estimates.m`) was run twice in the sandbox:
+
+- **N_REPS=0** (point estimates only, ~minutes).
+- **N_REPS=1000** (full bootstrap, **~12 hours wall time**: Stata generating 1000 × 2-variant PSID resamples and their cov-binned covariance matrices ≈ 1 h, MATLAB bootstrap optimization ≈ 11 h sequential across 4 `.mat` files).
+
+Results, both runs:
+
+- `_data_sigma2eps_mostdrop_hhslabinc_avghourlyhh.txt` — byte-identical to committed baseline.
+- `_data_sigma2eps_busno_drop_hhslabinc_avghourlyhh.txt` — byte-identical to committed baseline.
+- `_data_omega_mostdrop_hhslabinc_avghourlyhh.txt` — byte-identical to committed baseline.
+- `_data_omega_busno_drop_hhslabinc_avghourlyhh.txt` — byte-identical to committed baseline.
+
+The pipeline is fully deterministic from the raw PSID extract at `psid/psid.dta`; the point estimates do not depend on `N_REPS`. Bootstrap only affects the `H.mat`/`L.mat` workspace (adds `sigma2_epsilon_bs` of shape `(12, n_reps)`) and the confidence-band plot.
+
+**Bootstrap optimizer convergence**: of 1000 reps, 9 failed for H and 1 failed for L (produce NaN rows in `sigma2_epsilon_bs`). Plain MATLAB `prctile` propagates NaN, so the default `plot_estimates.m` can render gapped bands. Fix pending: switch to `prctile(..., 'omitnan')` (or compute via `nanpercentile` equivalent) — not blocking figure replication since the percentiles compute over 990+ valid reps.
+
+### 13.5 Pipeline ergonomics fixes
+
+Committed with the bootstrap run:
+
+- **`run_estimation.bat` is now portable**. Previously hardcoded `C:\Program Files\Stata16\StataSE-64.exe` and `C:\Program Files\MATLAB\R2018b\bin\matlab.exe`. Now honors `STATA_EXE` and `MATLAB_EXE` environment variables, falls back to the original defaults, and fails early with a clear error + override instructions if either executable is missing. Wrapped in `setlocal`/`endlocal`.
+- **`N_REPS` is now an environment variable**. Previously hardcoded `local n_reps 0` in `estimate_income_process.do:29` and `n_reps = 0` in `estimate_parameters.m:30`. Both now read `getenv('N_REPS')` / Stata `: env N_REPS` and fall back to 0. Replicators can run `set N_REPS=1000 & run_estimation.bat` without editing the source.
+- **Bootstrap `.mat` files are now tracked**. `.gitignore` previously excluded `output/**/*.mat`; added exceptions for `H.mat` and `L.mat` (~690 KB total across 2 variants × 2 types), so the figure with 95% CI bands is reproducible from the committed repo without the 12-hour bootstrap run.
+
+### 13.6 Paper Figure 6 vs current sandbox plot
+
+The paper's Appendix figure (`\ref{fig:app:calibration:shocks}`, rendered via [Dropbox submissions/01_EJ_R&R2/.../graphs/_MT_inputs/variances_plot.eps](file:///C:/Users/pzoch/Dropbox/Projects/EMERYT/_Paper_16_inequality_longevity/submissions/01_EJ_R%26R2/_Overleaf%20(backup)/graphs/_MT_inputs/variances_plot.eps), dated 2025-01-27) is produced by the Dropbox predecessor `plot_estimates.m` using a **hybrid**:
+
+- **Point estimates**: loaded from `calibration/income_process/matlab/output/mostdrop_hhslabinc/avghourlyhh/{H,L}.mat`. These values are **byte-identical** to the current sandbox's `mostdrop_hhslabinc/{H,L}.mat` (`sigma2_epsilon_point` matches to all 12 bins).
+- **Bootstrap 95% CIs**: loaded from `calibration/income_process/matlab/deaton_{H,L}_avghourlyhh.mat` — a **predecessor pipeline's 500-rep bootstrap**, taken from a period before the mostdrop/busno_drop variant split. The first bin is dropped in both paper and current scripts (`sig2(2:end)`, `ind = 1:11`).
+
+Consequences:
+- The solid lines in the paper's Figure 6 and the sandbox's `sigma2eps_mostdrop_hhslabinc.png` are identical data, identical positions. Visual perception of a difference from reading the low-res `draft.pdf` page render (72 dpi) is an artefact of how PDF viewers resample the embedded EPS — the source EPS at 300+ dpi shows the same curves as the sandbox render.
+- The CI bands differ in width but not dramatically: paper's `busno_drop`-labeled `busno_drop_hhslabinc/avghourlyhh/{H,L}.mat` in Dropbox has a 1000-rep bootstrap whose *point values* match current `mostdrop_hhslabinc` (confirming a variant-label flip between the two projects); but the paper figure instead uses the `deaton_*` bootstrap that predates the variant split. Sandbox's new bands are self-consistent (same variant for point and CI, current sample, 1000 reps).
+
+**Confidence**: the Fortran input `_data_sigma2eps_*.txt` comes from `sigma2_epsilon_point`, which is identical across all three inspected versions (sandbox new, main committed, Dropbox paper-era). The paper's Figure 6 and the sandbox's figure both correspond to this same baseline.
+
+### 13.7 Assets moved into the sandbox for replication
+
+- `psid/psid.dta` (98 MB, gitignored) — copied from `_Paper_16_EJ_replication/psid/psid.dta` so the income-process pipeline can run without relying on the adjacent repo.
+- `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` (1.96 GB, gitignored) — copied from the main repo so D02 (post path-fix) can load the ACS extract.
+
+Neither file is committed; both are referenced by scripts that expect them on disk. README Stage B already instructs replicators to obtain `psid/psid.dta` from the PSID Data Center; a similar instruction for `ACS_college.dta` (IPUMS ACS) may be worth adding.
+
+### 13.8 Remaining cleanup
+
+- ~108 GB of per-rep Stata `.dta` intermediates live under `inputs_stata_code/income_process/output/<variant>/psid_*_rep*.dta` after the bootstrap run. These are gitignored and safe to delete.
+- `plot_estimates.m` should switch `prctile` to a NaN-omitting variant (§13.4). Low priority since the figure still renders correctly for the 990+ reps that converge.
+- D02's duplicate `save` at [D02_prepare_college.do:72-73](../inputs_stata_code/skill_premium/D02_prepare_college.do#L72-L73) (same file saved twice after the path fix) is a cosmetic leftover from the original `..\data\...` vs `skill_premium\...` split.

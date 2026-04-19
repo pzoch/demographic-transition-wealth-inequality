@@ -26,8 +26,19 @@ if _rc != 0 {
 * =============================================================================
 local variants      mostdrop_hhslabinc busno_drop_hhslabinc
 local measure       avghourlyhh
-local n_reps        0                    // 0 = point estimate only, 1000 = full bootstrap
 local psid_path     "../../psid/psid"    // path to raw PSID dta (no extension), relative to this .do file's directory
+
+* n_reps: 0 = point estimate only (fast), 1000 = full bootstrap for confidence bands.
+* Override the default via environment variable N_REPS (e.g. `set N_REPS=1000` before
+* running run_estimation.bat). Leave unset for the default of 0.
+local n_reps_env : env N_REPS
+if "`n_reps_env'" != "" {
+    local n_reps `n_reps_env'
+}
+else {
+    local n_reps 0
+}
+display as text "Using n_reps = `n_reps'"
 
 * Create output directories
 capture mkdir "./output"

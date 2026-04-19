@@ -1,3 +1,5 @@
+set more off
+
 * set initial and final years
 global year_start 1935
 global year_stop 2100
@@ -13,7 +15,7 @@ global f_results "" // paste here the path for your results output from Fortran 
 
 *** PROCESS DATA - FORTRAN INPUTS;
 * PWT inputs;
-global bsource ""				
+global bsource "."
 do depreciation/M01prepare_depr			
 do tfp/M02prepare_gamma					
 do labor_share/M03prepare_labor_share	
@@ -29,7 +31,7 @@ do tax_rate/T01prepare_taxes
 do social_security/T02prepare_contributions		
 do tax_rate/T03prepare_tax_lambda 
 
-erase bone.dta
-erase bone1y.dta
+capture erase bone.dta
+capture erase bone1y.dta
 
 

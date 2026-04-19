@@ -27,7 +27,16 @@ addpath('matlab');
 %  ========================================================================
 variants  = {'mostdrop_hhslabinc', 'busno_drop_hhslabinc'};
 measure   = 'avghourlyhh';
-n_reps    = 0;                      % 0 = point estimate only, 1000 = full bootstrap
+% n_reps: 0 = point estimate only (fast), 1000 = full bootstrap for confidence bands.
+% Override via environment variable N_REPS (e.g. `set N_REPS=1000` before running
+% run_estimation.bat). Leave unset for the default of 0.
+n_reps_env = getenv('N_REPS');
+if ~isempty(n_reps_env)
+    n_reps = str2double(n_reps_env);
+else
+    n_reps = 0;
+end
+fprintf('Using n_reps = %d\n', n_reps);
 
 %% ========================================================================
 %  MODEL SETUP (should not need editing)

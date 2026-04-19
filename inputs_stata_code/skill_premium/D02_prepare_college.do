@@ -3,7 +3,7 @@ capture mkdir skill_premium\ACS_college\processed
 global lam = 1600
 
 ////////////////// Import data from ACS (downloaded from IPUMS) //////////////////
-use "..\data\skill_premium\ACS_college\ACS_college.dta", clear
+use "skill_premium\ACS_college\ACS_college.dta", clear
 keep if age == 25
 gen has_BA_more = (higrade >= 19 & year < 1990) //completed at least 16 years of education
 //higrade in general version reports the highest grade completed; detailed higrade also provide attended
@@ -60,14 +60,14 @@ export delimited v using "../fortran_code/data/_data_$var.txt", delimiter(tab) n
 
 restore
 gen cohort = year - 25
-save "..\data\skill_premium\ACS_college\processed\col_share_acs", replace
+save "skill_premium\ACS_college\processed\col_share_acs", replace
 
 clear
 range cohort 1840 2075 48
-merge 1:1 cohort using "..\data\skill_premium\ACS_college\processed\col_share_acs", nogen
+merge 1:1 cohort using "skill_premium\ACS_college\processed\col_share_acs", nogen
 replace college_share = .0469714 if cohort < 1910
 replace year = cohort + 25
 replace data = 0 if mi(data)
 replace ncollege_share = 1- college_share if mi(ncollege_share)
-save "..\data\skill_premium\ACS_college\processed\col_share_acs_ext", replace
+save "skill_premium\ACS_college\processed\col_share_acs_ext", replace
 save "skill_premium\ACS_college\processed\col_share_acs_ext", replace
