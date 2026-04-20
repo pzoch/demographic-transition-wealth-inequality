@@ -792,7 +792,7 @@ Twelve `.do` files in `outputs_stata_code/` (1244 lines total): driver `__main.d
 | Script (LoC) | Reads | Writes | Called by `__main.do` @ line | Globals required from caller | cwd | Notes |
 |---|---|---|---|---|---|---|
 | `__main.do` (194) | — (driver) | — (driver) | — | — | starts `outputs_stata_code/`; see §14.3 for the `cd` ledger | Sets `$resultspath`, `$graphspath`, `$datapath`, `$year_start/stop`, `$download_data=0`, per-block `$scenario`/`$variant_base`/`$variant_comp`/`$r1`/`$r2`/`$legend`/`$colors`/`$bsource`. Imports `mass_trans_small.csv` inline for the primary scenario (lines 16–28). |
-| `_prog_coding.do` (154) | — | — (program definitions) | line 9 | none (defines programs) | `outputs_stata_code/` | Defines `periods`, `periods_proj`, `drawing`, `special_drawing`, `drawing_for_piotr`, `prep_data_for_main_plot`. **§14.5-P1**: three `drawing*` programs lack `preserve`/`restore`, same bug `2bed247` fixed in `_prepare_programs.do`. |
+| `_prog_coding.do` (154) | — | — (program definitions) | line 9 | none (defines programs) | `outputs_stata_code/` | Defines `periods`, `periods_proj`, `drawing`, `special_drawing`, `prep_data_for_main_plot`. **§14.5-P1**: `drawing` and `special_drawing` originally lacked `preserve`/`restore` (same bug `2bed247` fixed in `_prepare_programs.do`); fixed in `c2`. A third plotting program `drawing_for_piotr` was also present but unused; removed in `c4`. |
 | `_prog_ineq_function.do` (197) | — | — | line 10 | none | `outputs_stata_code/` | Defines `ours_ineqdeco` (custom GE decomposition). Self-contained. Used by `MvD_4`. |
 | `_prep_Gini_data.do` (65) | `../fortran_code/Results/*/gini_trans.csv` (one per scenario folder); `../data/SCF/SCF_plus.dta` | `../graphs/outputs/wealth_inequality/combined_gini.dta` | line 11 | `$lam` implicitly (for `periods_proj` later); relies on community `ineqdeco` | `outputs_stata_code/` | **§14.5-P2**: community package `ineqdeco` not listed in README's Stata package requirements. Line 50: `qui ineqdeco ...`. |
 | `R_Figure1.do` (21) | `combined_gini.dta` | `$graphspath\Results_Gini_changes.png` | line 32 | `$scenario`, `$graphspath` | `outputs_stata_code/` | Figure 1 (main text). Clean single-export. |
@@ -844,9 +844,9 @@ All `cd` statements are balanced (no drift).
 
 ### 14.5 Integration-bug findings
 
-#### P1 — `_prog_coding.do` `drawing`/`special_drawing`/`drawing_for_piotr` lack `preserve`/`restore`
+#### P1 — `_prog_coding.do` `drawing`/`special_drawing` lack `preserve`/`restore`
 
-[`outputs_stata_code/_prog_coding.do:28-43`](../outputs_stata_code/_prog_coding.do#L28-L43), lines 46–64 and 67–85 define three plotting programs. Each does `tsset year; keep if year < 2050` before the `twoway` block, then ends — **no `preserve`/`restore`**. This is the exact bug commit `2bed247` fixed in `inputs_stata_code/_prepare_programs.do`.
+[`outputs_stata_code/_prog_coding.do:28-43`](../outputs_stata_code/_prog_coding.do#L28-L43) and lines 46–64 define two plotting programs. Each does `tsset year; keep if year < 2050` before the `twoway` block, then ends — **no `preserve`/`restore`**. This is the exact bug commit `2bed247` fixed in `inputs_stata_code/_prepare_programs.do`. (The file originally had a third program `drawing_for_piotr` with the same bug; it had no callers anywhere in the repo and was removed in commit `c4` as part of this audit.)
 
 **Blast radius**: when `__main.do` line 9 sources `_prog_coding.do`, the buggy versions enter the workspace. Appendix B (lines 58–81) then re-runs seven prep scripts that call these programs — M01 (`special_drawing`), M02 (`drawing`), M03 (`drawing`), H01, D02, T01, T03 (all call `drawing`). Each script's sequence is: compute → call `drawing` (which **truncates caller's data to year<2050**) → `export delimited` (which writes the truncated dataset). The Fortran inputs in `../fortran_code/Data/` produced by `__main_data_prepare.do` (clean, 34-row series) are **overwritten with 23-row truncated series** by Appendix B.
 

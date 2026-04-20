@@ -66,28 +66,6 @@ restore
 end
 
 
-capture program drop drawing_for_piotr
-program drawing_for_piotr
-preserve
-tsset year
-keep if year < 2050
-twoway	(tsline $var_frozen ,lcolor(blue) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ys,$ye), lcolor(black) lwidth(vthick)) ///
-		(tsline $var if inrange(year,1935,$ys), lcolor(black)  lwidth(medium) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ye,2100), lcolor(black) lwidth(medium)  lpattern(dash)) , ///
-		xtitle("year", size(*1.35)) ytitle(, size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(-  "Primary"  - "Alternative" 2 "data"  1 "extrapolation" 3 "extrapolation"  ) size(*1.4) cols(2))
-
-
-	graph save "../graphs/inputs/$var.gph", replace
-	graph export "../graphs/inputs/$var.png", replace
-	graph export "../graphs/inputs/$var.eps", replace
-	graph export "../graphs/inputs/$var.svg", replace
-	graph export "../graphs/inputs/$var.pdf", replace
-restore
-end
-
-
 //This program is used to prepare model data for plotting
 capture program drop prep_data_for_main_plot
 program prep_data_for_main_plot
