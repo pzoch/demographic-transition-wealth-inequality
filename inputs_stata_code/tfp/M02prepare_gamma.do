@@ -54,4 +54,4 @@ global ye 2020
 special_drawing
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace

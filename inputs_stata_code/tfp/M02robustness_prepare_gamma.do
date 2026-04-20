@@ -48,4 +48,4 @@ global ye 2020
 special_drawing2
 
 ////// EXPORTING ///////
-export delimited $var_frozen using "../fortran_code/data/_data_gamma_robustness.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var_frozen using "../fortran_code/Data/_data_gamma_robustness.txt", delimiter(tab) novarnames nolabel replace

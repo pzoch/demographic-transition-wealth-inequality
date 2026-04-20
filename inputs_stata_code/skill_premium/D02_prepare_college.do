@@ -56,7 +56,7 @@ special_drawing
 
 preserve
 stack college_share ncollege_share, into(v)
-export delimited v using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited v using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
 
 restore
 gen cohort = year - 25

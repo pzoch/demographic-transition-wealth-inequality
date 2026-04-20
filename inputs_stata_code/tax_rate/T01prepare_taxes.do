@@ -49,5 +49,5 @@ special_drawing
 
 ////// EXPORTING ///////
 local taxletter = substr("`tax'", 2, .)
-export delimited $var using "../fortran_code/data/_data_tau`taxletter'.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/Data/_data_tau`taxletter'.txt", delimiter(tab) novarnames nolabel replace
 }

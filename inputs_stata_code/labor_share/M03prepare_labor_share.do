@@ -47,6 +47,6 @@ global ye 2015
 special_drawing
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_labsh.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/Data/_data_labsh.txt", delimiter(tab) novarnames nolabel replace
 
 
