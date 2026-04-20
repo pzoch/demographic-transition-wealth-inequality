@@ -839,7 +839,7 @@ This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes th
 - `_data_depr.txt` (depreciation) — `depreciation/M01prepare_depr.do`
 - `_data_gamma.txt` (TFP growth path) — `tfp/M02prepare_gamma.do`
 - `_data_labsh.txt` (labor share) — `labor_share/M03prepare_labor_share.do`
-- `_data_irr.txt`, `_data_exog_rate_1935.txt` (exogenous rate series for the `exor_` scenario) — `../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do`
+- `_data_exog_rate_1935.txt` (exogenous rate series for the `exor_` scenario) — `../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do`
 - `_data_skill_premium.txt` — `skill_premium/H01prepare_skill_premium.do`
 - `_data_college_share.txt` — `skill_premium/D02_prepare_college.do`
 - `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt` (consumption, capital, labor tax rates) — `tax_rate/T01prepare_taxes.do`

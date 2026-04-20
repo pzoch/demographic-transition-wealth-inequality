@@ -43,6 +43,7 @@ global var irr
 tsline $var, yscale(range(5 11) )
 
 
-///for partial-equilibrium model input
-export delimited $var using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+// Exported under the name Fortran reads (see fortran_code/data.f90).
+// The earlier "_data_irr.txt" alias was removed: it was byte-identical
+// to _data_exog_rate_1935.txt and nothing in the repository consumed it.
 export delimited $var using "../fortran_code/Data/_data_exog_rate_1935.txt", delimiter(tab) novarnames nolabel replace

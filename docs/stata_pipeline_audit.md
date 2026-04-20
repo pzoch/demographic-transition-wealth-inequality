@@ -38,7 +38,7 @@ __main_data_prepare.do
 ├── depreciation/M01prepare_depr.do          (writes ../fortran_code/data/_data_depr.txt)
 ├── tfp/M02prepare_gamma.do                  (writes ../fortran_code/data/_data_gamma.txt)
 ├── labor_share/M03prepare_labor_share.do    (writes ../fortran_code/data/_data_lab_share.txt)
-├── ../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do   (robustness; writes _data_irr.txt, not frozen)
+├── ../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do   (robustness; writes _data_exog_rate_1935.txt, not frozen)
 ├── skill_premium/H01prepare_skill_premium.do (writes ../fortran_code/data/_data_skill_premium.txt)
 ├── skill_premium/D02_prepare_college.do     (writes ../fortran_code/data/_data_college_share.txt)
 ├── tax_rate/T01prepare_taxes.do             (writes _data_tC.txt, _data_tK.txt, _data_tL.txt via $var loop)
@@ -192,7 +192,7 @@ Legend:
 
 | Path | Kind | Status | Confidence | Note |
 |---|---|---|---|---|
-| `exog_rate/M04prepare_exog_rate.do` | script | live | high | Called from `__main_data_prepare.do:19` and `__main.do:175`; writes `_data_irr.txt` |
+| `exog_rate/M04prepare_exog_rate.do` | script | live | high | Called from `__main_data_prepare.do:19` and `__main.do:175`; writes `_data_exog_rate_1935.txt` (the name Fortran reads) |
 | `exog_rate/irr.dta` | data | tracked-input-data | high | Source data for M04 |
 | `exog_rate/M02robustness_prepare_gamma.do` | script | **missing** | high | `__main.do:164` expects this path but the file only exists at `inputs_stata_code/tfp/M02robustness_prepare_gamma.do`. See 2.3 |
 
@@ -277,7 +277,7 @@ Part of the audit's charter is verifying that [README.md](../README.md) describe
 | Step 2 Stage A run command | `cd inputs_stata_code && stata -e do __main_data_prepare.do` | Pipeline must be launched via [inputs_stata_code/main.stpr](../inputs_stata_code/main.stpr) in interactive Stata; `stata -e` crashes on the first `merge` | Replaced with `.stpr`-based launch steps |
 | Step 2 Stage A file list | `_data_labsh.txt` | Script writes `_data_lab_share.txt` (from `global var lab_share`) | Corrected |
 | Step 2 Stage A file list | `_data_contrib.txt` | Script writes `_data_contributions.txt` (from `global var contributions`) | Corrected |
-| Step 2 Stage A file list | `_data_exog_rate.txt, _data_irr.txt` from M04 | M04 writes only `_data_irr.txt`; `_data_exog_rate_1935.txt` is a frozen hand-written input | Dropped the `_data_exog_rate.txt` claim |
+| Step 2 Stage A file list | `_data_exog_rate.txt, _data_irr.txt` from M04 | M04 now writes only `_data_exog_rate_1935.txt` (commit `75e4433` consolidated the two exports after the alias `_data_irr.txt` was found to be unused) | Updated to the single current output |
 | Step 2 Stage C description | "hand-held demography prep produces the `_data_Nn_*.txt` population series and `_data_pi_*.txt` survival series" | No Stata script produces `_data_Nn_*.txt` — those are frozen hand-written inputs. Mortality/hetero_pi scripts write to `inputs_stata_code/demography/<sub>/output/`, not directly to `fortran_code/Data/`, and are copied over by hand | Rewritten to separate frozen series from scripted outputs and to name the subfolder-to-Data/ hand-copy step |
 | Step 2 Stage C | (no mention of orphan files) | ~15 `_data_*.txt` files in `fortran_code/Data/` have no Stata producer: `_data_tau{C,K,L}.txt`, `_data_contrib{,_to_gdp}.txt`, `_data_{exog_rate,gy,rho}_1935.txt`, `_data_type_*.txt`, `_data_het_pi_US_since1935.txt`, `_data_pi_cond_het_US_since1935.txt`, `_data_gamma_robustness.txt` | Added an inventory paragraph flagging them as frozen source data |
 | Step 7 run command | `cd outputs_stata_code && stata -e do __main.do` | Must be launched via [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr) | Replaced with `.stpr`-based launch steps |
@@ -510,7 +510,7 @@ The sandbox also requires:
 | M02r | `_data_gamma_robustness.txt` | **PERFECT MATCH** (34/34) | |
 | M03 | `_data_labsh.txt` | **PERFECT MATCH** (23/23) | |
 | M03 | `_data_lab_share.txt` | **PERFECT MATCH** (23/23) | |
-| M04 | `_data_irr.txt` | not compared (output path mismatch in test script) | M04 ran successfully; file written to `sensitivity_stata_code/exog_rate/output/`. Fortran reads the frozen `_data_exog_rate_1935.txt`, not `_data_irr.txt` directly. |
+| M04 | `_data_exog_rate_1935.txt` | not compared (output path mismatch in test script) | M04 ran successfully. This is the name Fortran reads ([data.f90:159](../fortran_code/data.f90#L159)). |
 | T01 | `_data_tL.txt` | **PERFECT MATCH** (23/23) | |
 | T01 | `_data_tK.txt` | **PERFECT MATCH** (23/23) | |
 | T01 | `_data_tC.txt` | **PERFECT MATCH** (23/23) | |
@@ -560,7 +560,7 @@ However, the comparison reports PERFECT MATCH at 46/46 — meaning D02 reproduce
 | `_data_tauC.txt` / `_data_tC.txt` | T01 | **Yes, byte-exact** | 23 | 34? | Check `last_data_tauC` |
 | `_data_contributions.txt` | T02 | **Yes, byte-exact** | 23 | 34? | Check `last_data_t1` |
 | `_data_pi_cond_US_since1935.txt` | D01 | **Length mismatch** | 544 | 528+header | See §11.4 |
-| `_data_irr.txt` | M04 | Not compared | — | — | Fortran reads frozen `_data_exog_rate_1935.txt` |
+| `_data_exog_rate_1935.txt` | M04 | Not compared | — | — | The name Fortran reads; produced by M04 |
 | `_data_lab_share.txt` | M03 | **Yes, byte-exact** | 23 | — | Not directly read by Fortran |
 | `_data_rho_1935.txt` | — | Frozen | — | — | No Stata producer |
 | `_data_exog_rate_1935.txt` | — | Frozen | — | — | No Stata producer |
