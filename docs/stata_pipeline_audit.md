@@ -884,8 +884,8 @@ Recommend the first option (commit the frozen `.dta` files) for consistency with
 
 ### 14.6 Orphan disposition
 
-- **`outputs_stata_code/__main_PIOTR.do`**: `grep -rln "__main_PIOTR"` across `.do`, `.stpr`, `.md`, `.bat` returns **only docs references** (this audit, brainstorms, plans, and §6). No Stata call site. Already ranked P3 in §6. **Confirmed orphan; safe to delete in commit `c3`.**
-- **`outputs_stata_code/asi_aux.dta`**: same grep pattern returns only docs. No `.do` script reads it. Already ranked P3. **Confirmed orphan; safe to delete in commit `c3`.**
+- **`outputs_stata_code/__main_PIOTR.do`**: already deleted on `ej-sandbox` by commit `ba08b26` ("Delete stale outputs_stata_code/__main_PIOTR.do"). The §6 P3 item was stale as of 2026-04-14. No follow-up needed. `grep -rln "__main_PIOTR"` now finds only references in this audit and related docs.
+- **`outputs_stata_code/asi_aux.dta`**: `grep -rln "asi_aux"` across `.do`, `.stpr`, `.md`, `.bat` returns **only docs references** (this audit, brainstorms, plans, §6). No `.do` script reads it. Already ranked P3. **Confirmed orphan; deleted in commit `c3`.**
 - **`outputs_stata_code/bone.dta`, `outputs_stata_code/bone1y.dta`**: required by Appendix B's `$bsource="../outputs_stata_code/"` merges at [line 63](../outputs_stata_code/__main.do#L63). **Keep committed** per §6 P2; file a README note (§14.7).
 
 ### 14.7 Updates to §6 open-issues list
@@ -897,8 +897,8 @@ Recommend the first option (commit the frozen `.dta` files) for consistency with
 | P2 — `Data/` vs `data/` case asymmetry | **resolved** by `af261e2` | §14.5 verification |
 | P2 — demography output paths | partially resolved by `75451a0`/`2bed247` (D03 wired to `fortran_code/Data/`); D01 still local-only | §13 earlier noted; unchanged by this audit |
 | P2 — `bone*.dta` policy | **unchanged** (keep committed for Appendix B); add a README note | §14.6 |
-| P3 — `__main_PIOTR.do` | **confirmed orphan**; delete in `c3` | §14.6 |
-| P3 — `asi_aux.dta` | **confirmed orphan**; delete in `c3` | §14.6 |
+| P3 — `__main_PIOTR.do` | **already resolved** in commit `ba08b26` (pre-this-session) | §14.6 (§6 item was stale) |
+| P3 — `asi_aux.dta` | **confirmed orphan**; deleted in `c3` | §14.6 |
 | P3 — `.stpr` as canonical entry point | README Step 2 + Step 7 already updated | (no change needed) |
 | P3 — `R01compare_r_sd.do` disposition | **unchanged** (out of scope; inputs tree) | — |
 | P3 — income-process split doc | **resolved** (§13.5 + README Stage B) | — |
