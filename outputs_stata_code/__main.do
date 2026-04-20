@@ -125,7 +125,7 @@ global variant_comp "psid_nts_govt__ psid_nls_govt__ psid_nga_govt__ psid_ndp_go
 global legend `"legend(order(1 "[S4] Technology:1955" 2 "[S4a] LabShare:1955" 3 "[S4b] TFP:1955" 4 "[S4c] Depr:1955" ) cols(4))"'
 global colors "dkgreen dkgreen*0.5 dk_green*0.3 green  " 
 do R_Figure3.do				// Figure E.3.
-graph export $graphspath\\Results_Gini_drivers_taxes.png, replace 
+graph export $graphspath\\Results_Gini_drivers_macro.png, replace
 
 ** Do graphs for Appendix F -- Sensitivity
 * Higher intertemporal elasticity of substitution

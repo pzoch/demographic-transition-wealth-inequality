@@ -1,3 +1,10 @@
+* Community `ineqdeco` is required by this script (line ~50) and by
+* MvD_3_Gini_wealth.do. Auto-install on first run if missing.
+capture which ineqdeco
+if _rc != 0 {
+    ssc install ineqdeco
+}
+
 local mainfolder "../fortran_code/Results/"
 local subfolders : dir "`mainfolder'" dirs "*"
 

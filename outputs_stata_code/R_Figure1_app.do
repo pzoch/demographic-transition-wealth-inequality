@@ -17,6 +17,9 @@ twoway  (bar aGini_dta_5yr year,  barwidth(3.2) color(gs12) bargap(0) )  ///
 		xtitle("") title("Change in wealth Gini coefficient (in p.p. relative to 1950)")  yline(0, lcolor(gs12) lwidth(medthick)) ///
 		ytitle("Gini coefficient change in p.p.", size(*1.2))  ///
 	 	xlabel(1950[15]2015, labsize(*1.2) ) ///
-		xsize(7.5) ysize(3)  ylabel(, labsize(*1.2)  angle(h) gstyle(dot) glcolor(grey)) 
-		 
-		graph export $graphspath\\Results_Gini_changes.png, replace 
+		xsize(7.5) ysize(3)  ylabel(, labsize(*1.2)  angle(h) gstyle(dot) glcolor(grey))
+
+// __main.do line 185 exports this graph to AppF_Gini_counterfactuals_exograte.png.
+// An earlier copy of this script also `graph export`ed to Results_Gini_changes.png
+// here, which clobbered Figure 1 (the main-text file produced by R_Figure1.do).
+// Removed. See docs/stata_pipeline_audit.md §14.4-D2.

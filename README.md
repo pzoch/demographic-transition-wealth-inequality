@@ -394,7 +394,7 @@ The following data cannot be redistributed due to licensing restrictions:
 
 3. **Stata** (for calibration inputs and paper figures)
    - Version: Stata/SE 16 or later (tested with Stata 16)
-   - Required packages: `psmatch2`, `mat2txt`, `egenmore` (install via `ssc install`)
+   - Required packages: `psmatch2`, `mat2txt`, `egenmore`, `ineqdeco` (install via `ssc install`). `ineqdeco` is auto-installed on first run by `outputs_stata_code/_prep_Gini_data.do`; the others must be installed manually.
    - Used by: `inputs_stata_code/` (Step 2, calibration inputs) and `outputs_stata_code/` (Step 7, paper figures)
    - License: Commercial (StataCorp)
 
@@ -811,7 +811,7 @@ Or download as ZIP and extract to any local path — no hardcoded locations are 
 The Fortran model reads ~40 calibration input files from `fortran_code/Data/`. These files are produced by the Stata (and MATLAB) code under `inputs_stata_code/`. **Re-running the calibration pipeline is part of the replication**: the pre-generated files in the repository reflect the authors' most recent run and should be treated as a snapshot, not a frozen deliverable.
 
 **Required software**:
-- **Stata 16+** with the `psmatch2`, `mat2txt`, and `egenmore` packages
+- **Stata 16+** with the `psmatch2`, `mat2txt`, `egenmore`, and `ineqdeco` packages (`ineqdeco` is auto-installed on first run)
 - **MATLAB R2018b+** (required by `inputs_stata_code/income_process/`)
 - **Raw PSID extract** at `psid/psid.dta` (~98 MB, at the repository root). Not redistributed — obtain through the PSID Data Center. See the Data Availability section for access instructions.
 
