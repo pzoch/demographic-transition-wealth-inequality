@@ -1,6 +1,17 @@
 %% Plot sigma2_epsilon estimates with bootstrap confidence intervals
-% Loads H.mat and L.mat from the output directory produced by
-% estimate_parameters.m. Each .mat file contains:
+% Loads point estimates from H.mat / L.mat (the live pipeline output,
+% overwritten by every run of estimate_parameters.m including the default
+% N_REPS=0). Loads bootstrap confidence intervals from H_archive.mat /
+% L_archive.mat if present — these hold the authors' paper-baseline
+% 1000-rep bootstrap and are tracked in the repository; they are never
+% overwritten by run_estimation.bat. This split means a default
+% point-estimate rerun cannot clobber the committed CI arrays.
+%
+% Fallback: if no *_archive.mat exists, look for sigma2_epsilon_bs inside
+% H.mat / L.mat directly (pre-split layout). If neither has bootstrap,
+% plot point estimates only.
+%
+% Each .mat file contains:
 %   sigma2_epsilon_point  - point estimates (1 x C_eff)
 %   sigma2_epsilon_bs     - bootstrap estimates (C_eff x n_reps), if n_reps > 0
 %
@@ -16,41 +27,62 @@ for ivar = 1:length(variants)
 
     fprintf('Plotting sigma2_epsilon for %s\n', variant);
 
-    % --- Load H (college) ---
-    H_data = load(fullfile(result_dir, 'H.mat'), ...
-        'sigma2_epsilon_point');
+    % --- Point estimates: always from live H.mat / L.mat ---
+    H_data = load(fullfile(result_dir, 'H.mat'), 'sigma2_epsilon_point');
+    L_data = load(fullfile(result_dir, 'L.mat'), 'sigma2_epsilon_point');
     sig2_H = H_data.sigma2_epsilon_point;
-    has_bootstrap = false;
+    sig2_L = L_data.sigma2_epsilon_point;
+
+    % --- Bootstrap arrays: prefer *_archive.mat (paper baseline, tracked);
+    %     fall back to live *.mat if no archive exists (e.g. after a full
+    %     bootstrap run that rewrote both live and archive). ---
+    sig2_H_bs = [];
+    sig2_L_bs = [];
+    H_archive = fullfile(result_dir, 'H_archive.mat');
+    L_archive = fullfile(result_dir, 'L_archive.mat');
+    H_live    = fullfile(result_dir, 'H.mat');
+    L_live    = fullfile(result_dir, 'L.mat');
+
     try
-        H_bs = load(fullfile(result_dir, 'H.mat'), 'sigma2_epsilon_bs');
-        sig2_H_bs = H_bs.sigma2_epsilon_bs;
-        % Drop bootstrap reps where any bin failed to converge (all-NaN
-        % propagates through prctile; reps are failed per-column not per-bin).
-        valid_H   = ~any(isnan(sig2_H_bs), 1);
-        prc0975H  = prctile(sig2_H_bs(:, valid_H)', 97.5);
-        prc0025H  = prctile(sig2_H_bs(:, valid_H)', 2.5);
-        fprintf('  H bootstrap: %d valid / %d total reps.\n', sum(valid_H), numel(valid_H));
-        has_bootstrap = true;
+        if exist(H_archive, 'file')
+            tmp = load(H_archive, 'sigma2_epsilon_bs');
+            sig2_H_bs = tmp.sigma2_epsilon_bs;
+            fprintf('    H CI source: H_archive.mat\n');
+        else
+            tmp = load(H_live, 'sigma2_epsilon_bs');
+            sig2_H_bs = tmp.sigma2_epsilon_bs;
+            fprintf('    H CI source: H.mat (no archive found)\n');
+        end
     catch
-        fprintf('  No bootstrap data for H — plotting point estimates only.\n');
+    end
+    try
+        if exist(L_archive, 'file')
+            tmp = load(L_archive, 'sigma2_epsilon_bs');
+            sig2_L_bs = tmp.sigma2_epsilon_bs;
+            fprintf('    L CI source: L_archive.mat\n');
+        else
+            tmp = load(L_live, 'sigma2_epsilon_bs');
+            sig2_L_bs = tmp.sigma2_epsilon_bs;
+            fprintf('    L CI source: L.mat (no archive found)\n');
+        end
+    catch
     end
 
-    % --- Load L (no college) ---
-    L_data = load(fullfile(result_dir, 'L.mat'), ...
-        'sigma2_epsilon_point');
-    sig2_L = L_data.sigma2_epsilon_point;
-    if has_bootstrap
-        try
-            L_bs = load(fullfile(result_dir, 'L.mat'), 'sigma2_epsilon_bs');
-            sig2_L_bs = L_bs.sigma2_epsilon_bs;
-            valid_L   = ~any(isnan(sig2_L_bs), 1);
-            prc0975L  = prctile(sig2_L_bs(:, valid_L)', 97.5);
-            prc0025L  = prctile(sig2_L_bs(:, valid_L)', 2.5);
-            fprintf('  L bootstrap: %d valid / %d total reps.\n', sum(valid_L), numel(valid_L));
-        catch
-            fprintf('  No bootstrap data for L — plotting point estimates only.\n');
-            has_bootstrap = false;
-        end
+    has_bootstrap = false;
+    if ~isempty(sig2_H_bs) && ~isempty(sig2_L_bs)
+        % Drop reps where any bin failed to converge (all-NaN propagates
+        % through prctile; reps are failed per-column not per-bin).
+        valid_H   = ~any(isnan(sig2_H_bs), 1);
+        valid_L   = ~any(isnan(sig2_L_bs), 1);
+        prc0975H  = prctile(sig2_H_bs(:, valid_H)', 97.5);
+        prc0025H  = prctile(sig2_H_bs(:, valid_H)', 2.5);
+        prc0975L  = prctile(sig2_L_bs(:, valid_L)', 97.5);
+        prc0025L  = prctile(sig2_L_bs(:, valid_L)', 2.5);
+        fprintf('  H bootstrap: %d valid / %d total reps.\n', sum(valid_H), numel(valid_H));
+        fprintf('  L bootstrap: %d valid / %d total reps.\n', sum(valid_L), numel(valid_L));
+        has_bootstrap = true;
+    else
+        fprintf('  No bootstrap data — plotting point estimates only.\n');
     end
 
     %% Main figure (paper version)

@@ -887,7 +887,9 @@ set N_REPS=1000
 run_estimation.bat
 ```
 
-The `output/<variant>/{H,L}.mat` workspace files produced by this run contain the bootstrap arrays (`sigma2_epsilon_bs`, shape `(12, N_REPS)`) that `matlab/plot_estimates.m` uses to compute the shaded 95% bands. These four `.mat` files are **tracked in the repository** (~690 KB total); a fresh clone ships with the authors' 1000-rep bootstrap outputs so the figure replicates without re-running the 12-hour bootstrap. Re-running `run_estimation.bat` with the default `N_REPS=0` will overwrite them with point-only versions — keep a backup if you want to preserve the committed bootstrap results locally.
+**Live vs. archived `.mat` files** — `output/<variant>/{H,L}.mat` are the **live pipeline outputs**; `run_estimation.bat` overwrites them on every run (including the default `N_REPS=0`), so they are **not tracked** in git. Alongside them, `output/<variant>/{H,L}_archive.mat` hold the **authors' paper-baseline 1000-rep bootstrap** (`sigma2_epsilon_bs`, shape `(12, 1000)`) and **are tracked** (~690 KB total) via a `.gitignore` exception. `matlab/plot_estimates.m` loads point estimates from the live `.mat` and bootstrap arrays from the `_archive.mat`, so Figure 6 always reflects the current point estimates **plus the committed paper CI bands**, even after a replicator runs `run_estimation.bat` with the default `N_REPS=0`.
+
+If you do run the full bootstrap yourself (`set N_REPS=1000 & run_estimation.bat`, ~12 h), `estimate_parameters.m` automatically refreshes the archive on top of the live file — so your own bootstrap results become the new CI source without manual copying. Revert the archive files from git (`git checkout HEAD -- inputs_stata_code/income_process/output/*/H_archive.mat inputs_stata_code/income_process/output/*/L_archive.mat`) if you want the authors' baseline back.
 
 **Expected bootstrap convergence rate**: of 1000 reps, ~10 may fail `lsqnonlin` convergence (9 H, 1 L in the authors' run). `plot_estimates.m` drops failed reps before computing percentiles.
 

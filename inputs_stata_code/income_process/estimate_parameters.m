@@ -273,6 +273,20 @@ for ivar = 1:length(variants)
         fprintf('Saving %s\n', mat_file);
         save(mat_file);
 
+        % When a bootstrap was run (n_reps > 0), also mirror the workspace to
+        % <type>_archive.mat. The archive is the CI source for plot_estimates.m
+        % and the file that is tracked in the repository; refreshing it on
+        % every bootstrap run keeps the archive in sync with the latest
+        % resampling. A default point-estimate run (n_reps == 0) does NOT
+        % touch the archive, so the committed paper-baseline 1000-rep
+        % bootstrap is preserved through a `set N_REPS=0 & run_estimation.bat`
+        % replication.
+        if n_reps > 0
+            archive_file = fullfile(save_dir, [type '_archive.mat']);
+            fprintf('Saving %s (bootstrap archive)\n', archive_file);
+            save(archive_file);
+        end
+
         % ------------------------------------------------------------------
         % Store sigma2_epsilon for Fortran export
         % ------------------------------------------------------------------
