@@ -776,3 +776,142 @@ Neither file is committed; both are referenced by scripts that expect them on di
 - ~108 GB of per-rep Stata `.dta` intermediates live under `inputs_stata_code/income_process/output/<variant>/psid_*_rep*.dta` after the bootstrap run. These are gitignored and safe to delete.
 - `plot_estimates.m` should switch `prctile` to a NaN-omitting variant (§13.4). Low priority since the figure still renders correctly for the 990+ reps that converge.
 - D02's duplicate `save` at [D02_prepare_college.do:72-73](../inputs_stata_code/skill_premium/D02_prepare_college.do#L72-L73) (same file saved twice after the path fix) is a cosmetic leftover from the original `..\data\...` vs `skill_premium\...` split.
+
+## 14. Output-driver audit — `outputs_stata_code/` (2026-04-20)
+
+Sibling to §13 covering the figure-generation pipeline driven by [outputs_stata_code/__main.do](../outputs_stata_code/__main.do) via [outputs_stata_code/__replication_graphs.stpr](../outputs_stata_code/__replication_graphs.stpr). Method follows the same single-pass pattern (§13): static read of every `.do` file in `outputs_stata_code/`, cross-referenced against `__main.do`'s invocation sequence, dup/dead-write hunt, P1/P2/P3 delta. Plan: [docs/plans/2026-04-20-refactor-output-stata-audit-plan.md](plans/2026-04-20-refactor-output-stata-audit-plan.md). Brainstorm: [docs/brainstorms/2026-04-20-output-stata-audit-brainstorm.md](brainstorms/2026-04-20-output-stata-audit-brainstorm.md).
+
+### 14.1 Scope and method
+
+Twelve `.do` files in `outputs_stata_code/` (1244 lines total): driver `__main.do`, three helpers (`_prog_coding`, `_prog_ineq_function`, `_prep_Gini_data`), four figure scripts (`R_Figure1`, `R_Figure1_app`, `R_Figure2`, `R_Figure3`), four Model-vs-Data scripts (`MvD_1_macro`, `MvD_2_Gini_income`, `MvD_3_Gini_wealth`, `MvD_4_GE_decomposition`). Plus `__main.do`'s Appendix B/C/F calls into `inputs_stata_code/` and `sensitivity_stata_code/` (previously audited in §13 for their inputs-driver invocation path — re-audited here for the outputs-driver re-entry).
+
+**Dry-run constraint**: `mklink /J` (the plan's folder-junction approach for staging Fortran `Results/`) failed on the N: network drive ("Local NTFS volumes are required"). Dry-run therefore relies on path overrides at the harness level (global `$resultspath` pointed at the main repo's absolute path). The `.stpr` interactive execution of `__main.do` end-to-end remains deferred (§6 P1-2), consistent with the brainstorm's choice of "static + dry-run of runnable pieces only".
+
+### 14.2 Per-script spec table
+
+| Script (LoC) | Reads | Writes | Called by `__main.do` @ line | Globals required from caller | cwd | Notes |
+|---|---|---|---|---|---|---|
+| `__main.do` (194) | — (driver) | — (driver) | — | — | starts `outputs_stata_code/`; see §14.3 for the `cd` ledger | Sets `$resultspath`, `$graphspath`, `$datapath`, `$year_start/stop`, `$download_data=0`, per-block `$scenario`/`$variant_base`/`$variant_comp`/`$r1`/`$r2`/`$legend`/`$colors`/`$bsource`. Imports `mass_trans_small.csv` inline for the primary scenario (lines 16–28). |
+| `_prog_coding.do` (154) | — | — (program definitions) | line 9 | none (defines programs) | `outputs_stata_code/` | Defines `periods`, `periods_proj`, `drawing`, `special_drawing`, `drawing_for_piotr`, `prep_data_for_main_plot`. **§14.5-P1**: three `drawing*` programs lack `preserve`/`restore`, same bug `2bed247` fixed in `_prepare_programs.do`. |
+| `_prog_ineq_function.do` (197) | — | — | line 10 | none | `outputs_stata_code/` | Defines `ours_ineqdeco` (custom GE decomposition). Self-contained. Used by `MvD_4`. |
+| `_prep_Gini_data.do` (65) | `../fortran_code/Results/*/gini_trans.csv` (one per scenario folder); `../data/SCF/SCF_plus.dta` | `../graphs/outputs/wealth_inequality/combined_gini.dta` | line 11 | `$lam` implicitly (for `periods_proj` later); relies on community `ineqdeco` | `outputs_stata_code/` | **§14.5-P2**: community package `ineqdeco` not listed in README's Stata package requirements. Line 50: `qui ineqdeco ...`. |
+| `R_Figure1.do` (21) | `combined_gini.dta` | `$graphspath\Results_Gini_changes.png` | line 32 | `$scenario`, `$graphspath` | `outputs_stata_code/` | Figure 1 (main text). Clean single-export. |
+| `R_Figure1_app.do` (22) | `combined_gini.dta` | `$graphspath\Results_Gini_changes.png` (overwrites Figure 1!) | line 184 | `$scenario="psid_all_govt__ exor_all_govt__"` (hardcoded two-scenario string), `$graphspath` | `outputs_stata_code/` | **§14.4-D1**: line 22 writes to the Figure-1 filename; `__main.do:185` then re-exports to the correct `AppF_Gini_counterfactuals_exograte.png`. Figure 1's PNG ends up corrupted with Figure F.7 content. |
+| `R_Figure2.do` (36) | `combined_gini.dta` | no internal `graph export` (caller exports) | 6× — lines 38, 136, 144, 152, 161, 177, 192 (7× in total) | `$variant_base`, `$variant_comp`, `$r1`, `$r2`, `$legend` (?) | `outputs_stata_code/` | Calls `prep_data_for_main_plot` (defined in `_prog_coding`). Clean; no dead writes. |
+| `R_Figure3.do` (74) | `combined_gini.dta` | no internal `graph export` | 5× — lines 46, 53, 111, 119, 127 | `$variant_base`, `$variant_comp`, `$colors`, `$legend` | `outputs_stata_code/` | Clean. |
+| `MvD_1_macro.do` (219) | `data/irr_data.dta`, `data/benefits_cbo.dta`, `data/avghours_data.dta`, `$resultspath\$scenario\irr_trans_1y.txt`, `$resultspath\$scenario\benefits_trans.txt`, `$resultspath\$scenario\avg_hours_trans.txt`, `..\inputs_stata_code\social_security\57971-Data.xlsx` | `$graphspath\{irr,avghours,benefits}_trans_levels.{png,eps,svg}` (9 files) | line 98 | `$scenario`, `$year_start=1950`/`$year_stop=2020` (reset by `__main.do` at lines 93–97), `$min_age`, `$max_age`, `$year_end=2100`, `$download_data`, `$lam` (implicit) | `outputs_stata_code/` | **§14.5-P3**: `outputs_stata_code/data/` subfolder does not exist in sandbox or main repo. With default `$download_data=0`, `use data/irr_data.dta` fails `r(601)`. |
+| `MvD_2_Gini_income.do` (39) | `..\data\model_$scenario.dta` (from `__main.do:28`), `..\data\PSID\psid_ready.dta` | `$graphspath\Lorenz_<yr>.{png,eps,svg}` (one per year in data) | line 99 | `$scenario`, `$min_age`, `$max_age`, `$graphspath` | `outputs_stata_code/` | `psid_ready.dta` gitignored (see [data availability](../README.md)). |
+| `MvD_3_Gini_wealth.do` (72) | `..\data\SCF\SCF_plus.dta`, `..\data\model_<scenario>.dta` | `$graphspath\MvD_Gini_levels.png` | line 100 | `$year_start=1950`/`$year_stop=2020` (reset by `__main.do`), `$graphspath`; community `ineqdeco` (see §14.5-P2) | `outputs_stata_code/` | `scenario` is a **local** (line 35) that shadows the global; behavior depends only on line-35 value. |
+| `MvD_4_GE_decomposition.do` (151) | `..\data\model_<scenario>.dta`, `..\data\SCF\SCF_plus.dta` | `$graphspath\MvD_GE.{png,eps,svg}` | line 101 | `$graphspath` | `outputs_stata_code/` | Local `scenario` (line 9) shadows global. Calls `ours_ineqdeco` from `_prog_ineq_function.do`. |
+| `__main_PIOTR.do` (?) | — | — | **not called** (orphan) | — | — | §14.6 orphan; P3 close-out. |
+
+### 14.3 `__main.do` structural map
+
+Driver blocks (line numbers are `__main.do`):
+
+| Block | Lines | Purpose | Key globals reset | `cd` | Prep re-entry |
+|---|---|---|---|---|---|
+| **Setup** | 1–11 | Globals, do _prog_coding, _prog_ineq_function, _prep_Gini_data | `$resultspath`, `$graphspath`, `$datapath`, `$year_start=1935`, `$year_stop=2100`, `$download_data=0` | — | — |
+| **Scheme + primary sim import** | 13–28 | Load Fortran mass_trans_small.csv for `psid_all_govt__`, save as `..\data\model_psid_all_govt__.dta` | `local scenario` | — | — |
+| **Main text — Figure 1** | 31–32 | R_Figure1 | `$scenario` | — | — |
+| **Main text — Figures 2/3** | 34–54 | R_Figure2 (1×) + R_Figure3 (2×), with exports at 39, 47, 54 | `$variant_base`, `$variant_comp`, `$r1`, `$r2`, `$legend`, `$colors` | — | — |
+| **Appendix B — Calibration** | 57–81 | Re-run M01/M02/M03/M04, H01, D02, T01/T02/T03 with `$bsource="../outputs_stata_code/"`; erase bone at end | `$year_start/stop`, `$bsource` | `cd ..\inputs_stata_code` (58) → `cd ..\outputs_stata_code` (81) | Uses `drawing`/`special_drawing` from step-1's `_prog_coding.do` (BUGGY — see §14.5-P1) |
+| **Appendix C — Populations** | 84–88 | D03, D01 | — | `cd ..\inputs_stata_code` (85) → `cd ..\outputs_stata_code` (88) | No `_prepare_programs` call; uses whatever `drawing` is in workspace. |
+| **Appendix D — MvD** | 90–101 | MvD_1, MvD_2, MvD_3, MvD_4 | `$scenario`, `$year_start=1950`/`$year_stop=2020`/`$year_end=2100`, `$min_age`, `$max_age` | — | — |
+| **Appendix E — Additional** | 103–128 | R_Figure3 3× (incomes, taxes, macro) | `$variant_base`, `$variant_comp`, `$legend`, `$colors` | — | — |
+| **Appendix F — Sensitivity** | 130–193 | R_Figure2 4× (crr3, hrat, ndel, nstr), M02robustness re-prep, R_Figure2 (gcbo), M04 re-prep, R_Figure1_app (exor), R_Figure2 (beqs) | `$variant_base`, `$variant_comp`, `$r1`, `$r2`, `$bsource`, `$scenario` | `cd ..\inputs_stata_code` (165) → `cd ..\outputs_stata_code` (171); also `do _prepare_programs` at 167 (this is where the FIXED programs finally reach the workspace, too late for Appendix B — see §14.5-P1) | `do _prepare_programs` at 167 overrides the Appendix-B-era buggy programs with the fixed inputs-side versions. |
+
+All `cd` statements are balanced (no drift).
+
+### 14.4 Duplicate / dead-write findings
+
+#### D1 — `__main.do:128` overwrites Figure E.2 with Figure E.3
+
+[`__main.do:120`](../outputs_stata_code/__main.do#L120) exports Figure E.2 (taxes variants) to `Results_Gini_drivers_taxes.png`. [`__main.do:128`](../outputs_stata_code/__main.do#L128) exports Figure E.3 (macro-trends variants) **to the same filename**. Whichever runs last — Figure E.3 in the current code — is what ends up on disk; Figure E.2 is silently discarded.
+
+**Fix**: rename the line-128 export to `Results_Gini_drivers_macro.png` (or similar) so both figures land at distinct names.
+
+#### D2 — `R_Figure1_app.do:22` overwrites Figure 1
+
+[`R_Figure1_app.do:22`](../outputs_stata_code/R_Figure1_app.do#L22): internal `graph export $graphspath\\Results_Gini_changes.png, replace`. This is the Figure 1 filename. `__main.do:185` then re-exports the same current graph to the correct `AppF_Gini_counterfactuals_exograte.png`, so Figure F.7's file is correct — but `Results_Gini_changes.png` (Figure 1) has been clobbered with F.7's content.
+
+**Fix**: remove line 22 of `R_Figure1_app.do`. `__main.do:185` handles the real export.
+
+#### Non-findings (reviewed and dismissed)
+
+- `_prog_coding.do` has 15 multi-write hits on `../graphs/inputs/$var.{gph,png,eps,svg,pdf}` — this is the three `drawing*` programs each writing to `$var`-parameterised paths. Different callers set `$var` to different values, so the runtime targets are distinct. Not a dead write.
+- M04 is invoked twice (inputs driver + `__main.do:182`) — defensive re-run so a standalone `__main.do` session produces the inputs Figure F.7 needs. Not a dead write.
+
+### 14.5 Integration-bug findings
+
+#### P1 — `_prog_coding.do` `drawing`/`special_drawing`/`drawing_for_piotr` lack `preserve`/`restore`
+
+[`outputs_stata_code/_prog_coding.do:28-43`](../outputs_stata_code/_prog_coding.do#L28-L43), lines 46–64 and 67–85 define three plotting programs. Each does `tsset year; keep if year < 2050` before the `twoway` block, then ends — **no `preserve`/`restore`**. This is the exact bug commit `2bed247` fixed in `inputs_stata_code/_prepare_programs.do`.
+
+**Blast radius**: when `__main.do` line 9 sources `_prog_coding.do`, the buggy versions enter the workspace. Appendix B (lines 58–81) then re-runs seven prep scripts that call these programs — M01 (`special_drawing`), M02 (`drawing`), M03 (`drawing`), H01, D02, T01, T03 (all call `drawing`). Each script's sequence is: compute → call `drawing` (which **truncates caller's data to year<2050**) → `export delimited` (which writes the truncated dataset). The Fortran inputs in `../fortran_code/Data/` produced by `__main_data_prepare.do` (clean, 34-row series) are **overwritten with 23-row truncated series** by Appendix B.
+
+Not caught by the inputs audit (§13) because that audit ran `__main_data_prepare.do` only, which sources the fixed `_prepare_programs.do` instead of `_prog_coding.do`.
+
+**Fix**: add `preserve` before the `tsset`/`keep`/`twoway` block and `restore` after the final `graph export` in all three `drawing*` programs in `outputs_stata_code/_prog_coding.do`.
+
+#### P2 — Missing `ineqdeco` package dependency
+
+[`_prep_Gini_data.do:50`](../outputs_stata_code/_prep_Gini_data.do#L50), [`MvD_3_Gini_wealth.do:22,51`](../outputs_stata_code/MvD_3_Gini_wealth.do#L22) call community `ineqdeco` (not the custom `ours_ineqdeco` defined in `_prog_ineq_function.do`). [`README.md:813`](../README.md#L813) lists `psmatch2`, `mat2txt`, `egenmore` — `ineqdeco` is missing.
+
+**Fix**: add `ineqdeco` to the README's Stata package list, and optionally add a `capture which ineqdeco` / `ssc install ineqdeco` preamble to `_prep_Gini_data.do` (same pattern `estimate_income_process.do:18-22` uses for `mat2txt`).
+
+#### P3 — `outputs_stata_code/data/` subfolder missing for `MvD_1_macro.do`
+
+[`MvD_1_macro.do:21,50,119`](../outputs_stata_code/MvD_1_macro.do#L21) reads `data/irr_data.dta`, `data/benefits_cbo.dta`, `data/avghours_data.dta` from `outputs_stata_code/data/`. That folder does **not exist** in the sandbox or in `_Paper_16_EJ_replication`. With the default `$download_data=0` path, MvD_1 fails immediately on `use data/irr_data.dta` with `r(601)`.
+
+`$download_data=1` would work (re-downloads from dbnomics/CBO, `save`s to `data/*.dta`, then the subsequent `use` succeeds), but that requires network access and is not the default. On a fresh clone the pipeline is broken.
+
+**Options**:
+- Commit the three `data/*.dta` files as frozen inputs (small, deterministic, like the committed `depreciation.dta` / `gamma.dta` files for the inputs pipeline).
+- Or swap the default to `$download_data=1` for these three series and document the network requirement.
+- Or rewrite the script to always compute from the source CSVs committed elsewhere, same as the inputs drivers do.
+
+Recommend the first option (commit the frozen `.dta` files) for consistency with the rest of the repo.
+
+#### Verification of §6 items closed in prior commits
+
+- **M02robustness path** (§6 P1 — fixed by `c796dd0` + `.stpr` update `6d0bbea`): [`__main.do:164-171`](../outputs_stata_code/__main.do#L164-L171) has the correct sequence (`cd`, `do _prepare_programs`, `do tfp/M02robustness_prepare_gamma`, erase bone, `cd` back). Confirmed: path fix took.
+- **Case asymmetry** (§6 P2 — fixed by `af261e2`): Appendix B's re-runs now write to `../fortran_code/Data/` (capital D) on Linux. Verified.
+
+#### Latent item not addressed
+
+- **Appendix C bone-file dependency**: Appendix B erases `bone.dta`/`bone1y.dta` at lines 78–79 of `__main.do`. Appendix C (lines 85–88) then calls D03 and D01 without re-creating them. If either script `merge`s `using bone1y` etc., it will fail. Static read of D03 does not show a bone merge, but D01 has not been re-read in this audit. Defer to §14.7.
+
+### 14.6 Orphan disposition
+
+- **`outputs_stata_code/__main_PIOTR.do`**: `grep -rln "__main_PIOTR"` across `.do`, `.stpr`, `.md`, `.bat` returns **only docs references** (this audit, brainstorms, plans, and §6). No Stata call site. Already ranked P3 in §6. **Confirmed orphan; safe to delete in commit `c3`.**
+- **`outputs_stata_code/asi_aux.dta`**: same grep pattern returns only docs. No `.do` script reads it. Already ranked P3. **Confirmed orphan; safe to delete in commit `c3`.**
+- **`outputs_stata_code/bone.dta`, `outputs_stata_code/bone1y.dta`**: required by Appendix B's `$bsource="../outputs_stata_code/"` merges at [line 63](../outputs_stata_code/__main.do#L63). **Keep committed** per §6 P2; file a README note (§14.7).
+
+### 14.7 Updates to §6 open-issues list
+
+| §6 item | Status after §14 | Note |
+|---|---|---|
+| P1 — M02robustness path | **resolved** via `c796dd0` (src) + `6d0bbea` (`.stpr`) | §14.5 verification |
+| P1 — runtime verification via `.stpr` | **inputs driver: resolved** (§13.3); **outputs driver: covered statically in §14**, full `.stpr` interactive run still deferred | Requires a complete Fortran `Results/` on a local NTFS volume (junction failed on N:) |
+| P2 — `Data/` vs `data/` case asymmetry | **resolved** by `af261e2` | §14.5 verification |
+| P2 — demography output paths | partially resolved by `75451a0`/`2bed247` (D03 wired to `fortran_code/Data/`); D01 still local-only | §13 earlier noted; unchanged by this audit |
+| P2 — `bone*.dta` policy | **unchanged** (keep committed for Appendix B); add a README note | §14.6 |
+| P3 — `__main_PIOTR.do` | **confirmed orphan**; delete in `c3` | §14.6 |
+| P3 — `asi_aux.dta` | **confirmed orphan**; delete in `c3` | §14.6 |
+| P3 — `.stpr` as canonical entry point | README Step 2 + Step 7 already updated | (no change needed) |
+| P3 — `R01compare_r_sd.do` disposition | **unchanged** (out of scope; inputs tree) | — |
+| P3 — income-process split doc | **resolved** (§13.5 + README Stage B) | — |
+| **§14-P1a — `_prog_coding.do` lacks preserve/restore** | **new, fixed in `c2`** | §14.5 |
+| **§14-P1b — `__main.do:128` dead-write** | **new, fixed in `c2`** | §14.4-D1 |
+| **§14-P1c — `R_Figure1_app.do:22` clobbers Figure 1** | **new, fixed in `c2`** | §14.4-D2 |
+| **§14-P1d — `outputs_stata_code/data/*.dta` missing** | **new, documented; fix deferred** pending decision | §14.5-P3 |
+| **§14-P2 — missing `ineqdeco` package dependency** | **new, fixed in `c2`** (README + `_prep_Gini_data.do` auto-install guard) | §14.5-P2 |
+
+### 14.8 Session commits
+
+- `c1` — this audit (`docs/stata_pipeline_audit.md` §14 + `docs/plans/2026-04-20-refactor-output-stata-audit-plan.md` + `docs/brainstorms/2026-04-20-output-stata-audit-brainstorm.md`).
+- `c2` — source fixes: `_prog_coding.do` preserve/restore × 3 programs; `__main.do:128` filename; `R_Figure1_app.do:22` removed; `README.md` Stata package list + `_prep_Gini_data.do` `ineqdeco` auto-install.
+- `c3` — cleanup: delete `outputs_stata_code/__main_PIOTR.do` and `outputs_stata_code/asi_aux.dta`. Add a README note that `outputs_stata_code/bone.dta`/`bone1y.dta` are tracked as Appendix-B pre-seeded inputs.
+
+SHAs filled in on commit.
