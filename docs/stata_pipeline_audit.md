@@ -905,7 +905,7 @@ Recommend the first option (commit the frozen `.dta` files) for consistency with
 | **§14-P1a — `_prog_coding.do` lacks preserve/restore** | **new, fixed in `c2`** | §14.5 |
 | **§14-P1b — `__main.do:128` dead-write** | **new, fixed in `c2`** | §14.4-D1 |
 | **§14-P1c — `R_Figure1_app.do:22` clobbers Figure 1** | **new, fixed in `c2`** | §14.4-D2 |
-| **§14-P1d — `outputs_stata_code/data/*.dta` missing** | **new, documented; fix deferred** pending decision | §14.5-P3 |
+| **§14-P1d — `outputs_stata_code/data/*.dta` missing** | **resolved** in `c5`: Python bootstrap `tools/bootstrap_mvd_data.py` produced frozen `irr_data.dta` / `benefits_cbo.dta` / `avghours_data.dta`, now committed under `outputs_stata_code/data/`. MvD_1 gains a `capture mkdir data` safety net. Stata's `dbnomics` package fails to compile in batch mode on this Stata 16 install (`ssc install libjson; ssc install moremata; capture dbnomics import` still errors with Mata compile faults). Python fetches the same dbnomics REST API + applies the same HP-filter (λ=1600) and 5-year collapse, producing Stata-readable `.dta` files. | §14.5-P3 |
 | **§14-P2 — missing `ineqdeco` package dependency** | **new, fixed in `c2`** (README + `_prep_Gini_data.do` auto-install guard) | §14.5-P2 |
 
 ### 14.8 Session commits

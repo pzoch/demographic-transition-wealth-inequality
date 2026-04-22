@@ -1,3 +1,5 @@
+capture mkdir data
+
 //this dofile graphs following macro variables:
 // irr      // avg_hours    // benefits
 
