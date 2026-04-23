@@ -82,22 +82,25 @@ program prep_data_for_main_plot
 
         sum aGini_`variant' if inrange(year,1975,2050), detail
 
-        global `variant'_min  =  `r(min)' 
-        global `variant'_max  =  `r(max)' 
+        global `variant'_min  =  `r(min)'
+        global `variant'_max  =  `r(max)'
 
-	   local val = ${variant_base_max} - ${variant_comp_min}
-    
-		if `val' == 0 {
-			global diff_`y' = 0
-		}
-		else {
-			local rounded = round(`val', 10^(floor(log10(abs(`val')))-1))
-        
-        * kill floating-point noise explicitly
-        local clean = round(`rounded', 1e-10)
-		}
-		
-		global `variant'_diff : display %5.2g `clean' //  floor(( `r(max)'-`r(min)' )*100)/100
+        * Per-variant max-min spread (used in R_Figure2's text labels). Was
+        * previously ${variant_base_max} - ${variant_comp_min}, which references
+        * the opposite-variant globals — undefined on the first loop pass and
+        * semantically cross-variant anyway. Switched to the current variant.
+        local val = ${`variant'_max} - ${`variant'_min}
+
+        if `val' == 0 {
+            local clean = 0
+        }
+        else {
+            local rounded = round(`val', 10^(floor(log10(abs(`val')))-1))
+            * kill floating-point noise explicitly
+            local clean = round(`rounded', 1e-10)
+        }
+
+        global `variant'_diff : display %5.2g `clean'
 
         gen `variant'_min = `r(min)'
         gen `variant'_max = `r(max)'

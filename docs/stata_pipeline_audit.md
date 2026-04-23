@@ -908,6 +908,23 @@ Recommend the first option (commit the frozen `.dta` files) for consistency with
 | **§14-P1d — `outputs_stata_code/data/*.dta` missing** | **resolved** in `c5`+`c7`: frozen `irr_data.dta` / `benefits_cbo.dta` / `avghours_data.dta` committed under `outputs_stata_code/data/`. MvD_1 gains a `capture mkdir data` safety net. MvD_1's inline `if $download_data==1 { dbnomics ... save data/<file>.dta }` download blocks are the regenerator (same pattern as the inputs pipeline); no separate bootstrap script needed. The initial snapshots were produced via an interim Python fetch + pandas `to_stata` (now removed) because the `dbnomics` Stata community package (v1.2.0 May 2020) is incompatible with Stata 16+ — its Mata `urlencode()` declaration collides with Stata 16's built-in `urlencode()`, failing compile with r(3499). This breakage is system-wide on current Stata: the inputs' `$download_data=1` refresh paths (M01/M02/M03/M04/T02) hit the same error. All committed `.dta` files are snapshots from a prior working Stata (≤15) install; the current replication package therefore relies on the snapshots and runs with `$download_data=0` by default. | §14.5-P3 |
 | **§14-P2 — missing `ineqdeco` package dependency** | **new, fixed in `c2`** (README + `_prep_Gini_data.do` auto-install guard) | §14.5-P2 |
 
+### 14.8a End-to-end dry-run (2026-04-22)
+
+After copying the full `fortran_code/Results/` (27 GB, 30 scenarios) and `data/PSID` + `data/SCF` + `data/model_psid_all_govt__.dta` into the sandbox, a comprehensive harness (`_test_outputs.do`, deleted post-run) exercised every script in `outputs_stata_code/` with the globals `__main.do` normally provides. Result:
+
+| Level | Scripts exercised | Outcome |
+|---|---|---|
+| 1 | `_prog_coding`, `_prog_ineq_function`, `_prep_Gini_data` | ✅ |
+| 2 | `R_Figure1.do` (main-text Figure 1) | ✅ |
+| 3 | `R_Figure2.do` (main-text Figure 2 — psid_all vs psid_ndm) | ✅ **after** `c8` fix |
+| 4 | `R_Figure3.do` (main-text Figures 3/4 — demographics bar) | ✅ |
+| 5 | `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_Gini_wealth.do`, `MvD_4_GE_decomposition.do` | ✅ |
+| 6 | `R_Figure1_app.do` (Appendix F.7) | ✅ |
+
+**One new P1 bug surfaced**: `prep_data_for_main_plot` in [`_prog_coding.do:88`](../outputs_stata_code/_prog_coding.do#L88) referenced `${variant_comp_min}` **during the first iteration of its variant loop**, before the `variant_comp_*` globals were set. This caused `local val = ${variant_base_max} -` (missing operand) → `r(198) invalid syntax` on the first call to `R_Figure2.do` in a fresh session. The formula also set both `variant_base_diff` and `variant_comp_diff` to the same cross-variant value, inconsistent with R_Figure2's text labels which display each variant's own spread. Fixed in `c8`: rewrote to per-variant `${`variant'_max} - ${`variant'_min}`.
+
+Why the bug was never caught before: paper figures must have been produced either (a) in sessions where the globals were already set from a prior run (carried over between `.stpr` invocations), or (b) errors were manually worked around. A clean-state run consistently fails without the fix.
+
 ### 14.8 Session commits
 
 - `c1` — this audit (`docs/stata_pipeline_audit.md` §14 + `docs/plans/2026-04-20-refactor-output-stata-audit-plan.md` + `docs/brainstorms/2026-04-20-output-stata-audit-brainstorm.md`).
