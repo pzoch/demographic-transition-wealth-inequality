@@ -834,7 +834,7 @@ The helpers in this folder use relative paths (`$bsource/bone`, `../fortran_code
 
 **Data download switch (`$download_data`)**: The driver sets `global download_data 0` at the top. With the default value of 0, every prep script loads source data from committed `.dta` snapshots (e.g. `depreciation/depreciation.dta`, `tfp/gamma.dta`). This pins the pipeline to the data vintage used in the paper and ensures reproducibility without network access. To refresh the source data from dbnomics/OECD, change the global to `global download_data 1` before running — each script will re-download its series and overwrite the local `.dta`. The same switch is set in `outputs_stata_code/__main.do` for the model-vs-data figures.
 
-This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes the following `.txt` files into `../fortran_code/data/` (lowercase — see note below):
+This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes the following `.txt` files into `../fortran_code/Data/`:
 
 - `_data_depr.txt` (depreciation) — `depreciation/M01prepare_depr.do`
 - `_data_gamma.txt` (TFP growth path) — `tfp/M02prepare_gamma.do`
@@ -846,7 +846,25 @@ This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes th
 - `_data_contrib_to_gdp.txt` (pension contributions / GDP) — `social_security/T02prepare_contributions.do`
 - `_data_lambda.txt` (tax progressivity) — `tax_rate/T03prepare_tax_lambda.do`
 
-**Case-sensitivity note**: every helper above calls `export delimited ... using "../fortran_code/data/_data_$var.txt"` with a **lowercase** `data/`. The Fortran sources read from `fortran_code/Data/` with a **capital** `D`. On Windows these resolve to the same directory and the pipeline works; on case-sensitive filesystems (Linux, case-sensitive macOS, many CI runners) the scripts write files the Fortran code cannot find. If replicating on Linux, either rename the tracked folder to `data/`, create a symlink, or update every `export delimited` call to use `Data/`.
+**Calibration-plot side outputs**: the same prep scripts also save one per-variable diagnostic plot (`.png`, `.eps`, `.gph`, `.svg`, `.pdf`) to `../graphs/inputs/`. These are the Appendix-B calibration figures in the paper. Plot writing is done through three helper programs defined in `_prepare_programs.do` — `drawing`, `special_drawing`, `special_drawing2` — that wrap a `twoway tsline` in `preserve`/`restore`. The full side-output mapping is:
+
+| Script | `graphs/inputs/<file>.<ext>` basename | Plotting program |
+|---|---|---|
+| `depreciation/M01prepare_depr.do` | `depr` | `special_drawing` |
+| `tfp/M02prepare_gamma.do` | `gamma` | `special_drawing` |
+| `tfp/M02robustness_prepare_gamma.do` | `gamma_robust` | `special_drawing2` (Appendix F, via `__main.do`) |
+| `labor_share/M03prepare_labor_share.do` | `lab_share` | `special_drawing` |
+| `skill_premium/H01prepare_skill_premium.do` | `skill_premium` | `special_drawing` |
+| `skill_premium/D02_prepare_college.do` | `college_share` | `special_drawing` |
+| `tax_rate/T01prepare_taxes.do` | `tC`, `tK`, `tL` | `special_drawing` (loops over three tax types) |
+| `social_security/T02prepare_contributions.do` | `contributions` | inline `twoway` (own `preserve`/`restore`) |
+| `tax_rate/T03prepare_tax_lambda.do` | `lambda` | `special_drawing` |
+
+Each plot is emitted in five formats: `.png`, `.eps`, `.gph`, `.svg`, `.pdf` (one `graph save` call + four `graph export` calls). The `drawing` program in `_prepare_programs.do` is defined but currently unused; only `special_drawing` and `special_drawing2` are called by the Stage-A scripts.
+
+The `M04prepare_exog_rate.do` script does **not** save to `graphs/inputs/` — it uses an inline `tsline` for visual inspection only.
+
+The Stage B income-process run (`run_estimation.bat`, described below) additionally writes `graphs/inputs/sigma2eps_{mostdrop,busno_drop}_hhslabinc.{eps,png}` plus `sigma2eps_diagnostic_*.png` (all-bin view).
 
 Note that the `sensitivity_stata_code/exog_rate/` code is load-bearing for the `exor_` scenario and is called from `__main_data_prepare.do`; it is *not* purely optional robustness code. The `gcbo_` scenario's robustness prep lives at `inputs_stata_code/tfp/M02robustness_prepare_gamma.do` and is invoked from `outputs_stata_code/__main.do` (see Step 7) — not from `__main_data_prepare.do`.
 
