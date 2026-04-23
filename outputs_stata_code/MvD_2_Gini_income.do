@@ -1,3 +1,9 @@
+* Clear any named graphs left over from MvD_1 (irr, avghours, benefits).
+* Without this, subsequent `graph export` calls inside the lorenz loop can
+* capture stale named graphs from memory instead of the freshly-drawn
+* lorenz curve — Lorenz_<yr>.png files end up containing MvD_1's time-series
+* plots. See docs/stata_pipeline_audit.md §14 diagnosis.
+capture graph drop _all
 
 	use ..\data\model_$scenario, clear
 	ren labinc_pretax hhslabinc

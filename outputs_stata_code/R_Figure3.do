@@ -69,6 +69,6 @@ twoway	(bar differ N if scenario=="`s1'", lwidth(white) hor barw(0.95) bcolor(`c
 		, ysc(reverse) $legend ///
 		xline(0, lcolor(gs6) lpattern(solid)) ///
 		xlabel(#`l3',grid glcolor(gs6) gstyle(dot)) ///
-		yscale(r(`r(min)'(1)`r(max)')) ylabel(0 "1975" `l1' "2015" `l2' "2055", grid glcolor(gs6) gstyle(dot)) ///
+		yscale(r(`r(min)'(1)`r(max)')) ylabel(0 "1975" `l1' "2015" `l2' "2050", grid glcolor(gs6) gstyle(dot)) ///
 		ytitle("") xtitle("Gini points") ///
 		

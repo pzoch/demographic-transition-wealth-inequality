@@ -3,6 +3,8 @@
 **** and from the data ***********************
 **********************************************
 
+* Clear any named graphs left over from MvD_1 / MvD_2.
+capture graph drop _all
 
 // Calculating Gini from observational 5year data
 tempfile data

@@ -5,6 +5,9 @@
 **** and from the data ***********************
 **********************************************
 
+* Clear any named graphs left over from earlier MvD scripts.
+capture graph drop _all
+
 // Obtaining decompositions from the model
 local scenario		"psid_all_govt__"
 

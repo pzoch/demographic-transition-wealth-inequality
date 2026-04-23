@@ -199,7 +199,7 @@ gen fixed_ncol	= LE500 if year<=1955
 sum fixed_ncol if year==1955
 replace fixed_ncol = `r(mean)'  if year>1955
 
-//THIS IS THE MAIN VISUALISATION:	
+//THIS IS THE MAIN VISUALISATION:
 twoway 	(line LE501 year if inrange(year,1935,1970), lcolor(blue) lwidth(thick) ) ///
 		(line LE501 year if year>=1970 , lcolor(blue)  lwidth(medium) lpattern(dash)) ///
 		(line LE500 year if inrange(year,1935,1970) , sort lcolor(black) lwidth(thick)) ///
@@ -207,9 +207,13 @@ twoway 	(line LE501 year if inrange(year,1935,1970), lcolor(blue) lwidth(thick) 
 		xlabel(1935[15]2050, labsize(*1.2)) ylabel(24[5]40, labsize(*1.2)) ///
 		legend(cols(2) order(-  "Data"  - "Demographic forecast" 1 "college"  2 "college"  3 "less than college"  4 "less than college") ///
 		size(*1.2)) xtitle("year", size(*1.2)) xsize(2) ysize(1) ytitle("Life expectancy at 50")
-/*
-graph save 	 "graphs\inputs\LE50year.gph", replace
-graph export "graphs\inputs\LE50year.png", replace
-graph export "graphs\inputs\LE50year.svg", replace
-graph export "graphs\inputs\LE50year.eps", replace
-graph export "graphs\inputs\LE50year.pdf", replace
+
+// Save as Figure B.2 (LE50 by education). Path is `../graphs/inputs/` because
+// __main.do `cd`s to inputs_stata_code/ before dispatching this script, so the
+// graphs/ folder is one level up. Previously wrapped in an unclosed /* block
+// which silently disabled these writes.
+graph save   "../graphs/inputs/LE50year.gph", replace
+graph export "../graphs/inputs/LE50year.png", replace
+graph export "../graphs/inputs/LE50year.svg", replace
+graph export "../graphs/inputs/LE50year.eps", replace
+graph export "../graphs/inputs/LE50year.pdf", replace
