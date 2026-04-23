@@ -3,13 +3,14 @@ use ../graphs/outputs/wealth_inequality/combined_gini.dta, clear
 
 tsset year
 
-foreach var in Gini_dta_5yr $scenario {
+* Uses the HP-filtered trend (matches R_Figure1.do). See _prep_Gini_data.do.
+foreach var in Gini_data_wealth_trend $scenario {
 	sum `var' if year == 1950
 	gen a`var' = (`var'-`r(mean)')*100
 	}
 
-*** Figure 1 
-twoway  (bar aGini_dta_5yr year,  barwidth(3.2) color(gs12) bargap(0) )  ///
+*** Figure 1
+twoway  (bar aGini_data_wealth_trend year,  barwidth(3.2) color(gs12) bargap(0) )  ///
 		(tsline apsid_all_govt__, lcolor(black) lwidth(thick))  ///
 		(tsline aexor_all_govt__, lcolor(blue) lwidth(thick))  ///
 		if inrange(year,1950,2015) , /// 
