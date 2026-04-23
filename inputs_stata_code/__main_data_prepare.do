@@ -1,4 +1,5 @@
 set more off
+set scheme burd    // match __main.do; produces clean-white calibration plots under graphs/inputs/
 
 * set initial and final years
 global year_start 1935
