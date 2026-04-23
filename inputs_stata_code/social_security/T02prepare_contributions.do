@@ -58,20 +58,30 @@ replace contributions = `r(mean)'  if year>2020& mi(contributions)
 
 
 ////// DRAWING ////////
-* Build the "fixed at 1955" counterfactual series so the plot matches the
-* other Stage-A calibration figures (depr, gamma, lab_share, skill_premium,
-* college_share, tC, tK, tL, lambda — all use special_drawing with
-* $var_frozen). The 1955-level contribution rate is the demographic-pressure
-* counterfactual referenced in the paper.
-sum contributions if year == 1955
-gen contributions_frozen = `r(mean)'
-
+* Contributions is plotted WITHOUT the "fixed at 1955" counterfactual line
+* that other Stage-A figures use — the paper presents contributions as
+* data + extrapolation only (three series, no $var_frozen). Hence the
+* inline twoway instead of special_drawing.
 global var contributions
-global var_frozen contributions_frozen
 global ys 1970
 global ye 2020
 
-special_drawing
+preserve
+tsset year
+keep if year < 2050
+twoway	 ///
+		(tsline $var if inrange(year,$ys,$ye), lcolor(black) lwidth(vthick)) ///
+		(tsline $var if inrange(year,1935,$ys), lcolor(black)  lwidth(medium) lpattern(dash)) ///
+		(tsline $var if inrange(year,$ye,2100), lcolor(black) lwidth(medium)  lpattern(dash)) , ///
+		xtitle("year", size(*1.35)) ytitle("", size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
+		ylabel(,labsize(*1.2) ) legend(order(-  "Baseline" - ""  1 "data"   - "" 2 "extrapolation"  ) size(*1.4) cols(2))
+
+	graph save "../graphs/inputs/$var.gph", replace
+	graph export "../graphs/inputs/$var.png", replace
+	graph export "../graphs/inputs/$var.eps", replace
+	graph export "../graphs/inputs/$var.svg", replace
+	graph export "../graphs/inputs/$var.pdf", replace
+restore
 
 ////// EXPORTING ///////
 export delimited $var using "../fortran_code/Data/_data_contrib_to_gdp.txt", delimiter(tab) novarnames nolabel replace
