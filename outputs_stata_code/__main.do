@@ -83,9 +83,16 @@ cd ..\outputs_stata_code
 
 ** Do graphs for Appendix C -- Populations
 cd ..\inputs_stata_code
-do ..\inputs_stata_code\demography\hetero_pi\D03_prepare_hetero_pi 
-do ..\inputs_stata_code\demography\mortality\D01_life_tables 
+do ..\inputs_stata_code\demography\hetero_pi\D03_prepare_hetero_pi
+do ..\inputs_stata_code\demography\mortality\D01_life_tables
 cd ..\outputs_stata_code
+
+* Figure C.1 -- population pyramids (Fortran model: full vs frozen-longevity).
+* Requires population.csv in each scenario subfolder; Fortran must be built
+* with data.f90 writing to cwd_scenario (see commit note).
+global variant_base "psid_all_govt__"
+global variant_comp "psid_ndm_govt__"
+do R_FigureC1_popstructure.do
 
 ** Do graphs for Appendix D -- Model vs Data 
 global scenario		"psid_all_govt__"
