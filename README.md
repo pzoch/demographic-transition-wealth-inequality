@@ -918,7 +918,16 @@ You should see ~40 files including `_data_Nn_US_*.txt` (population), `_data_pi_*
 
 ### Step 3: Compile the Model
 
-#### Option A: Using Visual Studio (Recommended)
+#### Option 0: Use the pre-built binaries (skip compilation)
+
+Two Intel-Fortran x64 Release binaries ship with the repository for replicators who do not have Intel oneAPI / Visual Studio 2019 installed:
+
+- `fortran_code/bin/5Gtrans.exe` — main model build.
+- `fortran_code/bin/5Gtrans_het.exe` — heterogeneous-rates build (used by the `hrat_` sensitivity scenarios in Appendix F).
+
+Both are ~2 MB each, compiled with Intel `ifx` on Windows x64. Skip ahead to Step 4 if you want to use these. Rebuild from source (Option A or B below) if you need to modify the model or verify the binaries from scratch.
+
+#### Option A: Using Visual Studio (Recommended for source-level changes)
 
 1. **Open the solution**:
    - Double-click `fortran_code/5Gtrans.sln` (opens Visual Studio)

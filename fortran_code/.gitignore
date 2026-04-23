@@ -19,6 +19,13 @@ x64/
 Debug/
 Release/
 
+# Exception: ship the two pre-built Intel-Fortran binaries under bin/ so
+# replicators who do not have Intel oneAPI / VS 2019 can still run the
+# Fortran model. Rebuild from 5Gtrans.sln to refresh.
+!bin/
+!bin/5Gtrans.exe
+!bin/5Gtrans_het.exe
+
 # Visual Studio
 .vs/
 *.suo
