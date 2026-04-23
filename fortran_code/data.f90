@@ -874,8 +874,8 @@ do i = 1,bigT,1
     enddo
 enddo
 
-call chdir(cwd_w)
-open(unit = 1, file= version//experiment//closure//"population.csv")
+call chdir(cwd_scenario)
+open(unit = 1, file= "population.csv")
     do i = 1,bigT,1
         write(1, '(1x, F, 16(",", F))') (Nn_d(j,i), j = 1,bigJ)
     enddo
