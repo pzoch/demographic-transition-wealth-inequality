@@ -24,10 +24,8 @@ rename wprem2_trend wprem2
 gen skill_premium = exp(wprem2)
 tsset year
 tsline skill_premium
-gen skill_premium_model = skill_premium
 sum skill_premium if year == 1955
-replace skill_premium_model = `r(mean)' if year>=1955
-replace skill_premium_model = . if year < 1955
+gen skill_premium_model = `r(mean)'
 
 ////// DRAWING ////////
 global var_frozen skill_premium_model
@@ -39,6 +37,6 @@ special_drawing
 ////// EXPORTING ///////
 gen ones = 1.00
 
-stack $var ones, into(v)
+stack $var ones, into(v) clear
 drop _stack
 export delimited v using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace

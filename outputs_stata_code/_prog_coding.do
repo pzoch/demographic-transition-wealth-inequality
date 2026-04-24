@@ -25,25 +25,6 @@ range year 1935 2100 166
 save bone1y, replace
 
 
-capture program drop drawing
-program drawing
-preserve
-tsset year
-keep if year < 2050
-twoway	(tsline $var if inrange(year,$ys,$ye), lcolor(black) lwidth(vthick)) ///
-		(tsline $var if inrange(year,1935,$ys), lcolor(blue) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ye,2100), lcolor(blue) lpattern(dash)), ///
-		xtitle("year", size(*1.35)) ytitle(, size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(1 "data" 2 "extrapolation") size(*1.35))
-	graph save "../graphs/inputs/$var.gph", replace
-	graph export "../graphs/inputs/$var.png", replace
-	graph export "../graphs/inputs/$var.eps", replace
-	graph export "../graphs/inputs/$var.svg", replace
-restore
-
-end
-
-
 capture program drop special_drawing
 program special_drawing
 capture graph drop _all
@@ -86,10 +67,6 @@ program prep_data_for_main_plot
         global `variant'_min  =  `r(min)'
         global `variant'_max  =  `r(max)'
 
-        * Per-variant max-min spread (used in R_Figure2's text labels). Was
-        * previously ${variant_base_max} - ${variant_comp_min}, which references
-        * the opposite-variant globals — undefined on the first loop pass and
-        * semantically cross-variant anyway. Switched to the current variant.
         local val = ${`variant'_max} - ${`variant'_min}
 
         if `val' == 0 {
@@ -97,7 +74,6 @@ program prep_data_for_main_plot
         }
         else {
             local rounded = round(`val', 10^(floor(log10(abs(`val')))-1))
-            * kill floating-point noise explicitly
             local clean = round(`rounded', 1e-10)
         }
 

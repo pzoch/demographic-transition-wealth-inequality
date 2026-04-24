@@ -1,7 +1,7 @@
-# Frozen Fortran inputs
+# External Fortran inputs
 
-These three text files are Fortran inputs that no script in the repository
-regenerates. They originate from external sources and are shipped as-is.
+These three text files are Fortran inputs sourced from external authorities
+that no script in the repository regenerates — they are shipped as-is.
 
 | File | Rows | Content | Source |
 |---|---|---|---|
@@ -11,9 +11,7 @@ regenerates. They originate from external sources and are shipped as-is.
 
 See paper §3 and Online Appendix C for details.
 
-`inputs_stata_code/__main_data_prepare.do` copies these three files into
-`fortran_code/Data/` before the calibration scripts run, so they are available
-to the Fortran binary alongside the pipeline-generated inputs.
-
-If you need to update any of them, edit the file here and re-run
-`__main_data_prepare.do`.
+`copy_to_fortran.do` (in this folder, called from `__main_data_prepare.do`)
+copies these files into `fortran_code/Data/` so the Fortran binary reads them
+alongside the pipeline-generated inputs. To update one, edit the copy here and
+re-run `__main_data_prepare.do`.

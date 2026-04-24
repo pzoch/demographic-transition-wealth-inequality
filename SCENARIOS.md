@@ -105,15 +105,14 @@ All counterfactuals use the `psid_` version. Each holds specific factors at thei
 
 Each robustness version modifies the model specification or calibration. For each version, two scenarios are run: `{version}_all_govt__` (baseline with all changes) and `{version}_ndm_govt__` (counterfactual with fixed longevity). The difference between them measures the contribution of demographics under the alternative model.
 
-| Version | Paper Section | Description | Executable |
+| Version | Paper section (figure) | Description | Executable |
 |---------|--------------|-------------|------------|
-| `crr3_` | App. F.1 | Higher risk aversion (&theta;=3 instead of 1.5). | `5Gtrans.exe` |
-| `hrat_` | App. F.2 | Persistently heterogeneous rates of return by education level. College-educated households earn 62 bp higher annual returns. | `5Gtrans_het.exe` |
-| `ndel_` | App. F.3 | No discount factor shocks (&delta; constant for all households). | `5Gtrans.exe` |
-| `nstr_` | App. F.4 | No "superstars" income state. Standard 5-state income process estimated including business owners. Uses `busno_drop` data files. | `5Gtrans.exe` |
-| `gcbo_` | App. F.5 | Higher future TFP growth rate path (CBO 2025 projection). TFP rebounds to >1% annually instead of stabilizing at 0.6%. | `5Gtrans.exe` |
-| `exor_` | App. F.6 | Exogenous interest rates (open economy). Interest rates set to match data (`_data_exog_rate_1935.txt`) rather than determined endogenously. `switch_exog_rate=1`. | `5Gtrans.exe` |
-| `beqs_` | App. F.7 | Unequal bequest distribution. 70% receive nothing, 20% receive half, top 10% receive the other half. Bequests received at age 45-49. | `5Gtrans.exe` |
+| `crr3_` | §F.1 (Fig. F.1) | Higher risk aversion (&theta;=3 instead of 1.5). | `5Gtrans.exe` |
+| `hrat_` | §F.2 (Fig. F.2) | Persistently heterogeneous rates of return by education level. College-educated households earn 62 bp higher annual returns. | `5Gtrans_het.exe` |
+| `ndel_` | §F.3 (Fig. F.3) | No discount factor shocks (&delta; constant for all households). | `5Gtrans.exe` |
+| `nstr_` | §F.4 (Fig. F.4) | No "superstars" income state. Standard 5-state income process estimated including business owners. Uses `busno_drop` data files. | `5Gtrans.exe` |
+| `gcbo_` | §F.5 (Figs. F.5, F.6) | Higher future TFP growth rate path (CBO 2025 projection). TFP rebounds to >1% annually instead of stabilizing at 0.6%. Section F.5 contains Figure F.5 (the alternative TFP path) and Figure F.6 (the Gini counterfactual). | `5Gtrans.exe` |
+| `beqs_` | §F.6 (Fig. F.7) | Unequal bequest distribution. 70% receive nothing, 20% receive half, top 10% receive the other half. Bequests received at age 45-49. | `5Gtrans.exe` |
 
 ---
 
@@ -149,7 +148,6 @@ For robustness **versions**, the experiment switches are the same as `psid_`; th
 | `ndel_` | `switch_discount_risk`: 2&rarr;0 |
 | `nstr_` | `switch_drop_psid_superstars`: 0&rarr;1 (uses `busno_drop` data files) |
 | `gcbo_` | `switch_go_to_lower_gamma`: 1&rarr;3 (loads `_data_gamma_robustness.txt` instead of `_data_gamma.txt`) |
-| `exor_` | `switch_exog_rate`: 0&rarr;1 (uses exogenous interest rate path from data) |
 | `beqs_` | `switch_unequal_bequest`: 0&rarr;2 |
 
 ---
@@ -165,10 +163,10 @@ For robustness **versions**, the experiment switches are the same as `psid_`; th
 | App.: Income decomposition | `psid_all` vs. `psid_nlb` (S2), `psid_ncs` (S2a), `psid_ncp` (S2b), `psid_nsh` (S2c) |
 | App.: Tax decomposition | `psid_all` vs. `psid_ntx` (S3), `psid_ntl` (S3a), `psid_ntc` (S3b), `psid_ntk` (S3c), `psid_ntp` (S3d) |
 | App.: Technology decomposition | `psid_all` vs. `psid_nts` (S4), `psid_nls` (S4a), `psid_nga` (S4b), `psid_ndp` (S4c) |
-| App. F.1: &theta;=3 | `crr3_all` vs. `crr3_ndm` |
-| App. F.2: Het. returns | `hrat_all` vs. `hrat_ndm` |
-| App. F.3: No &delta; shocks | `ndel_all` vs. `ndel_ndm` |
-| App. F.4: No superstars | `nstr_all` vs. `nstr_ndm` |
-| App. F.5: Higher TFP growth | `gcbo_all` vs. `gcbo_ndm` |
-| App. F.6: Open economy | `exor_all` (compared to data and `psid_all`) |
-| App. F.7: Unequal bequests | `beqs_all` vs. `beqs_ndm` |
+| Figure F.1 (§F.1 &theta;=3) | `crr3_all` vs. `crr3_ndm` |
+| Figure F.2 (§F.2 het. returns) | `hrat_all` vs. `hrat_ndm` |
+| Figure F.3 (§F.3 no &delta; shocks) | `ndel_all` vs. `ndel_ndm` |
+| Figure F.4 (§F.4 no superstars) | `nstr_all` vs. `nstr_ndm` |
+| Figure F.5 (§F.5 alternative TFP path) | — (calibration plot from `M02robustness_prepare_gamma.do`, not a scenario run) |
+| Figure F.6 (§F.5 higher TFP growth Gini) | `gcbo_all` vs. `gcbo_ndm` |
+| Figure F.7 (§F.6 unequal bequests Gini) | `beqs_all` vs. `beqs_ndm` |

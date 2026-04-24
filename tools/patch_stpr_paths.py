@@ -17,10 +17,6 @@ REWRITES = [
     # (old_path, new_path)
     (r"..\..\_Paper_16_EJ_replication\inputs_stata_code\tfp\M02robustness_prepare_gamma.do",
      r"..\inputs_stata_code\tfp\M02robustness_prepare_gamma.do"),
-    (r"..\..\_Paper_16_EJ_replication\sensitivity_stata_code\exog_rate\M04prepare_exog_rate.do",
-     r"..\sensitivity_stata_code\exog_rate\M04prepare_exog_rate.do"),
-    (r"..\..\_Paper_16_EJ_replication\outputs_stata_code\R_Figure1_app.do",
-     r"R_Figure1_app.do"),
 ]
 
 TC_STRING = 0x74

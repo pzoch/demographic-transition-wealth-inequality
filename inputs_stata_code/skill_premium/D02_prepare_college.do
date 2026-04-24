@@ -55,7 +55,7 @@ global ye 2020
 special_drawing
 
 preserve
-stack college_share ncollege_share, into(v)
+stack college_share ncollege_share, into(v) clear
 export delimited v using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
 
 restore

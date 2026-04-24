@@ -58,10 +58,6 @@ replace contributions = `r(mean)'  if year>2020& mi(contributions)
 
 
 ////// DRAWING ////////
-* Contributions is plotted WITHOUT the "fixed at 1955" counterfactual line
-* that other Stage-A figures use — the paper presents contributions as
-* data + extrapolation only (three series, no $var_frozen). Hence the
-* inline twoway instead of special_drawing.
 global var contributions
 global ys 1970
 global ye 2020

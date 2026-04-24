@@ -3,9 +3,6 @@ use ../graphs/outputs/wealth_inequality/combined_gini.dta, clear
 
 tsset year
 
-* Use the HP-filtered trend series (matches paper). The raw Gini_dta_5yr has
-* a ~6 p.p. 1975 dip from single-period noise; the trend smooths it to ~2.5
-* p.p., which is what the published Figure 1 shows. See _prep_Gini_data.do.
 foreach var in Gini_data_wealth_trend $scenario {
 	sum `var' if year == 1950
 	gen a`var' = (`var'-`r(mean)')*100

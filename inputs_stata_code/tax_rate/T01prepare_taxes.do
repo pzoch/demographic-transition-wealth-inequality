@@ -38,7 +38,6 @@ merge 1:1 year using `model'
 ///// FROZEN /////////
 sum `tax' if year == 1955
 gen `tax'_frozen = `r(mean)'
-replace `tax'_frozen = . if year < 1955
 
 ////// DRAWING ////////
 global var_frozen `tax'_frozen

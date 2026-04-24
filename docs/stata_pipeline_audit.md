@@ -88,8 +88,7 @@ __main.do
 ├── [Appendix D — Model vs Data]
 │   ├── MvD_1_macro.do
 │   ├── MvD_2_Gini_income.do
-│   ├── MvD_3_Gini_wealth.do
-│   └── MvD_4_GE_decomposition.do
+│   └── MvD_3_GE_decomposition.do
 │
 ├── [Appendix E, F — counterfactuals] R_Figure1_app.do, more R_Figure2.do / R_Figure3.do calls
 │
@@ -184,7 +183,7 @@ Legend:
 | `__replication_graphs.stpr` | Stata project | **canonical entry point** | high | Load-bearing: the figures pipeline is designed to be launched by opening this file in interactive Stata. Must stay tracked. |
 | `_prog_coding.do`, `_prog_ineq_function.do`, `_prep_Gini_data.do` | helper | helper | high | Program definitions called at top of `__main.do` |
 | `R_Figure1.do`, `R_Figure1_app.do`, `R_Figure2.do`, `R_Figure3.do` | script | live | high | Figures produced for main text and appendices |
-| `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_Gini_wealth.do`, `MvD_4_GE_decomposition.do` | script | live | high | Appendix D model-vs-data figures |
+| `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_GE_decomposition.do` | script | live | high | Appendix D model-vs-data figures |
 | `bone.dta`, `bone1y.dta` | data | **pre-seeded** | high | Consumed by `__main.do` Appendix B re-runs via `$bsource="../outputs_stata_code/"`. Not temp files in this location — deliberately committed inputs. See TODO 2 |
 | `asi_aux.dta` | data | **orphan** | high | Zero references across all `.do` files; likely stale artifact |
 
@@ -783,7 +782,7 @@ Sibling to §13 covering the figure-generation pipeline driven by [outputs_stata
 
 ### 14.1 Scope and method
 
-Twelve `.do` files in `outputs_stata_code/` (1244 lines total): driver `__main.do`, three helpers (`_prog_coding`, `_prog_ineq_function`, `_prep_Gini_data`), four figure scripts (`R_Figure1`, `R_Figure1_app`, `R_Figure2`, `R_Figure3`), four Model-vs-Data scripts (`MvD_1_macro`, `MvD_2_Gini_income`, `MvD_3_Gini_wealth`, `MvD_4_GE_decomposition`). Plus `__main.do`'s Appendix B/C/F calls into `inputs_stata_code/` and `sensitivity_stata_code/` (previously audited in §13 for their inputs-driver invocation path — re-audited here for the outputs-driver re-entry).
+Eleven `.do` files in `outputs_stata_code/`: driver `__main.do`, three helpers (`_prog_coding`, `_prog_ineq_function`, `_prep_Gini_data`), four figure scripts (`R_Figure1`, `R_Figure1_app`, `R_Figure2`, `R_Figure3`), three Model-vs-Data scripts (`MvD_1_macro`, `MvD_2_Gini_income`, `MvD_3_GE_decomposition`). Plus `__main.do`'s Appendix B/C/F calls into `inputs_stata_code/` and `sensitivity_stata_code/` (previously audited in §13 for their inputs-driver invocation path — re-audited here for the outputs-driver re-entry). Note: an earlier `MvD_3_Gini_wealth.do` (emitting `MvD_Gini_levels.png`) was removed on 2026-04-24 as it was never referenced in the paper; what was `MvD_4_GE_decomposition.do` at the audit date has been renamed to `MvD_3_GE_decomposition.do`.
 
 **Dry-run constraint**: `mklink /J` (the plan's folder-junction approach for staging Fortran `Results/`) failed on the N: network drive ("Local NTFS volumes are required"). Dry-run therefore relies on path overrides at the harness level (global `$resultspath` pointed at the main repo's absolute path). The `.stpr` interactive execution of `__main.do` end-to-end remains deferred (§6 P1-2), consistent with the brainstorm's choice of "static + dry-run of runnable pieces only".
 
@@ -793,7 +792,7 @@ Twelve `.do` files in `outputs_stata_code/` (1244 lines total): driver `__main.d
 |---|---|---|---|---|---|---|
 | `__main.do` (194) | — (driver) | — (driver) | — | — | starts `outputs_stata_code/`; see §14.3 for the `cd` ledger | Sets `$resultspath`, `$graphspath`, `$datapath`, `$year_start/stop`, `$download_data=0`, per-block `$scenario`/`$variant_base`/`$variant_comp`/`$r1`/`$r2`/`$legend`/`$colors`/`$bsource`. Imports `mass_trans_small.csv` inline for the primary scenario (lines 16–28). |
 | `_prog_coding.do` (154) | — | — (program definitions) | line 9 | none (defines programs) | `outputs_stata_code/` | Defines `periods`, `periods_proj`, `drawing`, `special_drawing`, `prep_data_for_main_plot`. **§14.5-P1**: `drawing` and `special_drawing` originally lacked `preserve`/`restore` (same bug `2bed247` fixed in `_prepare_programs.do`); fixed in `c2`. A third plotting program `drawing_for_piotr` was also present but unused; removed in `c4`. |
-| `_prog_ineq_function.do` (197) | — | — | line 10 | none | `outputs_stata_code/` | Defines `ours_ineqdeco` (custom GE decomposition). Self-contained. Used by `MvD_4`. |
+| `_prog_ineq_function.do` (197) | — | — | line 10 | none | `outputs_stata_code/` | Defines `ours_ineqdeco` (custom GE decomposition). Self-contained. Used by `MvD_3_GE_decomposition.do`. |
 | `_prep_Gini_data.do` (65) | `../fortran_code/Results/*/gini_trans.csv` (one per scenario folder); `../data/SCF/SCF_plus.dta` | `../graphs/outputs/wealth_inequality/combined_gini.dta` | line 11 | `$lam` implicitly (for `periods_proj` later); relies on community `ineqdeco` | `outputs_stata_code/` | **§14.5-P2**: community package `ineqdeco` not listed in README's Stata package requirements. Line 50: `qui ineqdeco ...`. |
 | `R_Figure1.do` (21) | `combined_gini.dta` | `$graphspath\Results_Gini_changes.png` | line 32 | `$scenario`, `$graphspath` | `outputs_stata_code/` | Figure 1 (main text). Clean single-export. |
 | `R_Figure1_app.do` (22) | `combined_gini.dta` | `$graphspath\Results_Gini_changes.png` (overwrites Figure 1!) | line 184 | `$scenario="psid_all_govt__ exor_all_govt__"` (hardcoded two-scenario string), `$graphspath` | `outputs_stata_code/` | **§14.4-D1**: line 22 writes to the Figure-1 filename; `__main.do:185` then re-exports to the correct `AppF_Gini_counterfactuals_exograte.png`. Figure 1's PNG ends up corrupted with Figure F.7 content. |
@@ -801,8 +800,7 @@ Twelve `.do` files in `outputs_stata_code/` (1244 lines total): driver `__main.d
 | `R_Figure3.do` (74) | `combined_gini.dta` | no internal `graph export` | 5× — lines 46, 53, 111, 119, 127 | `$variant_base`, `$variant_comp`, `$colors`, `$legend` | `outputs_stata_code/` | Clean. |
 | `MvD_1_macro.do` (219) | `data/irr_data.dta`, `data/benefits_cbo.dta`, `data/avghours_data.dta`, `$resultspath\$scenario\irr_trans_1y.txt`, `$resultspath\$scenario\benefits_trans.txt`, `$resultspath\$scenario\avg_hours_trans.txt`, `..\inputs_stata_code\social_security\57971-Data.xlsx` | `$graphspath\{irr,avghours,benefits}_trans_levels.{png,eps,svg}` (9 files) | line 98 | `$scenario`, `$year_start=1950`/`$year_stop=2020` (reset by `__main.do` at lines 93–97), `$min_age`, `$max_age`, `$year_end=2100`, `$download_data`, `$lam` (implicit) | `outputs_stata_code/` | **§14.5-P3**: `outputs_stata_code/data/` subfolder does not exist in sandbox or main repo. With default `$download_data=0`, `use data/irr_data.dta` fails `r(601)`. |
 | `MvD_2_Gini_income.do` (39) | `..\data\model_$scenario.dta` (from `__main.do:28`), `..\data\PSID\psid_ready.dta` | `$graphspath\Lorenz_<yr>.{png,eps,svg}` (one per year in data) | line 99 | `$scenario`, `$min_age`, `$max_age`, `$graphspath` | `outputs_stata_code/` | `psid_ready.dta` gitignored (see [data availability](../README.md)). |
-| `MvD_3_Gini_wealth.do` (72) | `..\data\SCF\SCF_plus.dta`, `..\data\model_<scenario>.dta` | `$graphspath\MvD_Gini_levels.png` | line 100 | `$year_start=1950`/`$year_stop=2020` (reset by `__main.do`), `$graphspath`; community `ineqdeco` (see §14.5-P2) | `outputs_stata_code/` | `scenario` is a **local** (line 35) that shadows the global; behavior depends only on line-35 value. |
-| `MvD_4_GE_decomposition.do` (151) | `..\data\model_<scenario>.dta`, `..\data\SCF\SCF_plus.dta` | `$graphspath\MvD_GE.{png,eps,svg}` | line 101 | `$graphspath` | `outputs_stata_code/` | Local `scenario` (line 9) shadows global. Calls `ours_ineqdeco` from `_prog_ineq_function.do`. |
+| `MvD_3_GE_decomposition.do` (151) | `..\data\model_<scenario>.dta`, `..\data\SCF\SCF_plus.dta` | `$graphspath\MvD_GE.{png,eps,svg}` | line 100 | `$graphspath` | `outputs_stata_code/` | Local `scenario` (line 9) shadows global. Calls `ours_ineqdeco` from `_prog_ineq_function.do`. Was `MvD_4_GE_decomposition.do` at the audit date; renamed 2026-04-24 when the wealth-Gini diagnostic (`MvD_3_Gini_wealth.do`) was dropped. |
 | `__main_PIOTR.do` (?) | — | — | **not called** (orphan) | — | — | §14.6 orphan; P3 close-out. |
 
 ### 14.3 `__main.do` structural map
@@ -817,7 +815,7 @@ Driver blocks (line numbers are `__main.do`):
 | **Main text — Figures 2/3** | 34–54 | R_Figure2 (1×) + R_Figure3 (2×), with exports at 39, 47, 54 | `$variant_base`, `$variant_comp`, `$r1`, `$r2`, `$legend`, `$colors` | — | — |
 | **Appendix B — Calibration** | 57–81 | Re-run M01/M02/M03/M04, H01, D02, T01/T02/T03 with `$bsource="../outputs_stata_code/"`; erase bone at end | `$year_start/stop`, `$bsource` | `cd ..\inputs_stata_code` (58) → `cd ..\outputs_stata_code` (81) | Uses `drawing`/`special_drawing` from step-1's `_prog_coding.do` (BUGGY — see §14.5-P1) |
 | **Appendix C — Populations** | 84–88 | D03, D01 | — | `cd ..\inputs_stata_code` (85) → `cd ..\outputs_stata_code` (88) | No `_prepare_programs` call; uses whatever `drawing` is in workspace. |
-| **Appendix D — MvD** | 90–101 | MvD_1, MvD_2, MvD_3, MvD_4 | `$scenario`, `$year_start=1950`/`$year_stop=2020`/`$year_end=2100`, `$min_age`, `$max_age` | — | — |
+| **Appendix D — MvD** | 90–100 | MvD_1, MvD_2, MvD_3_GE | `$scenario`, `$year_start=1950`/`$year_stop=2020`/`$year_end=2100`, `$min_age`, `$max_age` | — | — |
 | **Appendix E — Additional** | 103–128 | R_Figure3 3× (incomes, taxes, macro) | `$variant_base`, `$variant_comp`, `$legend`, `$colors` | — | — |
 | **Appendix F — Sensitivity** | 130–193 | R_Figure2 4× (crr3, hrat, ndel, nstr), M02robustness re-prep, R_Figure2 (gcbo), M04 re-prep, R_Figure1_app (exor), R_Figure2 (beqs) | `$variant_base`, `$variant_comp`, `$r1`, `$r2`, `$bsource`, `$scenario` | `cd ..\inputs_stata_code` (165) → `cd ..\outputs_stata_code` (171); also `do _prepare_programs` at 167 (this is where the FIXED programs finally reach the workspace, too late for Appendix B — see §14.5-P1) | `do _prepare_programs` at 167 overrides the Appendix-B-era buggy programs with the fixed inputs-side versions. |
 
@@ -856,7 +854,7 @@ Not caught by the inputs audit (§13) because that audit ran `__main_data_prepar
 
 #### P2 — Missing `ineqdeco` package dependency
 
-[`_prep_Gini_data.do:50`](../outputs_stata_code/_prep_Gini_data.do#L50), [`MvD_3_Gini_wealth.do:22,51`](../outputs_stata_code/MvD_3_Gini_wealth.do#L22) call community `ineqdeco` (not the custom `ours_ineqdeco` defined in `_prog_ineq_function.do`). [`README.md:813`](../README.md#L813) lists `psmatch2`, `mat2txt`, `egenmore` — `ineqdeco` is missing.
+[`_prep_Gini_data.do:50`](../outputs_stata_code/_prep_Gini_data.do#L50) calls community `ineqdeco` (not the custom `ours_ineqdeco` defined in `_prog_ineq_function.do`). [`README.md:813`](../README.md#L813) lists `psmatch2`, `mat2txt`, `egenmore` — `ineqdeco` is missing. (The former second caller, `MvD_3_Gini_wealth.do`, was removed 2026-04-24.)
 
 **Fix**: add `ineqdeco` to the README's Stata package list, and optionally add a `capture which ineqdeco` / `ssc install ineqdeco` preamble to `_prep_Gini_data.do` (same pattern `estimate_income_process.do:18-22` uses for `mat2txt`).
 
@@ -918,7 +916,7 @@ After copying the full `fortran_code/Results/` (27 GB, 30 scenarios) and `data/P
 | 2 | `R_Figure1.do` (main-text Figure 1) | ✅ |
 | 3 | `R_Figure2.do` (main-text Figure 2 — psid_all vs psid_ndm) | ✅ **after** `c8` fix |
 | 4 | `R_Figure3.do` (main-text Figures 3/4 — demographics bar) | ✅ |
-| 5 | `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_Gini_wealth.do`, `MvD_4_GE_decomposition.do` | ✅ |
+| 5 | `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_GE_decomposition.do` | ✅ |
 | 6 | `R_Figure1_app.do` (Appendix F.7) | ✅ |
 
 **One new P1 bug surfaced**: `prep_data_for_main_plot` in [`_prog_coding.do:88`](../outputs_stata_code/_prog_coding.do#L88) referenced `${variant_comp_min}` **during the first iteration of its variant loop**, before the `variant_comp_*` globals were set. This caused `local val = ${variant_base_max} -` (missing operand) → `r(198) invalid syntax` on the first call to `R_Figure2.do` in a fresh session. The formula also set both `variant_base_diff` and `variant_comp_diff` to the same cross-variant value, inconsistent with R_Figure2's text labels which display each variant's own spread. Fixed in `c8`: rewrote to per-variant `${`variant'_max} - ${`variant'_min}`.

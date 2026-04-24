@@ -30,6 +30,8 @@ demographic-transition-wealth-inequality/
 │                                the calibration inputs in fortran_code/Data/
 │   ├── demography/
 │   ├── depreciation/
+│   ├── external/                External Fortran inputs (UN/CDC/SSA source data),
+│   │                            copied to fortran_code/Data/ via copy_to_fortran.do
 │   ├── income_process/          Stata + MATLAB income-process pipeline
 │   │   ├── estimate_income_process.do
 │   │   ├── estimate_parameters.m
@@ -43,8 +45,6 @@ demographic-transition-wealth-inequality/
 │
 ├── outputs_stata_code/          Stata code that produces paper tables/figures
 │                                from Fortran output
-│
-├── sensitivity_stata_code/      Robustness-check Stata code
 │
 ├── graphs/                      Generated figures (inputs/ and outputs/)
 │
@@ -96,279 +96,41 @@ The author(s) of the manuscript have legitimate access to and permission to use 
 
 This paper uses publicly available data and authors' estimates derived from restricted-access microdata. All **processed/derived data files** necessary for replication are included in this package.
 
-Some estimates were derived from **restricted-access PSID microdata** (Panel Study of Income Dynamics, 1970-2019 waves). The PSID microdata cannot be redistributed but can be accessed by researchers through the PSID Data Center (see Section 3 below for access instructions).
-
-**Important**: All results in the paper can be replicated using the included derived data files. Access to raw PSID data is NOT required for replication, but instructions are provided for researchers who wish to re-estimate the income process parameters from scratch.
+Some estimates were derived from **restricted-access PSID microdata** (Panel Study of Income Dynamics, 1970-2019 waves). PSID microdata cannot be redistributed; researchers can obtain it at https://psidonline.isr.umich.edu/. Access to raw PSID is **not** required to replicate the paper — the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` files suffice.
 
 ---
 
-## Details on Each Data Source
-
-### 1. U.S. Population Data by Age Cohort
-
-**Description**: Historical and projected population counts by 5-year age groups for the United States, covering years 1935-2100.
-
-**Source**: United Nations Population Database
-
-**Access**: https://population.un.org/wpp/
-
-**Date Accessed**: 2021-2022
-
-**License/Terms**: Public domain, freely redistributable under UN terms of use
-
-**Files in this package**:
-- `fortran_code/Data/_data_Nn_US_1935_2100.txt` - Main population series (1935-2100)
-- `fortran_code/Data/_data_Nn_US_1935_init_old.txt` - Initial population distribution for 1935
-
-**Notes**: Population data aggregated into 5-year periods (model periods). Historical data (1935-2020) combined with UN medium-variant projections (2020-2100) for future periods.
-
----
-
-### 2. Survival Probabilities and Mortality Data
-
-**Description**: Conditional survival probabilities by age and education level (college vs. less than college). Constructed from U.S. death certificate data.
-
-**Source**: Case, Anne and Deaton, Angus. 2021. "Life expectancy in adulthood is falling for those without a BA degree, but as educational gaps have widened, racial gaps have narrowed." *Proceedings of the National Academy of Sciences* 118(11): e2024777118. https://doi.org/10.1073/pnas.2024777118
-
-**Access**: Data available from PNAS supplementary materials at: https://www.pnas.org/doi/10.1073/pnas.2024777118
-
-**Date Accessed**: 2021
-
-**License/Terms**: Published data, freely available for research use
-
-**Files in this package**:
-- `fortran_code/Data/_data_pi_cond_US_since1935.txt` - Conditional survival probabilities (overall population)
-- `fortran_code/Data/_data_pi_cond_het_US_since1935.txt` - Heterogeneous survival (by education, 1990-2018)
-- `fortran_code/Data/_data_pi_US_since1935_col.txt` - College-educated survival probabilities
-- `fortran_code/Data/_data_pi_US_since1935_no_col.txt` - Non-college-educated survival probabilities
-- `fortran_code/Data/_data_het_pi_US_since1935_all.txt` - Comprehensive heterogeneous mortality data
-
-**Notes**:
-- Case and Deaton (2021) provide mortality data by education for cohorts reaching age 50 between 1935-1990 (historical) and 1990-2065 (projections).
-- For cohorts born before 1915, we extrapolate using the ratio observed for the 1915 cohort (1.018).
-- For cohorts born after 1990, we use the ratio observed for the 1990 cohort (1.006).
-- Combined with UN population data to construct complete survival probabilities by education.
-
----
-
-### 3. Age-Efficiency (Wage) Profiles
-
-**Description**: Age-specific labor productivity profiles reflecting life-cycle earnings patterns, estimated separately for college and non-college educated workers.
-
-**Source**: **Authors' estimates** using Panel Study of Income Dynamics (PSID) 1970-2019 waves. Estimation uses Deaton-Paxson (2000) decomposition method to separate age, cohort, and time effects.
-
-**Raw Data Access**: PSID data requires registration at https://psidonline.isr.umich.edu/. Free access for research purposes, requires data use agreement.
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: PSID data subject to data use agreement. **Raw microdata cannot be redistributed**. Estimated age profiles (included here) can be shared.
-
-**Files in this package** (all are **derived/analysis data**):
-- `fortran_code/Data/_data_omega_deaton_avghourly.txt` - Baseline age-efficiency profile
-- `fortran_code/Data/_data_omega_deaton_avghourlyhh.txt` - Household-level profile
-- `fortran_code/Data/_data_omega_busno_drop_hhslabinc_avghourlyhh.txt` - Excluding business income
-- `fortran_code/Data/_data_omega_mostdrop_hhslabinc_avghourlyhh.txt` - Alternative specification
-- [Additional omega files for robustness specifications]
-
-**Notes**:
-- These files contain **estimated parameters**, not raw PSID data
-- Estimation procedure: Deaton and Paxson (2000) decomposition, identifying age effects while controlling for cohort and year effects
-- Raw PSID data is NOT needed for replication - use the included estimated profiles
-- For researchers who want to re-estimate: See Online Appendix for detailed estimation procedure
-
----
-
-### 4. Total Factor Productivity (TFP) Growth
-
-**Description**: Historical TFP growth rates (1950-2017) and projections (2018-2100) for the U.S. economy, adjusted to be labor-augmenting.
-
-**Source**:
-- Historical (1950-2017): Penn World Table (PWT) 10.0, variable `rtfpna`
-- Projections (2018+): Fernald, John G. 2016. "Reassessing Longer-Run U.S. Growth: How Low?" Federal Reserve Bank of San Francisco Working Paper 2016-18.
-
-**Access**:
-- PWT 10.0: https://www.rug.nl/ggdc/productivity/pwt/
-- Fernald (2016): https://www.frbsf.org/economic-research/publications/working-papers/2016/18/
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: Both public domain / freely available for research
-
-**Files in this package**:
-- `fortran_code/Data/_data_gamma.txt` - Baseline TFP growth series (1935-2100)
-- `fortran_code/Data/_data_gamma_robustness.txt` - Alternative TFP for robustness checks
-
-**Notes**:
-- TFP from PWT adjusted to be labor-augmenting using time-varying capital share α_t
-- Further adjusted for changing age/education composition and skill premium
-- Pre-1950: Flat TFP growth assumed
-- Post-2020: 0.6% annual TFP growth following Fernald (2016) projections (range: 0.4-0.8%)
-
----
-
-### 5. Tax Progressivity and Effective Tax Rates
-
-**Description**: Tax progressivity parameter (λ) governing the elasticity of after-tax to pre-tax income in the progressive tax function.
-
-**Source**: Heathcote, Jonathan, Kjetil Storesletten, and Giovanni L. Violante. 2017. "Optimal Tax Progressivity: An Analytical Framework." *Quarterly Journal of Economics* 132(4): 1693-1754.
-
-**Access**: https://doi.org/10.1093/qje/qjx018 (Parameter values reported in paper)
-
-**Date Accessed**: 2020
-
-**License/Terms**: Published academic paper, parameters can be used with citation
-
-**Files in this package**:
-- `fortran_code/Data/_data_lambda.txt` - Tax progressivity parameter over time (1935-2100)
-
-**Notes**:
-- λ_t governs progressivity in tax function: T(y) = y - (1-τ)(y/ȳ)^(1-λ)ȳ
-- Historical values from Heathcote et al. (2017) estimates
-- Projected to remain constant after 2020
-
----
-
-### 6. Social Security Replacement Rates
-
-**Description**: Parameters governing Social Security benefit calculations in the model (rho parameter).
-
-**Source**: Calibrated to match U.S. Social Security Administration data on benefit expenditures as share of GDP
-
-**Access**: SSA Office of the Chief Actuary - https://www.ssa.gov/oact/
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: Public domain
-
-**Files in this package**:
-- `fortran_code/Data/_data_rho_1935.txt` - Replacement rate parameter series (1935-2100)
-
-**Notes**: Model replicates observed pension expenditure/GDP ratio well, with future path matching CBO projections
-
----
-
-### 7. Educational Attainment and Skill Premium
-
-**Description**: (a) Share of population with college education by birth cohort, and (b) College wage premium (log difference between college and non-college wages)
-
-**Sources**:
-- **College shares**: U.S. Census Bureau and American Community Survey (individual-level data aggregated by cohort)
-- **Skill premium**: Autor, David and Dorn, David. 2020. "Changes in the occupational skill-intensity of U.S. manufacturing employment: 1980-1995." Updated series from Goldin and Katz (2008), extended to 1914-2020.
-
-**Access**:
-- Census/ACS: most convenient via [IPUMS USA](https://usa.ipums.org/usa/). The Stata script expects an extract at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` with variables `age`, `higrade`, `educd`, `perwt`, `year` (~2 GB, 1970-present). File is gitignored; replicators must register with IPUMS and generate the extract.
-- Skill premium data: Updated series available from Autor-Dorn research pages
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: Public domain (Census/ACS; IPUMS redistribution subject to their terms of use), published academic series (skill premium)
-
-**Files in this package**:
-- `fortran_code/Data/_data_college_share.txt` - Share with college degree by cohort (1885-2050)
-
-**Notes**:
-- College shares calculated for each entry cohort and projected forward
-- Skill premium series smoothed using Hodrick-Prescott filter (λ=6.25), assumed constant after 2020
-- Raw IPUMS ACS extract (`ACS_college.dta`, ~2 GB) NOT included — replicators provide their own extract (see Access above)
-
----
-
-### 8. Social Security Contribution Rates
-
-**Description**: Payroll tax rates for Social Security over time, relative to GDP
-
-**Source**: OECD Social Security Contributions database
-
-**Access**: https://data.oecd.org/
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: OECD data freely available for research
-
-**Files in this package**:
-- `fortran_code/Data/_data_contrib.txt` - Empty file (contributions calculated endogenously in model)
-- `fortran_code/Data/_data_contrib_to_gdp.txt` - Historical contributions as share of GDP
-
-**Notes**: Model uses contributions/GDP ratio. Effective contribution rate τ_ss calculated using labor share (1-α)
-
----
-
-### 9. Depreciation Rates and Capital Share
-
-**Description**: Capital depreciation rates and labor/capital shares in production
-
-**Source**: Bureau of Economic Analysis (BEA) Fixed Assets Tables and National Income accounts
-
-**Access**: https://apps.bea.gov/national/FA2004/Index.asp
-
-**Date Accessed**: 2020-2021
-
-**License/Terms**: Public domain
-
-**Files in this package**:
-- `fortran_code/Data/_data_depr.txt` - Depreciation rate series (1935-2100)
-
-**Notes**: Depreciation rates from BEA aggregated across asset types, adjusted to model periodicity (5 years)
-
----
-
-### 10. Additional Calibration Data
-
-**Description**: Labor share, government spending, and other auxiliary parameters
-
-**Sources**:
-- **Labor share**: BEA NIPA tables
-- **Government spending**: BEA National Income accounts
-- **Interest rates**: Various (used for counterfactual scenarios only)
-
-**Files in this package**:
-- `fortran_code/Data/_data_labsh.txt` - Labor share of income (=1-α)
-- `fortran_code/Data/_data_gy_1935.txt` - Government spending relative to GDP (empty - calculated endogenously)
-- `fortran_code/Data/_data_exog_rate_1935.txt` - Exogenous interest rates (for sensitivity analysis)
-
-**Access**: https://www.bea.gov/
-
-**License/Terms**: Public domain
-
-**Notes**: Most fiscal parameters determined endogenously by government budget closure rule
-
----
-
-### Data Not Included
-
-**[IF APPLICABLE]:**
-
-The following data cannot be redistributed due to licensing restrictions:
-- [List any restricted data]
-- Instructions for access: [Provide detailed steps]
-- Expected access timeline: [e.g., "2-3 months for data use agreement approval"]
-- Contact for assistance: [name and email]
-
-**Without this restricted data, the following results cannot be replicated**:
-- [List specific tables/figures that require restricted data]
-
-**All other results can be replicated using the included data.**
-
----
-
-# Dataset List
-
-| Data File | Source | Type | Included | Described Above |
-|-----------|--------|------|----------|-----------------|
-| `_data_Nn_US_*.txt` | [Source] | Secondary/Public | Yes | Section 1 |
-| `_data_pi_*.txt` | [Source] | Secondary/Public | Yes | Section 2 |
-| `_data_omega_*.txt` | Derived from PSID | Analysis/Derived | Yes | Section 3 |
-| `_data_gamma*.txt` | [Source] | Secondary/Public | Yes | Section 4 |
-| `_data_lambda.txt` | Heathcote et al. (2017) | Secondary/Public | Yes | Section 5 |
-| `_data_rho_*.txt` | [Source] | Secondary/Public | Yes | Section 6 |
-| `_data_college_share.txt` | [Source] | Secondary/Public | Yes | Section 7 |
-| `_data_contrib*.txt` | SSA | Secondary/Public | Yes | Section 8 |
-| `_data_depr.txt` | BEA | Secondary/Public | Yes | Section 9 |
-| `_data_labsh.txt` | [Source] | Secondary/Public | Yes | Section 10 |
-| `_data_gy_*.txt` | [Source] | Secondary/Public | Yes | Section 10 |
-| `_data_exog_rate_*.txt` | [Source] | Secondary/Public | Yes | Section 10 |
-
-**Note**: Additional robustness variants exist for some data series (e.g., multiple omega files for different specifications).
+## Data Sources
+
+Each model input file, its source, and the script that produces it.
+
+| File | Source | Producer / location |
+|---|---|---|
+| `_data_Nn_US_1935_2100.txt` | UN World Population Prospects + CDC birth counts (https://population.un.org/wpp/, https://www.cdc.gov/nchs/nvss/) | `inputs_stata_code/external/` (hand-curated) |
+| `_data_Nn_US_1935_init_old.txt` | CDC historical population tables | `inputs_stata_code/external/` (hand-curated) |
+| `_data_rho_1935.txt` | SSA PIA benefit formula (https://www.ssa.gov/oact/) | `inputs_stata_code/external/` (hand-curated) |
+| `_data_pi_cond_US_since1935.txt` | Human Mortality Database (https://www.mortality.org/) + UN WPP projections | `demography/mortality/D01_life_tables.do` |
+| `_data_het_pi_US_since1935_all.txt` | Same as above × education ratio from Case & Deaton (2021, PNAS 118(11)), shared by the authors | `demography/hetero_pi/D03_prepare_hetero_pi.do` |
+| `_data_omega_{mostdrop,busno_drop}_hhslabinc_avghourlyhh.txt` | Derived from PSID 1970-2019 (https://psidonline.isr.umich.edu/) | `inputs_stata_code/income_process/estimate_income_process.do` + MATLAB |
+| `_data_sigma2eps_{mostdrop,busno_drop}_hhslabinc_avghourlyhh.txt` | Derived from PSID 1970-2019 | `inputs_stata_code/income_process/` (MATLAB `estimate_parameters.m`) |
+| `_data_gamma.txt` | Penn World Table 10.0 `rtfpna` (https://www.rug.nl/ggdc/productivity/pwt/) | `tfp/M02prepare_gamma.do` |
+| `_data_gamma_robustness.txt` | Same as above (alternative scenario path) | `tfp/M02robustness_prepare_gamma.do` |
+| `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt` | McDaniel (2007) updated tax series (https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia) | `tax_rate/T01prepare_taxes.do` |
+| `_data_lambda.txt` | Piketty-based progressivity via Bayer-Born-Luetticke replication data (`tax_rate/progressivity_measures_all.xlsx`) | `tax_rate/T03prepare_tax_lambda.do` |
+| `_data_contrib_to_gdp.txt` | OECD Revenue Statistics (https://data.oecd.org/) | `social_security/T02prepare_contributions.do` |
+| `_data_depr.txt` | Penn World Table 10.0 `delta` | `depreciation/M01prepare_depr.do` |
+| `_data_labsh.txt` | Penn World Table 10.0 `labsh` | `labor_share/M03prepare_labor_share.do` |
+| `_data_skill_premium.txt` | Autor-Goldin-Katz (2020 AEA P&P), openICPSR 120694 | `skill_premium/H01prepare_skill_premium.do` |
+| `_data_college_share.txt` | ACS via IPUMS USA (https://usa.ipums.org/usa/), replicator-supplied extract | `skill_premium/D02_prepare_college.do` |
+
+### Auxiliary data consumed outside the Fortran input chain
+
+- `data/SCF/SCF_plus.dta` — SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*). Distributed by the authors at https://www.moritz-schularick.com/data. **Not redistributed here** (gitignored). Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's Gini and decomposition figures.
+- `psid/psid.dta` — PSID public-use extract. **Not redistributed here** (gitignored); obtain from https://psidonline.isr.umich.edu/ under the standard data-use agreement. Consumed only if replicators wish to re-estimate the income process from scratch (otherwise the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` suffice).
+
+### Access, license, dates
+
+All sources above are either public-domain, free for academic use under the provider's stated terms, or shipped here with the original authors' permission. All source data was accessed between 2020 and 2022.
 
 ---
 
@@ -394,7 +156,7 @@ The following data cannot be redistributed due to licensing restrictions:
 
 3. **Stata** (for calibration inputs and paper figures)
    - Version: Stata/SE 16 or later (tested with Stata 16)
-   - Required packages: `psmatch2`, `mat2txt`, `egenmore`, `ineqdeco` (install via `ssc install`). `ineqdeco` is auto-installed on first run by `outputs_stata_code/_prep_Gini_data.do`; the others must be installed manually.
+   - Required packages: `mat2txt` (used by the income-process pipeline) and `ineqdeco` (used by the Gini prep). Both are auto-installed on first run — `mat2txt` by `estimate_income_process.do`, `ineqdeco` by `_prep_Gini_data.do`.
    - Used by: `inputs_stata_code/` (Step 2, calibration inputs) and `outputs_stata_code/` (Step 7, paper figures)
    - License: Commercial (StataCorp)
 
@@ -698,7 +460,6 @@ Files named: `{version}{experiment}{closure}instructions.txt`
 Format: 35 lines, each containing an integer switch value followed by comment
 - Controls model features (mortality, taxes, pension rules, etc.)
 - Order of lines is CRITICAL and must match `set_globals.f90` read order
-- See CLAUDE.md for detailed line-by-line documentation
 
 Example: `psid_all_govt__instructions.txt`
 
@@ -709,7 +470,6 @@ Files named: `{version}{experiment}{closure}parameters.txt`
 Format: 51 lines containing numerical parameters
 - Tolerance levels, damping factors, structural parameters
 - Order of lines is CRITICAL and must match `set_globals.f90` read order
-- See CLAUDE.md for detailed line-by-line documentation
 
 Example: `psid_all_govt__parameters.txt`
 
@@ -808,10 +568,10 @@ Or download as ZIP and extract to any local path — no hardcoded locations are 
 
 ### Step 2: Generate Calibration Inputs (Stata + MATLAB)
 
-The Fortran model reads ~40 calibration input files from `fortran_code/Data/`. These files are produced by the Stata (and MATLAB) code under `inputs_stata_code/`. **Re-running the calibration pipeline is part of the replication**: the pre-generated files in the repository reflect the authors' most recent run and should be treated as a snapshot, not a frozen deliverable.
+The Fortran model reads ~21 calibration input files from `fortran_code/Data/`. These files are produced by the Stata (and MATLAB) code under `inputs_stata_code/`. **Re-running the calibration pipeline is part of the replication**: the pre-generated files in the repository reflect the authors' most recent run and should be treated as a snapshot, not a frozen deliverable.
 
 **Required software**:
-- **Stata 16+** with the `psmatch2`, `mat2txt`, `egenmore`, and `ineqdeco` packages (`ineqdeco` is auto-installed on first run)
+- **Stata 16+** with the `mat2txt` and `ineqdeco` packages (both are auto-installed on first run)
 - **MATLAB R2018b+** (required by `inputs_stata_code/income_process/`)
 - **Raw PSID extract** at `psid/psid.dta` (~98 MB, at the repository root). Not redistributed — obtain through the PSID Data Center. See the Data Availability section for access instructions.
 
@@ -834,19 +594,21 @@ The helpers in this folder use relative paths (`$bsource/bone`, `../fortran_code
 
 **Data download switch (`$download_data`)**: The driver sets `global download_data 0` at the top. With the default value of 0, every prep script loads source data from committed `.dta` snapshots (e.g. `depreciation/depreciation.dta`, `tfp/gamma.dta`). This pins the pipeline to the data vintage used in the paper and ensures reproducibility without network access. To refresh the source data from dbnomics/OECD, change the global to `global download_data 1` before running — each script will re-download its series and overwrite the local `.dta`. The same switch is set in `outputs_stata_code/__main.do` for the model-vs-data figures.
 
-This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes the following `.txt` files into `../fortran_code/Data/`:
+The driver orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes the following `.txt` files into `../fortran_code/Data/`:
 
+- `_data_Nn_US_1935_2100.txt`, `_data_Nn_US_1935_init_old.txt`, `_data_rho_1935.txt` — copied from `inputs_stata_code/external/` by `external/copy_to_fortran.do` (external source data, not regenerated)
 - `_data_depr.txt` (depreciation) — `depreciation/M01prepare_depr.do`
 - `_data_gamma.txt` (TFP growth path) — `tfp/M02prepare_gamma.do`
 - `_data_labsh.txt` (labor share) — `labor_share/M03prepare_labor_share.do`
-- `_data_exog_rate_1935.txt` (exogenous rate series for the `exor_` scenario) — `../sensitivity_stata_code/exog_rate/M04prepare_exog_rate.do`
 - `_data_skill_premium.txt` — `skill_premium/H01prepare_skill_premium.do`
 - `_data_college_share.txt` — `skill_premium/D02_prepare_college.do`
 - `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt` (consumption, capital, labor tax rates) — `tax_rate/T01prepare_taxes.do`
 - `_data_contrib_to_gdp.txt` (pension contributions / GDP) — `social_security/T02prepare_contributions.do`
 - `_data_lambda.txt` (tax progressivity) — `tax_rate/T03prepare_tax_lambda.do`
+- `_data_pi_cond_US_since1935.txt` (overall-population survival, written by `demography/mortality/D01_life_tables.do` to `demography/mortality/output/`, then copied into `../fortran_code/Data/` by the driver)
+- `_data_het_pi_US_since1935_all.txt` (education-specific survival, written directly by `demography/hetero_pi/D03_prepare_hetero_pi.do`)
 
-**Calibration-plot side outputs**: the same prep scripts also save one per-variable diagnostic plot (`.png`, `.eps`, `.gph`, `.svg`, `.pdf`) to `../graphs/inputs/`. These are the Appendix-B calibration figures in the paper. Plot writing is done through three helper programs defined in `_prepare_programs.do` — `drawing`, `special_drawing`, `special_drawing2` — that wrap a `twoway tsline` in `preserve`/`restore`. The full side-output mapping is:
+**Calibration-plot side outputs**: the same prep scripts also save one per-variable plot (`.png`, `.eps`, `.gph`, `.svg`, `.pdf`) to `../graphs/inputs/`. These are the Appendix-B calibration figures in the paper. Plot writing is done through two helper programs defined in `_prepare_programs.do` — `special_drawing` and `special_drawing2` — that wrap a `twoway tsline` in `preserve`/`restore`. The full side-output mapping is:
 
 | Script | `graphs/inputs/<file>.<ext>` basename | Plotting program |
 |---|---|---|
@@ -860,13 +622,13 @@ This orchestrates every `M0*`, `H0*`, `D0*`, and `T0*` prep script and writes th
 | `social_security/T02prepare_contributions.do` | `contributions` | inline `twoway` (own `preserve`/`restore`) |
 | `tax_rate/T03prepare_tax_lambda.do` | `lambda` | `special_drawing` |
 
-Each plot is emitted in five formats: `.png`, `.eps`, `.gph`, `.svg`, `.pdf` (one `graph save` call + four `graph export` calls). The `drawing` program in `_prepare_programs.do` is defined but currently unused; only `special_drawing` and `special_drawing2` are called by the Stage-A scripts.
+Each plot is emitted in five formats: `.png`, `.eps`, `.gph`, `.svg`, `.pdf` (one `graph save` call + four `graph export` calls).
 
-The `M04prepare_exog_rate.do` script does **not** save to `graphs/inputs/` — it uses an inline `tsline` for visual inspection only.
+`D01_life_tables.do` renders an interactive scatter of mortality by age but does not save it. `D03_prepare_hetero_pi.do` saves a life-expectancy-at-50 plot to `../graphs/inputs/LE50year.{png,eps,svg,gph,pdf}` (Figure B.2).
 
-The Stage B income-process run (`run_estimation.bat`, described below) additionally writes `graphs/inputs/sigma2eps_{mostdrop,busno_drop}_hhslabinc.{eps,png}` plus `sigma2eps_diagnostic_*.png` (all-bin view).
+The Stage B income-process run (`run_estimation.bat`, described below) additionally writes `graphs/inputs/sigma2eps_{mostdrop,busno_drop}_hhslabinc.{eps,png}`.
 
-Note that the `sensitivity_stata_code/exog_rate/` code is load-bearing for the `exor_` scenario and is called from `__main_data_prepare.do`; it is *not* purely optional robustness code. The `gcbo_` scenario's robustness prep lives at `inputs_stata_code/tfp/M02robustness_prepare_gamma.do` and is invoked from `outputs_stata_code/__main.do` (see Step 7) — not from `__main_data_prepare.do`.
+The `gcbo_` scenario's robustness TFP prep lives at `inputs_stata_code/tfp/M02robustness_prepare_gamma.do` and is invoked from `outputs_stata_code/__main.do` (see Step 7) — not from `__main_data_prepare.do`.
 
 #### Stage B — Income-Process Parameters (Stata + MATLAB)
 
@@ -911,14 +673,17 @@ If you do run the full bootstrap yourself (`set N_REPS=1000 & run_estimation.bat
 
 **Expected bootstrap convergence rate**: of 1000 reps, ~10 may fail `lsqnonlin` convergence (9 H, 1 L in the authors' run). `plot_estimates.m` drops failed reps before computing percentiles.
 
-#### Stage C — Population and Mortality
+#### Stage C — External Fortran Inputs
 
-Demography is split across two mechanisms, neither of which is driven by `__main_data_prepare.do`:
+Three Fortran inputs have no Stata producer and are sourced directly from external authorities. They live under `inputs_stata_code/external/`, and `external/copy_to_fortran.do` (called from `__main_data_prepare.do`) copies them into `fortran_code/Data/` at pipeline time:
 
-1. **Frozen population series** — `_data_Nn_US_1935_2100.txt` and `_data_Nn_US_1935_init_old.txt` in `fortran_code/Data/` are **hand-written frozen inputs**. No Stata script in the repository regenerates them. They should be treated as source data, not pipeline output.
-2. **Mortality / heterogeneous-survival scripts** — `inputs_stata_code/demography/mortality/D01_life_tables.do` and `inputs_stata_code/demography/hetero_pi/D03_prepare_hetero_pi.do` produce `_data_pi_cond_US_since*.txt`, `_data_pi_US_since1935_{no_}col.txt`, and `_data_het_pi_US_since1935_all.txt`. D01 writes to `inputs_stata_code/demography/mortality/output/` only. D03 writes to both its local `output/` subfolder and directly to `fortran_code/Data/`. The scripts are dispatched from `outputs_stata_code/__main.do` (Appendix C), not from `__main_data_prepare.do`.
+- `_data_Nn_US_1935_2100.txt` — newborn population per 5-year period (UN Population Prospects + CDC)
+- `_data_Nn_US_1935_init_old.txt` — initial 1935 age distribution (CDC historical tables)
+- `_data_rho_1935.txt` — pension replacement rates by retirement age (SSA benefit formula)
 
-Other `_data_*.txt` files present in `fortran_code/Data/` — including `_data_gy_1935.txt`, `_data_rho_1935.txt`, `_data_type_multiplier*.txt`, `_data_type_share.txt`, `_data_het_pi_US_since1935.txt`, `_data_pi_cond_het_US_since1935.txt`, `_data_contrib.txt` — are **frozen inputs** with no Stata script producing them today. Treat them as source data alongside the population series. Note: `_data_gamma_robustness.txt` is produced by `M02robustness_prepare_gamma.do` (called from `outputs_stata_code/__main.do`).
+See [`inputs_stata_code/external/README.md`](inputs_stata_code/external/README.md) for provenance details.
+
+The only file in `fortran_code/Data/` that is neither produced by a Stage-A script nor part of the external set is `_data_gamma_robustness.txt`, which is produced by `tfp/M02robustness_prepare_gamma.do` — called from `outputs_stata_code/__main.do` (Appendix F, Step 7).
 
 #### Verify
 
@@ -928,7 +693,7 @@ Once all three stages have run, check that `fortran_code/Data/` contains the exp
 dir fortran_code\Data\
 ```
 
-You should see ~40 files including `_data_Nn_US_*.txt` (population), `_data_pi_*.txt` (mortality), `_data_omega_*.txt` (productivity), `_data_gamma*.txt` (TFP), and the tax / contribution / skill-premium files listed above. The full catalogue is in the Data Availability section.
+You should see ~20 files: `_data_Nn_US_*.txt` (population), `_data_pi_cond_US_since1935.txt` and `_data_het_pi_US_since1935_all.txt` (mortality), `_data_omega_*.txt` and `_data_sigma2eps_*.txt` (productivity), `_data_gamma.txt` (TFP; `_data_gamma_robustness.txt` is written later by Step 7), `_data_tauC/K/L.txt` and `_data_lambda.txt` (taxes), `_data_contrib_to_gdp.txt`, `_data_skill_premium.txt`, `_data_college_share.txt`, `_data_depr.txt`, `_data_labsh.txt`, and `_data_rho_1935.txt`. The full catalogue is in the Data Availability section.
 
 **If any files are missing** after running Stages A and B: see Data Availability section for the PSID access instructions, and check the individual `.do` logs under `inputs_stata_code/*/`.
 
@@ -954,14 +719,17 @@ Both are ~2 MB each, compiled with Intel `ifx` on Windows x64. Skip ahead to Ste
 2. **Set build configuration**:
    - At the top: Select "Release" (not Debug)
    - Select "x64" platform
+   - Build → Rebuild Solution
 
-3. **Clean and rebuild**:
-   - Menu: Build → Clean Solution
-   - Menu: Build → Rebuild Solution (or press Ctrl+Alt+F7)
+3. **Build the het-rate variant** (needed for Appendix F.2 `hrat_` scenarios):
+   - Select "Release_HetRate" × "x64"
+   - Build → Rebuild Solution
+   - Produces `x64\Release_HetRate\5Gtrans_het.exe`
+   - This configuration swaps `pfi.f90` → `pfi_het.f90` and `steady_state.f90` → `steady_state_het.f90` via per-file `ExcludedFromBuild` rules; preprocessor defines and compile flags are otherwise identical to Release
 
 4. **Verify compilation**:
    - Check Output window for "Build succeeded"
-   - Verify executable exists: `x64\Release\5Gtrans.exe` OR `5Gtrans.exe` (depending on project settings)
+   - Verify executables exist: `x64\Release\5Gtrans.exe` and (if built) `x64\Release_HetRate\5Gtrans_het.exe`
 
 **Compilation time**: ~2-5 minutes depending on your system
 
@@ -1065,21 +833,20 @@ This script:
 2. Runs each uncommented scenario sequentially
 3. Saves output to separate subfolders in `fortran_code/Results/`
 
-**Important**: `fortran_code/scenarios.txt` ships as a **catalogue**, not a pre-configured run list. Every paper scenario is listed but most are commented out (prefixed with `#`) for safety — running the full set is multi-day. Before invoking the batch script, uncomment the scenarios you actually want to run. The full map from paper figure → scenarios is in [SCENARIOS.md](SCENARIOS.md); the scenario families needed for the paper are:
+**Important**: `fortran_code/scenarios.txt` lists every paper scenario uncommented; `run_scenarios_from_list.bat` runs them all sequentially with `5Gtrans.exe` (searches `5Gtrans.exe`, `x64\Release\`, `x64\Debug\`, `Release\`, `Debug\`, then `bin\` as a shipped-binary fallback). Running the full set is multi-day — comment out scenarios you don't need before invoking. The `hrat_` scenarios are **not** in `scenarios.txt`; run them separately via `run_scenarios_het.bat`, which invokes `5Gtrans_het.exe` (searches `x64\Release_HetRate\` then `bin\`). The full map from paper figure → scenarios is in [SCENARIOS.md](SCENARIOS.md); the scenario families needed for the paper are:
 
-- `psid_ all_ govt__` (baseline)
-- `psid_ ndm_ govt__`, `psid_ nds_ govt__`, `psid_ ndo_ govt__` (Main Text, demographic decomposition)
-- `psid_ nlb_`, `psid_ ntx_`, `psid_ nts_` (all-factor decomposition)
-- `psid_ ncs_`, `psid_ ncp_`, `psid_ nsh_` (income inequality decomposition)
-- `psid_ ntl_`, `psid_ ntc_`, `psid_ ntk_`, `psid_ ntp_` (tax decomposition)
-- `psid_ nls_`, `psid_ nga_`, `psid_ ndp_` (technology decomposition)
-- `crr3_ all_ govt__`, `crr3_ ndm_ govt__` (Appendix F.1, higher risk aversion)
-- `hrat_ all_ govt__`, `hrat_ ndm_ govt__` (Appendix F.2, heterogeneous returns — **requires `5Gtrans_het.exe`**, a separate Release_HetRate build)
-- `ndel_ all_ govt__`, `ndel_ ndm_ govt__` (F.3, no discount-factor shocks)
-- `nstr_ all_ govt__`, `nstr_ ndm_ govt__` (F.4, no superstars)
-- `gcbo_ all_ govt__`, `gcbo_ ndm_ govt__` (F.5, CBO productivity growth)
-- `exor_ all_ govt__` (F.6, exogenous interest rate)
-- `beqs_ all_ govt__`, `beqs_ ndm_ govt__` (F.7, unequal bequests)
+- `psid_ all_ govt__` (baseline, Figures 1-2)
+- `psid_ ndm_ govt__`, `psid_ nds_ govt__`, `psid_ ndo_ govt__` (Figure 3, demographic decomposition)
+- `psid_ nlb_`, `psid_ ntx_`, `psid_ nts_` (Figure 4, all-factor decomposition)
+- `psid_ ncs_`, `psid_ ncp_`, `psid_ nsh_` (Figure E.1, income-inequality decomposition)
+- `psid_ ntl_`, `psid_ ntc_`, `psid_ ntk_`, `psid_ ntp_` (Figure E.2, tax decomposition)
+- `psid_ nls_`, `psid_ nga_`, `psid_ ndp_` (Figure E.3, technology decomposition)
+- `crr3_ all_ govt__`, `crr3_ ndm_ govt__` (§F.1 alternative IES / higher risk aversion — Figure F.1)
+- `hrat_ all_ govt__`, `hrat_ ndm_ govt__` (§F.2 heterogeneous returns — Figure F.2; **run via `run_scenarios_het.bat`** with `5Gtrans_het.exe` from the Release_HetRate build)
+- `ndel_ all_ govt__`, `ndel_ ndm_ govt__` (§F.3 no discount-factor shocks — Figure F.3)
+- `nstr_ all_ govt__`, `nstr_ ndm_ govt__` (§F.4 no superstars — Figure F.4)
+- `gcbo_ all_ govt__`, `gcbo_ ndm_ govt__` (§F.5 higher TFP growth — Figure F.6; the companion Figure F.5 is the alternative TFP path itself, produced at calibration time by `M02robustness_prepare_gamma.do`)
+- `beqs_ all_ govt__`, `beqs_ ndm_ govt__` (§F.6 unequal bequests — Figure F.7)
 
 **Runtime for all scenarios**: ~[X] hours (see Runtime Requirements)
 
@@ -1125,12 +892,12 @@ Internal paths set by the script:
 
 `__main.do` orchestrates:
 
-- **Main text figures**: `R_Figure1.do` (Gini change to 1950), `R_Figure2.do` (line plots with labels), `R_Figure3.do` (counterfactual bar plots, called with several different variant sets for Figures 2–4).
-- **Appendix B — Calibration figures**: re-runs the Stage-A prep scripts from Step 2 (`M01prepare_depr.do`, `M02prepare_gamma.do`, `M03prepare_labor_share.do`, `H01prepare_skill_premium.do`, `D02_prepare_college.do`, `T01prepare_taxes.do`, `T02prepare_contributions.do`, `T03prepare_tax_lambda.do`) with a plotting source switched on.
-- **Appendix C — Population and mortality**: dispatches `demography/hetero_pi/D03_prepare_hetero_pi.do` and `demography/mortality/D01_life_tables.do`.
-- **Appendix D — Model vs Data comparisons**: `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_Gini_wealth.do`, `MvD_4_GE_decomposition.do`.
+- **Main text figures**: `R_Figure1.do` (Figure 1, wealth-Gini change vs. 1950), `R_Figure2.do` (Figure 2, baseline vs. constant-longevity counterfactual), `R_Figure3.do` (counterfactual bar plots for Figures 3 and 4, called twice with different variant sets).
+- **Appendix B — Calibration figures**: re-runs the Stage-A prep scripts from Step 2 (`M01prepare_depr.do`, `M02prepare_gamma.do`, `M03prepare_labor_share.do`, `H01prepare_skill_premium.do`, `D02_prepare_college.do`, `T01prepare_taxes.do`, `T02prepare_contributions.do`, `T03prepare_tax_lambda.do`) with a plotting source switched on. Figure B.2 (LE50 by education) is produced in Step 2 by `D03_prepare_hetero_pi.do` as a side output.
+- **Appendix C — Population pyramid**: `R_FigureC1_popstructure.do` plots the full-model vs. frozen-longevity population distribution from Fortran's `population.csv`.
+- **Appendix D — Model vs Data comparisons**: `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_GE_decomposition.do`.
 - **Appendix E — Additional decompositions**: further calls to `R_Figure3.do` with income, tax, and technology counterfactual sets.
-- **Appendix F — Sensitivity**: calls to `R_Figure1_app.do` and `R_Figure2.do` across the `crr3_`, `hrat_`, `ndel_`, `nstr_`, `gcbo_`, `exor_`, and `beqs_` sensitivity scenarios, including re-preparation of inputs through `M02robustness_prepare_gamma.do` (for `gcbo_`) and `M04prepare_exog_rate.do` (for `exor_`). The `gcbo_` branch wraps the `M02robustness_prepare_gamma.do` call in a `cd ..\inputs_stata_code` block and re-runs `_prepare_programs.do` to recreate `bone.dta` / `bone1y.dta` (erased at the end of Appendix B), so this Appendix-F section is self-contained.
+- **Appendix F — Sensitivity**: calls to `R_Figure2.do` across the `crr3_`, `hrat_`, `ndel_`, `nstr_`, `gcbo_`, and `beqs_` sensitivity scenarios, including re-preparation of the alternative TFP input through `M02robustness_prepare_gamma.do` (for `gcbo_`). The re-prep block sets `global year_start 1935` and `global year_stop 2100` (after Appendix D narrows the globals to 1950/2020 for model-vs-data plots), then `cd ..\inputs_stata_code` and re-runs `_prepare_programs.do` to recreate `bone.dta` / `bone1y.dta` (erased at the end of Appendix B), so this Appendix-F section is self-contained.
 
 **Pre-seeded files in `outputs_stata_code/`**: `outputs_stata_code/bone.dta` and `outputs_stata_code/bone1y.dta` are committed to the repository as inputs for Appendix B, which sets `global bsource "../outputs_stata_code/"` and merges `using $bsource/bone` / `$bsource/bone1y` inside the re-run prep scripts. They are temporary files in the inputs-driver workflow (created by `_prepare_programs.do`, erased at the end of `__main_data_prepare.do`), but **must stay tracked** here so the outputs-driver Appendix B can run without prior state. `__main.do` erases them at the end of Appendix B and recreates them transiently in Appendix F's `gcbo_` block.
 
@@ -1252,8 +1019,6 @@ Key parameters can be changed by editing the parameters file:
 - **Line 14**: `alpha` - Capital share (typically 0.35)
 - **Line 15**: `depr` - Depreciation rate (typically 0.05)
 
-See `CLAUDE.md` for complete documentation of all 51 parameter lines.
-
 ### Sensitivity Analysis
 
 To run sensitivity analysis across parameter values:
@@ -1269,7 +1034,6 @@ To run sensitivity analysis across parameter values:
 
 ### Documentation
 
-- **`fortran_code/CLAUDE.md`**: Technical documentation for the Fortran codebase (model equations, switches, parameter lines, build configurations).
 - **`SCENARIOS.md`**: Full per-scenario catalogue, including which paper figure each scenario supports.
 - **`docs/`**: Internal brainstorm notes and documented solutions to recurring integration issues.
 - **This README**: Replication instructions for users.
@@ -1304,38 +1068,74 @@ The provided code reproduces:
 
 ## Main Text
 
-| Item | Description | Program/File | Output File(s) | Notes |
-|------|-------------|--------------|----------------|-------|
-| **Table 1** | Steady State Comparison | `steady_state.f90` | `fortran_code/Results/psid_all_govt__/steadys_old_information_run.txt` and `steadys_new_information_run.txt` | Compare "Initial SS" vs. "Final SS" values |
-| **Table 2** | Transition Path Statistics | `transition.f90` | `fortran_code/Results/psid_all_govt__/gdp_trans.txt`, `r_trans.txt`, `bigK_trans.txt` | Aggregate statistics over transition |
-| **Table 3** | Welfare Analysis | `pfi_household_problem.f90` | [Requires post-processing of consumption and labor files] | Calculate consumption-equivalent variation |
-| **Table 4** | Decomposition | Multiple scenarios | Compare `psid_all_govt__` vs. `psid_ndm_govt__` vs. other counterfactuals | Run all scenarios in `scenarios.txt` |
-| **Figure 1** | Interest Rate Path | `transition.f90` | `fortran_code/Results/psid_all_govt__/r_trans.txt` | Plot time series (years 1935-2100) |
-| **Figure 2** | Capital Stock Path | `transition.f90` | `fortran_code/Results/psid_all_govt__/bigK_trans.txt` | Plot time series |
-| **Figure 3** | Life-Cycle Consumption | `pfi_agregation.f90` | `fortran_code/Results/psid_all_govt__/c_j_trans.csv` | Plot age profiles for selected years |
-| **Figure 4** | Life-Cycle Labor Supply | `pfi_agregation.f90` | `fortran_code/Results/psid_all_govt__/l_j_trans.csv` | Plot age profiles for selected years |
-| **Figure 5** | Wealth Distribution | `pfi_distribution.f90` | `fortran_code/Results/psid_all_govt__/gini_weight_trans.csv`, `mass_trans.csv` | Compute Gini coefficient and wealth shares |
-| [Continue for all tables/figures...] | | | | |
+| Figure | Paper title | Generating script | Output file |
+|---|---|---|---|
+| **Figure 1** | Evolution of wealth inequality: model vs. data | `outputs_stata_code/R_Figure1.do` | `graphs/outputs/Results_Gini_changes.png` |
+| **Figure 2** | Baseline vs counterfactual scenario of constant longevity | `outputs_stata_code/R_Figure2.do` | `graphs/outputs/Results_Gini_counterfactuals.png` |
+| **Figure 3** | Impact of rising longevity on wealth inequality (in Gini points) | `outputs_stata_code/R_Figure3.do` | `graphs/outputs/Results_Gini_drivers_demographics.png` |
+| **Figure 4** | Impact of different factors evolution on wealth inequality (in Gini points) | `outputs_stata_code/R_Figure3.do` | `graphs/outputs/Results_Gini_drivers_comparison.png` |
+
+The paper's main text contains no tables.
 
 ---
 
-## Online Appendix
+## Online Appendix B — Calibration
 
-| Item | Description | Program/File | Output File(s) | Notes |
-|------|-------------|--------------|----------------|-------|
-| **Table A.1** | Robustness: Alternative Calibration | `steady_state.f90` | `fortran_code/Results/[TBD]/steadys_new_information_run.txt` | Compare to baseline `psid_all_govt__` — scenario name pending (the former `base_*` alternative was retired in the scenario audit) |
-| **Table A.2** | Robustness: TFP Assumptions | Multiple scenarios | Compare scenarios with different `_data_gamma*.txt` files | Run scenarios with different TFP files |
-| [Continue for appendix items...] | | | | |
+| Figure | Paper title | Generating script | Output file(s) |
+|---|---|---|---|
+| **Figure B.1** | Share of college graduates | `skill_premium/D02_prepare_college.do` | `graphs/inputs/college_share.*` |
+| **Figure B.2** | Life expectancy at 50 (college vs. non-college) | `demography/hetero_pi/D03_prepare_hetero_pi.do` | `graphs/inputs/LE50year.*` |
+| **Figure B.3** | Skill premium | `skill_premium/H01prepare_skill_premium.do` | `graphs/inputs/skill_premium.*` |
+| **Figure B.4** | Deterministic profile of log productivity across age | Plotted externally from `fortran_code/Data/_data_omega_mostdrop_hhslabinc_avghourlyhh.txt` | — |
+| **Figure B.5** | Variances of idiosyncratic productivity shocks | `income_process/matlab/plot_estimates.m` | `graphs/inputs/sigma2eps_{mostdrop,busno_drop}_hhslabinc.{eps,png}` |
+| **Figure B.6** | Technology — panels (a) depreciation, (b) labor share, (c) TFP | `depreciation/M01prepare_depr.do`; `labor_share/M03prepare_labor_share.do`; `tfp/M02prepare_gamma.do` | `graphs/inputs/depr.*`, `lab_share.*`, `gamma.*` |
+| **Figure B.7** | Tax rates — panels (a-c) τ_C/τ_K/τ_L, (d) progressivity λ | `tax_rate/T01prepare_taxes.do`; `tax_rate/T03prepare_tax_lambda.do` | `graphs/inputs/tC.*`, `tK.*`, `tL.*`, `lambda.*` |
+| **Figure B.8** | Social security contributions to GDP | `social_security/T02prepare_contributions.do` | `graphs/inputs/contributions.*` |
+| **Figure B.9** | Replacement-rate scale parameter ρ_j,t | Plotted externally from `inputs_stata_code/external/_data_rho_1935.txt` | — |
 
 ---
 
-## In-Text Numbers
+## Online Appendix C — Population structure
 
-| Location | Description | Source |
-|----------|-------------|--------|
-| Page X, para Y | "GDP grows by Z%" | `fortran_code/Results/psid_all_govt__/gdp_trans.txt`, compare year 1935 to year 2100 |
-| Page X, para Y | "Welfare gain of W%" | Calculate from consumption equivalent variation |
-| [Continue for all in-text numbers...] | | |
+| Figure | Paper title | Generating script | Output file(s) |
+|---|---|---|---|
+| **Figure C.1** | Population structure: comparison for four periods | `outputs_stata_code/R_FigureC1_popstructure.do` | `graphs/outputs/AppC_PopStructure_{1935,1950,1975,2000,2020,2050,2100}.*` |
+
+---
+
+## Online Appendix D — Model vs. data
+
+| Figure | Paper title | Generating script | Output file |
+|---|---|---|---|
+| **Figure D.1** | The real interest rate, model vs data | `outputs_stata_code/MvD_1_macro.do` | `graphs/outputs/irr_trans_levels.*` |
+| **Figure D.2** | Average annual hours per capita aged 20-64, model vs data | `outputs_stata_code/MvD_1_macro.do` | `graphs/outputs/avghours_trans_levels.*` |
+| **Figure D.3** | Share of expenditure on social security benefits in GDP, model vs data | `outputs_stata_code/MvD_1_macro.do` | `graphs/outputs/benefits_trans_levels.*` |
+| **Figure D.4** | Lorenz curves of income distribution (five decade snapshots, 1970-2010) | `outputs_stata_code/MvD_2_Gini_income.do` | `graphs/outputs/Lorenz_{1970,1980,1990,2000,2010}.*` |
+| **Figure D.5** | Contribution of between-cohort vs. within-cohort inequality | `outputs_stata_code/MvD_3_GE_decomposition.do` | `graphs/outputs/MvD_GE.*` |
+
+---
+
+## Online Appendix E — Additional decompositions
+
+| Figure | Paper title | Generating script | Output file |
+|---|---|---|---|
+| **Figure E.1** | Impact of evolution of income determinants on wealth inequality | `outputs_stata_code/R_Figure3.do` (`psid_ncs_/_ncp_/_nsh_` variants) | `graphs/outputs/Results_Gini_drivers_incomes.png` |
+| **Figure E.2** | Impact of tax changes on wealth inequality | `outputs_stata_code/R_Figure3.do` (`psid_ntl_/_ntc_/_ntk_/_ntp_` variants) | `graphs/outputs/Results_Gini_drivers_taxes.png` |
+| **Figure E.3** | Impact of technology changes on wealth inequality | `outputs_stata_code/R_Figure3.do` (`psid_nls_/_nga_/_ndp_` variants) | `graphs/outputs/Results_Gini_drivers_macro.png` |
+
+---
+
+## Online Appendix F — Sensitivity
+
+| Figure | Paper title | Generating script | Output file |
+|---|---|---|---|
+| **Figure F.1** | Baseline vs. constant-longevity (θ = 3) | `outputs_stata_code/R_Figure2.do` (`crr3_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_theta.png` |
+| **Figure F.2** | Baseline vs. constant-longevity (heterogeneous returns) | `outputs_stata_code/R_Figure2.do` (`hrat_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_hetrates.png` |
+| **Figure F.3** | Baseline vs. constant-longevity (no discount-factor shocks) | `outputs_stata_code/R_Figure2.do` (`ndel_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_homogendelta.png` |
+| **Figure F.4** | Baseline vs. constant-longevity (no "superstars") | `outputs_stata_code/R_Figure2.do` (`nstr_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_nosuperstars.png` |
+| **Figure F.5** | Primary and alternative TFP growth rate | `tfp/M02robustness_prepare_gamma.do` | `graphs/inputs/gamma_robust.*` |
+| **Figure F.6** | Baseline vs. constant-longevity (TFP growth rate) | `outputs_stata_code/R_Figure2.do` (`gcbo_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_gamma.png` |
+| **Figure F.7** | Baseline vs. constant-longevity (unequal bequest distribution) | `outputs_stata_code/R_Figure2.do` (`beqs_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_beq.png` |
 
 ---
 
@@ -1345,43 +1145,39 @@ The provided code reproduces:
 
 ### Mortality and Demographics
 
-- Case, Anne and Deaton, Angus. 2021. "Life expectancy in adulthood is falling for those without a BA degree, but as educational gaps have widened, racial gaps have narrowed." *Proceedings of the National Academy of Sciences* 118(11): e2024777118. https://doi.org/10.1073/pnas.2024777118
+- Human Mortality Database. University of California, Berkeley (USA), and Max Planck Institute for Demographic Research (Germany). https://www.mortality.org/ (accessed 2021).
 
-- United Nations, Department of Economic and Social Affairs, Population Division. 2022. "World Population Prospects 2022." https://population.un.org/wpp/
+- United Nations, Department of Economic and Social Affairs, Population Division. 2022. *World Population Prospects 2022*. https://population.un.org/wpp/
 
-- U.S. Census Bureau. 2021. "American Community Survey." https://www.census.gov/programs-surveys/acs
+- Case, Anne and Deaton, Angus. 2021. "Life expectancy in adulthood is falling for those without a BA degree, but as educational gaps have widened, racial gaps have narrowed." *Proceedings of the National Academy of Sciences* 118(11): e2024777118. https://doi.org/10.1073/pnas.2024777118. Processed education-specific mortality file shared with us by the authors.
 
-### Income and Wages
-
-- Autor, David and Dorn, David. 2020. "Changes in the occupational skill-intensity of U.S. manufacturing employment." Updated series extending Goldin and Katz (2008). https://www.ddorn.net/data.htm
+### Income, Wages, and Wealth
 
 - Panel Study of Income Dynamics, public use dataset. Produced and distributed by the Survey Research Center, Institute for Social Research, University of Michigan, Ann Arbor, MI (1970-2019 waves). https://psidonline.isr.umich.edu/
 
+- Autor, David, Claudia Goldin, and Lawrence F. Katz. 2020. "Extending the Race between Education and Technology." *AEA Papers and Proceedings* 110: 347-51. Replication package: openICPSR project 120694, https://www.openicpsr.org/openicpsr/project/120694/.
+
 - Goldin, Claudia and Lawrence F. Katz. 2008. *The Race Between Education and Technology*. Cambridge, MA: Harvard University Press.
 
-- Deaton, Angus and Christina Paxson. 2000. "Growth and Saving Among Individuals and Households." *Review of Economics and Statistics* 82(2): 212–225.
+- U.S. Census Bureau. *American Community Survey*, accessed via IPUMS USA (Ruggles et al.). https://usa.ipums.org/usa/
+
+- Kuhn, Moritz, Moritz Schularick, and Ulrike I. Steins. 2020. "Income and Wealth Inequality in America, 1949-2016." *Journal of Political Economy* 128(9): 3469-3519 (SCF+ harmonized wealth panel). https://www.moritz-schularick.com/data
 
 ### Tax Parameters
 
-- Heathcote, Jonathan, Kjetil Storesletten, and Giovanni L. Violante. 2017. "Optimal Tax Progressivity: An Analytical Framework." *Quarterly Journal of Economics* 132(4): 1693-1754. https://doi.org/10.1093/qje/qjx018
+- McDaniel, Cara. 2007. "Average tax rates on consumption, investment, labor and capital in the OECD 1950-2003," working paper (updated series used here). Data at https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia.
+
+- Bayer, Christian, Benjamin Born, and Ralph Luetticke. Forthcoming. "Shocks, Frictions, and Inequality in US Business Cycles." *American Economic Review*. Tax progressivity series shipped with the working-paper replication materials (λ based on Piketty tax-microdata estimates).
 
 ### Productivity and Economic Aggregates
 
-- Feenstra, Robert C., Robert Inklaar and Marcel P. Timmer. 2015. "The Next Generation of the Penn World Table." *American Economic Review* 105(10): 3150-3182. https://www.ggdc.net/pwt (Penn World Table 10.0, accessed 2021)
-
-- Fernald, John G. 2016. "Reassessing Longer-Run U.S. Growth: How Low?" Federal Reserve Bank of San Francisco Working Paper 2016-18. https://www.frbsf.org/economic-research/publications/working-papers/2016/18/
-
-- U.S. Bureau of Economic Analysis. 2021. "Fixed Assets Tables." U.S. Department of Commerce. https://apps.bea.gov/national/FA2004/Index.asp (accessed 2020-2021)
-
-- U.S. Bureau of Economic Analysis. 2021. "National Income and Product Accounts." U.S. Department of Commerce. https://www.bea.gov/data/gdp/gross-domestic-product (accessed 2020-2021)
+- Feenstra, Robert C., Robert Inklaar, and Marcel P. Timmer. 2015. "The Next Generation of the Penn World Table." *American Economic Review* 105(10): 3150-3182. Penn World Table 10.0, https://www.rug.nl/ggdc/productivity/pwt/ (accessed 2021 via dbnomics). Used for the TFP (`rtfpna`), depreciation (`delta`), labor share (`labsh`), and interest rate (`irr`) series.
 
 ### Government and Social Security
 
-- U.S. Social Security Administration. 2021. "Social Security Contributions and Benefit Payments." Office of the Chief Actuary. https://www.ssa.gov/oact/ (accessed 2020-2021)
+- U.S. Social Security Administration. *Primary Insurance Amount benefit formula*. Office of the Chief Actuary, https://www.ssa.gov/oact/ (used to compute age-specific replacement rates offline).
 
-- OECD. 2021. "Social Security Contributions (indicator)." https://data.oecd.org/ (accessed 2020-2021)
-
-- Congressional Budget Office. 2020. "The 2020 Long-Term Budget Outlook." https://www.cbo.gov/publication/56516
+- OECD. *Revenue Statistics*, accessed via dbnomics (series `OECD/REV/NES.*.TAXGDP.USA`). https://data.oecd.org/
 
 ## Software and Tools
 
@@ -1426,8 +1222,6 @@ Any remaining errors are entirely our own.
 
 ---
 
-**Last Updated**: January 16, 2026
+**Last Updated**: April 2026
 
-**README Version**: 1.0
-
-**Corresponding Author**: [Name] - [email@institution.edu]
+**Corresponding Author**: Joanna Tyrowicz — j.tyrowicz@grape.org.pl

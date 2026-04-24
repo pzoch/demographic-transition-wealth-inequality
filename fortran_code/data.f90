@@ -156,16 +156,16 @@ call chdir(cwd_r)
 
 
 ! -------------------------------- rate -------------------------------
-        Open(unit = 5, FILE = "_data_exog_rate_1935.txt")  
-
-        do i = 1, last_data_exog_rate, 1
-            read(5,*) exog_rate_d(i)
-        enddo
-        exog_rate_d(last_data_exog_rate+1:) = exog_rate_d(last_data_exog_rate)
-            
-
-
-    close(5)
+        if (switch_exog_rate == 1) then
+            Open(unit = 5, FILE = "_data_exog_rate_1935.txt")
+            do i = 1, last_data_exog_rate, 1
+                read(5,*) exog_rate_d(i)
+            enddo
+            exog_rate_d(last_data_exog_rate+1:) = exog_rate_d(last_data_exog_rate)
+            close(5)
+        else
+            exog_rate_d = 0d0
+        endif
     
       
 ! -------------------------------- SIGMA2_EPSILON -------------------------------

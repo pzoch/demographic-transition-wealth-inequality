@@ -82,11 +82,6 @@ cd ..\outputs_stata_code
 
 
 ** Do graphs for Appendix C -- Populations
-* D01/D03 moved to inputs_stata_code/__main_data_prepare.do — they produce
-* Fortran inputs and belong in the input pipeline, not in the output driver.
-* Figure B.2 (LE50year.png) is produced there as a side-effect of D03.
-* Figure C.1 (population pyramids) stays here because it reads Fortran's
-* population.csv, which only exists after the model has run.
 global variant_base "psid_all_govt__"
 global variant_comp "psid_ndm_govt__"
 do R_FigureC1_popstructure.do
@@ -99,10 +94,9 @@ global year_stop  2020
 global year_end   2100
 global min_age 20
 global max_age 65
-do MvD_1_macro.do  
+do MvD_1_macro.do
 do MvD_2_Gini_income.do
-do MvD_3_Gini_wealth.do
-do MvD_4_GE_decomposition.do
+do MvD_3_GE_decomposition.do
 
 ** Do graphs for Appendix E -- Additional results
 * combine all scenarios gini_trans.csv from all relevant folders
@@ -166,6 +160,8 @@ do R_Figure2.do 		//  Figure F.4
 graph export $graphspath\\AppF_Gini_counterfactuals_nosuperstars.png, replace 
 
 * Higher productivity growth
+global year_start 1935
+global year_stop  2100
 cd ..\inputs_stata_code
 global bsource "../outputs_stata_code/"
 do _prepare_programs
@@ -182,23 +178,11 @@ do R_Figure2.do 		//  Figure F.6
 graph export $graphspath\\AppF_Gini_counterfactuals_gamma.png, replace 
 
 
-* Exogeneous interest rate (M04 needs bone1y.dta; regenerate via _prepare_programs
-* because the preceding M02robustness block erases it at lines 173-174).
-cd ..\inputs_stata_code
-do _prepare_programs
-do ../sensitivity_stata_code/exog_rate/M04prepare_exog_rate //prepare inputs for simulation
-erase bone.dta
-erase bone1y.dta
-cd ..\outputs_stata_code
-global scenario		"psid_all_govt__ exor_all_govt__"
-do R_Figure1_app.do 		//  Figure F.7
-graph export $graphspath\\AppF_Gini_counterfactuals_exograte.png, replace 
-
 * Unequal distribution of bequests
-global variant_base "beqs_all_govt__" 
-global variant_comp "beqs_ndm_govt__" 
-global r1 69 
+global variant_base "beqs_all_govt__"
+global variant_comp "beqs_ndm_govt__"
+global r1 69
 global r2 77
-do R_Figure2.do 		//  Figure F.8
-graph export $graphspath\\AppF_Gini_counterfactuals_beq.png, replace 
+do R_Figure2.do 		//  Figure F.7
+graph export $graphspath\\AppF_Gini_counterfactuals_beq.png, replace
 

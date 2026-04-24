@@ -137,33 +137,6 @@ for ivar = 1:length(variants)
     fprintf('  Saved: %s.eps, %s.png\n', out_name, out_name);
     close(fmain);
 
-    %% Diagnostic figure (all bins including first)
-    if has_bootstrap
-        f = figure('Visible', 'off');
-            f.Position = [0 0 1540 1040];
-
-            subplot(1,2,1)
-            plot(prc0025H);
-            hold on;
-            plot(prc0975H);
-            plot(sig2_H);
-            title('H')
-            grid;
-            axis tight;
-
-            subplot(1,2,2)
-            plot(prc0025L);
-            hold on;
-            plot(prc0975L);
-            plot(sig2_L);
-            title('L')
-            grid;
-            axis tight;
-
-        saveas(f, fullfile(output_dir, ['sigma2eps_diagnostic_' variant]), 'png');
-        close(f);
-    end
-
 end
 
 fprintf('All plots saved to %s\n', output_dir);

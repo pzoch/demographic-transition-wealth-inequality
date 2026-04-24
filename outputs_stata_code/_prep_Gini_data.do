@@ -1,5 +1,3 @@
-* Community `ineqdeco` is required by this script (line ~50) and by
-* MvD_3_Gini_wealth.do. Auto-install on first run if missing.
 capture which ineqdeco
 if _rc != 0 {
     ssc install ineqdeco
@@ -17,10 +15,8 @@ foreach folder of local subfolders {
 
     display "Processing folder: `folder'"
 
-    * Construct full path to CSV
     local filepath "`mainfolder'/`folder'/gini_trans.csv"
 
-    * Check if file exists
     capture confirm file "`filepath'"
     if !_rc {
 
@@ -65,11 +61,6 @@ svmat float INEQ, names(col)
 rename year_start year
 drop if year == .
 
-* Apply an HP filter to the raw 5-year Gini to get a smooth trend series,
-* matching the paper's prep in Paper_16_inequality/.../G06p_wealth_ineq_prep_data.do
-* (log-transform -> tsfilter hp smooth(20) -> exp back). R_Figure1 uses the
-* trend (Gini_data_wealth_trend) so the 1975 bar reflects the data's smoothed
-* cycle rather than the noisy single-period dip.
 gen time = _n
 tsset time
 gen Gini_data_wealth = ln(Gini_dta_5yr * 100)

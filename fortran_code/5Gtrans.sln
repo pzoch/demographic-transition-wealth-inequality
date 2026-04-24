@@ -11,6 +11,7 @@ Global
 		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Release_HetRate|x64 = Release_HetRate|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Debug|x64.ActiveCfg = Debug|x64
@@ -21,6 +22,8 @@ Global
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x64.Build.0 = Release|x64
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x86.ActiveCfg = Release|Win32
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x86.Build.0 = Release|Win32
+		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release_HetRate|x64.ActiveCfg = Release_HetRate|x64
+		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release_HetRate|x64.Build.0 = Release_HetRate|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,4 @@
 capture mkdir demography\hetero_pi\processed
-capture mkdir demography\hetero_pi\output
 
 *****************Merging pi data with college proportion*********************************
 //Use data generated in D01_life_tables.do
@@ -104,20 +103,7 @@ replace prob = round(prob, .00001)
 replace prob= 0.9999 if prob >= 1
 
 keep prob
-export delimited "demography\hetero_pi\output\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace
 export delimited "..\fortran_code\Data\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace
-restore
-
-preserve
-keep syn_pr1
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_no_col.txt", replace
-export delimited "..\fortran_code\Data\_data_pi_US_since1935_no_col.txt", replace
-restore
-
-preserve
-keep syn_pr3
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_col.txt", replace
-export delimited "..\fortran_code\Data\_data_pi_US_since1935_col.txt", replace
 restore
 
 ******************************Calculating LE50 for heterogenous pi*************************************
@@ -208,10 +194,6 @@ twoway 	(line LE501 year if inrange(year,1935,1970), lcolor(blue) lwidth(thick) 
 		legend(cols(2) order(-  "Data"  - "Demographic forecast" 1 "college"  2 "college"  3 "less than college"  4 "less than college") ///
 		size(*1.2)) xtitle("year", size(*1.2)) xsize(2) ysize(1) ytitle("Life expectancy at 50")
 
-// Save as Figure B.2 (LE50 by education). Path is `../graphs/inputs/` because
-// __main.do `cd`s to inputs_stata_code/ before dispatching this script, so the
-// graphs/ folder is one level up. Previously wrapped in an unclosed /* block
-// which silently disabled these writes.
 graph save   "../graphs/inputs/LE50year.gph", replace
 graph export "../graphs/inputs/LE50year.png", replace
 graph export "../graphs/inputs/LE50year.svg", replace

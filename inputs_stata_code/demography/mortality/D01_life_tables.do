@@ -85,26 +85,8 @@ twoway (scatter pi Year if age == 20) ///
 (scatter pi Year if age == 95)
 
 preserve
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1935.txt", replace 
-restore
-
-preserve 
-keep if Year > 1945 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1950.txt", replace 
-restore
-
-preserve 
-keep if Year > 1955 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1960.txt", replace 
-restore
-
-preserve 
-keep if Year > 2008 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US.txt", replace 
+keep pi
+export delimited "demography\mortality\output\_data_pi_cond_US_since1935.txt", replace
 restore
 
 save "demography\mortality\processed\pi_tot_new.dta", replace

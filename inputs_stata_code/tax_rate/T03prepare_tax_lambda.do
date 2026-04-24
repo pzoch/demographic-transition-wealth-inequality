@@ -2,8 +2,7 @@
 The data for the conditionally accepted version are shorter (we need the data to start as early as possible.
 Also, the data for the conditionally accepted version lump together taxes and social security contributions in ATRs.
 In our paper social security contributions are separate, also the contributions are not progressive in the US (except for the cut-off), 
-so progressivity measures should not be affected by including/excluding the contributions. 
-For more explanation, please contact Ralph Luetticke: ralph.luetticke@uni-tuebingen.de */
+so progressivity measures should not be affected by including/excluding the contributions.  */
 
 
 import excel tax_rate/progressivity_measures_all.xlsx, firstrow clear
@@ -34,7 +33,6 @@ merge 1:1 year using `model'
 ///// FROZEN /////////
 sum lambda if year == 1955
 gen lambda_frozen = `r(mean)'
-replace lambda_frozen = . if year < 1955
 
 ////// DRAWING ////////
 global var_frozen lambda_frozen

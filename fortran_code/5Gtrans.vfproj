@@ -49,6 +49,17 @@
 			<Tool Name="VFPostBuildEventTool"/>
 			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
 		</Configuration>
+		<Configuration Name="Release_HetRate|x64" UseCompiler="ifxCompiler" OutputDirectory="$(SolutionDir)x64\Release_HetRate\" IntermediateDirectory="$(SolutionDir)x64\Release_HetRate\" TargetName="5Gtrans_het">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+			<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\5Gtrans_het.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
 	</Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
@@ -76,9 +87,16 @@
 					<File RelativePath=".\closures.f90"/>
 				</Filter>
 				<Filter Name="consumers_problem">
-					<File RelativePath=".\pfi.f90"/>
+					<File RelativePath=".\pfi.f90">
+						<FileConfiguration Name="Release_HetRate|x64" ExcludedFromBuild="true">
+						</FileConfiguration>
+					</File>
 					<File RelativePath=".\pfi_agregation.f90"/>
 					<File RelativePath=".\pfi_distribution.f90"/>
+					<File RelativePath=".\pfi_het.f90">
+						<FileConfiguration Name="Release|x64" ExcludedFromBuild="true">
+						</FileConfiguration>
+					</File>
 					<File RelativePath=".\pfi_household_problem.f90"/>
 					<File RelativePath=".\pfi_print.f90"/>
 				</Filter>
@@ -104,7 +122,14 @@
 				<File RelativePath=".\main.f90"/>
 				<File RelativePath=".\main_base_transition.f90"/>
 				<File RelativePath=".\sort.f90"/>
-				<File RelativePath=".\steady_state.f90"/>
+				<File RelativePath=".\steady_state.f90">
+					<FileConfiguration Name="Release_HetRate|x64" ExcludedFromBuild="true">
+					</FileConfiguration>
+				</File>
+				<File RelativePath=".\steady_state_het.f90">
+					<FileConfiguration Name="Release|x64" ExcludedFromBuild="true">
+					</FileConfiguration>
+				</File>
 				<File RelativePath=".\transition.f90"/>
 				<File RelativePath=".\transition_iterations.f90"/>
 			</Filter>
