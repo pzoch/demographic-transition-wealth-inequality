@@ -46,6 +46,7 @@ end
 
 capture program drop special_drawing
 program special_drawing
+capture graph drop _all
 preserve
 tsset year
 keep if year < 2050

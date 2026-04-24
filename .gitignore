@@ -54,3 +54,8 @@ inputs_stata_code/skill_premium/ACS_college/ACS_college.dta
 
 # UN World Population Prospects mortality table (180 MB)
 inputs_stata_code/demography/mortality/WPP2022_MORT_F07_1_ABRIDGED_LIFE_TABLE_BOTH_SEXES.xlsx
+
+# Transient Stata scratch files — auto-created by _prog_coding.do
+# (outputs side) and _prepare_programs.do (inputs side), erased at end of run
+**/bone.dta
+**/bone1y.dta

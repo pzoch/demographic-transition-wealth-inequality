@@ -84,4 +84,7 @@ save `data'
 use `data', clear
 merge 1:1 year using `master'
 
+capture mkdir "../graphs"
+capture mkdir "../graphs/outputs"
+capture mkdir "../graphs/outputs/wealth_inequality"
 save ../graphs/outputs/wealth_inequality/combined_gini.dta, replace

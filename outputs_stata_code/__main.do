@@ -82,14 +82,11 @@ cd ..\outputs_stata_code
 
 
 ** Do graphs for Appendix C -- Populations
-cd ..\inputs_stata_code
-do ..\inputs_stata_code\demography\hetero_pi\D03_prepare_hetero_pi
-do ..\inputs_stata_code\demography\mortality\D01_life_tables
-cd ..\outputs_stata_code
-
-* Figure C.1 -- population pyramids (Fortran model: full vs frozen-longevity).
-* Requires population.csv in each scenario subfolder; Fortran must be built
-* with data.f90 writing to cwd_scenario (see commit note).
+* D01/D03 moved to inputs_stata_code/__main_data_prepare.do — they produce
+* Fortran inputs and belong in the input pipeline, not in the output driver.
+* Figure B.2 (LE50year.png) is produced there as a side-effect of D03.
+* Figure C.1 (population pyramids) stays here because it reads Fortran's
+* population.csv, which only exists after the model has run.
 global variant_base "psid_all_govt__"
 global variant_comp "psid_ndm_govt__"
 do R_FigureC1_popstructure.do
@@ -185,8 +182,14 @@ do R_Figure2.do 		//  Figure F.6
 graph export $graphspath\\AppF_Gini_counterfactuals_gamma.png, replace 
 
 
-* Exogeneous interest rate
+* Exogeneous interest rate (M04 needs bone1y.dta; regenerate via _prepare_programs
+* because the preceding M02robustness block erases it at lines 173-174).
+cd ..\inputs_stata_code
+do _prepare_programs
 do ../sensitivity_stata_code/exog_rate/M04prepare_exog_rate //prepare inputs for simulation
+erase bone.dta
+erase bone1y.dta
+cd ..\outputs_stata_code
 global scenario		"psid_all_govt__ exor_all_govt__"
 do R_Figure1_app.do 		//  Figure F.7
 graph export $graphspath\\AppF_Gini_counterfactuals_exograte.png, replace 

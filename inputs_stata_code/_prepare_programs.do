@@ -41,6 +41,7 @@ end
 
 capture program drop special_drawing
 program special_drawing
+capture graph drop _all
 preserve
 tsset year
 keep if year < 2050
@@ -62,6 +63,10 @@ end
 
 capture program drop special_drawing2
 program special_drawing2
+* Drop any named graphs left in memory by earlier scripts (e.g., MvD_1's
+* "irr"/"avghours"/"benefits"). Otherwise `graph save` without an explicit
+* name can resolve to the wrong graph and emit "graph benefits not found".
+capture graph drop _all
 preserve
 tsset year
 keep if year < 2050
