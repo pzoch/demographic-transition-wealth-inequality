@@ -1,22 +1,12 @@
 @echo off
-REM Full income process estimation pipeline
-REM Processes all variants automatically (no arguments needed)
-REM Pipeline: Stata (PSID -> omega + covariances) -> MATLAB (covariances -> sigma2eps) -> Plot
-REM Final outputs copied to fortran_code/Data/ for Fortran, figures to graphs/inputs/
-REM
-REM Override software paths via environment variables if your install locations differ:
-REM   set STATA_EXE=D:\Stata17\StataSE-64.exe
-REM   set MATLAB_EXE=D:\MATLAB\R2023a\bin\matlab.exe
-REM Otherwise defaults below are used.
-REM
-REM Bootstrap: by default n_reps=0 (point estimates only, ~minutes).
-REM For confidence bands set N_REPS=1000 before running (several hours):
-REM   set N_REPS=1000
-REM Both estimate_income_process.do and estimate_parameters.m honor this env var.
+REM Full income-process pipeline compatibility driver.
+REM Stata side lives in inputs_stata_code/income_process.
+REM MATLAB estimation lives in inputs_matlab_code/income_process.
+REM MATLAB plotting lives in outputs_matlab_code/income_process.
 
 setlocal
-
-cd /d "%~dp0"
+set "SCRIPT_DIR=%~dp0"
+for %%I in ("%SCRIPT_DIR%..\..") do set "REPO_ROOT=%%~fI"
 
 if not defined STATA_EXE  set "STATA_EXE=C:\Program Files\Stata16\StataSE-64.exe"
 if not defined MATLAB_EXE set "MATLAB_EXE=C:\Program Files\MATLAB\R2018b\bin\matlab.exe"
@@ -40,38 +30,28 @@ echo Using Stata:  %STATA_EXE%
 echo Using MATLAB: %MATLAB_EXE%
 echo.
 
-echo === Step 1: Stata pipeline (all variants) ===
-"%STATA_EXE%" /e do estimate_income_process.do
+echo === Step 1: Stata PSID income-process inputs ===
+pushd "%REPO_ROOT%\inputs_stata_code"
+"%STATA_EXE%" /e do income_process\__run_psid_income_inputs.do
 if errorlevel 1 (
-    echo ERROR: Stata failed. Check estimate_income_process.log
+    echo ERROR: Stata failed. Check inputs_stata_code\__run_psid_income_inputs.log or Stata output.
+    popd
     pause
     exit /b 1
 )
-echo Stata complete.
+popd
 
-echo === Step 2: MATLAB estimation (all variants) ===
-"%MATLAB_EXE%" -batch "estimate_parameters"
+echo === Step 2: MATLAB income-process estimation and plots ===
+call "%REPO_ROOT%\inputs_matlab_code\income_process\run_income_process_matlab.bat"
 if errorlevel 1 (
-    echo ERROR: MATLAB failed.
+    echo ERROR: MATLAB stage failed.
     pause
     exit /b 1
 )
-echo MATLAB complete.
-
-echo === Step 3: Plot sigma2_epsilon estimates ===
-"%MATLAB_EXE%" -batch "addpath('matlab'); plot_estimates"
-if errorlevel 1 (
-    echo WARNING: Plotting failed. Estimation outputs are still valid.
-)
-echo Plotting complete.
 
 echo.
-echo === Pipeline complete ===
-echo Outputs copied to fortran_code/Data/:
-for %%v in (mostdrop_hhslabinc busno_drop_hhslabinc) do (
-    echo   _data_omega_%%v_avghourlyhh.txt
-    echo   _data_sigma2eps_%%v_avghourlyhh.txt
-)
-echo Figures saved to graphs/inputs/
+echo === Income-process pipeline complete ===
+echo Fortran inputs copied to fortran_code\Data\.
+echo Plots saved to graphs\inputs\.
 pause
 endlocal

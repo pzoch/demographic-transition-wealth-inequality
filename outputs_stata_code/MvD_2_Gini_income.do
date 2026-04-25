@@ -4,7 +4,7 @@ capture graph drop _all
 	ren labinc_pretax hhslabinc
 	ren mass weight
  
-	append using "..\data\PSID\psid_ready.dta"
+	append using "..\inputs_stata_code\income_process\output\mostdrop_hhslabinc\psid_ready.dta"
 	replace source = "PSID" if mi(source)
 	replace hhslabinc = pure_labinc if source == "PSID"
 	keep  year age source hhslabinc weight

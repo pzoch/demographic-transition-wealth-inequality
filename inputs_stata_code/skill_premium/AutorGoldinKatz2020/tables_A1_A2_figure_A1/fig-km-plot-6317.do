@@ -5,7 +5,7 @@ set more 1
 /*
 * update: A Wu, 08/13/2019 (change fonts in figure on 08/19/2019)
 local dir="/proj/pdautor/tech-race-revisited/ASEC/Science14-fig3b-4-update/"
-* local dir="/Users/alicehwu/Dropbox/agk_rbet_revisited/data/March_CPS/autor_2014_marchcps/update/"
+* local dir="<original-author-local-data-folder>"
 */
 
 capture log close

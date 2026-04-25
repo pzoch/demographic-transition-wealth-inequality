@@ -42,7 +42,6 @@ Release/
 __pycache__/
 
 # Visual Studio profiler results
-Intel® VTune™ Profiler Results/
 
 # OS generated files
 .DS_Store

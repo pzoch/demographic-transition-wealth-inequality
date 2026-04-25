@@ -2,10 +2,8 @@
 % Produces: _data_sigma2eps_{variant}_avghourlyhh.txt (earnings shock variances)
 %           H.mat, L.mat (full estimation results with bootstrap CIs)
 %
-% Reads covariance matrices produced by estimate_income_process.do
+% Reads covariance matrices produced by inputs_stata_code/income_process.
 %
-% Source script (on Dropbox, for reference):
-%   matlab/main_types_binned.m
 %
 % Income process:
 %   zeta(c,t,i) = rho * zeta(c,t-1,i) + epsilon(c,t,i)
@@ -18,9 +16,14 @@
 
 clear all
 
-% Add helper functions to path (loader, objective_cohort_binned,
-% create_parameters_binned are in matlab/ subdirectory)
-addpath('matlab');
+% Resolve paths from this script location so MATLAB can be launched from
+% Stata, a batch file, or the MATLAB GUI without relying on CWD.
+this_dir = fileparts(mfilename('fullpath'));
+repo_root = fullfile(this_dir, '..', '..');
+addpath(this_dir);
+stata_output_root  = fullfile(repo_root, 'inputs_stata_code', 'income_process', 'output');
+matlab_output_root = fullfile(this_dir, 'output');
+fortran_dir        = fullfile(repo_root, 'fortran_code', 'Data');
 
 %% ========================================================================
 %  CONFIGURATION (only section user ever edits)
@@ -92,8 +95,11 @@ year  = p.first_cohort : (p.first_cohort + p.C - 1);
 
 for ivar = 1:length(variants)
     variant  = variants{ivar};
-    data_dir = ['./output/' variant '/cov_binned/'];
-    save_dir = ['./output/' variant '/'];
+    data_dir = fullfile(stata_output_root, variant, 'cov_binned');
+    save_dir = fullfile(matlab_output_root, variant);
+    if ~exist(save_dir, 'dir')
+        mkdir(save_dir);
+    end
 
     fprintf('\n###############################################################\n');
     fprintf('# Processing variant: %s\n', variant);
@@ -320,8 +326,7 @@ for ivar = 1:length(variants)
     % ======================================================================
     %  COPY TO FORTRAN DATA DIRECTORY
     % ======================================================================
-    fortran_dir = '../../fortran_code/Data';
-    omega_file  = fullfile(save_dir, ['_data_omega_' variant '_' measure '.txt']);
+    omega_file  = fullfile(stata_output_root, variant, ['_data_omega_' variant '_' measure '.txt']);
     sigma_file  = output_file;
 
     if exist(fortran_dir, 'dir')
@@ -338,7 +343,7 @@ end  % variant loop
 
 fprintf('\n=== All variants complete ===\n');
 for ivar = 1:length(variants)
-    fprintf('  output/%s/_data_sigma2eps_%s_%s.txt\n', ...
-        variants{ivar}, variants{ivar}, measure);
+    fprintf('  %s\n', fullfile(matlab_output_root, variants{ivar}, ...
+        ['_data_sigma2eps_' variants{ivar} '_' measure '.txt']));
 end
-fprintf('Fortran inputs in: ../../fortran_code/Data/\n');
+fprintf('Fortran inputs in: %s\n', fortran_dir);

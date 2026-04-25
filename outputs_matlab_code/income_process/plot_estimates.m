@@ -2,7 +2,7 @@
 % Loads point estimates from H.mat / L.mat (the live pipeline output,
 % overwritten by every run of estimate_parameters.m including the default
 % N_REPS=0). Loads bootstrap confidence intervals from H_archive.mat /
-% L_archive.mat if present — these hold the authors' paper-baseline
+% L_archive.mat if present - these hold the authors' paper-baseline
 % 1000-rep bootstrap and are tracked in the repository; they are never
 % overwritten by run_estimation.bat. This split means a default
 % point-estimate rerun cannot clobber the committed CI arrays.
@@ -15,15 +15,21 @@
 %   sigma2_epsilon_point  - point estimates (1 x C_eff)
 %   sigma2_epsilon_bs     - bootstrap estimates (C_eff x n_reps), if n_reps > 0
 %
-% Called from income_process/ directory (same CWD as estimate_parameters.m).
-% Output saved to ../../graphs/inputs/ (monorepo calibration figures).
+% Can be called from any working directory.
+% Output saved to graphs/inputs/ (monorepo calibration figures).
 
-variants   = {'mostdrop_hhslabinc', 'busno_drop_hhslabinc'};
-output_dir = '../../graphs/inputs';
+variants = {'mostdrop_hhslabinc', 'busno_drop_hhslabinc'};
+this_dir = fileparts(mfilename('fullpath'));
+repo_root = fullfile(this_dir, '..', '..');
+result_root = fullfile(repo_root, 'inputs_matlab_code', 'income_process', 'output');
+output_dir = fullfile(repo_root, 'graphs', 'inputs');
+if ~exist(output_dir, 'dir')
+    mkdir(output_dir);
+end
 
 for ivar = 1:length(variants)
     variant    = variants{ivar};
-    result_dir = ['./output/' variant '/'];
+    result_dir = fullfile(result_root, variant);
 
     fprintf('Plotting sigma2_epsilon for %s\n', variant);
 
@@ -82,7 +88,7 @@ for ivar = 1:length(variants)
         fprintf('  L bootstrap: %d valid / %d total reps.\n', sum(valid_L), numel(valid_L));
         has_bootstrap = true;
     else
-        fprintf('  No bootstrap data — plotting point estimates only.\n');
+        fprintf('  No bootstrap data ??" plotting point estimates only.\n');
     end
 
     %% Main figure (paper version)
