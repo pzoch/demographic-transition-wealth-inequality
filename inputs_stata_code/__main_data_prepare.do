@@ -10,11 +10,9 @@ cd "`c(pwd)'"
 clear
 do _prepare_programs.do					// this keeps routines that are repeated between dofiles
 
-global f_results "" // paste here the path for your results output from Fortran if you want to compare model to data 
-* currently the dofiles use our outputs
 
 
-do external/copy_to_fortran.do    // external Fortran inputs — see external/README.md
+do external/copy_to_fortran.do    // external Fortran inputs - see external/README.md
 
 *** PROCESS DATA - FORTRAN INPUTS;
 * PWT inputs;
@@ -39,6 +37,17 @@ do demography/hetero_pi/D03_prepare_hetero_pi
 
 capture copy "demography/mortality/output/_data_pi_cond_US_since1935.txt" ///
     "../fortran_code/Data/_data_pi_cond_US_since1935.txt", replace
+
+
+* PSID income-process inputs (optional; requires raw PSID extract).
+capture confirm file "income_process/PSID/psid.dta"
+if !_rc {
+    do income_process/__run_psid_income_inputs.do
+}
+else {
+    display as text "Raw PSID extract not found; keeping packaged PSID-derived Fortran inputs."
+    display as text "To rebuild them, place psid.dta in income_process/PSID/ and rerun this driver."
+}
 
 capture erase bone.dta
 capture erase bone1y.dta

@@ -1,5 +1,7 @@
 * Run the Stata side of the PSID income-process pipeline.
 * Produces cleaned variant samples, psid_ready.dta, omega txt files, and covariance txt files for MATLAB.
+* Deaton/omega and sigma2epsilon plots are scripted outside this input-prep driver; see
+* outputs_stata_code/income_process/plot_omega.do and outputs_matlab_code/income_process/plot_estimates.m.
 
 clear all
 set more off

@@ -32,7 +32,7 @@ variants  = {'mostdrop_hhslabinc', 'busno_drop_hhslabinc'};
 measure   = 'avghourlyhh';
 % n_reps: 0 = point estimate only (fast), 1000 = full bootstrap for confidence bands.
 % Override via environment variable N_REPS (e.g. `set N_REPS=1000` before running
-% run_estimation.bat). Leave unset for the default of 0.
+% the MATLAB batch stage). Leave unset for the default of 0.
 n_reps_env = getenv('N_REPS');
 if ~isempty(n_reps_env)
     n_reps = str2double(n_reps_env);
@@ -281,12 +281,11 @@ for ivar = 1:length(variants)
 
         % When a bootstrap was run (n_reps > 0), also mirror the workspace to
         % <type>_archive.mat. The archive is the CI source for plot_estimates.m
-        % and the file that is tracked in the repository; refreshing it on
+        % and the packaged archive file; refreshing it on
         % every bootstrap run keeps the archive in sync with the latest
         % resampling. A default point-estimate run (n_reps == 0) does NOT
-        % touch the archive, so the committed paper-baseline 1000-rep
-        % bootstrap is preserved through a `set N_REPS=0 & run_estimation.bat`
-        % replication.
+        % touch the archive, so the paper-baseline 1000-rep
+        % bootstrap is preserved through a default point-estimate run with N_REPS=0.
         if n_reps > 0
             archive_file = fullfile(save_dir, [type '_archive.mat']);
             fprintf('Saving %s (bootstrap archive)\n', archive_file);

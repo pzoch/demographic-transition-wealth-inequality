@@ -49,6 +49,10 @@ if "`variant'" == "mostdrop_hhslabinc" {
     gen pure_labinc = hhslabinc - hhsinc_bus
     save "`output_dir'/psid_ready", replace
     display as text "   Saved: `output_dir'/psid_ready.dta"
+    capture mkdir "$IP_REPO_ROOT/data"
+    capture mkdir "$IP_REPO_ROOT/data/PSID"
+    copy "`output_dir'/psid_ready.dta" "$IP_REPO_ROOT/data/PSID/psid_ready.dta", replace
+    display as text "   Copied: $IP_REPO_ROOT/data/PSID/psid_ready.dta"
     drop year_g p25 pure_labinc
     display as text "   mostdrop: dropped business-income superstars"
 }

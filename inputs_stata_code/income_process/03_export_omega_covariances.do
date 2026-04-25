@@ -114,6 +114,9 @@ forvalues rep = 0/`n_reps' {
         preserve
         collapse (first) ageff_LE ageff_HE, by(age)
         save "`output_dir'/ageeffects_`measure'", replace
+        capture mkdir "$IP_REPO_ROOT/data"
+        capture mkdir "$IP_REPO_ROOT/data/PSID"
+        copy "`output_dir'/ageeffects_`measure'.dta" "$IP_REPO_ROOT/data/PSID/ageeffects_`variant'_`measure'.dta", replace
 
         gen exp_ageff_LE = exp(ageff_LE)
         gen exp_ageff_HE = exp(ageff_HE)

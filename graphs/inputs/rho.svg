@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This is a Stata 16.0 generated SVG file (http://www.stata.com) -->
+
+<svg version="1.1" width="4.80in" height="3.20in" viewBox="0 0 3456 2304" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>Stata Graph - Graph</desc>
+	<rect x="0" y="0" width="3456" height="2304" style="fill:#EAF2F3;stroke:none"/>
+	<rect x="0.00" y="0.00" width="3456.00" height="2304.00" style="fill:#EAF2F3"/>
+	<rect x="2.30" y="2.30" width="3451.39" height="2299.39" style="fill:none;stroke:#EAF2F3;stroke-width:4.61"/>
+	<rect x="312.66" y="188.25" width="3062.66" height="1803.09" style="fill:#FFFFFF"/>
+	<rect x="314.96" y="190.55" width="3058.06" height="1798.48" style="fill:none;stroke:#FFFFFF;stroke-width:4.61"/>
+	<line x1="312.66" y1="1940.68" x2="3375.32" y2="1940.68" style="stroke:#E0E0E0;stroke-width:6.91"/>
+	<line x1="312.66" y1="1515.26" x2="3375.32" y2="1515.26" style="stroke:#E0E0E0;stroke-width:6.91"/>
+	<line x1="312.66" y1="1089.85" x2="3375.32" y2="1089.85" style="stroke:#E0E0E0;stroke-width:6.91"/>
+	<line x1="312.66" y1="664.43" x2="3375.32" y2="664.43" style="stroke:#E0E0E0;stroke-width:6.91"/>
+	<line x1="312.66" y1="239.01" x2="3375.32" y2="239.01" style="stroke:#E0E0E0;stroke-width:6.91"/>
+	<path d=" M363.31 1728.03 L511.38 1621.65 L659.34 1621.65 L807.41 1302.61 L955.48 1196.23 L1103.54 877.19 L1251.61 664.43 L1399.68 451.77 L1547.75 239.01 L1695.82 239.01 L1843.88 239.01 L1991.95 239.01 L2140.02 239.01 L2288.09 239.01 L2436.16 239.01 L2584.22 239.01 L2732.29 239.01 L2880.36 239.01 L3028.43 239.01 L3176.50 239.01 L3324.56 239.01" stroke-linejoin="round" style="fill:none;stroke:#1A476F;stroke-width:10.37"/>
+	<line x1="312.66" y1="1991.34" x2="312.66" y2="188.25" style="stroke:#000000;stroke-width:4.61"/>
+	<line x1="312.66" y1="1940.68" x2="280.58" y2="1940.68" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="240.54" y="1940.68" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 240.54,1940.68)" text-anchor="middle">.4</text>
+	<line x1="312.66" y1="1515.26" x2="280.58" y2="1515.26" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="240.54" y="1515.26" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 240.54,1515.26)" text-anchor="middle">.6</text>
+	<line x1="312.66" y1="1089.85" x2="280.58" y2="1089.85" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="240.54" y="1089.85" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 240.54,1089.85)" text-anchor="middle">.8</text>
+	<line x1="312.66" y1="664.43" x2="280.58" y2="664.43" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="240.54" y="664.43" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 240.54,664.43)" text-anchor="middle">1</text>
+	<line x1="312.66" y1="239.01" x2="280.58" y2="239.01" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="240.54" y="239.01" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 240.54,239.01)" text-anchor="middle">1.2</text>
+	<text x="152.63" y="1089.85" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" transform="rotate(-90 152.63,1089.85)" text-anchor="middle">replacement rate scale parameter</text>
+	<line x1="312.66" y1="1991.34" x2="3375.32" y2="1991.34" style="stroke:#000000;stroke-width:4.61"/>
+	<line x1="363.31" y1="1991.34" x2="363.31" y2="2023.41" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="363.31" y="2095.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">1935</text>
+	<line x1="1103.65" y1="1991.34" x2="1103.65" y2="2023.41" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="1103.65" y="2095.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">1960</text>
+	<line x1="1843.99" y1="1991.34" x2="1843.99" y2="2023.41" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="1843.99" y="2095.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">1985</text>
+	<line x1="2584.33" y1="1991.34" x2="2584.33" y2="2023.41" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="2584.33" y="2095.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">2010</text>
+	<line x1="3324.67" y1="1991.34" x2="3324.67" y2="2023.41" style="stroke:#000000;stroke-width:4.61"/>
+	<text x="3324.67" y="2095.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">2035</text>
+	<text x="1843.99" y="2183.28" style="font-family:'Times New Roman';font-size:80.03px;fill:#000000" text-anchor="middle">year</text>
+	<text x="1843.99" y="150.36" style="font-family:'Times New Roman';font-size:80.03px;fill:#1E2D53" text-anchor="middle">Calibration</text>
+</svg>

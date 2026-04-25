@@ -33,13 +33,20 @@ inputs_matlab_code/income_process/output/**/*.mat
 !inputs_matlab_code/income_process/output/**/L_archive.mat
 
 # ---------------------------------------------------------------------------
-# Large raw data — kept on disk, not in git.
+# Large raw data - kept on disk unless explicitly packaged.
 # Pull these from the original sources (see input-data-file-provenance.md).
 # ---------------------------------------------------------------------------
 
-# Raw PSID and SCF extracts
-data/PSID/
-data/SCF/
+# Large/source microdata stay local unless explicitly packaged.
+# The journal deposit should include data/SCF/SCF_plus.dta when permitted;
+# PSID should be supplied through the PSID Repository/publication extract route.
+data/PSID/*
+!data/PSID/
+!data/PSID/psid_ready.dta
+!data/PSID/ageeffects_*.dta
+data/SCF/*
+!data/SCF/
+!data/SCF/SCF_plus.dta
 
 # PSID extract (psid.dta, ~98 MB) consumed by the Stata income-process pipeline
 inputs_stata_code/income_process/PSID/psid.dta
@@ -47,13 +54,13 @@ inputs_stata_code/income_process/PSID/psid.dta
 # Baseline model-ready panel (200 MB)
 data/model_psid_all_govt__.dta
 
-# ACS college-share extract (2 GB)
+# ACS college-share extract (~1.8 GB); obtain from IPUMS or redistribute only with permission.
 inputs_stata_code/skill_premium/ACS_college/ACS_college.dta
 
 # UN World Population Prospects mortality table (180 MB)
 inputs_stata_code/demography/mortality/WPP2022_MORT_F07_1_ABRIDGED_LIFE_TABLE_BOTH_SEXES.xlsx
 
-# Transient Stata scratch files — auto-created by _prog_coding.do
+# Transient Stata scratch files - auto-created by _prog_coding.do
 # (outputs side) and _prepare_programs.do (inputs side), erased at end of run
 **/bone.dta
 **/bone1y.dta

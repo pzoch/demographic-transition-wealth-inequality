@@ -75,11 +75,17 @@ do ../inputs_stata_code/tax_rate/T01prepare_taxes
 do ../inputs_stata_code/social_security/T02prepare_contributions		
 do ../inputs_stata_code/tax_rate/T03prepare_tax_lambda 
 
+* replacement-rate scale parameter
+do ../outputs_stata_code/plot_rho.do
+
 erase $bsource/bone.dta
 erase $bsource/bone1y.dta
 
 cd ..\outputs_stata_code
 
+
+* Plot income-process diagnostics
+do income_process/plot_omega.do
 
 ** Do graphs for Appendix C -- Populations
 global variant_base "psid_all_govt__"
