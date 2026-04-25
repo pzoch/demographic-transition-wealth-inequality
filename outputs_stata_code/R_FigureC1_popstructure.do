@@ -39,7 +39,7 @@ append using `tem_comp'
 foreach yr in 1935 1950 1975 2000 2020 2050 2100 {
     twoway  (bar population`yr' age if source == "comp", bcolor(red%50)    horizontal barw(5)) ///
             (bar population`yr' age if source == "base", bcolor(purple%50) horizontal barw(3)), ///
-            title("`yr'") legend(order(1 "[S1]Frozen:longevity" 2 "FullModel")) ///
+            title("`yr'") legend(order(1 "Counterfactual: longevity fixed at 1955" 2 "Baseline")) ///
             xtitle("`yr' population") ytitle("age")
     graph export "$graphspath/AppC_PopStructure_`yr'.png", replace
     graph export "$graphspath/AppC_PopStructure_`yr'.eps", replace
