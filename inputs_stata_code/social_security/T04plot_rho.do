@@ -40,7 +40,7 @@ label variable rho "Calibration"
 label variable year "year"
 
 twoway (line rho year, lcolor(navy) lwidth(medthick)), ///
-    title("Calibration", size(medsmall)) ///
+    title("", size(medsmall)) ///
     ytitle("replacement rate scale parameter") xtitle("year") ///
     ylabel(0.4(0.2)1.2, grid glcolor(gs14)) xlabel(1935 1960 1985 2010 2035) ///
     legend(off) xsize(4.8) ysize(3.2)
@@ -48,5 +48,5 @@ twoway (line rho year, lcolor(navy) lwidth(medthick)), ///
 graph save "`outdir'/rho.gph", replace
 graph export "`outdir'/rho.png", replace
 graph export "`outdir'/rho.eps", replace
-graph export "`outdir'/rho.svg", replace fontface("Times New Roman")
+graph export "`outdir'/rho.svg", replace 
 graph export "`outdir'/rho.pdf", replace

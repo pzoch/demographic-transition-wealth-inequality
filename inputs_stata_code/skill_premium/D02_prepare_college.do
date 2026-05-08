@@ -1,3 +1,6 @@
+
+
+
 capture mkdir skill_premium\ACS_college\processed
 
 global lam = 1600

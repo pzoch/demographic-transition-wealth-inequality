@@ -6,23 +6,23 @@
 clear all
 set more off
 
-capture confirm file "income_process/00_config.do"
+capture confirm file "income_process/I01_00_config.do"
 if !_rc {
-    do "income_process/00_config.do"
+    do "income_process/I01_00_config.do"
 }
 else {
-    capture confirm file "00_config.do"
+    capture confirm file "I01_00_config.do"
     if !_rc {
-        do "00_config.do"
+        do "I01_00_config.do"
     }
     else {
-        do "inputs_stata_code/income_process/00_config.do"
+        do "inputs_stata_code/income_process/I01_00_config.do"
     }
 }
 
-do "$IP_INCOME_DIR/01_prepare_common_sample.do"
-do "$IP_INCOME_DIR/02_make_variant_samples.do"
-do "$IP_INCOME_DIR/03_export_omega_covariances.do"
+do "$IP_INCOME_DIR/I01_01_prepare_common_sample.do"
+do "$IP_INCOME_DIR/I01_02_make_variant_samples.do"
+do "$IP_INCOME_DIR/I01_03_export_omega_covariances.do"
 
 display as text ""
 display as text "=== Stata PSID income-process inputs complete ==="

@@ -24,7 +24,7 @@ do labor_share/M03prepare_labor_share
 * skill premium and high/low shares;
 do skill_premium/H01prepare_skill_premium 
 *college share
-do skill_premium/D02_prepare_college 
+* do skill_premium/D02_prepare_college  // this file uses original IPUMS download of ACS 10-year (subsequently 5-year) census data for 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016 and 2021 to generate model input data in skill_premium\processed which are used in subsequent simulations and graphing, see README.md
 
 * taxes and contributions;
 do tax_rate/T01prepare_taxes
@@ -42,7 +42,7 @@ capture copy "demography/mortality/output/_data_pi_cond_US_since1935.txt" ///
 * PSID income-process inputs (optional; requires raw PSID extract).
 capture confirm file "income_process/PSID/psid.dta"
 if !_rc {
-    do income_process/__run_psid_income_inputs.do
+    do income_process/I01_run_psid_income_inputs.do
 }
 else {
     display as text "Raw PSID extract not found; keeping packaged PSID-derived Fortran inputs."

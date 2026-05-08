@@ -37,6 +37,7 @@ global r1 70
 global r2 78
 do R_Figure2.do 		//  lines with labels (Figure 2)
 graph export $graphspath\\Results_Gini_counterfactuals.png, replace 
+graph export $graphspath\\Results_Gini_counterfactuals.svg, replace 
 
 
 global variant_base "psid_all_govt__" 
@@ -45,6 +46,7 @@ global legend `"legend(order(1 "[S1] Longevity:1955" 2 "[S1a] ExpectedLongevity:
 global colors "purple pink orange_red"
 do R_Figure3.do 		//  bars for population scenarios (Figure 3)
 graph export $graphspath\\Results_Gini_drivers_demographics.png, replace 
+graph export $graphspath\\Results_Gini_drivers_demographics.svg, replace 
 
 global variant_base "psid_all_govt__" 
 global variant_comp "psid_ndm_govt__ psid_nlb_govt__ psid_ntx_govt__ psid_nts_govt__ "  
@@ -52,6 +54,7 @@ global legend `"legend(order(1 "[S1] Longevity:1955" 2 "[S2] IncomeINEQ:1955" 3 
 global colors "purple blue orange green"
 do R_Figure3.do 		//  bars for population scenarios (Figure 4)
 graph export $graphspath\\Results_Gini_drivers_comparison.png, replace 
+graph export $graphspath\\Results_Gini_drivers_comparison.svg, replace 
 
 
 ** Do graphs for Appendix B -- Calibration
@@ -74,9 +77,8 @@ do ../inputs_stata_code/skill_premium/D02_prepare_college
 do ../inputs_stata_code/tax_rate/T01prepare_taxes		
 do ../inputs_stata_code/social_security/T02prepare_contributions		
 do ../inputs_stata_code/tax_rate/T03prepare_tax_lambda 
-
 * replacement-rate scale parameter
-do ../outputs_stata_code/plot_rho.do
+do ../inputs_stata_code/social_security/T04plot_rho.do
 
 erase $bsource/bone.dta
 erase $bsource/bone1y.dta
@@ -85,12 +87,12 @@ cd ..\outputs_stata_code
 
 
 * Plot income-process diagnostics
-do income_process/plot_omega.do
+do ../inputs_matlab_code/income_process/plot_omega.do /// !!!! TO NIE Dziala
 
 ** Do graphs for Appendix C -- Populations
 global variant_base "psid_all_govt__"
 global variant_comp "psid_ndm_govt__"
-do R_FigureC1_popstructure.do
+do R_FigureC1_popstructure.do  /// !!!! TO NIE Dziala
 
 ** Do graphs for Appendix D -- Model vs Data 
 global scenario		"psid_all_govt__"
@@ -103,17 +105,19 @@ global max_age 65
 do MvD_1_macro.do
 do MvD_2_Gini_income.do
 do MvD_3_GE_decomposition.do
+do MvD_4_Gini_levels.do
 
 ** Do graphs for Appendix E -- Additional results
-* combine all scenarios gini_trans.csv from all relevant folders
+* uses combined all scenarios gini_trans.csv from all relevant results folders
 
 *Income inequality
 global variant_base "psid_all_govt__" 
 global variant_comp "psid_nlb_govt__ psid_ncs_govt__ psid_ncp_govt__ psid_nsh_govt__"  
-global legend `"legend(order(1 "[S2] IncomeINEQ:1955" 2 "[S2a] CollegeShare:1955 " 3 "[S2b] CollegePremium:1955" 4 "[S2c] Shocks:Initial" ) cols(4))"'
+global legend `"legend(order(1 "[S2] IncomeINEQ:1955" 2 "[S2a] CollegeShare:1955 " 3 "[S2b] CollegePremium:1955" 4 "[S2c] Shocks:Initial" ) cols(3))"'
 global colors "blue emidblue purple%30 eltblue "
 do R_Figure3.do				// Figure E.1.
 graph export $graphspath\\Results_Gini_drivers_incomes.png, replace 
+graph export $graphspath\\Results_Gini_drivers_incomes.svg, replace 
 
 *Taxes
 global variant_base "psid_all_govt__" 
@@ -122,14 +126,16 @@ global legend `"legend(order(1 "[S3] Taxes:1955" 2 "[S3a] {&tau}{sub:L}:1955 " 3
 global colors "orange orange_red*0.5 dkorange*0.5 dkorange orange_red "
 do R_Figure3.do				// Figure E.2.
 graph export $graphspath\\Results_Gini_drivers_taxes.png, replace 
+graph export $graphspath\\Results_Gini_drivers_taxes.svg, replace 
 
 *Macroeconomic trends // 
 global variant_base "psid_all_govt__" 
 global variant_comp "psid_nts_govt__ psid_nls_govt__ psid_nga_govt__ psid_ndp_govt__ "  
-global legend `"legend(order(1 "[S4] Technology:1955" 2 "[S4a] LabShare:1955" 3 "[S4b] TFP:1955" 4 "[S4c] Depr:1955" ) cols(4))"'
+global legend `"legend(order(1 "[S4] Technology:1955" 2 "[S4a] LabShare:1955" 3 "[S4b] TFP:1955" 4 "[S4c] Depr:1955" ) cols(3))"'
 global colors "dkgreen dkgreen*0.5 dk_green*0.3 green  " 
 do R_Figure3.do				// Figure E.3.
 graph export $graphspath\\Results_Gini_drivers_macro.png, replace
+graph export $graphspath\\Results_Gini_drivers_macro.svg, replace
 
 ** Do graphs for Appendix F -- Sensitivity
 * Higher intertemporal elasticity of substitution
@@ -139,6 +145,7 @@ global r1 68
 global r2 74
 do R_Figure2.do 		//  Figure F.1
 graph export $graphspath\\AppF_Gini_counterfactuals_theta.png, replace 
+graph export $graphspath\\AppF_Gini_counterfactuals_theta.svg, replace 
 
 * Heterogeneous rates of return
 global variant_base "hrat_all_govt__" 
@@ -147,6 +154,7 @@ global r1 70
 global r2 80
 do R_Figure2.do 		//  Figure F.2
 graph export $graphspath\\AppF_Gini_counterfactuals_hetrates.png, replace 
+graph export $graphspath\\AppF_Gini_counterfactuals_hetrates.svg, replace 
 
 * Model without discount factor shocks
 global variant_base "ndel_all_govt__" 
@@ -155,6 +163,7 @@ global r1 49
 global r2 70
 do R_Figure2.do 		//  Figure F.3
 graph export $graphspath\\AppF_Gini_counterfactuals_homogendelta.png, replace 
+graph export $graphspath\\AppF_Gini_counterfactuals_homogendelta.svg, replace 
 
 
 * Income process without superstars
@@ -164,6 +173,7 @@ global r1 67
 global r2 76
 do R_Figure2.do 		//  Figure F.4
 graph export $graphspath\\AppF_Gini_counterfactuals_nosuperstars.png, replace 
+graph export $graphspath\\AppF_Gini_counterfactuals_nosuperstars.svg, replace 
 
 * Higher productivity growth
 global year_start 1935
@@ -182,6 +192,7 @@ global r1 70
 global r2 77
 do R_Figure2.do 		//  Figure F.6
 graph export $graphspath\\AppF_Gini_counterfactuals_gamma.png, replace 
+graph export $graphspath\\AppF_Gini_counterfactuals_gamma.svg, replace 
 
 
 * Unequal distribution of bequests
@@ -191,4 +202,23 @@ global r1 69
 global r2 77
 do R_Figure2.do 		//  Figure F.7
 graph export $graphspath\\AppF_Gini_counterfactuals_beq.png, replace
+graph export $graphspath\\AppF_Gini_counterfactuals_beq.svg, replace
+
+* Exogenous interest rate (open-economy specification)
+* M04prepare_exog_rate needs bone1y.dta; rebuild it via _prepare_programs
+* (the Appendix B block at lines ~83-84 erases bone/bone1y).
+global year_start 1935
+global year_stop  2100
+cd ..\inputs_stata_code
+global bsource "../outputs_stata_code/"
+do _prepare_programs
+do exog_rate/M04prepare_exog_rate
+erase $bsource/bone.dta
+erase $bsource/bone1y.dta
+cd ..\outputs_stata_code
+
+global scenario "psid_all_govt__ exor_all_govt__"
+do R_Figure1_app.do 	//  Figure F.8
+graph export $graphspath\\AppF_Gini_counterfactuals_exograte.png, replace
+graph export $graphspath\\AppF_Gini_counterfactuals_exograte.svg, replace
 

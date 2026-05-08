@@ -69,7 +69,7 @@ demographic-transition-wealth-inequality/
 
 - **Krzysztof Makarski** - SGH Warsaw School of Economics and FAME|GRAPE - kmakar@sgh.waw.pl
 - **Joanna Tyrowicz** - University of Augsburg, FAME|GRAPE, University of Warsaw, and IZA - j.tyrowicz@grape.org.pl
-- **Piotr Zoch** - University of Warsaw, FAME|GRAPE - p.zoch@uw.edu.pl
+- **Piotr Zoch** - University of Warsaw, FAME|GRAPE - p.zoch@grape.org.pl
 
 **Corresponding Author**: Joanna Tyrowicz - j.tyrowicz@grape.org.pl
 
@@ -128,14 +128,15 @@ Each model input file, its source, and the script that produces it.
 | `_data_depr.txt` | Penn World Table 10.0 `delta` | `depreciation/M01prepare_depr.do` |
 | `_data_labsh.txt` | Penn World Table 10.0 `labsh` | `labor_share/M03prepare_labor_share.do` |
 | `_data_skill_premium.txt` | Autor-Goldin-Katz (2020 AEA P&P), openICPSR 120694 | `skill_premium/H01prepare_skill_premium.do` |
-| `_data_college_share.txt` | ACS via IPUMS USA (https://usa.ipums.org/usa/); processed inputs are shipped, raw extract is not bundled by default | `skill_premium/D02_prepare_college.do` |
+| `_data_college_share.txt` | ACS via IPUMS USA (https://usa.ipums.org/usa/); processed inputs are shipped, raw extract is not bundled by default, this file uses original IPUMS download of ACS 10-year (subsequently 5-year) census data for 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016 and 2021 to generate model input data in skill_premium\processed which are used in subsequent simulations and graphing | `skill_premium/D02_prepare_college.do` |
+| `_data_exog_rate.txt` | GGDC Penn World Table 10.0 `irr.USA` (internal rate of return); only consumed when `switch_exog_rate=1` (e.g. the `exor_` scenario, Figure F.8) | `exog_rate/M04prepare_exog_rate.do` |
 
 ### Auxiliary data consumed outside the Fortran input chain
 
 - `data/SCF/SCF_plus.dta` - SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*). The journal deposit should include this file (about 99 MB). If missing, download it from https://www.moritz-schularick.com/data and place it at this path. Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's wealth-Gini and decomposition figures.
 - `data/PSID/psid_ready.dta` - processed PSID panel generated from the mostdrop income-process sample and used by `outputs_stata_code/MvD_2_Gini_income.do` for Appendix Figure D.4. The Stata PSID stage refreshes this file when raw PSID is available.
 - `inputs_stata_code/income_process/PSID/psid.dta` - raw PSID public-use extract. Obtain from https://psidonline.isr.umich.edu/ or from the authors' PSID Repository publication extract if one is supplied. Consumed only if replicators re-estimate the income process from scratch or regenerate `data/PSID/psid_ready.dta`. Otherwise the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` files suffice for running the Fortran model.
-- `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs.dta` and `col_share_acs_ext.dta` - processed ACS/IPUMS college-share inputs. The raw `ACS_college.dta` extract is needed only to rebuild these processed files; `fortran_code/Data/_data_college_share.txt` is already included for the Fortran model.
+- `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs.dta` and `col_share_acs_ext.dta` - processed ACS/IPUMS college-share inputs. The raw `ACS_college.dta` extract is needed only to rebuild these processed files; The file is an original IPUMS download of ACS 10-year (subsequently 5-year) census data for 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016 and 2021  and renamed for clarity `fortran_code/Data/_data_college_share.txt` is already included for the Fortran model.
 
 ### Access, license, dates
 
@@ -706,7 +707,7 @@ Three Fortran inputs have no Stata producer and are sourced directly from extern
 - `_data_rho_1935.txt` - pension replacement rates by retirement age (calibrated)
 
 
-The only file in `fortran_code/Data/` that is neither produced by a Stage-A script nor part of the external set is `_data_gamma_robustness.txt`, which is produced by `tfp/M02robustness_prepare_gamma.do` - called from `outputs_stata_code/__main.do` (Appendix F, Step 7).
+Two files in `fortran_code/Data/` are produced later, in Appendix F (Step 7), rather than during Stage A: `_data_gamma_robustness.txt` (by `tfp/M02robustness_prepare_gamma.do`) and `_data_exog_rate.txt` (by `exog_rate/M04prepare_exog_rate.do`). Both are written from `outputs_stata_code/__main.do`.
 
 #### Verify
 
@@ -716,7 +717,7 @@ Once all three stages have run, check that `fortran_code/Data/` contains the exp
 dir fortran_code\Data\
 ```
 
-You should see ~20 files: `_data_Nn_US_*.txt` (population), `_data_pi_cond_US_since1935.txt` and `_data_het_pi_US_since1935_all.txt` (mortality), `_data_omega_*.txt` and `_data_sigma2eps_*.txt` (productivity), `_data_gamma.txt` (TFP; `_data_gamma_robustness.txt` is written later by Step 7), `_data_tauC/K/L.txt` and `_data_lambda.txt` (taxes), `_data_contrib_to_gdp.txt`, `_data_skill_premium.txt`, `_data_college_share.txt`, `_data_depr.txt`, `_data_labsh.txt`, and `_data_rho_1935.txt`. The full catalogue is in the Data Availability section.
+You should see ~20 files: `_data_Nn_US_*.txt` (population), `_data_pi_cond_US_since1935.txt` and `_data_het_pi_US_since1935_all.txt` (mortality), `_data_omega_*.txt` and `_data_sigma2eps_*.txt` (productivity), `_data_gamma.txt` (TFP; `_data_gamma_robustness.txt` and `_data_exog_rate.txt` are written later by Step 7), `_data_tauC/K/L.txt` and `_data_lambda.txt` (taxes), `_data_contrib_to_gdp.txt`, `_data_skill_premium.txt`, `_data_college_share.txt`, `_data_depr.txt`, `_data_labsh.txt`, and `_data_rho_1935.txt`. The full catalogue is in the Data Availability section.
 
 **If any files are missing** after running Stages A and B: see Data Availability section for the PSID access instructions, and check the individual `.do` logs under `inputs_stata_code/*/`.
 
@@ -879,6 +880,7 @@ This script:
 - `nstr_ all_ govt__`, `nstr_ ndm_ govt__` (Appendix F.4 no superstars - Figure F.4)
 - `gcbo_ all_ govt__`, `gcbo_ ndm_ govt__` (Appendix F.5 higher TFP growth - Figure F.6; the companion Figure F.5 is the alternative TFP path itself, produced at calibration time by `M02robustness_prepare_gamma.do`)
 - `beqs_ all_ govt__`, `beqs_ ndm_ govt__` (Appendix F.6 unequal bequests - Figure F.7)
+- `exor_ all_ govt__` (Appendix F.7 exogenous interest rate / open economy - Figure F.8; runs with `switch_exog_rate=1` against `_data_exog_rate.txt` produced by `inputs_stata_code/exog_rate/M04prepare_exog_rate.do`)
 
 **Runtime for all scenarios**: The full scenario set is a multi-day workload on a typical workstation.
 
@@ -1155,6 +1157,7 @@ The paper's main text contains no tables.
 | **Figure F.5** | Primary and alternative TFP growth rate | `tfp/M02robustness_prepare_gamma.do` | `graphs/inputs/gamma_robust.*` |
 | **Figure F.6** | Baseline vs. constant-longevity (TFP growth rate) | `outputs_stata_code/R_Figure2.do` (`gcbo_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_gamma.png` |
 | **Figure F.7** | Baseline vs. constant-longevity (unequal bequest distribution) | `outputs_stata_code/R_Figure2.do` (`beqs_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_beq.png` |
+| **Figure F.8** | Baseline vs. open economy (exogenous interest rate) | `outputs_stata_code/R_Figure1_app.do` (`exor_` variant) | `graphs/outputs/AppF_Gini_counterfactuals_exograte.png` |
 
 ---
 

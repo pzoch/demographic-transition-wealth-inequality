@@ -157,7 +157,7 @@ call chdir(cwd_r)
 
 ! -------------------------------- rate -------------------------------
         if (switch_exog_rate == 1) then
-            Open(unit = 5, FILE = "_data_exog_rate_1935.txt")
+            Open(unit = 5, FILE = "_data_exog_rate.txt")
             do i = 1, last_data_exog_rate, 1
                 read(5,*) exog_rate_d(i)
             enddo

@@ -19,3 +19,4 @@ twoway  (bar aGini_data_wealth_trend year,  barwidth(3.2) color(gs12) bargap(0) 
 		xsize(7.5) ysize(3)  ylabel(, labsize(*1.2)  angle(h) gstyle(dot) glcolor(grey))
 
 		graph export $graphspath\\Results_Gini_changes.png, replace
+		graph export $graphspath\\Results_Gini_changes.svg, replace
