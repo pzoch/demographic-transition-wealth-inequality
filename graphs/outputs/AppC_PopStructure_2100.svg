@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- This is a Stata 16.0 generated SVG file (http://www.stata.com) -->
+<!-- This is a Stata 18.0 generated SVG file (http://www.stata.com) -->
 
-<svg version="1.1" width="3.58in" height="2.60in" viewBox="0 0 2574 1872" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg version="1.1" width="3.575in" height="2.600in" viewBox="0 0 2574 1872" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<desc>Stata Graph - Graph</desc>
 	<rect x="0" y="0" width="2574" height="1872" style="fill:#FFFFFF;stroke:none"/>
 	<rect x="0.00" y="0.00" width="2573.92" height="1872.00" style="fill:#FFFFFF"/>
 	<rect x="1.50" y="1.50" width="2570.92" height="1869.00" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
 	<rect x="366.63" y="378.79" width="2141.73" height="1194.29" style="fill:#FFFFFF"/>
-	<rect x="368.13" y="380.29" width="2138.73" height="1191.29" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<rect x="368.13" y="380.29" width="2138.73" height="1191.29" style="fill:none;stroke:#FFFFFF;stroke-opacity:0.00;stroke-width:3.00"/>
 	<rect x="407.82" y="1430.79" width="1948.12" height="67.41" style="fill:#FF3333;fill-opacity:0.50"/>
 	<rect x="409.32" y="1432.29" width="1945.12" height="64.41" style="fill:none;stroke:#FF0000;stroke-opacity:0.50;stroke-width:3.00"/>
 	<rect x="407.82" y="1363.38" width="1930.66" height="67.41" style="fill:#FF3333;fill-opacity:0.50"/>
@@ -87,13 +87,13 @@
 	<text x="2055.34" y="1657.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000" text-anchor="middle">20000</text>
 	<text x="2467.18" y="1657.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000" text-anchor="middle">25000</text>
 	<text x="1437.50" y="1751.51" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000" text-anchor="middle">2100 population</text>
-	<rect x="389.08" y="235.13" width="1250.00" height="121.14" style="fill:#FFFFFF"/>
-	<rect x="390.58" y="236.63" width="1247.00" height="118.14" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<rect x="389.08" y="235.13" width="1748.55" height="121.14" style="fill:#FFFFFF"/>
+	<rect x="390.58" y="236.63" width="1745.55" height="118.14" style="fill:none;stroke:#FFFFFF;stroke-opacity:0.00;stroke-width:3.00"/>
 	<rect x="417.15" y="263.20" width="64.99" height="65.00" style="fill:#FF3333;fill-opacity:0.50"/>
 	<rect x="418.65" y="264.70" width="61.99" height="62.00" style="fill:none;stroke:#FF0000;stroke-opacity:0.50;stroke-width:3.00"/>
-	<rect x="1220.72" y="263.20" width="64.99" height="65.00" style="fill:#993399;fill-opacity:0.50"/>
-	<rect x="1222.22" y="264.70" width="61.99" height="62.00" style="fill:none;stroke:#800080;stroke-opacity:0.50;stroke-width:3.00"/>
-	<text x="521.15" y="318.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000">[S1]Frozen:longevity</text>
-	<text x="1324.73" y="318.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000">FullModel</text>
+	<rect x="1749.60" y="263.20" width="64.99" height="65.00" style="fill:#993399;fill-opacity:0.50"/>
+	<rect x="1751.10" y="264.70" width="61.99" height="62.00" style="fill:none;stroke:#800080;stroke-opacity:0.50;stroke-width:3.00"/>
+	<text x="521.15" y="318.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000">Counterfactual: longevity fixed at 1955</text>
+	<text x="1853.60" y="318.47" style="font-family:'Times New Roman';font-size:64.99px;fill:#000000">Baseline</text>
 	<text x="366.63" y="129.20" style="font-family:'Times New Roman';font-size:90.97px;fill:#000000">2100</text>
 </svg>

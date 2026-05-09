@@ -92,7 +92,7 @@ do ../inputs_matlab_code/income_process/plot_omega.do /// !!!! TO NIE Dziala
 ** Do graphs for Appendix C -- Populations
 global variant_base "psid_all_govt__"
 global variant_comp "psid_ndm_govt__"
-do R_FigureC1_popstructure.do  /// !!!! TO NIE Dziala
+do R_FigureC1_popstructure.do
 
 ** Do graphs for Appendix D -- Model vs Data 
 global scenario		"psid_all_govt__"

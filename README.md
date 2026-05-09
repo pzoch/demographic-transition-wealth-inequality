@@ -928,10 +928,10 @@ Internal paths set by the script:
 
 - **Main text figures**: `R_Figure1.do` (Figure 1, wealth-Gini change vs. 1950), `R_Figure2.do` (Figure 2, baseline vs. constant-longevity counterfactual), `R_Figure3.do` (counterfactual bar plots for Figures 3 and 4, called twice with different variant sets).
 - **Appendix B - Calibration figures**: re-runs the Stage-A prep scripts from Step 2 (`M01prepare_depr.do`, `M02prepare_gamma.do`, `M03prepare_labor_share.do`, `H01prepare_skill_premium.do`, `D02_prepare_college.do`, `T01prepare_taxes.do`, `T02prepare_contributions.do`, `T03prepare_tax_lambda.do`) with a plotting source switched on. Figure B.2 (LE50 by education) is produced in Step 2 by `D03_prepare_hetero_pi.do` as a side output.
-- **Appendix C - Population pyramid**: `R_FigureC1_popstructure.do` plots the full-model vs. frozen-longevity population distribution from Fortran's `population.csv`.
+- **Appendix C - Population pyramid**: `R_FigureC1_popstructure.do` plots the full-model vs. frozen-longevity population distribution from Fortran's `population.csv`. Requires `population.csv` to be present under both `Results/psid_all_govt__/` (baseline) and `Results/psid_ndm_govt__/` (frozen-longevity counterfactual); these files are written by the Fortran model during initialisation, so even a brief Fortran run on each scenario is sufficient.
 - **Appendix D - Model vs Data comparisons**: `MvD_1_macro.do`, `MvD_2_Gini_income.do`, `MvD_3_GE_decomposition.do`.
 - **Appendix E - Additional decompositions**: further calls to `R_Figure3.do` with income, tax, and technology counterfactual sets.
-- **Appendix F - Sensitivity**: calls to `R_Figure2.do` across the `crr3_`, `hrat_`, `ndel_`, `nstr_`, `gcbo_`, and `beqs_` sensitivity scenarios, including re-preparation of the alternative TFP input through `M02robustness_prepare_gamma.do` (for `gcbo_`). The re-prep block sets `global year_start 1935` and `global year_stop 2100` (after Appendix D narrows the globals to 1950/2020 for model-vs-data plots), then `cd ..\inputs_stata_code` and re-runs `_prepare_programs.do` to recreate `bone.dta` / `bone1y.dta` (erased at the end of Appendix B), so this Appendix-F section is self-contained.
+- **Appendix F - Sensitivity**: calls to `R_Figure2.do` across the `crr3_`, `hrat_`, `ndel_`, `nstr_`, `gcbo_`, and `beqs_` sensitivity scenarios, plus `R_Figure1_app.do` for the `exor_` open-economy scenario. Includes re-preparation of the alternative TFP input through `M02robustness_prepare_gamma.do` (for `gcbo_`) and the exogenous-rate path through `exog_rate/M04prepare_exog_rate.do` (for `exor_`). Both re-prep blocks set `global year_start 1935` and `global year_stop 2100` (after Appendix D narrows the globals to 1950/2020 for model-vs-data plots), then `cd ..\inputs_stata_code` and re-run `_prepare_programs.do` to recreate `bone.dta` / `bone1y.dta` (erased at the end of Appendix B), so this Appendix-F section is self-contained.
 
 **Pre-seeded files in `outputs_stata_code/`**: `outputs_stata_code/bone.dta` and `outputs_stata_code/bone1y.dta` are packaged inputs for Appendix B, which sets `global bsource "../outputs_stata_code/"` and merges `using $bsource/bone` / `$bsource/bone1y` inside the re-run prep scripts. They are temporary files in the inputs-driver workflow (created by `_prepare_programs.do`, erased at the end of `__main_data_prepare.do`), but **must be present** here so the outputs-driver Appendix B can run without prior state. `__main.do` erases them at the end of Appendix B and recreates them transiently in Appendix F's `gcbo_` block.
 
@@ -1120,7 +1120,7 @@ The paper's main text contains no tables.
 
 | Figure | Paper title | Generating script | Output file(s) |
 |---|---|---|---|
-| **Figure C.1** | Population structure: comparison for four periods | `outputs_stata_code/R_FigureC1_popstructure.do` | `graphs/outputs/AppC_PopStructure_{1935,1950,1975,2000,2020,2050,2100}.*` |
+| **Figure C.1** | Population structure: baseline vs. frozen-1955-longevity counterfactual, seven periods (1935, 1950, 1975, 2000, 2020, 2050, 2100) | `outputs_stata_code/R_FigureC1_popstructure.do` (reads `population.csv` from both `psid_all_govt__/` and `psid_ndm_govt__/` Results folders) | `graphs/outputs/AppC_PopStructure_{1935,1950,1975,2000,2020,2050,2100}.{png,eps,svg,pdf}` |
 
 ---
 
