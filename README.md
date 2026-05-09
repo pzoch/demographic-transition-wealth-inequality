@@ -129,7 +129,7 @@ Each model input file, its source, and the script that produces it.
 | `_data_labsh.txt` | Penn World Table 10.0 `labsh` | `labor_share/M03prepare_labor_share.do` |
 | `_data_skill_premium.txt` | Autor-Goldin-Katz (2020 AEA P&P), openICPSR 120694 | `skill_premium/H01prepare_skill_premium.do` |
 | `_data_college_share.txt` | ACS via IPUMS USA (https://usa.ipums.org/usa/); processed inputs are shipped, raw extract is not bundled by default, this file uses original IPUMS download of ACS 10-year (subsequently 5-year) census data for 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016 and 2021 to generate model input data in skill_premium\processed which are used in subsequent simulations and graphing | `skill_premium/D02_prepare_college.do` |
-| `_data_exog_rate.txt` | GGDC Penn World Table 10.0 `irr.USA` (internal rate of return); only consumed when `switch_exog_rate=1` (e.g. the `exor_` scenario, Figure F.8) | `exog_rate/M04prepare_exog_rate.do` |
+| `_data_exog_rate.txt` | GGDC Penn World Table 10.0 `irr.USA` (internal rate of return); only consumed when `switch_exog_rate=1` (e.g. the `exor_` scenario, Figure F.7) | `exog_rate/M04prepare_exog_rate.do` |
 
 ### Auxiliary data consumed outside the Fortran input chain
 
@@ -209,7 +209,6 @@ All sources above are either public-domain, free for academic use under the prov
 
 The April 2026 package verification and preprocessing run used:
 
-- **Computer**: COMP--PZ
 - **Operating system**: Microsoft Windows 11 Pro, version 10.0.26200, build 26200
 - **Processor**: AMD Ryzen 7 5800X 8-Core Processor
 - **Cores / logical processors**: 8 / 16
@@ -879,8 +878,8 @@ This script:
 - `ndel_ all_ govt__`, `ndel_ ndm_ govt__` (Appendix F.3 no discount-factor shocks - Figure F.3)
 - `nstr_ all_ govt__`, `nstr_ ndm_ govt__` (Appendix F.4 no superstars - Figure F.4)
 - `gcbo_ all_ govt__`, `gcbo_ ndm_ govt__` (Appendix F.5 higher TFP growth - Figure F.6; the companion Figure F.5 is the alternative TFP path itself, produced at calibration time by `M02robustness_prepare_gamma.do`)
-- `beqs_ all_ govt__`, `beqs_ ndm_ govt__` (Appendix F.6 unequal bequests - Figure F.7)
-- `exor_ all_ govt__` (Appendix F.7 exogenous interest rate / open economy - Figure F.8; runs with `switch_exog_rate=1` against `_data_exog_rate.txt` produced by `inputs_stata_code/exog_rate/M04prepare_exog_rate.do`)
+- `exor_ all_ govt__` (Appendix F.6 exogenous interest rate / open economy - Figure F.7; runs with `switch_exog_rate=1` against `_data_exog_rate.txt` produced by `inputs_stata_code/exog_rate/M04prepare_exog_rate.do`)
+- `beqs_ all_ govt__`, `beqs_ ndm_ govt__` (Appendix F.7 unequal bequests - Figure F.8)
 
 **Runtime for all scenarios**: The full scenario set is a multi-day workload on a typical workstation.
 
@@ -1015,46 +1014,6 @@ Results should match the paper within numerical precision:
 - Close other applications (browser, etc.) to free RAM
 - Check that antivirus isn't scanning the output folder during run
 
----
-
-## Advanced Usage
-
-### Running Custom Scenarios
-
-To create a new scenario:
-
-1. **Copy configuration files**:
-   ```bash
-   copy Instructions\psid_all_govt__instructions.txt Instructions\custom_all_govt__instructions.txt
-   copy Parameters\psid_all_govt__parameters.txt Parameters\custom_all_govt__parameters.txt
-   ```
-
-2. **Edit the files** to modify switches or parameters
-
-3. **Run the scenario**:
-   ```bash
-   5Gtrans.exe custom_ all_ govt__
-   ```
-
-4. **Results** will be saved to `fortran_code/Results/custom_all_govt__/`
-
-### Modifying Model Parameters
-
-Key parameters can be changed by editing the parameters file:
-
-- **Line 12**: `delta` - Discount factor (typically 1.010)
-- **Line 13**: `theta` - Risk aversion (typically 1.5)
-- **Line 14**: `alpha` - Capital share (typically 0.35)
-- **Line 15**: `depr` - Depreciation rate (typically 0.05)
-
-### Sensitivity Analysis
-
-To run sensitivity analysis across parameter values:
-
-1. Create multiple parameter files with different values
-2. Add them to `scenarios.txt`
-3. Run `run_scenarios_from_list.bat`
-4. Compare results across scenarios
 
 ---
 
@@ -1073,7 +1032,7 @@ For questions about replication, use the author contact information above.
 
 # List of Tables and Figures
 
-This section maps each numbered figure in the paper to the output files and programs that generate it. The extracted paper text contains no numbered tables.
+This section maps each numbered figure in the paper to the output files and programs that generate it. The paper contains no numbered tables.
 
 ## Reproducibility Status
 
@@ -1156,8 +1115,8 @@ The paper's main text contains no tables.
 | **Figure F.4** | Baseline vs. constant-longevity (no "superstars") | `outputs_stata_code/R_Figure2.do` (`nstr_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_nosuperstars.png` |
 | **Figure F.5** | Primary and alternative TFP growth rate | `tfp/M02robustness_prepare_gamma.do` | `graphs/inputs/gamma_robust.*` |
 | **Figure F.6** | Baseline vs. constant-longevity (TFP growth rate) | `outputs_stata_code/R_Figure2.do` (`gcbo_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_gamma.png` |
-| **Figure F.7** | Baseline vs. constant-longevity (unequal bequest distribution) | `outputs_stata_code/R_Figure2.do` (`beqs_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_beq.png` |
-| **Figure F.8** | Baseline vs. open economy (exogenous interest rate) | `outputs_stata_code/R_Figure1_app.do` (`exor_` variant) | `graphs/outputs/AppF_Gini_counterfactuals_exograte.png` |
+| **Figure F.7** | Baseline vs. open economy (exogenous interest rate) | `outputs_stata_code/R_Figure1_app.do` (`exor_` variant) | `graphs/outputs/AppF_Gini_counterfactuals_exograte.png` |
+| **Figure F.8** | Baseline vs. constant-longevity (unequal bequest distribution) | `outputs_stata_code/R_Figure2.do` (`beqs_` variants) | `graphs/outputs/AppF_Gini_counterfactuals_beq.png` |
 
 ---
 

@@ -112,7 +112,8 @@ Each robustness version modifies the model specification or calibration. For eac
 | `ndel_` | §F.3 (Fig. F.3) | No discount factor shocks (&delta; constant for all households). | `5Gtrans.exe` |
 | `nstr_` | §F.4 (Fig. F.4) | No "superstars" income state. Standard 5-state income process estimated including business owners. Uses `busno_drop` data files. | `5Gtrans.exe` |
 | `gcbo_` | §F.5 (Figs. F.5, F.6) | Higher future TFP growth rate path (CBO 2025 projection). TFP rebounds to >1% annually instead of stabilizing at 0.6%. Section F.5 contains Figure F.5 (the alternative TFP path) and Figure F.6 (the Gini counterfactual). | `5Gtrans.exe` |
-| `beqs_` | §F.6 (Fig. F.7) | Unequal bequest distribution. 70% receive nothing, 20% receive half, top 10% receive the other half. Bequests received at age 45-49. | `5Gtrans.exe` |
+| `exor_` | §F.6 (Fig. F.7) | Open-economy specification: exogenous interest rate path (HP-filtered GGDC `irr.USA`, with quadratic extension to a 7% terminal rate by 2100). Activated by `switch_exog_rate=1`; reads `_data_exog_rate.txt`. Only the `_all_govt__` variant is run, compared against `psid_all_govt__` baseline. | `5Gtrans.exe` |
+| `beqs_` | §F.7 (Fig. F.8) | Unequal bequest distribution. 70% receive nothing, 20% receive half, top 10% receive the other half. Bequests received at age 45-49. | `5Gtrans.exe` |
 
 ---
 
@@ -169,4 +170,5 @@ For robustness **versions**, the experiment switches are the same as `psid_`; th
 | Figure F.4 (§F.4 no superstars) | `nstr_all` vs. `nstr_ndm` |
 | Figure F.5 (§F.5 alternative TFP path) | — (calibration plot from `M02robustness_prepare_gamma.do`, not a scenario run) |
 | Figure F.6 (§F.5 higher TFP growth Gini) | `gcbo_all` vs. `gcbo_ndm` |
-| Figure F.7 (§F.6 unequal bequests Gini) | `beqs_all` vs. `beqs_ndm` |
+| Figure F.7 (§F.6 exogenous interest rate / open economy Gini) | `exor_all` vs. `psid_all` (open-economy comparison via `R_Figure1_app.do`) |
+| Figure F.8 (§F.7 unequal bequests Gini) | `beqs_all` vs. `beqs_ndm` |

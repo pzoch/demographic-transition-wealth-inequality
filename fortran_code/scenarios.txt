@@ -50,16 +50,16 @@ ndel_ ndm_ govt__
 nstr_ all_ govt__
 nstr_ ndm_ govt__
 
-# --- Appendix F.6: CBO productivity growth ---
+# --- Appendix F.5: CBO productivity growth ---
 gcbo_ all_ govt__
 gcbo_ ndm_ govt__
+
+# --- Appendix F.6: Exogenous interest rate (open economy) ---
+exor_ all_ govt__
 
 # --- Appendix F.7: Unequal bequests ---
 beqs_ all_ govt__
 beqs_ ndm_ govt__
-
-# --- Appendix F.8: Exogenous interest rate (open economy) ---
-exor_ all_ govt__
 
 # --- Appendix F.2: Heterogeneous returns ---
 # Run separately via run_scenarios_het.bat (uses 5Gtrans_het.exe built from

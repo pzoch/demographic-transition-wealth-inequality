@@ -86,7 +86,7 @@ erase $bsource/bone1y.dta
 cd ..\outputs_stata_code
 
 
-* Plot income-process diagnostics (Figure B.4)
+* Plot income-process (Figure B.4)
 do income_process/plot_omega.do
 
 ** Do graphs for Appendix C -- Populations
@@ -200,7 +200,7 @@ global variant_base "beqs_all_govt__"
 global variant_comp "beqs_ndm_govt__"
 global r1 69
 global r2 77
-do R_Figure2.do 		//  Figure F.7
+do R_Figure2.do 		//  Figure F.8
 graph export $graphspath\\AppF_Gini_counterfactuals_beq.png, replace
 graph export $graphspath\\AppF_Gini_counterfactuals_beq.svg, replace
 
@@ -218,7 +218,7 @@ erase $bsource/bone1y.dta
 cd ..\outputs_stata_code
 
 global scenario "psid_all_govt__ exor_all_govt__"
-do R_Figure1_app.do 	//  Figure F.8
+do R_Figure1_app.do 	//  Figure F.7
 graph export $graphspath\\AppF_Gini_counterfactuals_exograte.png, replace
 graph export $graphspath\\AppF_Gini_counterfactuals_exograte.svg, replace
 
