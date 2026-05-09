@@ -1120,7 +1120,7 @@ The paper's main text contains no tables.
 
 | Figure | Paper title | Generating script | Output file(s) |
 |---|---|---|---|
-| **Figure C.1** | Population structure: baseline vs. frozen-1955-longevity counterfactual, seven periods (1935, 1950, 1975, 2000, 2020, 2050, 2100) | `outputs_stata_code/R_FigureC1_popstructure.do` (reads `population.csv` from both `psid_all_govt__/` and `psid_ndm_govt__/` Results folders) | `graphs/outputs/AppC_PopStructure_{1935,1950,1975,2000,2020,2050,2100}.{png,eps,svg,pdf}` |
+| **Figure C.1** | Population structure: baseline vs. frozen-1955-longevity counterfactual, seven periods (1935, 1950, 1975, 2000, 2020, 2050, 2100) | `outputs_stata_code/R_FigureC1_popstructure.do` (reads `population.csv` from both `psid_all_govt__/` and `psid_ndm_govt__/` Results folders) | `graphs/outputs/AppC_PopStructure_{1935,1950,1975,2000,2020,2050,2100}.{png,svg}` |
 
 ---
 

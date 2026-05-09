@@ -86,8 +86,8 @@ erase $bsource/bone1y.dta
 cd ..\outputs_stata_code
 
 
-* Plot income-process diagnostics
-do ../inputs_matlab_code/income_process/plot_omega.do /// !!!! TO NIE Dziala
+* Plot income-process diagnostics (Figure B.4)
+do income_process/plot_omega.do
 
 ** Do graphs for Appendix C -- Populations
 global variant_base "psid_all_govt__"

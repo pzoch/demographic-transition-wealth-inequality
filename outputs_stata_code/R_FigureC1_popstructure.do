@@ -42,7 +42,5 @@ foreach yr in 1935 1950 1975 2000 2020 2050 2100 {
             title("`yr'") legend(order(1 "Counterfactual: longevity fixed at 1955" 2 "Baseline")) ///
             xtitle("`yr' population") ytitle("age")
     graph export "$graphspath/AppC_PopStructure_`yr'.png", replace
-    graph export "$graphspath/AppC_PopStructure_`yr'.eps", replace
     graph export "$graphspath/AppC_PopStructure_`yr'.svg", replace fontface("Times New Roman")
-    graph export "$graphspath/AppC_PopStructure_`yr'.pdf", replace
 }
