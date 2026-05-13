@@ -35,11 +35,11 @@ label variable ageff_HE "College or more"
 twoway ///
     (line ageff_LE age, lcolor(navy) lwidth(medthick)) ///
     (line ageff_HE age, lcolor(maroon) lwidth(medthick)), ///
-    title("(a) Empirical estimates", size(medsmall)) ///
-    ytitle("log productivity") xtitle("age") ///
+    title("(a) Empirical estimates") ///
+    ytitle("log productivity") xtitle("age group") ///
     ylabel(, grid glcolor(gs14)) xlabel(20(5)65) ///
-    legend(order(1 "High school or less" 2 "College or more") rows(1) size(small)) ///
-    xsize(3.4) ysize(2.8) name(omega_empirical, replace)
+    legend(order(1 "High school or less" 2 "College or more") rows(1)) ///
+    xsize(1.5) ysize(1) name(omega_empirical, replace)
 
 preserve
     gen age_start = 20 + 5 * floor((age - 20) / 5)
@@ -58,14 +58,14 @@ preserve
     twoway ///
         (connected omega_LE age_start, lcolor(navy) mcolor(navy) lwidth(medthick)) ///
         (connected omega_HE age_start, lcolor(maroon) mcolor(maroon) lwidth(medthick)), ///
-        title("(b) Model inputs", size(medsmall)) ///
-        ytitle("productivity, relative to age 20-24") xtitle("age group") ///
-        ylabel(, grid glcolor(gs14)) xlabel(20 "20-24" 25 "25-29" 30 "30-34" 35 "35-39" 40 "40-44" 45 "45-49" 50 "50-54" 55 "55-59" 60 "60-64" 65 "65", angle(45) labsize(small)) ///
-        legend(order(1 "High school or less" 2 "College or more") rows(1) size(small)) ///
-        xsize(3.4) ysize(2.8) name(omega_model, replace)
+        title("(b) Model inputs") ///
+        ytitle("productivity, relative to HS, age 20-24") xtitle("age group") ///
+        ylabel(, grid glcolor(gs14)) xlabel(20(5)65)  ///
+        legend(order(1 "High school or less" 2 "College or more") rows(1) ) ///
+        xsize(1.5) ysize(1)  name(omega_model, replace)
 restore
 
-graph combine omega_empirical omega_model, cols(2) xsize(7.2) ysize(3.2) imargin(small)
+graph combine omega_empirical omega_model, cols(2) xsize(3) ysize(1) imargin(small)
 
 graph save "`outdir'/omega_deaton_`variant'.gph", replace
 
