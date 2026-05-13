@@ -1,16 +1,16 @@
 * Export age-efficiency omega files and covariance matrices for MATLAB estimation.
 
-capture confirm file "income_process/00_config.do"
+capture confirm file "income_process/I01_00_config.do"
 if !_rc {
-    do "income_process/00_config.do"
+    do "income_process/I01_00_config.do"
 }
 else {
-    capture confirm file "00_config.do"
+    capture confirm file "I01_00_config.do"
     if !_rc {
-        do "00_config.do"
+        do "I01_00_config.do"
     }
     else {
-        do "inputs_stata_code/income_process/00_config.do"
+        do "inputs_stata_code/income_process/I01_00_config.do"
     }
 }
 local variants "$IP_VARIANTS"
