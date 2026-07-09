@@ -264,19 +264,20 @@ All sources above are either public-domain, free for academic use under the prov
 
 ## Hardware Requirements
 
-### Minimum Requirements
+The Fortran solver allocates large arrays at startup, so memory is the binding constraint for the model runs. The requirements below reflect the configuration on which the authors actually ran the full pipeline; machines with substantially less memory may fail at startup with `forrtl: severe (41): insufficient virtual memory`, especially with a small or fixed-size Windows page file.
 
-- **Processor**: 4-core Intel or AMD x64 processor, 2.5 GHz or faster
-- **RAM**: 8 GB
-- **Storage**: At least 30 GB free space for a single baseline run. The baseline `psid_all_govt__` output alone includes multi-GB transition files, including `mass_trans_small.csv` and `prob_trans.csv`.
-- **Operating System**: Windows 10 (64-bit)
+### Verified Configuration (used for all shipped results)
 
-### Recommended Specifications
-
-- **Processor**: 8-core Intel or AMD x64 processor, 3.0 GHz or faster
-- **RAM**: 16 GB or more
-- **Storage**: 50 GB or more free space for comfortable replication. A complete set of paper-scenario result folders is about 27 GiB in the authors' results copy; 50 GB leaves headroom for reruns, logs, and temporary files.
+- **Processor**: AMD Ryzen 7 5800X, 8 cores / 16 logical processors
+- **RAM**: 96 GB
+- **Storage**: 50 GB or more free space. A complete set of paper-scenario result folders is about 27 GiB; 50 GB leaves headroom for reruns, logs, and temporary files. The baseline `psid_all_govt__` output alone includes multi-GB transition files (`mass_trans_small.csv` and `prob_trans.csv`).
 - **Operating System**: Windows 11 (64-bit)
+
+### Notes for Smaller Machines
+
+- The Stata and MATLAB preprocessing stages (Steps 2 and 7) are light and run comfortably on an ordinary 16 GB machine; only the Fortran scenario runs (Steps 4 and 6) are memory-hungry.
+- We have not established a minimum RAM figure for the Fortran runs. On machines with 16 GB or less, let Windows manage the page file automatically (or set a large one) before attempting Step 4; a virtual-memory error at startup indicates the configuration is insufficient.
+- Route 1 (figures from the shipped results archive) does not run the Fortran solver at all and works on an ordinary machine.
 
 ### Reference Hardware Environment
 
@@ -559,7 +560,7 @@ The baseline emits the full output set; every other scenario writes only the min
 - `gini_trans.csv` - Gini coefficient of savings by year (consumed by [outputs_stata_code/_prep_Gini_data.do](outputs_stata_code/_prep_Gini_data.do))
 - `steadys_old_information_run.txt` - Initial steady-state summary (gated by `switch_ss_write=1`, true for all shipped scenarios)
 - `steadys_new_information_run.txt` - Final steady-state summary (same gating)
-- `information.txt` - Run configuration and parameter summary
+- `information.txt` - Run configuration and parameter summary. Written inside the scenario folder by the current build; shipped result folders produced with earlier builds may lack it, as older code wrote it at the repository top level.
 - `feasibility` - Per-period feasibility check from the transition iterations
 - `{version}{experiment}{closure}instructions.txt`, `{version}{experiment}{closure}parameters.txt` - Copies of the inputs used (auto-copied for reproducibility)
 
