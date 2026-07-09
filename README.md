@@ -1,6 +1,6 @@
 # Replication Package: Demographic Transition and the Rise of Wealth Inequality
 
-**Date**: January 2026
+**Date**: July 2026
 
 This replication package accompanies:
 
@@ -55,7 +55,7 @@ Missing raw PSID or ACS files are not automatically fatal for Routes 1-2. If raw
 
 ```
 demographic-transition-wealth-inequality/
-|-- README.md                    This file; export to PDF for the journal deposit if required
+|-- README.md                    This file
 |-- LICENSE.txt                  MIT license
 |-- SCENARIOS.md                 Full scenario catalogue
 |
@@ -144,9 +144,9 @@ This paper uses public data, authors' estimates derived from restricted-use or t
 
 All unrestricted processed inputs needed to run the Fortran scenarios are included. The PSID-derived income-process inputs used by the Fortran model (`_data_omega_*.txt` and `_data_sigma2eps_*.txt`) are included in `fortran_code/Data/`; their Stata-side components are refreshed by `__main_data_prepare.do` or Step 2B when the replicator supplies the raw PSID extract.
 
-The journal deposit should include the SCF+ file `data/SCF/SCF_plus.dta` (about 99 MB), which is used by the model-vs-data wealth-Gini and decomposition scripts. If it is missing, obtain SCF+ from the Kuhn-Schularick-Steins data archive listed below and place it at that path.
+The package includes the SCF+ file `data/SCF/SCF_plus.dta` (about 99 MB), which is used by the model-vs-data wealth-Gini and decomposition scripts. If it is missing from your copy, obtain SCF+ from the Kuhn-Schularick-Steins data archive listed below and place it at that path.
 
-Raw PSID microdata (Panel Study of Income Dynamics, 1970-2019 waves) should not be redistributed directly from a PSID website download. The authors' exact extract is archived in the official PSID Public Data Extract Repository (ICPSR ID 307887, https://doi.org/10.3886/E307887V1), from which replicators can obtain the byte-identical `psid.dta` consistent with the PSID Conditions of Use; alternatively, rebuild it from https://psidonline.isr.umich.edu/ using the shipped variable lists and `psid_read.R`. Raw PSID is not required to run the Fortran model with the shipped inputs. The package includes the processed PSID panel `data/PSID/psid_ready.dta` used by `outputs_stata_code/MvD_2_Gini_income.do` for Appendix Figure D.4; raw PSID is required only to regenerate that panel and the income-process pipeline from scratch.
+Raw PSID microdata (Panel Study of Income Dynamics, 1970-2019 waves) should not be redistributed directly from a PSID website download. The authors' exact extract is archived in the official PSID Public Data Extract Repository (ICPSR ID 307887, https://doi.org/10.3886/ICPSR307887.V1), from which replicators can obtain the byte-identical `psid.dta` consistent with the PSID Conditions of Use; alternatively, rebuild it from https://psidonline.isr.umich.edu/ using the shipped variable lists and `psid_read.R`. Raw PSID is not required to run the Fortran model with the shipped inputs. The package includes the processed PSID panel `data/PSID/psid_ready.dta` used by `outputs_stata_code/MvD_2_Gini_income.do` for Appendix Figure D.4; raw PSID is required only to regenerate that panel and the income-process pipeline from scratch.
 
 The ACS/IPUMS extract is large (about 1.8 GB locally) and may be omitted from a public deposit if required by IPUMS terms. Despite its file name, `ACS_college.dta` **is raw data**: it is the IPUMS USA extract exactly as delivered by the IPUMS extract system - the authors only renamed the downloaded file; no observations or variables were modified. It contains the census/ACS samples for every year available at extraction time (decennial censuses 1940-2000, then ACS 2006, 2011, 2016, and 2021, reflecting the US move from a 10-year to a 5-year cadence). Note that IPUMS extracts are user-generated and re-downloading is not byte-reproducible; a fresh extract with the same samples and variables is equivalent in content but not bit-identical. The package includes the processed college-share inputs needed by the model; regenerating them from raw ACS requires `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`, obtained from IPUMS USA or redistributed only with the required IPUMS permission/journal-subset approval.
 
@@ -156,8 +156,8 @@ The package is organized so replicators can either run the model from shipped pr
 
 | Data class | Included processed file(s) | Raw input needed only for full rebuild | Transformation script(s) | Notes on rights and exact rebuild |
 |---|---|---|---|---|
-| PSID income process | `fortran_code/Data/_data_omega_*.txt`, `fortran_code/Data/_data_sigma2eps_*.txt`, `data/PSID/psid_ready.dta`, `data/PSID/ageeffects_*.dta` | `inputs_stata_code/income_process/PSID/psid.dta` | `inputs_stata_code/income_process/I01_run_psid_income_inputs.do`, then `inputs_matlab_code/income_process/estimate_parameters.m` | Raw PSID is governed by PSID Conditions of Use. Obtain the authors' exact extract from the PSID Public Data Extract Repository (https://doi.org/10.3886/E307887V1) or rebuild it from the PSID Data Center, and place it at the path shown. The exact extraction route is documented in `inputs_stata_code/income_process/PSID/psid_read.R` and `inputs_stata_code/income_process/PSID/README.md`. |
-| ACS/IPUMS college share | `fortran_code/Data/_data_college_share.txt`, `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs*.dta` | `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` | `inputs_stata_code/skill_premium/D02_prepare_college.do` | The shipped raw extract is unmodified IPUMS USA output (only the file name was changed). A rebuild extract should use `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT` for the years listed below. The IPUMS USA collection DOI is `10.18128/C010`; cite the version DOI matching your extract date (Version 16.0, `10.18128/D010.V16.0`, at the time of this revision). |
+| PSID income process | `fortran_code/Data/_data_omega_*.txt`, `fortran_code/Data/_data_sigma2eps_*.txt`, `data/PSID/psid_ready.dta`, `data/PSID/ageeffects_*.dta` | `inputs_stata_code/income_process/PSID/psid.dta` | `inputs_stata_code/income_process/I01_run_psid_income_inputs.do`, then `inputs_matlab_code/income_process/estimate_parameters.m` | Raw PSID is governed by PSID Conditions of Use. Obtain the authors' exact extract from the PSID Public Data Extract Repository (https://doi.org/10.3886/ICPSR307887.V1) or rebuild it from the PSID Data Center, and place it at the path shown. The exact extraction route is documented in `inputs_stata_code/income_process/PSID/psid_read.R` and `inputs_stata_code/income_process/PSID/README.md`. |
+| ACS/IPUMS college share | `fortran_code/Data/_data_college_share.txt`, `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs*.dta` | `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` | `inputs_stata_code/skill_premium/D02_prepare_college.do` | The shipped raw extract is unmodified IPUMS USA output (only the file name was changed). A rebuild extract should use `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT` for the years listed below. The IPUMS USA collection DOI is `10.18128/C010`; cite the version DOI matching your extract date (Version 16.0, `10.18128/D010.V16.0`, as of July 2026). |
 | SCF+ wealth data | `data/SCF/SCF_plus.dta` | same file, if omitted | `outputs_stata_code/_prep_Gini_data.do`, `outputs_stata_code/MvD_3_GE_decomposition.do` | SCF+ comes from Kuhn, Schularick, and Steins (2020). The file is used for model-vs-data wealth comparisons and is not produced by this package. |
 | Macro, fiscal, tax, and aggregate calibration inputs | `fortran_code/Data/_data_depr.txt`, `_data_gamma.txt`, `_data_labsh.txt`, `_data_tau*.txt`, `_data_lambda.txt`, `_data_contrib_to_gdp.txt`, `_data_skill_premium.txt` | packaged `.dta`, `.csv`, or `.xlsx` snapshots; optional dbnomics refresh for selected series | `inputs_stata_code/__main_data_prepare.do` and component scripts | With `global download_data 0`, scripts use packaged snapshots. Setting `download_data 1` refreshes supported dbnomics/OECD/GGDC series and overwrites local snapshots. |
 | Mortality, population, and pension replacement inputs | `fortran_code/Data/_data_pi_cond_US_since1935.txt`, `_data_het_pi_US_since1935_all.txt`, `_data_Nn_US_*.txt`, `_data_rho_1935.txt` | packaged HMD/UN/Case-Deaton/CDC/SSA source snapshots or hand-curated source files under `inputs_stata_code/` | `demography/mortality/D01_life_tables.do`, `demography/hetero_pi/D03_prepare_hetero_pi.do`, `external/copy_to_fortran.do` | The three files under `inputs_stata_code/external/` are hand-curated external inputs copied into `fortran_code/Data/`; the mortality scripts document the HMD, UN, and Case-Deaton transformations. |
@@ -172,25 +172,7 @@ Every Stata dataset shipped in this package is accompanied by a `.csv` copy with
 
 **PSID**: To rebuild the income-process files from scratch, place the raw public-use extract at `inputs_stata_code/income_process/PSID/psid.dta`. The authors' extraction uses the PSID Main Study family and individual files, the SRC sample, heads only, waves 1970-2019, and the `psidR` variable-list layout. The exact variable lists `famvars_big.txt` and `indvars.txt` are included in `inputs_stata_code/income_process/PSID/`, and `psid_read.R` finds them there automatically (current `psidR` versions no longer ship `famvars_big.txt`; environment-variable overrides are documented in the local README). The first Stata stage then constructs household labor income, business-income components, household hours, average hourly income, CPI-deflated measures, education categories, birth cohorts, and cleaned age-20-to-65 person panels. The most important derived output for the figure pipeline is `data/PSID/psid_ready.dta`; it is produced by `I01_02_make_variant_samples.do` from the `mostdrop_hhslabinc` variant after dropping households whose five-year business-income share exceeds 25 percent and whose labor income is above the year-specific first quartile.
 
-**ACS/IPUMS**: The authors' `ACS_college.dta` is the raw IPUMS USA extract as downloaded, without any modification (the extract file was only renamed). To rebuild the college-share input from scratch, create `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` from IPUMS USA (https://usa.ipums.org/usa/) using the samples/years 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016, and 2021 - every year available at the authors' extraction time. Required variables are `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT`. IPUMS extracts are user-generated, so a re-download is content-equivalent but not byte-identical to the authors' file. Cite the IPUMS USA version DOI matching the extract date (collection DOI `10.18128/C010`; Version 16.0 is `10.18128/D010.V16.0` at the time of this revision); see `inputs_stata_code/skill_premium/ACS_college/README.md`. `D02_prepare_college.do` keeps age-25 observations, defines BA-or-higher status using `HIGRADE` before 1990 and `EDUCD` from 1990 onward, computes weighted shares, interpolates/extrapolates the five-year model path, writes `fortran_code/Data/_data_college_share.txt`, and saves the processed cohort files used by the heterogeneous-mortality script.
-
-## Replication-Team Code Issues Addressed in This Revision
-
-The package was revised after the journal replication team attempted a full pipeline run. The following portability and reproducibility fixes are included in the current source tree:
-
-| Issue observed in replication | Fix in this revision |
-|---|---|
-| Step 4 referenced a bare `5Gtrans.exe`, while the package may only ship binaries under `bin/` or `x64/Release/`; an older `bin/` executable also produced an insufficient-virtual-memory error on the replicator's machine. | The README now runs `bin\5Gtrans.exe` or `x64\Release\5Gtrans.exe` explicitly. The shipped `bin/` executables were rebuilt from the current x64 Release and Release_HetRate configurations. |
-| Windows case-insensitive filename collision between `bigl_trans.txt` and `bigL_trans.txt` style outputs. | Removed the unused standalone lower-case labor-output streams from `fortran_code/Print_DB.f90`; downstream graph scripts use the CSV/full-output data or `bigY_trans.txt` instead. |
-| Shared top-level Fortran outputs could be overwritten or confused across scenarios. | `data.f90` now writes `implied_pi.txt` inside the active scenario folder, and `set_globals.f90` changes explicitly to `Results/<scenario>/` before writing `information.txt`. |
-| Stata scratch files `bone.dta` and `bone1y.dta` could be read-only in a copied journal package, causing `save, replace` to fail. | `_prog_coding.do`, `_prepare_programs.do`, `__main_data_prepare.do`, and cleanup blocks now clear stale Windows read-only attributes before overwrite/delete attempts. |
-| Some documented SVG graph outputs were stale because scripts exported EPS twice or omitted SVG. | The relevant Stata graph scripts now export SVG explicitly alongside PNG/EPS/PDF/GPH outputs. |
-| `N_REPS=1000` was unclear for interactive Stata and could make MATLAB fail when Stata bootstrap files were absent. | `inputs_stata_code/income_process/N_REPS.txt` is now the shared default read by both Stata and MATLAB, and it ships set to `1000` so the default run reproduces the paper bootstrap, as suggested by the replication team; `0` is the documented fast option. The `N_REPS` environment variable still works as an override. MATLAB now fails early with an actionable message if bootstrap covariance files are missing. |
-| `psid_read.R` referenced a legacy `famvars_big.txt` list and an unshipped `Downloads/psid.xlsx` example. | The authors' exact variable lists `famvars_big.txt` and `indvars.txt` are now shipped next to `psid_read.R`, which finds them automatically; environment-variable overrides remain documented, and the unused `Downloads/psid.xlsx` code path was removed. |
-| `outputs_stata_code/__main.do` could fail in Appendix B when raw `ACS_college.dta` was omitted. | The graph driver now rebuilds the college-share figure only when raw ACS/IPUMS is present; otherwise it keeps the packaged processed college-share inputs and existing graph. |
-| Package datasets were shipped only as proprietary Stata `.dta` files. | Every shipped `.dta` is now accompanied by a `.csv` copy with identical values; `data/model_psid_all_govt__.dta` is documented as a regenerable intermediate and is the only exception. |
-
-Pre-built Fortran executables must be rebuilt after source changes if the package is submitted with binaries. Generated logs and graphs should be regenerated after the final code run so that the deposit contains outputs from the revised scripts.
+**ACS/IPUMS**: The authors' `ACS_college.dta` is the raw IPUMS USA extract as downloaded, without any modification (the extract file was only renamed). To rebuild the college-share input from scratch, create `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` from IPUMS USA (https://usa.ipums.org/usa/) using the samples/years 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2006, 2011, 2016, and 2021 - every year available at the authors' extraction time. Required variables are `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT`. IPUMS extracts are user-generated, so a re-download is content-equivalent but not byte-identical to the authors' file. Cite the IPUMS USA version DOI matching the extract date (collection DOI `10.18128/C010`; Version 16.0 is `10.18128/D010.V16.0` as of July 2026); see `inputs_stata_code/skill_premium/ACS_college/README.md`. `D02_prepare_college.do` keeps age-25 observations, defines BA-or-higher status using `HIGRADE` before 1990 and `EDUCD` from 1990 onward, computes weighted shares, interpolates/extrapolates the five-year model path, writes `fortran_code/Data/_data_college_share.txt`, and saves the processed cohort files used by the heterogeneous-mortality script.
 
 ---
 
@@ -220,33 +202,18 @@ Each model input file, its source, and the script that produces it.
 
 ### Auxiliary data consumed outside the Fortran input chain
 
-- `data/SCF/SCF_plus.dta` - SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*). The journal deposit should include this file (about 99 MB). If missing, download it from https://www.moritz-schularick.com/data and place it at this path. Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's wealth-Gini and decomposition figures.
+- `data/SCF/SCF_plus.dta` - SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*), about 99 MB, included in the package. If missing, download it from https://www.moritz-schularick.com/data and place it at this path. Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's wealth-Gini and decomposition figures.
 - `data/PSID/psid_ready.dta` - processed PSID panel generated from the mostdrop income-process sample and used by `outputs_stata_code/MvD_2_Gini_income.do` for Appendix Figure D.4. The Stata PSID stage refreshes this file when raw PSID is available.
-- `inputs_stata_code/income_process/PSID/psid.dta` - raw PSID public-use extract. Obtain the authors' exact extract from the PSID Public Data Extract Repository (ICPSR ID 307887, https://doi.org/10.3886/E307887V1) or rebuild from https://psidonline.isr.umich.edu/. Consumed only if replicators re-estimate the income process from scratch or regenerate `data/PSID/psid_ready.dta`. Otherwise the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` files suffice for running the Fortran model.
+- `inputs_stata_code/income_process/PSID/psid.dta` - raw PSID public-use extract. Obtain the authors' exact extract from the PSID Public Data Extract Repository (ICPSR ID 307887, https://doi.org/10.3886/ICPSR307887.V1) or rebuild from https://psidonline.isr.umich.edu/. Consumed only if replicators re-estimate the income process from scratch or regenerate `data/PSID/psid_ready.dta`. Otherwise the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` files suffice for running the Fortran model.
 - `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs.dta` and `col_share_acs_ext.dta` - processed ACS/IPUMS college-share inputs. The raw `ACS_college.dta` extract is needed only to rebuild these processed files. `fortran_code/Data/_data_college_share.txt` is already included for the Fortran model; see `inputs_stata_code/skill_premium/ACS_college/README.md` for exact IPUMS years and variables.
 
-### Recommended data citations
+### Data citations
 
-The following citations cover the data sources used by the paper and this package:
-
-- Autor, David, Claudia Goldin, and Lawrence F. Katz. 2020. "Extending the Race between Education and Technology." *AEA Papers and Proceedings* 110: 347-351. Replication data: openICPSR 120694.
-- Case, Anne, and Angus Deaton. 2021. "Life expectancy in adulthood is falling for those without a BA degree, but as educational gaps have widened, racial gaps have narrowed." *PNAS* 118(11).
-- Feenstra, Robert C., Robert Inklaar, and Marcel P. Timmer. 2015. "The Next Generation of the Penn World Table." *American Economic Review* 105(10): 3150-3182. Penn World Table 10.0, https://www.rug.nl/ggdc/productivity/pwt/.
-- Human Mortality Database. Max Planck Institute for Demographic Research (Germany), University of California, Berkeley (USA), and French Institute for Demographic Studies (France). https://www.mortality.org/.
-- Kuhn, Moritz, Moritz Schularick, and Ulrike I. Steins. 2020. "Income and Wealth Inequality in America, 1949-2016." *Journal of Political Economy* 128(9): 3469-3519. SCF+ data archive: https://www.moritz-schularick.com/data.
-- McDaniel, Cara. 2007. "Average tax rates on consumption, investment, labor and capital in the OECD 1950-2003." Arizona State University working paper; updated series.
-- OECD. Revenue Statistics. https://data.oecd.org/.
-- Panel Study of Income Dynamics, public use dataset (waves 1970-2019, downloaded April 2023 with the psidR package by Florian Oswald, https://github.com/floswald/psidR). Produced and distributed by the Survey Research Center, Institute for Social Research, University of Michigan, Ann Arbor, MI. Authors' extract: PSID Public Data Extract Repository, ICPSR ID 307887, https://doi.org/10.3886/E307887V1.
-- Ruggles, Steven, et al. IPUMS USA [dataset]. Minneapolis, MN: IPUMS. Collection DOI: https://doi.org/10.18128/C010; cite the version DOI matching the extract date (Version 16.0, https://doi.org/10.18128/D010.V16.0, current at this revision).
-- Social Security Administration. Primary Insurance Amount benefit formula. https://www.ssa.gov/oact/.
-- United Nations, Department of Economic and Social Affairs, Population Division. World Population Prospects. https://population.un.org/wpp/.
-- US Centers for Disease Control and Prevention, National Center for Health Statistics. National Vital Statistics System. https://www.cdc.gov/nchs/nvss/.
-
-The manuscript should carry the same data citations; this list is provided so the paper and the package stay in sync.
+Full data citations for every source, including access dates and DOIs, are collected in the References section at the end of this README; the manuscript carries the same citations.
 
 ### Access, license, dates
 
-All sources above are either public-domain, free for academic use under the provider's stated terms, or shipped here with the original authors' permission. Restricted or terms-governed raw microdata should be redistributed only through the provider-approved channel or omitted from the public package while retaining the processed files needed for replication. Source snapshots used in the paper were assembled during 2020-2022 and checked during the 2026 replication-package revision.
+All sources above are either public-domain, free for academic use under the provider's stated terms, or shipped here with the original authors' permission. Restricted or terms-governed raw microdata are redistributed only through the provider-approved channel (the PSID extract deposit) or omitted from the public package while retaining the processed files needed for replication. Source snapshots used in the paper were assembled during 2020-2023 and re-verified in 2026.
 
 ---
 
@@ -313,18 +280,16 @@ All sources above are either public-domain, free for academic use under the prov
 
 ### Reference Hardware Environment
 
-The April 2026 package verification and preprocessing run used:
+The authors' package verification and preprocessing runs used:
 
 - **Operating system**: Microsoft Windows 11 Pro, version 10.0.26200, build 26200
 - **Processor**: AMD Ryzen 7 5800X 8-Core Processor
 - **Cores / logical processors**: 8 / 16
 - **RAM**: 95.9 GB
-- **Local storage at verification time**: system drive 894 GB total / 651 GB free; data drive 3.7 TB total / 3.46 TB free
-- **Repository location during verification**: network-mounted working copy
 
 ### Reference Software Environment
 
-The recent package verification used:
+The authors' package verification used:
 
 - **Stata**: Stata/SE 16.0 (`C:\Program Files\Stata16\StataSE-64.exe`)
 - **MATLAB**: MATLAB 9.5.0.944444, R2018b (`C:\Program Files\MATLAB\R2018b\bin\matlab.exe`)
@@ -1114,15 +1079,15 @@ The paper's main text contains no tables.
 
 ### Mortality and Demographics
 
-- Human Mortality Database. University of California, Berkeley (USA), and Max Planck Institute for Demographic Research (Germany). https://www.mortality.org/ (accessed 2021).
+- Human Mortality Database. Max Planck Institute for Demographic Research (Germany), University of California, Berkeley (USA), and French Institute for Demographic Studies (France). https://www.mortality.org/ (accessed 2021).
 
-- United Nations, Department of Economic and Social Affairs, Population Division. 2022. *World Population Prospects 2022*. https://population.un.org/wpp/
+- United Nations, Department of Economic and Social Affairs, Population Division. 2019. *World Population Prospects 2019, Online Edition, Rev. 1*. https://population.un.org/wpp/
 
 - Case, Anne and Deaton, Angus. 2021. "Life expectancy in adulthood is falling for those without a BA degree, but as educational gaps have widened, racial gaps have narrowed." *Proceedings of the National Academy of Sciences* 118(11): e2024777118. https://doi.org/10.1073/pnas.2024777118. Processed education-specific mortality file shared with us by the authors.
 
 ### Income, Wages, and Wealth
 
-- Panel Study of Income Dynamics, public use dataset. Produced and distributed by the Survey Research Center, Institute for Social Research, University of Michigan, Ann Arbor, MI (1970-2019 waves). Data Center and documentation: https://psidonline.isr.umich.edu/ and https://psidonline.isr.umich.edu/Guide/documents.aspx. The PSID collection itself lists no dataset DOI; the authors' exact extract has one: https://doi.org/10.3886/E307887V1 (PSID Public Data Extract Repository, ICPSR ID 307887).
+- Panel Study of Income Dynamics, public use dataset. Produced and distributed by the Survey Research Center, Institute for Social Research, University of Michigan, Ann Arbor, MI (1970-2019 waves). Data Center and documentation: https://psidonline.isr.umich.edu/ and https://psidonline.isr.umich.edu/Guide/documents.aspx. The PSID collection itself lists no dataset DOI; the authors' exact extract has one: https://doi.org/10.3886/ICPSR307887.V1 (PSID Public Data Extract Repository, ICPSR ID 307887).
 
 - Autor, David, Claudia Goldin, and Lawrence F. Katz. 2020. "Extending the Race between Education and Technology." *AEA Papers and Proceedings* 110: 347-51. Replication package: openICPSR project 120694, https://www.openicpsr.org/openicpsr/project/120694/.
 
@@ -1150,6 +1115,8 @@ The paper's main text contains no tables.
 
 ## Software and Tools
 
+- Oswald, Florian. 2024. "psidR: Build Panel Data Sets from PSID Raw Data." R package. https://github.com/floswald/psidR (used to create the raw PSID extract).
+
 - Intel Corporation. 2025. "Intel oneAPI Fortran Compiler `ifx`." Version 2025.1.1, build 20250418. https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html
 
 - Microsoft Corporation. 2019. "Visual Studio Community 2019." Version 16.11.55. https://visualstudio.microsoft.com/
@@ -1169,6 +1136,6 @@ Any remaining errors are entirely our own.
 
 ---
 
-**Last Updated**: May 2026
+**Last Updated**: July 2026
 
 **Corresponding Author**: Joanna Tyrowicz - j.tyrowicz@grape.org.pl

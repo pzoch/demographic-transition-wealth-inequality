@@ -93,5 +93,5 @@ these 74 harmonized variables (produced by `psid_read.R` via `psidR`):
 
 The exact extract (identical file) is archived in the PSID Public Data Extract Repository,
 PSID's sanctioned channel for sharing publication extracts: ICPSR ID 307887, published
-July 9, 2026, https://doi.org/10.3886/E307887V1. Replicators can obtain the byte-identical
+July 9, 2026, https://doi.org/10.3886/ICPSR307887.V1. Replicators can obtain the byte-identical
 `psid.dta` there instead of rebuilding it from the PSID Data Center.
