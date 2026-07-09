@@ -14,7 +14,7 @@ Most replicators do not need to run every stage. Choose one route first; the det
 
 | Route | Goal | Raw restricted data needed? | Run order |
 |---|---|---|---|
-| **1. Figure-only check** | Recreate the paper figures from shipped model output. | No raw PSID or ACS/IPUMS. Requires shipped/obtained `data/SCF/SCF_plus.dta`, packaged `data/PSID/psid_ready.dta`, and populated `fortran_code/Results/`. | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
+| **1. Figure-only check** | Recreate the paper figures from shipped model output. | No raw PSID or ACS/IPUMS. Requires shipped/obtained `data/SCF/SCF_plus.dta`, packaged `data/PSID/psid_ready.dta`, and populated `fortran_code/Results/` (extract the companion results archive there; see Step 1). | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
 | **2. Rebuild processed calibration inputs** | Re-run Stata/MATLAB preprocessing from packaged snapshots, without restricted raw microdata. | No raw PSID or ACS/IPUMS. Packaged processed PSID and ACS-derived files are reused when raw extracts are absent. | Step 1, Step 2A, optional Step 2B (set `N_REPS.txt` to `0` first for the fast run), then Steps 3-7 only if you also want to re-solve the model. |
 | **3. Full raw-data rebuild** | Recreate the processed PSID and ACS-derived inputs, re-solve the Fortran model, and regenerate figures. | Yes: `inputs_stata_code/income_process/PSID/psid.dta` and `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`. | Step 1, Step 2A, Step 2B, Step 3, Step 4, Step 6, Step 7. |
 
@@ -642,7 +642,7 @@ dir fortran_code\Results
 
 **Details**
 
-For Route 1, the result folders must already be present. At minimum, the figures use the scenario families listed in Step 6; the two largest folders are `psid_all_govt__` and `psid_ndm_govt__`. The baseline folder contains the large `mass_trans_small.csv` and `prob_trans.csv` files used by the Stata figure pipeline.
+For Route 1, the result folders must already be present. Because of their size (about 20 GB uncompressed), the Fortran result folders are distributed as a companion archive (`3-replication-package-results.zip`) alongside this package; extract its contents into `fortran_code/Results/` so that one folder per scenario appears there. At minimum, the figures use the scenario families listed in Step 6; the two largest folders are `psid_all_govt__` and `psid_ndm_govt__`. The baseline folder contains the large `mass_trans_small.csv` and `prob_trans.csv` files used by the Stata figure pipeline.
 
 ### Step 2: Generate Calibration Inputs
 
