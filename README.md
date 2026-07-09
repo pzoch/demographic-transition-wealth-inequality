@@ -15,7 +15,7 @@ Most replicators do not need to run every stage. Choose one route first; the det
 | Route | Goal | Raw restricted data needed? | Run order |
 |---|---|---|---|
 | **1. Figure-only check** | Recreate the paper figures from shipped model output. | No raw PSID or ACS/IPUMS. Requires shipped/obtained `data/SCF/SCF_plus.dta`, packaged `data/PSID/psid_ready.dta`, and populated `fortran_code/Results/`. | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
-| **2. Rebuild processed calibration inputs** | Re-run Stata/MATLAB preprocessing from packaged snapshots, without restricted raw microdata. | No raw PSID or ACS/IPUMS. Packaged processed PSID and ACS-derived files are reused when raw extracts are absent. | Step 1, Step 2A, optional Step 2B with `N_REPS=0`, then Steps 3-7 only if you also want to re-solve the model. |
+| **2. Rebuild processed calibration inputs** | Re-run Stata/MATLAB preprocessing from packaged snapshots, without restricted raw microdata. | No raw PSID or ACS/IPUMS. Packaged processed PSID and ACS-derived files are reused when raw extracts are absent. | Step 1, Step 2A, optional Step 2B (set `N_REPS.txt` to `0` first for the fast run), then Steps 3-7 only if you also want to re-solve the model. |
 | **3. Full raw-data rebuild** | Recreate the processed PSID and ACS-derived inputs, re-solve the Fortran model, and regenerate figures. | Yes: `inputs_stata_code/income_process/PSID/psid.dta` and `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`. | Step 1, Step 2A, Step 2B, Step 3, Step 4, Step 6, Step 7. |
 
 **Route 1: minimal reviewer checklist**
@@ -31,7 +31,7 @@ Most replicators do not need to run every stage. Choose one route first; the det
 1. Place raw PSID at `inputs_stata_code/income_process/PSID/psid.dta` if rebuilding the PSID income-process inputs.
 2. Place raw ACS/IPUMS at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` if rebuilding the college-share input.
 3. Decide whether to keep `global download_data 0` in the Stata drivers or change it to `1` to refresh supported online data sources.
-4. Decide the bootstrap setting in `inputs_stata_code/income_process/N_REPS.txt`: use `0` for the fast point-estimate run with archived paper confidence bands, or `1000` for the full paper bootstrap.
+4. Decide the bootstrap setting in `inputs_stata_code/income_process/N_REPS.txt`: the shipped default `1000` reproduces the full paper bootstrap (about 12 hours across Stata and MATLAB); set it to `0` for a fast point-estimate run that reuses the archived paper confidence bands.
 5. Run `inputs_stata_code/__main_data_prepare.do` from `inputs_stata_code/main.stpr`.
 6. Run `inputs_stata_code/income_process/I01_run_psid_income_inputs.do` from the same Stata project if rebuilding PSID inputs, then run `inputs_matlab_code/income_process/run_income_process_matlab.bat`.
 7. Use the shipped Fortran binaries or rebuild them in Visual Studio, then run the scenarios listed in `fortran_code/scenarios.txt` and the heterogeneous-rate scenarios with `run_scenarios_het.bat`.
@@ -42,7 +42,7 @@ Most replicators do not need to run every stage. Choose one route first; the det
 | Setting | Default | Change only if |
 |---|---|---|
 | `global download_data` in `inputs_stata_code/__main_data_prepare.do` and `outputs_stata_code/__main.do` | `0` | You want Stata to refresh supported dbnomics/OECD/GGDC series instead of using packaged snapshots. |
-| `inputs_stata_code/income_process/N_REPS.txt` | `0` | You want to run the full 1000-repetition PSID/MATLAB bootstrap. |
+| `inputs_stata_code/income_process/N_REPS.txt` | `1000` | You want a fast point-estimate run instead of the full 12-hour paper bootstrap: set it to `0` to reuse the archived 1000-repetition bootstrap files for the confidence bands. |
 | `MATLAB_EXE` environment variable | `C:\Program Files\MATLAB\R2018b\bin\matlab.exe` | MATLAB is installed elsewhere or a different version is used. |
 | Raw PSID path | absent by default | You are doing Route 3 and have obtained the PSID extract. |
 | Raw ACS/IPUMS path | absent by default | You are doing Route 3 and have obtained the IPUMS USA extract. |
@@ -181,7 +181,7 @@ The package was revised after the journal replication team attempted a full pipe
 | Shared top-level Fortran outputs could be overwritten or confused across scenarios. | `data.f90` now writes `implied_pi.txt` inside the active scenario folder, and `set_globals.f90` changes explicitly to `Results/<scenario>/` before writing `information.txt`. |
 | Stata scratch files `bone.dta` and `bone1y.dta` could be read-only in a copied journal package, causing `save, replace` to fail. | `_prog_coding.do`, `_prepare_programs.do`, `__main_data_prepare.do`, and cleanup blocks now clear stale Windows read-only attributes before overwrite/delete attempts. |
 | Some documented SVG graph outputs were stale because scripts exported EPS twice or omitted SVG. | The relevant Stata graph scripts now export SVG explicitly alongside PNG/EPS/PDF/GPH outputs. |
-| `N_REPS=1000` was unclear for interactive Stata and could make MATLAB fail when Stata bootstrap files were absent. | `inputs_stata_code/income_process/N_REPS.txt` is now the shared default read by both Stata and MATLAB. The `N_REPS` environment variable still works as an override. MATLAB now fails early with an actionable message if bootstrap covariance files are missing. |
+| `N_REPS=1000` was unclear for interactive Stata and could make MATLAB fail when Stata bootstrap files were absent. | `inputs_stata_code/income_process/N_REPS.txt` is now the shared default read by both Stata and MATLAB, and it ships set to `1000` so the default run reproduces the paper bootstrap, as suggested by the replication team; `0` is the documented fast option. The `N_REPS` environment variable still works as an override. MATLAB now fails early with an actionable message if bootstrap covariance files are missing. |
 | `psid_read.R` referenced a legacy `famvars_big.txt` list and an unshipped `Downloads/psid.xlsx` example. | `psid_read.R` now checks for the variable-list files, documents environment-variable overrides, and removes the unused `Downloads/psid.xlsx` code path. |
 | `outputs_stata_code/__main.do` could fail in Appendix B when raw `ACS_college.dta` was omitted. | The graph driver now rebuilds the college-share figure only when raw ACS/IPUMS is present; otherwise it keeps the packaged processed college-share inputs and existing graph. |
 
@@ -714,15 +714,15 @@ Raw ACS/IPUMS and raw PSID are conditional. If `ACS_college.dta` is absent, Step
 
 The full catalogue of `_data_*.txt` inputs and their producing scripts is in the Model Input Catalogue above. Three Fortran inputs have no Stata producer and are copied from `inputs_stata_code/external/` by `external/copy_to_fortran.do`: `_data_Nn_US_1935_2100.txt`, `_data_Nn_US_1935_init_old.txt`, and `_data_rho_1935.txt`.
 
-The shared bootstrap setting is `inputs_stata_code/income_process/N_REPS.txt`. The default is `0`, which runs point estimates and uses the archived 1000-repetition bootstrap files for the paper confidence bands. To rerun the full bootstrap, set that file to:
+The shared bootstrap setting is `inputs_stata_code/income_process/N_REPS.txt`. The shipped default is `1000`, which reproduces the paper's full bootstrap when you run both the Stata PSID stage and the MATLAB stage: expect about 12 hours in total, roughly 1 hour for Stata covariance generation plus roughly 11 hours for MATLAB `lsqnonlin` bootstrap estimation. For a fast run that computes point estimates only and reuses the archived 1000-repetition bootstrap files for the paper confidence bands, set that file to:
 
 ```text
-1000
+0
 ```
 
-Then run both the Stata PSID stage and the MATLAB stage. For the paper we use 1000 repetitions, which takes about 12 hours: roughly 1 hour for Stata covariance generation plus roughly 11 hours for MATLAB `lsqnonlin` bootstrap estimation. MATLAB checks that the matching Stata bootstrap covariance files exist before starting; if they are missing, it stops with an explicit missing-file message rather than a low-level `textscan` error.
+MATLAB checks that the matching Stata bootstrap covariance files exist before starting a bootstrap run; if they are missing, it stops with an explicit missing-file message rather than a low-level `textscan` error.
 
-`inputs_matlab_code/income_process/output/<variant>/{H,L}.mat` are live outputs and are overwritten by the MATLAB stage. The companion `{H,L}_archive.mat` files hold the authors' paper-baseline 1000-repetition bootstrap arrays. `outputs_matlab_code/income_process/plot_estimates.m` uses live point estimates plus archived confidence bands, so a default `N_REPS=0` run does not erase the paper confidence intervals.
+`inputs_matlab_code/income_process/output/<variant>/{H,L}.mat` are live outputs and are overwritten by the MATLAB stage. The companion `{H,L}_archive.mat` files hold the authors' paper-baseline 1000-repetition bootstrap arrays. `outputs_matlab_code/income_process/plot_estimates.m` uses live point estimates plus archived confidence bands, so a fast `N_REPS=0` run does not erase the paper confidence intervals.
 
 To verify Step 2, check:
 

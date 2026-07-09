@@ -54,7 +54,8 @@ else {
     }
     else {
         global IP_N_REPS 0
-        display as text "Using default N_REPS: $IP_N_REPS"
+        display as text "N_REPS.txt not found; falling back to N_REPS = 0 (fast point-estimate run)."
+        display as text "The shipped package default is 1000 (full paper bootstrap) in $IP_INCOME_DIR/N_REPS.txt."
     }
 }
 

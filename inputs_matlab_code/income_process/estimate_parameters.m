@@ -30,9 +30,11 @@ fortran_dir        = fullfile(repo_root, 'fortran_code', 'Data');
 %  ========================================================================
 variants  = {'mostdrop_hhslabinc', 'busno_drop_hhslabinc'};
 measure   = 'avghourlyhh';
-% n_reps: 0 = point estimate only (fast), 1000 = full bootstrap for confidence bands.
+% n_reps: 1000 = full bootstrap for confidence bands (shipped default, used for
+% the paper), 0 = point estimate only (fast run reusing archived paper bands).
 % Override via environment variable N_REPS, or edit
 % inputs_stata_code/income_process/N_REPS.txt. The environment variable wins.
+% If the config file is missing entirely, the code falls back to 0 (fast).
 n_reps_env = getenv('N_REPS');
 config_file = fullfile(repo_root, 'inputs_stata_code', 'income_process', 'N_REPS.txt');
 if ~isempty(n_reps_env)
