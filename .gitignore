@@ -24,7 +24,7 @@ inputs_stata_code/income_process/output/**/*.mat
 inputs_stata_code/income_process/output/**/cov_binned/
 
 # ---------------------------------------------------------------------------
-# Large raw data — kept on disk, not in git.
+# Large raw data â€” kept on disk, not in git.
 # Pull these from the original sources (see input-data-file-provenance.md).
 # ---------------------------------------------------------------------------
 
@@ -34,8 +34,7 @@ data/SCF/
 
 # Root-level PSID extract (psid.dta, ~98 MB) consumed by
 # inputs_stata_code/income_process/estimate_income_process.do
-psid/
-
+/psid/
 # Baseline model-ready panel (200 MB)
 data/model_psid_all_govt__.dta
 
