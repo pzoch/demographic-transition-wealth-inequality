@@ -35,16 +35,11 @@ omega inputs, and covariance files for MATLAB.
 The authors' extraction uses the PSID Main Study family and individual files, the SRC sample,
 heads only, and waves 1970-2019. `psid_read.R` builds the panel from the `psidR` variable lists
 `famvars_big.txt` and `indvars.txt`. Those lists map PSID wave-specific variable names into the
-harmonized names consumed by the Stata scripts.
-
-Some current `psidR` installations, including version 2.3, no longer include
-`psid-lists/famvars_big.txt`. The script therefore checks for the list in two places:
-
-1. `inputs_stata_code/income_process/PSID/famvars_big.txt`
-2. the installed `psidR` package directory
-
-If the file is not present, the script stops with an explicit message. Replicators should then use
-the packaged/publication `psid.dta` extract or supply the authors' variable-list file with:
+harmonized names consumed by the Stata scripts, and **both list files are included in this folder**
+(1,055 family-variable and 121 individual-variable wave mappings). The script looks for them next
+to itself first, so no configuration is needed; it falls back to the installed `psidR` package
+directory, and stops with an explicit message if neither location has them. Environment-variable
+overrides remain available:
 
 ```bat
 set PSID_FAMVARS=C:\path\to\famvars_big.txt
@@ -52,6 +47,9 @@ set PSID_INDVARS=C:\path\to\indvars.txt
 set PSID_DATADIR=C:\path\to\downloaded\psid\files
 Rscript inputs_stata_code\income_process\PSID\psid_read.R
 ```
+
+`PSID_DATADIR` must point to a folder with the PSID family/individual files downloaded from the
+PSID Data Center (psidR stores them as `FAM<year>ER.rda` and `IND2019ER.rda`).
 
 The old exploratory `getNamesPSID` example that referenced `Downloads/psid.xlsx` is not part of
 the replication pipeline and has been removed from `psid_read.R`.
