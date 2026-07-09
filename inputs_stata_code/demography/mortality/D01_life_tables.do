@@ -1,7 +1,7 @@
 capture mkdir demography\mortality\processed
 capture mkdir demography\mortality\output
 
-////////////////// Improt data from the Human Mortality database //////////////////
+////////////////// Import data from the Human Mortality database //////////////////
 clear
 import excel "demography\mortality\life_tables.xlsx", sheet("Sheet1") firstrow
 rename Age Agex
@@ -65,46 +65,10 @@ drop if Period == "1933-1934"
 drop if Period == "2010-2015"
 
 gen Year = floor((_n-1)/16)*5 + 1935
-tab Year
-set scheme burd 
-twoway (scatter pi Year if age == 20) ///
-(scatter pi Year if age == 25) ///
-(scatter pi Year if age == 30) ///
-(scatter pi Year if age == 35) ///
-(scatter pi Year if age == 40) ///
-(scatter pi Year if age == 45) ///
-(scatter pi Year if age == 50) ///
-(scatter pi Year if age == 55) ///
-(scatter pi Year if age == 60) ///
-(scatter pi Year if age == 65) ///
-(scatter pi Year if age == 70) ///
-(scatter pi Year if age == 75) ///
-(scatter pi Year if age == 80) ///
-(scatter pi Year if age == 85) ///
-(scatter pi Year if age == 90) ///
-(scatter pi Year if age == 95)
 
 preserve
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1935.txt", replace 
-restore
-
-preserve 
-keep if Year > 1945 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1950.txt", replace 
-restore
-
-preserve 
-keep if Year > 1955 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US_since1960.txt", replace 
-restore
-
-preserve 
-keep if Year > 2008 
-keep pi 
-export delimited "demography\mortality\output\_data_pi_cond_US.txt", replace 
+keep pi
+export delimited "demography\mortality\output\_data_pi_cond_US_since1935.txt", replace
 restore
 
 save "demography\mortality\processed\pi_tot_new.dta", replace

@@ -16,17 +16,18 @@ if not exist "scenarios.txt" (
     exit /b 1
 )
 
-REM Check for executable in multiple locations
+REM Check for executable in multiple locations (bin\ is the shipped fallback)
 set EXE_PATH=
 if exist "5Gtrans.exe" set EXE_PATH=5Gtrans.exe
 if exist "x64\Release\5Gtrans.exe" set EXE_PATH=x64\Release\5Gtrans.exe
 if exist "x64\Debug\5Gtrans.exe" set EXE_PATH=x64\Debug\5Gtrans.exe
 if exist "Release\5Gtrans.exe" set EXE_PATH=Release\5Gtrans.exe
 if exist "Debug\5Gtrans.exe" set EXE_PATH=Debug\5Gtrans.exe
+if exist "bin\5Gtrans.exe" set EXE_PATH=bin\5Gtrans.exe
 
 if "%EXE_PATH%"=="" (
     echo ERROR: 5Gtrans.exe not found. Please compile the project first.
-    echo Searched in: current directory, x64\Release, x64\Debug, Release, Debug
+    echo Searched in: current directory, x64\Release, x64\Debug, Release, Debug, bin
     pause
     exit /b 1
 )

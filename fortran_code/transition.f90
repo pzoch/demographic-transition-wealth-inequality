@@ -2,108 +2,12 @@
 ! FILE: transition.f90
 !
 ! DESCRIPTION:
-!   Module for computing transition path between two steady states in the
-!   overlapping generations (OLG) model. Solves for time-varying general
-!   equilibrium with demographic transitions, policy reforms, and TFP shocks
-!   from period t=1 (old steady state) to t=bigT (new steady state).
+!   Solves for the full transition path between old and new steady states by
+!   iterating on time series of prices {r(t), w(t)} from t=1 to t=bigT.
+!   Includes several .f90 fragments for production, pensions, and closures.
 !
 ! MODULE: transition_DB
-!   Contains transition path computation routine
-!
-! KEY SUBROUTINE:
-!   - transition_path_DB: Main iterative solver for transition path equilibrium
-!
-! TRANSITION PATH EQUILIBRIUM:
-!   For each period t = 1 to bigT, find:
-!   1. Prices: {r(t), w(m,t)} that clear markets
-!   2. Household decisions: {c(j,m,t), l(j,m,t), s(j,m,t)} for all cohorts
-!   3. Government policy: {g(t), debt(t)} satisfying budget constraint
-!   4. Pension benefits: {b(j,m,t)} from PAYG or funded system
-!   Such that:
-!   - Households optimize given prices, policy, and expectations
-!   - Firms maximize profits period-by-period
-!   - Markets clear each period: K(t) + Debt(t) = savings(t-1)
-!   - Government budget balances each period (via closure rule)
-!   - Terminal conditions: converge to new steady state
-!
-! COHORT STRUCTURE (key complication):
-!   At time t, bigJ cohorts are alive (ages j=1 to bigJ)
-!   - Cohort born at calendar time (t-j+1)
-!   - Faces demographic conditions from its birth year
-!   - Different cohorts have different retirement ages (jbar_t_yob)
-!   - Must track cohort-specific pension accumulations
-!
-! ITERATIVE ALGORITHM:
-!   FOR iter_t = 1 TO n_iter_t:
-!     1. Compute prices from capital path k(t):
-!        r_bar(t) = zbar*alpha*k(t)^(alpha-1) - depr
-!        w_bar(m,t) = CES wages from labor aggregation
-!
-!     2. Calculate pension benefits for all cohorts (include pension_system.f90):
-!        - Track wage histories for each cohort
-!        - Apply valorization (wage indexation)
-!        - Compute benefits at retirement, index post-retirement
-!
-!     3. Solve household problem via backward induction:
-!        - Start from terminal period bigT (use new SS value function)
-!        - Work backward: For t = bigT-1 down to 1, j = bigJ down to 1
-!        - At each (t,j), solve for optimal {c,l,s} given EV(t+1,j+1)
-!        - Handle bequest receipt at specified age (beq_age)
-!
-!     4. Simulate forward to get distributions:
-!        - Start from initial distribution at t=1
-!        - Use policy functions to evolve prob(j,a,aime,ε,m,t)
-!
-!     5. Aggregate across all households:
-!        bigl(t) = CES aggregate of labor by type
-!        consumption(t) = sum over (j,m) of N(j,m,t) * c(j,m,t)
-!        savings(t) = sum over (j,m) of N(j,m,t) * s(j,m,t)
-!
-!     6. Compute bequests from mortality (include bequest.f90):
-!        Deaths between t-1 and t leave assets to survivors
-!
-!     7. Government budget closure (include closures.f90):
-!        g(t) = residual to balance budget (case 6 hardcoded)
-!
-!     8. Update capital path:
-!        k_new(t+1) = [savings(t) - debt(t)] / [nu(t+1)*gam(t+1)]
-!        cum_err = sum over t of |k_new(t) - k(t)|
-!
-!     9. Convergence check:
-!        IF cum_err < err_tol: EXIT
-!        ELSE: k(t) = up_t*k(t) + (1-up_t)*k_new(t) (damping)
-!   END FOR
-!
-! TIME-VARYING INPUTS (demographic and policy changes):
-!   - N_big_t_j(j,m,t): Population by age, type, time (from data)
-!   - gam_t(t): TFP growth rate over time
-!   - tauL_t(t), tauK_t(t), tauC_t(t): Tax rates over time
-!   - rho_t(t): Pension replacement rate over time
-!   - jbar_t(t): Retirement age by period (may change with reforms)
-!   - jbar_t_yob(yob): Cohort-specific retirement ages
-!
-! DEPENDENCIES:
-!   - get_data: Data structures and utilities
-!   - global_vars: Parameter and variable declarations
-!   - pfi_trans: Policy function iteration for transition
-!
-! INCLUDES (via include statements):
-!   - Initial_values_db.f90: Initialize transition path guesses
-!   - ces_production.f90: CES production function (time-varying)
-!   - bequest.f90: Bequest distribution calculation
-!   - pension_system.f90: Pension benefit calculation (transition)
-!   - closures.f90: Government budget closure (transition)
-!   - transition_iterations.f90: Main iteration loop
-!   - Print_db.f90: Diagnostic output
-!
-! NOTES:
-!   - Transition horizon bigT typically 250-400 periods (1250-2000 years)
-!   - Convergence tolerance err_tol typically 1e-4 to 1e-6
-!   - Damping parameter up_t typically 0.5-0.7
-!   - Initial capital k(1) from old steady state
-!   - Terminal capital k(bigT) should converge to new steady state
-!   - Handles heterogeneous agents: income shocks, return shocks, discount shocks
-!   - Computes superstar labor income shares for top earners
+!   Subroutine: transition_path_DB
 !===============================================================================
 
 MODULE transition_DB
@@ -307,9 +211,12 @@ subroutine transition_path_DB(switch_tauK_gross, switch_unequal_bequest, l_j, c_
 
     ! Gini coefficient calculation variables
     real(dp), dimension(bigT) :: gini_sav_trans
-    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav
-    integer :: counter
+    real(dp), dimension(((bigJ+n_beq-1)*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav
+    integer :: counter, ibeq
 
+    real(dp), dimension(bigT) :: r_low_new, err_r, err_inc, a_income
+    real(dp), dimension(bigM,bigT) :: r_type, a_income_type, a_base_type
+    real(dp), dimension(bigJ, bigM, bigT) :: asset_income_j, asset_base_j
 
 
     tl = tauL_t
@@ -449,7 +356,6 @@ enddo
            wl_bar(i) = wl_bar(i) +  sum(N_big_t_j(:,m,i) * l_j(:,m,i) * w_bar(m,i), dim=1)   
         enddo
     enddo
-    ! valor_share removed - was always 1.0 (full indexation)
     valor_mult(1) = (1 + 1.0d0*(gam_t(1)*nu(1) - 1))/gam_t(1)
     valor_mult(2) = (1 + 1.0d0*(gam_t(1)*nu(1) - 1))/gam_t(2)
     
@@ -459,11 +365,16 @@ enddo
     enddo
     
     if (switch_tauK_gross == 0) then
-        r = 1 + (1 - tk)*r_bar  
+        r = 1 + (1 - tk)*r_bar
         else
-        r = 1 + (1 - tk)*(r_bar+depr_t) - depr_t 
+        r = 1 + (1 - tk)*(r_bar+depr_t) - depr_t
     endif
-    
+    if (any(rate_adj /= 0.0d0)) then
+    do m = 1,bigM,1
+        r_type(m,:) = r_low + rate_adj(m)
+    enddo
+    endif
+
 
 
 include 'bequest.f90' !! review this to see if new pi is accounted for
@@ -590,10 +501,20 @@ do i = 1, bigT, 1
                     do ip = 1, n_sp, 1
                         do ir = 1, n_sr, 1
                             do id = 1, n_sd, 1
-                                vec_prob(counter) = prob_trans_big(j, ia, i_aime, ip, ir, id, m, i) * &
-                                    N_big_t_j(j, m, i) / sum(N_big_t_j(:, :, i))
-                                vec_sav(counter) = svplus_trans_big(j, ia, i_aime, ip, ir, id, m, i)
-                                counter = counter + 1
+                                ! bequest-aware Gini: at beq_age, expand into n_beq sub-groups
+                                if (j == beq_age .and. switch_unequal_bequest == 2) then
+                                    do ibeq = 1, n_beq
+                                        vec_prob(counter) = p_beq_trans(ibeq, i) * prob_trans_big(j, ia, i_aime, ip, ir, id, m, i) * &
+                                            N_big_t_j(j, m, i) / sum(N_big_t_j(:, :, i))
+                                        vec_sav(counter) = svplus_beq_trans_big(ibeq, ia, i_aime, ip, ir, id, m, i)
+                                        counter = counter + 1
+                                    enddo
+                                else
+                                    vec_prob(counter) = prob_trans_big(j, ia, i_aime, ip, ir, id, m, i) * &
+                                        N_big_t_j(j, m, i) / sum(N_big_t_j(:, :, i))
+                                    vec_sav(counter) = svplus_trans_big(j, ia, i_aime, ip, ir, id, m, i)
+                                    counter = counter + 1
+                                endif
                             enddo
                         enddo
                     enddo
@@ -601,7 +522,7 @@ do i = 1, bigT, 1
             enddo
         enddo
     enddo
-    gini_sav_trans(i) = gini(vec_sav, vec_prob)
+    gini_sav_trans(i) = gini(vec_sav(1:counter-1), vec_prob(1:counter-1))
 enddo
 
 

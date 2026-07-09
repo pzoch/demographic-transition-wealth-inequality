@@ -1,4 +1,9 @@
+
+
+
 capture mkdir skill_premium\ACS_college\processed
+
+global lam = 1600
 
 ////////////////// Import data from ACS (downloaded from IPUMS) //////////////////
 use "skill_premium\ACS_college\ACS_college.dta", clear
@@ -29,7 +34,7 @@ replace college_share = `r(mean)' if mi(college_share) & year<1940
 sum college_share 	if year==2020
 replace college_share =  `r(mean)'  + 0.5 /25 * (fiveyear - 17)^(1/1.9) if mi(college_share) & year>2020
 
-tsfilter hp college_share_cycle = college_share, smooth($lam) trend(college_share_trend) // smoothen the series
+quietly tsfilter hp college_share_cycle = college_share, smooth($lam) trend(college_share_trend) // smoothen the series
 
 collapse (mean) college_share_trend (first) year data, by(fiveyear)
 rename college_share_trend college_share
@@ -53,8 +58,8 @@ global ye 2020
 special_drawing
 
 preserve
-stack college_share ncollege_share, into(v)
-export delimited v using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+stack college_share ncollege_share, into(v) clear
+export delimited v using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
 
 restore
 gen cohort = year - 25

@@ -2,53 +2,11 @@
 ! FILE: transition_iterations.f90
 !
 ! DESCRIPTION:
-!   Main iteration loop for transition path computation in PAYG pension system.
-!   Iterates on prices, taxes, and policies until convergence to full transition path.
+!   Inner loop body of the transition path solver. Updates prices, solves
+!   household problems per cohort, aggregates, and checks convergence.
+!   Included by transition.f90 inside transition_path_DB.
 !
-! ALGORITHM:
-!   Fixed-point iteration on transition path:
-!   1. Take old guess: k(t), w(t), r(t), tau(t), benefits(t)
-!   2. Solve household problems given prices → policies {c,l,a'}(j,t)
-!   3. Aggregate over distribution → new K(t), L(t)
-!   4. Update prices from production: w(t)=FK'(K,L), r(t)=FL'(K,L)
-!   5. Compute government budget → new taxes/transfers (closure rule)
-!   6. Calculate pension benefits from contribution/replacement rates
-!   7. Check convergence: ∑_t |new(t) - old(t)| < err_tol
-!   8. Update guess (damping if needed), return to step 1
-!
-! KEY OPERATIONS PER ITERATION:
-!   - Labor aggregation by type: bigl_type(m,t) = ∑_j N(j,m,t)*l(j,m,t)
-!   - CES wage calculation: w_bar(m,t) from bigl_type (include 'ces_production.f90')
-!   - Technological progress: nu(t) = bigl(t)/bigl(t-1)
-!   - Interest rate: r_bar from exog_rate_t or endogenous production
-!   - Tax/transfer updates: pillarI_j, pillarII_j, bequest_j, b_j (pension benefits)
-!   - Government closure: Adjust residual (upsilon/tC/debt/g) per switch_residual
-!
-! CONVERGENCE:
-!   - err(t): Period-specific errors (market clearing, budget balance)
-!   - cum_err: ∑ err(t) - target < err_tol
-!   - feasibility(t): Resource constraint violation Y=C+I+G
-!   - Max iterations: n_iter_t (typically 1000-5000)
-!
-! SWITCHES:
-!   - switch_exog_rate: Use exogenous interest rate path (==1) vs endogenous
-!   - switch_print: Display iteration diagnostics every 1 iter (==1)
-!
-! INCLUDED FRAGMENTS:
-!   - print_iter.f90: Prints diagnostics if switch_print==1 and MOD(iter,1)==0
-!
-! VARIABLES UPDATED:
-!   Old values stored: pillarI_old_j, bequest_j_old, sv_old_j, tau1_s_t_old, etc.
-!   Used for damping or checking convergence.
-!
-! DEPENDENCIES:
-!   - global_vars: Full model state and parameters
-!   - Included scripts: print_iter.f90, ces_production.f90
-!
-! NOTES:
-!   Part of transition_path_DB in transition.f90. Nested inside outer loop over
-!   steady states. Comments indicate data flow: "TAKE" (inputs), "DO" (operations),
-!   "RETURN" (outputs). Critical for understanding adjustment dynamics.
+! INCLUDED BY: transition.f90 (transition_path_DB)
 !===============================================================================
 ! WHAT   : iteration for transition path for PAYG 
 ! TAKE   : unchanged in routine: productivity (omega), the size of each cohort [[N_t_j]], contribution to the pension system rate [[t1, t1_a, t2]], replacement rate [[rho1, [[rho2]]
@@ -154,23 +112,28 @@ include 'closures.f90'
 
 debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if (.not. any(rate_adj /= 0.0d0)) then
+            if (switch_tauK_gross == 0) then
+                r_vfi = (1 - tk)*r_bar
+            else
+                r_vfi = (1 - tk)*(r_bar+depr_t) - depr_t
+            endif
 
             if (switch_tauK_gross == 0) then
-                r_vfi = (1 - tk)*r_bar  
+                r_vfi_pretax = r_bar
             else
-                r_vfi = (1 - tk)*(r_bar+depr_t) - depr_t 
+                r_vfi_pretax = r_bar
             endif
-            
-            if (switch_tauK_gross == 0) then
-                r_vfi_pretax = r_bar  
-            else
-                r_vfi_pretax = r_bar 
-            endif
+    endif
 
         do m = 1,bigM, 1
 
-            
+    if (any(rate_adj /= 0.0d0)) then
+            r_type(m,:) = r_low + rate_adj(m)
+            r_vfi = r_type(m,:) - 1.0d0
+            r_vfi_pretax = r_vfi
+    endif
+
             pi(:,:) = pi_big(:,m,:)
             pi_vfi = pi
             
@@ -196,6 +159,8 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             b_pom_j_dif(:,:) = b_j(:,m,:) - b_j_old(:,m,:)
             aime_plus_trans  = aime_plus_trans_big(:, :, :, :, :, :,m,:)
             c_j_vfi = c_j(:,m,:)
+            asset_income_j_vfi = asset_income_j(:,m,:)
+            asset_base_j_vfi = asset_base_j(:,m,:)
             l_j_vfi = l_j(:,m,:)
             lab_j_vfi = lab_j(:,m,:)
             s_pom_j_vfi = sv_j(:,m,:)   
@@ -223,7 +188,9 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             c_trans = c_trans_big(:, :, :, :, :, : ,m,:) 
             
             c_beq_trans = c_beq_trans_big(:, :, :, :, :, : ,m,:)
-            l_trans = l_trans_big(:, :, :, :, :, : ,m,:) 
+            l_trans = l_trans_big(:, :, :, :, :, : ,m,:)
+            asset_income_trans = asset_income_trans_big(:, :, :, :, :, : ,m,:)
+            asset_base_trans = asset_base_trans_big(:, :, :, :, :, : ,m,:)
             svplus_trans = svplus_trans_big(:, :, :, :, :, :,m,:) 
             
             svplus_beq_trans = svplus_beq_trans_big(:, :, :, :, :, :,m,:)  
@@ -256,7 +223,9 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             aime_plus_beq_trans_big(:,:,:,:,:,:,m,:)            = aime_plus_beq_trans(:,:,:,:,:,:,:) 
             c_beq_trans_big(:, :, :, :, :, : ,m,:)              = c_beq_trans(:,:,:,:,:,:,:) 
             l_beq_trans_big(:, :, :, :, :, : ,m,:)              = l_beq_trans(:,:,:,:,:,:,:) 
-            lab_income_beq_trans_big(:, :, :, :, :, :,m,:)      = lab_income_beq_trans(:,:,:,:,:,:,:) 
+            lab_income_beq_trans_big(:, :, :, :, :, :,m,:)      = lab_income_beq_trans(:,:,:,:,:,:,:)
+            asset_income_beq_trans_big(:, :, :, :, :, :,m,:)  = asset_income_beq_trans(:,:,:,:,:,:,:)
+            asset_base_beq_trans_big(:, :, :, :, :, :,m,:)    = asset_base_beq_trans(:,:,:,:,:,:,:)
             lab_income_pretax_beq_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_beq_trans(:,:,:,:,:,:,:) 
             tot_income_beq_trans_big(:, :, :, :, :, :,m,:)        = tot_income_beq_trans(:,:,:,:,:,:,:) 
             tot_income_pretax_beq_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_beq_trans(:,:,:,:,:,:,:) 
@@ -272,7 +241,9 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             l_trans_big(:, :, :, :, :, : ,m,:)              = l_trans(:,:,:,:,:,:,:) 
             lab_income_trans_big(:, :, :, :, :, :,m,:)      = lab_income_trans(:,:,:,:,:,:,:) 
             lab_income_pretax_trans_big(:, :, :, :, :, :,m,:) = lab_income_pretax_trans(:,:,:,:,:,:,:) 
-            tot_income_trans_big(:, :, :, :, :, :,m,:)        = tot_income_trans(:,:,:,:,:,:,:) 
+            tot_income_trans_big(:, :, :, :, :, :,m,:)        = tot_income_trans(:,:,:,:,:,:,:)
+            asset_income_trans_big(:, :, :, :, :, :,m,:)      = asset_income_trans(:,:,:,:,:,:,:)
+            asset_base_trans_big(:, :, :, :, :, :,m,:)        = asset_base_trans(:,:,:,:,:,:,:)
             tot_income_pretax_trans_big(:, :, :, :, :, :,m,:) = tot_income_pretax_trans(:,:,:,:,:,:,:) 
             labor_tax_trans_big(:, :, :, :, :, :,m,:)         = labor_tax_trans(:,:,:,:,:,:,:) 
             svplus_trans_big(:, :, :, :, :, :,m,:)            = svplus_trans(:,:,:,:,:,:,:) 
@@ -282,12 +253,13 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
             c_j(:,m,:) = c_j_vfi(:,:)
             l_j(:,m,:) = l_j_vfi(:,:)
             lab_j(:,m,:) = lab_j_vfi(:,:)
+            asset_income_j(:,m,:) = asset_income_j_vfi(:,:)
+            asset_base_j(:,m,:) = asset_base_j_vfi(:,:)
             sv_j(1:bigJ-1,m,:) = s_pom_j_vfi(1:bigJ-1,:) 
             w_pom_trans(:,m,:) = w_pom_trans_vfi(:,:) 
             labor_tax_j(:,m,:) = labor_tax_j_vfi(:,:)
             l_pen_j(:,m,:)  = l_pen_j_vfi(:,:)
 
-            ! what to do with this?
             !sum_b_weight_ss(:) = sum_b_weight_ss + bigM_share_ss(m) * sum_b_weight_ss_vfi
             do i = 2,bigT
             sum_b_weight_trans_outer_mat(m,i) = sum_b_weight_trans(i)
@@ -322,6 +294,23 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
         bigl                   = bigl + type_multiplier_t(m,:) * bigl_type(m,:) ** rho_subst 
 
     enddo
+
+    if (any(rate_adj /= 0.0d0)) then
+    a_income = 0.0d0
+    a_income_type = 0.0d0
+    a_base_type = 0.0d0
+    do i = 1,bigT,1
+        a_income(i) = 0.0d0
+        do m = 1,bigM,1
+            a_base_type(m,i) = sum(N_big_t_j(:,m,i) * asset_base_j(:,m,i))
+            a_income_type(m,i) = sum(N_big_t_j(:,m,i) * asset_income_j(:,m,i))
+            a_income(i) = a_income(i) + a_income_type(m,i)
+            a_base_type(m,i) = a_base_type(m,i) / bigl(i)
+            a_income_type(m,i) = a_income_type(m,i) / bigl(i)
+        enddo
+        a_income(i) = a_income(i) / bigl(i)
+    enddo
+    endif
 
     do i = 1,bigT,1
     bigl(i) = bigl(i) ** (1.0d0/rho_subst)
@@ -366,7 +355,8 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
     include 'bequest.f90'
     
     k_new(1) = k(1)
-    
+    r_low_new(1) = r_low(1)
+
     bequest_trans = 0.0d0
     
     do i = 1,bigT,1
@@ -388,15 +378,31 @@ debt = up_debt_t * debt_trans_old  + (1 - up_debt_t) *  debt
         enddo
         
     else
-    
+
         k_new(n_p+1) = (savings(n_p+1) - debt(n_p+1))/(nu(n_p+1)*gam_t(n_p+1))
+        r_low_new(n_p+1) = r_low(n_p+1)
         do i = 2,n_p+1,1
             k_new(i) = max(0.0001,(savings(i-1) - debt(i-1))/(nu(i)*gam_t(i)))
+            if (any(rate_adj /= 0.0d0)) then
+                r_low_new(i) = min(max(1.0001d0, 1.0d0 + ((r(i)-1.0d0)*k(i) - a_income_type(1,i)) / a_base_type(2,i)), 1.6d0)
+                err_r(i) = abs(r_low_new(i) - r_low(i))
+                err_inc(i) = abs(a_income(i) - (r(i)-1.0d0)*k(i))
+            endif
             err(i) = abs(k_new(i) - k(i))
-            k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
-            l_j(:,:,i) =l_new_j(:,:,i) !up_t*l_j(:,:,i) + (1 - up_t)*l_new_j(:,:,i)
-        enddo    
-        
+            if (any(rate_adj /= 0.0d0)) then
+                if (iter < 30) then
+                    r_low(i) = 0.95d0*r_low(i) + (1.0d0 - 0.95d0)*r_low_new(i)
+                    k(i) = up_t*k(i) + (1.0d0 - up_t)*k_new(i)
+                else
+                    r_low(i) = 0.75d0*r_low(i) + (1.0d0 - 0.75d0)*r_low_new(i)
+                    k(i) = 0.50d0*k(i) + (1.0d0 - 0.50d0)*k_new(i)
+                endif
+            else
+                k(i) = up_t*k(i) + (1 - up_t)*k_new(i)
+            endif
+            l_j(:,:,i) =l_new_j(:,:,i)
+        enddo
+
     endif
     cum_err(iter) = sum(err)
 !cum_err(iter) = sum(prob_trans(5,:,:,:,:,:,2)) 

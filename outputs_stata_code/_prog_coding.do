@@ -16,6 +16,14 @@ sum year, det
 gen fiveyear =  floor((year-`r(min)')/5) - floor(($year_start -`r(min)')/5) + 1
 end
 
+foreach scratch in bone.dta bone1y.dta {
+    capture confirm file "`scratch'"
+    if !_rc {
+        capture shell attrib -R "`scratch'"
+        capture erase "`scratch'"
+    }
+}
+
 clear
 range year 1935 2100 34
 save bone, replace
@@ -25,26 +33,10 @@ range year 1935 2100 166
 save bone1y, replace
 
 
-capture program drop drawing
-program drawing
-tsset year
-keep if year < 2050
-twoway	(tsline $var if inrange(year,$ys,$ye), lcolor(black) lwidth(vthick)) ///
-		(tsline $var if inrange(year,1935,$ys), lcolor(blue) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ye,2100), lcolor(blue) lpattern(dash)), ///
-		xtitle("year", size(*1.35)) ytitle(, size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(1 "data" 2 "extrapolation") size(*1.35)) 
-	graph save "../graphs/inputs/$var.gph", replace
-	graph export "../graphs/inputs/$var.png", replace
-	graph export "../graphs/inputs/$var.eps", replace
-	graph export "../graphs/inputs/$var.svg", replace
-
-
-end
-
-
 capture program drop special_drawing
 program special_drawing
+capture graph drop _all
+preserve
 tsset year
 keep if year < 2050
 twoway	(tsline $var_frozen ,lcolor(red) lpattern(solid)) ///
@@ -52,36 +44,15 @@ twoway	(tsline $var_frozen ,lcolor(red) lpattern(solid)) ///
 		(tsline $var if inrange(year,1935,$ys), lcolor(black)  lwidth(medium) lpattern(dash)) ///
 		(tsline $var if inrange(year,$ye,2100), lcolor(black) lwidth(medium)  lpattern(dash)) , ///
 		xtitle("year", size(*1.35)) ytitle(, size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(-  "Baseline"  - "Counterfactual" 2 "data"  1 "fixed at 1955" 3 "extrapolation"  ) size(*1.4) cols(2))  
-		
-		
+		ylabel(,labsize(*1.2) ) legend(order(-  "Baseline"  - "Counterfactual" 2 "data"  1 "fixed at 1955" 3 "extrapolation"  ) size(*1.4) cols(2))
+
+
 	graph save "../graphs/inputs/$var.gph", replace
 	graph export "../graphs/inputs/$var.png", replace
 	graph export "../graphs/inputs/$var.eps", replace
 	graph export "../graphs/inputs/$var.svg", replace
 	graph export "../graphs/inputs/$var.pdf", replace
-
-end
-
-
-capture program drop drawing_for_piotr
-program drawing_for_piotr
-tsset year
-keep if year < 2050
-twoway	(tsline $var_frozen ,lcolor(blue) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ys,$ye), lcolor(black) lwidth(vthick)) ///
-		(tsline $var if inrange(year,1935,$ys), lcolor(black)  lwidth(medium) lpattern(dash)) ///
-		(tsline $var if inrange(year,$ye,2100), lcolor(black) lwidth(medium)  lpattern(dash)) , ///
-		xtitle("year", size(*1.35)) ytitle(, size(*1.35)) title("") xlabel(1935[25]2050, labsize(*1.2)) ///
-		ylabel(,labsize(*1.2) ) legend(order(-  "Primary"  - "Alternative" 2 "data"  1 "extrapolation" 3 "extrapolation"  ) size(*1.4) cols(2))  
-		
-		
-	graph save "../graphs/inputs/$var.gph", replace
-	graph export "../graphs/inputs/$var.png", replace
-	graph export "../graphs/inputs/$var.eps", replace
-	graph export "../graphs/inputs/$var.svg", replace
-	graph export "../graphs/inputs/$var.pdf", replace
-
+restore
 end
 
 
@@ -101,22 +72,11 @@ program prep_data_for_main_plot
 
         sum aGini_`variant' if inrange(year,1975,2050), detail
 
-        global `variant'_min  =  `r(min)' 
-        global `variant'_max  =  `r(max)' 
+        global `variant'_min  =  `r(min)'
+        global `variant'_max  =  `r(max)'
 
-	   local val = ${variant_base_max} - ${variant_comp_min}
-    
-		if `val' == 0 {
-			global diff_`y' = 0
-		}
-		else {
-			local rounded = round(`val', 10^(floor(log10(abs(`val')))-1))
-        
-        * kill floating-point noise explicitly
-        local clean = round(`rounded', 1e-10)
-		}
-		
-		global `variant'_diff : display %5.2g `clean' //  floor(( `r(max)'-`r(min)' )*100)/100
+        local val = ${`variant'_max} - ${`variant'_min}
+        global `variant'_diff = trim(string(`val', "%4.1f"))
 
         gen `variant'_min = `r(min)'
         gen `variant'_max = `r(max)'
@@ -135,18 +95,7 @@ program prep_data_for_main_plot
 foreach y in 1975 2015 2050 {
     
     local val = ${variant_base_`y'} - ${variant_comp_`y'}
-    
-    if `val' == 0 {
-        global diff_`y' = 0
-    }
-    else {
-        local rounded = round(`val', 10^(floor(log10(abs(`val')))-1))
-        
-        * kill floating-point noise explicitly
-        local clean = round(`rounded', 1e-10)
-        
-        global diff_`y' : display %5.2g `clean'
-    }
+    global diff_`y' = trim(string(`val', "%4.1f"))
 }
 
     keep if year >= 1935

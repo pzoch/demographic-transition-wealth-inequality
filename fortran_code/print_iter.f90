@@ -2,36 +2,13 @@
 ! FILE: print_iter.f90
 !
 ! DESCRIPTION:
-!   Prints iteration diagnostics during transition path solution. Displays
-!   convergence metrics and feasibility checks to monitor solver progress.
+!   Prints iteration progress and convergence diagnostics during transition
+!   path computation. Shows cumulative error, worst feasibility violation,
+!   and max interest rate error.
 !
-! SCRIPT (included code fragment)
-!   Executed periodically (every MOD(iter,1)==0) within transition_iterations.f90.
+! INCLUDED IN: transition_iterations.f90
 !
-! OUTPUT:
-!   Console display showing:
-!   - iter: Current iteration number
-!   - cum_err: Cumulative error sum(err) across all periods
-!   - worst feasibility: Max resource constraint violation and its time period
-!   - max error: Maximum single-period error and its time period
-!
-! FEASIBILITY CHECK:
-!   For each period i:
-!   feasibility(i) = |[Y - C - G]/Y - [γ*ν*K' + (δ-1)*K]/Y|
-!   Measures deviation from resource constraint: Y(t) = C(t) + G(t) + I(t)
-!
-! FILE OUTPUT:
-!   Writes feasibility(1:bigT) to "feasibility" file (unit 123) for inspection.
-!
-! VARIABLES (from global scope):
-!   - err(bigT): Period-specific convergence errors
-!   - y, consumption_gross, g, k: Aggregate variables
-!   - gam_t, nu, depr_t: Demographic/depreciation parameters
-!
-! NOTES:
-!   Controlled by switch_print==1 in transition_iterations.f90. Helps diagnose
-!   non-convergence issues (oscillation, divergence, constraint violations).
-!   Format uses ES10.3 for scientific notation with 3 decimals.
+! KEY OUTPUTS: Console diagnostics, feasibility file (unit 123)
 !===============================================================================
 write(*,'(A,I5)') 'iter ', iter              
 write(*,'(A,ES10.3)') 'cum_err = ', sum(err) 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.37327.17
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "5Gtrans", "5Gtrans.vfproj", "{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}"
 EndProject
@@ -9,6 +9,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release_HetRate|x64 = Release_HetRate|x64
+		Release_HetRate|x86 = Release_HetRate|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -17,6 +19,9 @@ Global
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Debug|x64.Build.0 = Debug|x64
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Debug|x86.ActiveCfg = Debug|Win32
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Debug|x86.Build.0 = Debug|Win32
+		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release_HetRate|x64.ActiveCfg = Release_HetRate|x64
+		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release_HetRate|x64.Build.0 = Release_HetRate|x64
+		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release_HetRate|x86.ActiveCfg = Release_HetRate|x64
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x64.ActiveCfg = Release|x64
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x64.Build.0 = Release|x64
 		{B4C277AB-4605-4B26-BA7F-9DAC1C7060E6}.Release|x86.ActiveCfg = Release|Win32
@@ -24,5 +29,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54B8FB08-8B91-47BC-B1D5-E696F7350E4B}
 	EndGlobalSection
 EndGlobal

@@ -2,67 +2,16 @@
 ! FILE: pension_system.f90
 !
 ! DESCRIPTION:
-!   Computes pension benefits during transition path for PAYG pension system.
-!   Calculates both Pillar I (defined benefit) and Pillar II (defined contribution)
-!   benefits using earnings history, valorization, and indexation rules.
+!   Computes pension benefits on the transition path. Calculates Pillar I (PAYG
+!   defined benefit) and Pillar II (funded, currently inactive) benefits using
+!   wage valorization, cohort-specific retirement ages, and replacement rates.
 !
 ! INCLUDED IN: transition.f90 via include statement
+!   Steady-state counterpart: pension_system_ss.f90
 !
-! PURPOSE:
-!   Calculate period-by-period pension benefits for all cohorts during transition.
-!   Handles cohort-specific retirement ages, wage indexation, and benefit
-!   valorization based on aggregate wage growth.
-!
-! KEY CALCULATIONS:
-!   1. Valorization multiplier (valor_mult): Indexes past wages to current period
-!   2. Average wage at retirement (avg_wl): Used for benefit calculation
-!   3. Pillar I benefits (b1_j): PAYG defined benefit using replacement rate (rho_t)
-!   4. Pillar II benefits (b2_j): Funded accounts (currently set to 0)
-!   5. Pension subsidy (subsidy_j): Difference between benefits and contributions
-!
-! FORMULA:
-!   At retirement (j = jbar_t(i)):
-!     b1_j(jbar,m,i) = rho_t(i) * avg_wl(i)
-!   
-!   After retirement (j > jbar_t(i)):
-!     b1_j(j,m,i) = valor_mult(i) * b1_j(j-1,m,i-1)
-!   
-!   Total benefit:
-!     b_j(j,m,i) = b_scale_factor(i) * b1_j(j,m,i)
-!   
-!   Subsidy:
-!     subsidy_j(j,m,i) = sum_b_weight * b_j(j,m,i) - t1(j,i) * w_bar(m,i) * l_j(j,m,i)
-!
-! INDEXATION:
-!   - Valorization rate (rI): Based on aggregate wage growth wl_bar(t)/wl_bar(t-1)
-!   - Applies TFP growth (gam_t) and population growth (nu)
-!   - Terminal steady state uses constant growth rate
-!
-! VARIABLES:
-!   INPUT (from transition path iteration):
-!     - l_j, w_bar, w_j: Labor supply and wages by age, type, time
-!     - N_big_t_j: Population by age, type, time
-!     - gam_t, nu: TFP and population growth rates
-!     - jbar_t: Retirement age by period
-!     - rho_t: Replacement rate by period
-!     - t1: Contribution rate
-!     - jbar_t_yob: Cohort-specific retirement ages
-!   
-!   OUTPUT:
-!     - b1_j, b2_j: Pillar I and II benefits by age, type, time
-!     - b_j: Total pension benefits
-!     - subsidy_j: Implicit subsidy/tax in pension system
-!     - contribution_j: Total contributions
-!
-! NOTES:
-!   - Uses cohort-specific retirement ages via jbar_t_yob mapping
-!   - Pillar II (b2_j) currently inactive (set to 0)
-!   - Benefits scaled by b_scale_factor to ensure budget balance
-!   - avg_wl computed as average wage over working life at retirement
-!   - sum_b_weight_trans_outer_mat adjusts for population composition
+! KEY OUTPUTS: b1_j, b2_j, b_j, subsidy_j, contribution_j
 !===============================================================================
 
-    ! valor_share removed - was always 1.0 (full indexation)
     valor_mult(1) = (1 + 1.0d0*(gam_t(1)*nu(1)  - 1))/gam_t(1)
     valor_mult(2) = (1 + 1.0d0*(gam_t(1)*nu(1)  - 1))/gam_t(2)
     wl_bar = 0.0d0
@@ -94,8 +43,7 @@
         avg_wl(i) = avg_wl(i)/real(jbar_t(max(i-1,1)) -1)
     enddo
     
-    !!!!!!!!!!!!!!!!! DB pension system !!!!!!!!!!!!!!!!!
-    ! indivdual pension benefits 
+    ! individual pension benefits
     do m = 1,bigM,1
     do i = 2,bigT,1
         b1_j(1:jbar_t(i)-1,m,i) = 0

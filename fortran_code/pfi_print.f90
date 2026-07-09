@@ -2,40 +2,10 @@
 ! FILE: pfi_print.f90
 !
 ! DESCRIPTION:
-!   Output routines for policy function iteration results. Writes value/policy
-!   functions and distributions to CSV files for post-processing and visualization.
+!   Diagnostic CSV output for policy functions and distributions.
+!   Currently mostly commented out; uncomment selectively for debugging.
 !
-! SUBROUTINES:
-!   - output: Main output routine (currently commented out)
-!             Writes c_vfi, s_vfi, l_vfi, prob_trans to CSV files
-!
-! OUTPUT FILES (when active):
-!   - c_vfi.csv: Consumption policy by (j, time) - semicolon delimited
-!   - s_vfi.csv: Savings policy by (j, time)
-!   - l_vfi.csv: Labor supply policy by (j, time)
-!   - prob_trans_*.csv: Distribution snapshots at different time periods
-!
-! FORMAT:
-!   CSV with semicolon separators. Rows = age j, Columns = time periods.
-!   Last column written without separator (advance='no' then final value).
-!
-! CURRENT STATUS:
-!   Most output code commented out (lines 4-72). Likely disabled for performance
-!   during production runs. Uncomment selectively for debugging/diagnostics.
-!
-! TYPICAL USAGE PATTERN:
-!   do j = 1, bigJ
-!     do i = 1, bigT-1
-!       write(unit, '(F20.10)', advance='no') variable(j,i)
-!       write(unit, '(A)', advance='no') ";"
-!     enddo
-!     write(unit, '(F20.10)') variable(j,bigT)  ! Last column, newline
-!   enddo
-!
-! NOTES:
-!   Unit numbers 103, 111 used. Ensure proper CLOSE to avoid file locks.
-!   Distributions prob_trans summed over state dimensions before writing.
-!   Enable selectively - full output can generate GB of data for large grids.
+! KEY OUTPUTS: c_vfi.csv, s_vfi.csv, l_vfi.csv, prob_trans_*.csv
 !===============================================================================
 !***************************************************************************************
     subroutine output()

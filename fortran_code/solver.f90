@@ -2,28 +2,11 @@
 ! FILE: solver.f90
 !
 ! DESCRIPTION:
-!   Provides specialized optimization routines for household decision problems
-!   in the OLG model. Implements Brent's method for one-dimensional minimization.
+!   Specialized optimization routines for household bequest decisions.
+!   Implements Brent's method (fmin) and an uncertainty objective function
+!   for one-dimensional minimization under two possible future states.
 !
 ! MODULE: solver
-!   Custom minimization routines for household optimization under uncertainty.
-!
-! FUNCTIONS:
-!   - uncertainty: Computes squared FOC error for lifetime consumption/saving
-!                  decision under two possible future states (used as objective)
-!   - fmin: Brent's method for one-dimensional function minimization on [ax,bx]
-!           Combines golden section search with parabolic interpolation
-!
-! ALGORITHM:
-!   fmin uses Brent (1973) algorithm - superlinear convergence for unimodal
-!   functions with continuous second derivative at minimum.
-!
-! DEPENDENCIES:
-!   - globals: Access to model parameters (phi_j, bigJ, prob)
-!
-! NOTE:
-!   Differs from generic minimization.f90 toolbox; tailored for specific
-!   lifetime transfer/bequest optimization with discrete future states.
 !===============================================================================
 module solver
     use globals

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This is a Stata 16.0 generated SVG file (http://www.stata.com) -->
+
+<svg version="1.1" width="3.00in" height="1.00in" viewBox="0 0 2160 720" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>Stata Graph - Graph</desc>
+	<rect x="0" y="0" width="2160" height="720" style="fill:#FFFFFF;stroke:none"/>
+	<rect x="0.00" y="0.00" width="2159.86" height="720.00" style="fill:#FFFFFF"/>
+	<rect x="1.50" y="1.50" width="2156.86" height="717.00" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<rect x="15.86" y="15.86" width="1064.07" height="688.27" style="fill:#FFFFFF"/>
+	<rect x="17.36" y="17.36" width="1061.07" height="685.27" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<rect x="92.75" y="112.66" width="980.71" height="517.69" style="fill:#FFFFFF"/>
+	<rect x="94.25" y="114.16" width="977.71" height="514.69" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<line x1="92.75" y1="618.47" x2="1073.45" y2="618.47" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="92.75" y1="519.71" x2="1073.45" y2="519.71" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="92.75" y1="420.89" x2="1073.45" y2="420.89" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="92.75" y1="322.13" x2="1073.45" y2="322.13" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="92.75" y1="223.37" x2="1073.45" y2="223.37" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="92.75" y1="124.55" x2="1073.45" y2="124.55" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<path d=" M104.63 618.47 L125.89 608.55 L147.15 584.45 L168.41 558.73 L189.68 529.50 L210.94 508.78 L232.20 502.30 L253.46 494.60 L274.73 487.18 L295.99 484.41 L317.25 464.50 L338.51 466.93 L359.77 451.54 L381.04 444.72 L402.30 444.58 L423.56 435.94 L444.82 451.81 L466.15 433.51 L487.42 447.96 L508.68 430.68 L529.94 430.00 L551.21 420.55 L572.47 431.62 L593.73 417.38 L614.99 430.41 L636.25 424.53 L657.52 433.44 L678.78 421.43 L700.04 426.96 L721.30 418.26 L742.57 410.16 L763.83 416.43 L785.09 417.51 L806.36 410.09 L827.62 402.19 L848.88 422.44 L870.14 414.68 L891.40 425.95 L912.67 406.98 L933.93 435.54 L955.19 412.99 L976.46 460.58 L997.72 438.51 L1018.98 492.98 L1040.24 495.08 L1061.57 501.02" stroke-linejoin="round" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<path d=" M104.63 618.47 L125.89 582.56 L147.15 522.62 L168.41 483.80 L189.68 438.91 L210.94 406.38 L232.20 379.04 L253.46 353.32 L274.73 316.32 L295.99 296.61 L317.25 274.47 L338.51 255.77 L359.77 244.84 L381.04 230.86 L402.30 219.52 L423.56 198.66 L444.82 191.17 L466.15 178.41 L487.42 174.16 L508.68 166.60 L529.94 165.12 L551.21 161.94 L572.47 161.94 L593.73 156.68 L614.99 160.86 L636.25 156.14 L657.52 151.82 L678.78 144.59 L700.04 146.15 L721.30 147.83 L742.57 160.86 L763.83 137.37 L785.09 142.30 L806.36 148.78 L827.62 156.95 L848.88 146.75 L870.14 142.64 L891.40 146.89 L912.67 150.13 L933.93 179.16 L955.19 167.34 L976.46 177.67 L997.72 197.79 L1018.98 213.79 L1040.24 216.62 L1061.57 259.35" stroke-linejoin="round" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<line x1="92.75" y1="630.35" x2="92.75" y2="112.66" style="stroke:#000000;stroke-width:3.00"/>
+	<text x="81.54" y="625.06" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">0</text>
+	<text x="81.54" y="526.30" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">.2</text>
+	<text x="81.54" y="427.47" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">.4</text>
+	<text x="81.54" y="328.72" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">.6</text>
+	<text x="81.54" y="229.96" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">.8</text>
+	<text x="81.54" y="131.13" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">1</text>
+	<text x="45.64" y="371.54" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" transform="rotate(-90 45.64,371.54)" text-anchor="middle">log productivity</text>
+	<line x1="92.75" y1="630.35" x2="1073.45" y2="630.35" style="stroke:#000000;stroke-width:3.00"/>
+	<text x="104.63" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">20</text>
+	<text x="211.00" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">25</text>
+	<text x="317.32" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">30</text>
+	<text x="423.63" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">35</text>
+	<text x="529.94" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">40</text>
+	<text x="636.25" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">45</text>
+	<text x="742.57" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">50</text>
+	<text x="848.95" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">55</text>
+	<text x="955.26" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">60</text>
+	<text x="1061.57" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">65</text>
+	<text x="583.13" y="681.80" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">age group</text>
+	<rect x="99.22" y="71.22" width="421.67" height="34.97" style="fill:#FFFFFF"/>
+	<rect x="100.72" y="72.72" width="418.67" height="31.97" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<line x1="107.33" y1="88.70" x2="126.09" y2="88.70" style="stroke:#1A476F;stroke-width:3.00"/>
+	<line x1="339.59" y1="88.70" x2="358.36" y2="88.70" style="stroke:#90353B;stroke-width:3.00"/>
+	<text x="141.07" y="95.29" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000">High school or less</text>
+	<text x="373.34" y="95.29" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000">College or more</text>
+	<text x="92.75" y="40.69" style="font-family:'Times New Roman';font-size:26.26px;fill:#000000">(a) Empirical estimates</text>
+	<rect x="1079.93" y="15.86" width="1064.07" height="688.27" style="fill:#FFFFFF"/>
+	<rect x="1081.43" y="17.36" width="1061.07" height="685.27" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<rect x="1167.82" y="112.66" width="969.70" height="517.69" style="fill:#FFFFFF"/>
+	<rect x="1169.32" y="114.16" width="966.70" height="514.69" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<line x1="1167.82" y1="618.47" x2="2137.52" y2="618.47" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="1167.82" y1="453.83" x2="2137.52" y2="453.83" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="1167.82" y1="289.19" x2="2137.52" y2="289.19" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<line x1="1167.82" y1="124.55" x2="2137.52" y2="124.55" style="stroke:#E0E0E0;stroke-width:3.00"/>
+	<path d=" M1179.63 618.47 L1284.73 557.04 L1389.89 523.23 L1494.99 510.60 L1600.09 498.05 L1705.18 497.10 L1810.28 484.48 L1915.45 493.59 L2020.55 528.02 L2125.64 561.43" stroke-linejoin="round" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1179.63" cy="618.47" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1284.73" cy="557.04" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1389.89" cy="523.23" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1494.99" cy="510.60" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1600.09" cy="498.05" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1705.18" cy="497.10" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1810.28" cy="484.48" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1915.45" cy="493.59" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="2020.55" cy="528.02" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="2125.64" cy="561.43" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<path d=" M1179.63 582.97 L1284.73 423.66 L1389.89 299.11 L1494.99 210.48 L1600.09 179.22 L1705.18 160.32 L1810.28 160.26 L1915.45 166.40 L2020.55 229.38 L2125.64 317.61" stroke-linejoin="round" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1179.63" cy="582.97" r="5.62" style="fill:#90353B"/>
+	<circle cx="1179.63" cy="582.97" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1284.73" cy="423.66" r="5.62" style="fill:#90353B"/>
+	<circle cx="1284.73" cy="423.66" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1389.89" cy="299.11" r="5.62" style="fill:#90353B"/>
+	<circle cx="1389.89" cy="299.11" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1494.99" cy="210.48" r="5.62" style="fill:#90353B"/>
+	<circle cx="1494.99" cy="210.48" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1600.09" cy="179.22" r="5.62" style="fill:#90353B"/>
+	<circle cx="1600.09" cy="179.22" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1705.18" cy="160.32" r="5.62" style="fill:#90353B"/>
+	<circle cx="1705.18" cy="160.32" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1810.28" cy="160.26" r="5.62" style="fill:#90353B"/>
+	<circle cx="1810.28" cy="160.26" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1915.45" cy="166.40" r="5.62" style="fill:#90353B"/>
+	<circle cx="1915.45" cy="166.40" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="2020.55" cy="229.38" r="5.62" style="fill:#90353B"/>
+	<circle cx="2020.55" cy="229.38" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="2125.64" cy="317.61" r="5.62" style="fill:#90353B"/>
+	<circle cx="2125.64" cy="317.61" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<line x1="1167.82" y1="630.35" x2="1167.82" y2="112.66" style="stroke:#000000;stroke-width:3.00"/>
+	<text x="1156.55" y="625.06" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">1</text>
+	<text x="1156.55" y="460.42" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">1.5</text>
+	<text x="1156.55" y="295.77" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">2</text>
+	<text x="1156.55" y="131.13" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="end">2.5</text>
+	<text x="1109.71" y="371.54" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" transform="rotate(-90 1109.71,371.54)" text-anchor="middle">productivity, relative to HS, age 20-24</text>
+	<line x1="1167.82" y1="630.35" x2="2137.52" y2="630.35" style="stroke:#000000;stroke-width:3.00"/>
+	<text x="1179.70" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">20</text>
+	<text x="1284.80" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">25</text>
+	<text x="1389.89" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">30</text>
+	<text x="1494.99" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">35</text>
+	<text x="1600.09" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">40</text>
+	<text x="1705.25" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">45</text>
+	<text x="1810.35" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">50</text>
+	<text x="1915.45" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">55</text>
+	<text x="2020.55" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">60</text>
+	<text x="2125.64" y="654.73" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">65</text>
+	<text x="1652.67" y="681.80" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000" text-anchor="middle">age group</text>
+	<rect x="1174.30" y="71.22" width="421.61" height="34.97" style="fill:#FFFFFF"/>
+	<rect x="1175.80" y="72.72" width="418.61" height="31.97" style="fill:none;stroke:#FFFFFF;stroke-width:3.00"/>
+	<line x1="1182.40" y1="88.70" x2="1201.16" y2="88.70" style="stroke:#1A476F;stroke-width:3.00"/>
+	<circle cx="1191.78" cy="88.70" r="4.12" style="fill:none;stroke:#1A476F;stroke-width:3.00"/>
+	<line x1="1414.66" y1="88.70" x2="1433.36" y2="88.70" style="stroke:#90353B;stroke-width:3.00"/>
+	<circle cx="1423.98" cy="88.70" r="5.62" style="fill:#90353B"/>
+	<circle cx="1423.98" cy="88.70" r="4.12" style="fill:none;stroke:#90353B;stroke-width:3.00"/>
+	<text x="1216.15" y="95.29" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000">High school or less</text>
+	<text x="1448.35" y="95.29" style="font-family:'Times New Roman';font-size:18.77px;fill:#000000">College or more</text>
+	<text x="1167.82" y="40.69" style="font-family:'Times New Roman';font-size:26.26px;fill:#000000">(b) Model inputs</text>
+</svg>

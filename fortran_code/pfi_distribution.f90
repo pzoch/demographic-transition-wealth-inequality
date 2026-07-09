@@ -2,124 +2,16 @@
 ! FILE: pfi_distribution.f90
 !
 ! DESCRIPTION:
-!   Computes the stationary distribution of households over the state space given
-!   policy functions. Implements forward simulation (Young's method) to iterate from
-!   initial distribution at age 1 to equilibrium distribution at all ages.
+!   Computes the distribution of households over the state space using forward
+!   iteration (Young's method). Propagates probability mass from age 1 to bigJ
+!   using policy functions and shock transition matrices.
 !
-! PURPOSE:
-!   Bridge between individual policy functions and aggregate statistics. Given
-!   optimal savings a'(j,a,aime,ε,δ,r) and AIME accumulation aime'(⋅), compute
-!   the measure of agents prob(j,a,aime,ε,δ,r) at each state and age.
+! INCLUDED IN: pfi.f90 (module pfi_trans)
 !
-! SUBROUTINES:
-!   - get_distribution_ss: Steady-state distribution computation
-!       Forward iteration: prob(j,⋅) → prob(j+1,⋅) using policy a'(⋅), aime'(⋅)
-!       Loops j = 2,...,bigJ to fill prob_ss(j,⋅) from prob_ss(j-1,⋅)
+! SUBROUTINES: get_distribution_ss, get_distribution_trans
 !
-!   - get_distribution_trans: Transition path variant (cohort-period tracking)
-!       Same as steady state but for period i
-!       Loops j = 2,...,bigJ using yesterday's distribution prob_trans(j-1,⋅,itm)
-!       where itm = year(i,2,1) is previous period
-!
-! DISTRIBUTION EVOLUTION EQUATION:
-!   prob_ss(j+1, a', aime', ε', δ', r') =
-!       ∑_{a,aime,ε,δ,r} prob_ss(j, a, aime, ε, δ, r) ×
-!                        Pr[a'|a,aime,ε,δ,r] × Pr[aime'|aime,ε] ×
-!                        Pr[ε'|ε] × Pr[δ'|δ] × Pr[r'|r] × π(j)
-!
-!   Where:
-!   - a' = svplus_ss(j,a,aime,ε,δ,r): Next period assets from policy function
-!   - aime' = aime_plus_ss(j,a,aime,ε,δ,r): Updated AIME (Social Security earnings)
-!   - π(j): Conditional survival probability to age j+1
-!   - Pr[ε'|ε], Pr[δ'|δ], Pr[r'|r]: Shock transition matrices (pi_ip, pi_id, pi_ir)
-!   - Pr[a'|⋅]: Linear interpolation weight (off-grid assets)
-!
-! INITIAL DISTRIBUTION (age j=1):
-!   Newborns enter with:
-!   - Assets (a): From bequest distribution (depends on switch_unequal_bequest)
-!   - AIME: Zero (no work history yet)
-!   - Shocks: Initial distributions (pi_ip_init, pi_id_init, pi_ir_init)
-!
-!   Bequest variants (switch_unequal_bequest):
-!   - == 0: Equal bequests → all start with a ≈ 0
-!   - == 1: Zipf distribution with n_beq classes → unequal initial wealth
-!           ia_initial(ind) ∝ bequest_ss_vfi / (ind^zipf) for ind = 1,...,n_beq
-!           Mimics wealth concentration at birth (intergenerational transfers)
-!   - == 2: Alternative Zipf with bequest received at age beq_age + 1 (inheritance)
-!
-! INTERPOLATION MECHANICS:
-!   Policy functions typically return off-grid values:
-!   - call linear_int(a', ial, iar, dist, sv, n_a, a_grow)
-!     Returns: ial, iar (bracket indices), dist ∈ [0,1] (weight on ial)
-!   - Distribute probability: dist × prob to ial, (1-dist) × prob to iar
-!   - Same for AIME grid using aime_plus_ss(⋅)
-!   - Four combinations: (ial,aimel), (ial,aimer), (iar,aimel), (iar,aimer)
-!
-! SPECIAL CASE: BEQUEST RECEIPT (switch_unequal_bequest == 2):
-!   At age j = beq_age + 1, agents receive bequests mid-life:
-!   - Loop over n_beq bequest classes (ibeq = 1,...,n_beq)
-!   - Use svplus_beq_ss(ibeq,a,aime,ε,δ,r) instead of svplus_ss
-!   - Weight by bequest class probabilities p_beq(ibeq)
-!   - Generates mid-life wealth dispersion spike
-!
-! STATE SPACE DIMENSIONS:
-!   prob_ss(j, ia, i_aime, ip, ir, id):
-!   - j ∈ {1,...,bigJ}: Age (5-year periods, e.g., 20-24, 25-29, ..., 95-99)
-!   - ia ∈ {0,...,n_a}: Asset grid (typically n_a ≈ 50-100)
-!   - i_aime ∈ {0,...,n_aime}: AIME grid (Social Security average earnings)
-!   - ip ∈ {1,...,n_sp}: Permanent/persistent productivity shock
-!   - ir ∈ {1,...,n_sr}: Return shock (portfolio returns)
-!   - id ∈ {1,...,n_sd}: Discount factor shock (preference heterogeneity)
-!
-! NORMALIZATION:
-!   For each age j: ∑_{ia,i_aime,ip,ir,id} prob_ss(j,ia,i_aime,ip,ir,id) = 1
-!   Ensures distribution is a valid probability measure (integrates to 1)
-!
-! ALGORITHM (STEADY STATE):
-!   1. Initialize prob_ss = 0 for all states
-!   2. Set initial distribution at j=1:
-!      a. Choose bequest distribution (equal or Zipf)
-!      b. Interpolate to find grid brackets (ial, iar)
-!      c. Assign prob_ss(1,ia,0,⋅,⋅,⋅) with initial shock probabilities
-!   3. Forward iterate j = 2,...,bigJ:
-!      a. Loop over yesterday's states (ia, i_aime, ip, ir, id) at age j-1
-!      b. Retrieve policy: a' = svplus_ss(j-1,⋅), aime' = aime_plus_ss(j-1,⋅)
-!      c. Interpolate a' and aime' to find brackets (ial,iar), (aimel,aimer)
-!      d. Loop over tomorrow's shocks (ip', ir', id') using transition matrices
-!      e. Accumulate: prob_ss(j, bracket, ⋅) += prob_ss(j-1,⋅) × weights × π(j-1)
-!   4. Return prob_ss(j,⋅,⋅,⋅,⋅,⋅) for all j
-!
-! TRANSITION PATH VARIANT:
-!   - Uses prob_trans(j,⋅,⋅,⋅,⋅,⋅,i) for period i
-!   - Cohort-specific shocks: year_birth = i - j + 1 → tp indexing
-!   - Time-varying transition matrices (pi_ip_trans) for cohort effects
-!   - Otherwise identical to steady state algorithm
-!
-! OUTPUTS:
-!   - prob_ss(j,ia,i_aime,ip,ir,id): Steady-state distribution
-!   - prob_trans(j,ia,i_aime,ip,ir,id,i): Transition distribution at period i
-!   Used in pfi_agregation.f90 to compute: aggregate(j) = ∑ prob(j,⋅) × policy(j,⋅)
-!
-! DEPENDENCIES:
-!   - global_vars: Policy functions (svplus_ss, aime_plus_ss, svplus_beq_ss),
-!                  grids (sv, aime), transition matrices (pi_ip, pi_id, pi_ir),
-!                  survival probabilities (pi_ss, pi_trans), parameters (n_beq, zipf)
-!   - linint: For linear_int() interpolation function
-!
-! NOTES FOR REPLICATION:
-!   - Forward simulation is stable (no iteration needed) given convergent policies
-!   - Main loop is over yesterday's states → distributes mass to tomorrow's grid
-!   - Bequest distribution calibrated to match wealth inequality (Gini, top shares)
-!   - AIME tracking essential for US Social Security (OASI) progressive formula
-!   - Interpolation weights (dist, dist_aime) must be ∈ [0,1] for valid probabilities
-!   - Survival probabilities (pi_j) already incorporated in policy function iteration
-!   - Transition path handles cohort-specific σ²_ε via year_birth indexing (tp)
-!
-! PERFORMANCE:
-!   - Nested loops: bigJ × n_a × n_aime × n_sp × n_sr × n_sd × n_sp × n_sr × n_sd
-!   - With typical grids: 16 × 60 × 40 × 9 × 5 × 5 × 9 × 5 × 5 ≈ 10^9 operations
-!   - Most time spent in inner shock loops (9×5×5 = 225 iterations per state)
-!   - Vectorization opportunities limited by irregular interpolation patterns
+! KEY OUTPUTS: prob_ss(j,ia,i_aime,ip,ir,id),
+!   prob_trans(j,ia,i_aime,ip,ir,id,i)
 !===============================================================================
 !***************************************************************************************
 
@@ -161,12 +53,11 @@
                     dist = min(dist, 1d0)
 
                     
-                    prob_ss(1, ial, 0, :, :, :)  = prob_ss(1, ial, 0, :, :, :)  + p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+                    prob_ss(1, ial, 0, :, :, :)  = prob_ss(1, ial, 0, :, :, :)  + p_initial(ind)*dist ! initial distribution
                     prob_ss(1, iar, 0, :,  :, :) = prob_ss(1, iar, 0, :, :, :) +  p_initial(ind)*(1d0 - dist)
                     
                     
                 enddo
-                  ! need to amend it to get initial dispersion
                 const = 0.0d0
                  do ia = 0, n_a, 1
                     do i_aime = 0, n_aime, 1
@@ -191,9 +82,7 @@
             dist = min(dist, 1d0)
             
             
-            ! need to amend it to get initial dispersion
-            
-            prob_ss(1, ial, 0, :, :, :) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+            prob_ss(1, ial, 0, :, :, :) = dist ! initial distribution
             prob_ss(1, iar, 0, :,  :, :) = 1d0 - dist
             
             
@@ -331,14 +220,13 @@
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
 
-                    prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, :, :, :,i) +  p_initial(ind)*dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+                    prob_trans(1, ial, 0, :, :, :, i)  = prob_trans(1, ial, 0, :, :, :,i) +  p_initial(ind)*dist ! initial distribution
                     prob_trans(1, iar, 0, :, :, :, i) =  prob_trans(1, iar, 0, :, :, :,i) +  p_initial(ind)*(1d0 - dist)
                 enddo
                 
                     
                     
 
-                  ! need to amend it to get initial dispersion
                 const = 0.0d0
                 
                 
@@ -362,7 +250,7 @@
                     ial = min(ial, n_a)
                     iar = min(iar, n_a)
                     dist = min(dist, 1d0)
-            prob_trans(1, ial, 0, :, :, :, i) = dist ! y-ss rename f_dens_ss ! poczatkowy rozk�ad
+            prob_trans(1, ial, 0, :, :, :, i) = dist ! initial distribution
             prob_trans(1, iar, 0, :, :, :, i) = 1d0 - dist
             
             

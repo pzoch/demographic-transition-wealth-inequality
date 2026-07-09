@@ -2,36 +2,13 @@
 ! FILE: Print_DB.f90
 !
 ! DESCRIPTION:
-!   Opens output files and writes transition path results to disk. Handles bulk
-!   data export for aggregate and cohort-level variables across time periods.
+!   Writes transition path results to disk: aggregate time series (*_trans.txt)
+!   and cohort-level life-cycle profiles (*_j_trans.csv). Controlled by
+!   switch_print_macro and switch_small_write.
 !
-! SCRIPT (included code fragment)
-!   Executed at end of transition path solution to save results.
+! INCLUDED IN: main_base_transition.f90
 !
-! OUTPUT FILES (saved to scenario subfolder Results/{version}{experiment}{closure}/):
-!   Time series (bigT vectors):
-!   - *_trans.txt: Aggregates (y, capital, rate, bigl, debt_share, g_share, etc.)
-!   - *_tax_revenue_trans.txt: Tax revenues by type (tC, tL, tK)
-!
-!   Cohort profiles (bigJ x bigT matrices):
-!   - *_j_trans.csv: Life-cycle profiles (u, l, c, b, sv by age and time)
-!
-!   Additional:
-!   - gamma_trans.txt, lambda_trans.txt: Demographics/productivity
-!   - replacement*_trans.txt: Pension replacement rates
-!   - cy_ratio, ky_ratio: Consumption/capital to output ratios
-!
-! FILE UNITS:
-!   Uses Fortran unit numbers 1-87 for different output streams.
-!   All files written as formatted text (human-readable).
-!
-! VARIABLES WRITTEN:
-!   From global_vars transition arrays: y(bigT), k(bigT), r(bigT), w(bigT),
-!   c_j(bigJ,bigT), l_j(bigJ,bigT), sv_j(bigJ,bigT), b_j(bigJ,bigT), etc.
-!
-! NOTES:
-!   Part of transition_path_DB output sequence. Controlled by switch_small_write.
-!   Working directory is set to scenario subfolder via chdir in set_globals.f90.
+! KEY OUTPUTS: *_trans.txt (aggregates), *_j_trans.csv (age profiles)
 !===============================================================================
   ! save in files
 
@@ -46,9 +23,7 @@ if (switch_print_macro == 1) then
     OPEN (unit=8,  FILE ="subsidy_share_trans.txt")
     OPEN (unit=9,  FILE ="benefits_trans.txt")
     
-    OPEN (unit=10, FILE ="bigl_trans.txt")
     OPEN (unit=11, FILE ="replacement_trans.txt")
-    ! upsilon removed - always 0
     OPEN (unit=13, FILE ="tC_trans.txt")
     OPEN (unit=14, FILE ="tL_trans.txt")
     OPEN (unit=15, FILE ="tK_trans.txt")
@@ -56,9 +31,7 @@ if (switch_print_macro == 1) then
     OPEN (unit=17, FILE ="debt_share_trans.txt")
     OPEN (unit=18, FILE ="debt_cost_share_trans.txt")
     
-    ! upsilon removed - always 0
-    OPEN (unit=21, FILE ="replacement2_trans.txt") !rozumiane jako pierwsza emerytura do ostatniej placy
-    OPEN (unit=22, FILE ="bigL_trans.txt")
+    OPEN (unit=21, FILE ="replacement2_trans.txt") ! first pension to last wage ratio
     OPEN (unit=23, FILE ="Nt_trans.txt")
     OPEN (unit=24, FILE ="g_share_trans.txt")
     OPEN (unit=25, FILE ="rbar_trans.txt")
@@ -68,12 +41,6 @@ if (switch_print_macro == 1) then
     OPEN (unit=28, FILE ="tK_tax_revenue_trans.txt")
     
     
-    OPEN (unit=59, FILE ="u_j_trans.csv")
-    OPEN (unit=60, FILE ="l_j_trans.csv")
-    OPEN (unit=61, FILE ="c_j_trans.csv")
-    OPEN (unit=62, FILE ="b_j_trans.csv")
-    OPEN (unit=63, FILE ="sv_j_trans.csv")
-
     OPEN (unit=64, FILE ="gamma_trans.txt")
     
     OPEN (unit=65, FILE ="cy_ratio_trans.txt")
@@ -101,6 +68,15 @@ if (switch_print_macro == 1) then
     OPEN (unit=85,  FILE ="star_pop_trans.txt")
     OPEN (unit=86,  FILE ="beq_gdp_trans.txt")
     OPEN (unit=87,  FILE ="avg_hours_trans.txt")
+    if (any(rate_adj /= 0.0d0)) then
+    OPEN (unit=88,  FILE ="r_low_trans.txt")
+    OPEN (unit=89,  FILE ="r_type_trans.csv")
+    write(89, '(A)', advance='no') "year;r_low"
+    do m = 1,bigM,1
+        write(89, '(A,I0)', advance='no') ";r_type_", m
+    enddo
+    write(89, '(A)') ""
+    endif
     do i = 2,bigJ-1,1
         write(1, '(F20.10)')  u_init_old(i) 
     enddo
@@ -115,19 +91,15 @@ if (switch_print_macro == 1) then
         write(5,  '(F20.10)') k(i) 
         write(6,  '(F20.10)') r_bar(i)  
         write(8,  '(F20.10)') subsidy(i)/y(i)
-        write(9, '(F20.10)')  sum_b(i)/y(i) !units?
-        write(10, '(F20.10)') bigl_aux(i)/1000000 
+        write(9, '(F20.10)')  sum_b(i)/y(i)
         write(11, '(F20.10)') replacement(i)
-        ! write(12, '(F20.10)') upsilon(i) - removed, always 0
         write(13, '(F20.10)') tC(i)
         write(14, '(F20.10)') tL(i)
         write(15, '(F20.10)') tK(i)
         write(16, '(F20.10)') contribution(i)/y(i)
         write(17, '(F20.10)') debt_share(i)
         write(18, '(F20.10)') ((1 + r_bar(i))*debt(max(i-1,1))/(nu(i)*gam_t(i)) - debt(i))/y(i)
-        ! write(20, '(F20.10)') upsilon(i)/(bigl(i)/N_t(i))/y(i) - removed, always 0
         write(21, '(F20.10)') replacement2(i)         
-        write(22, '(F20.10)') bigl(i)
         write(23, '(F20.10)') N_t(i)
         write(24, '(F20.10)') g(i)/y(i)
         write(25, '(F20.10)') (1d0 + r_bar(i))**(1d0/real(zbar)) - 1d0
@@ -135,12 +107,11 @@ if (switch_print_macro == 1) then
         
         write(27, '(F20.10)') labor_tax_revenue(i)/bigl(i)/y(i)
          if (switch_tauK_gross == 0) then 
-            write(28, '(F20.10)') tk(i)*r_bar(i)*k(i) /y(i) !! i am not sure if this is calculated correctly - need to check also in closure.f90
+            write(28, '(F20.10)') tk(i)*r_bar(i)*k(i) /y(i)
          else
             write(28, '(F20.10)') tk(i)*(r_bar(i)+depr)*k(i) / y(i)
          endif
          
-        write(30,  '(F20.16)') t1(2,i)
         write(64,  '(F20.10)') gam_t(i) 
         write(65,  '(F20.10)') consumption_gross(i)/y(i) 
         write(66,  '(F20.10)') k(i)/y(i)
@@ -167,29 +138,15 @@ if (switch_print_macro == 1) then
         write(85,  '(F20.10)') superstar_pop_share_trans(i)
         write(86,  '(F20.10)') bequest_trans(i) / y(i)
         write(87,  '(F20.10)') average_lab(i)
+        if (any(rate_adj /= 0.0d0)) then
+        write(88,  '(F20.10)') r_low(i)
+        write(89,  '(I5,A,F20.10)', advance='no') i, ";", r_low(i)
+        do m = 1,bigM,1
+            write(89, '(A,F20.10)', advance='no') ";", r_low(i)+rate_adj(m)
+        enddo
+        write(89, '(A)') ""
+        endif
     enddo
-    
-    
-
-    !do j = 1,bigJ,1
-    !    do i = 1,bigT-1,1
-    !        write(59, '(F20.10)', advance='no') u_j(j,i)
-    !        write(59, '(A)', advance='no')";"
-    !        write(60, '(F20.10)', advance='no') l_j(j,i)
-    !        write(60, '(A)', advance='no')";"
-    !        write(61, '(F20.10)', advance='no') c_j(j,i)
-    !        write(61, '(A)', advance='no')";"
-    !        write(62, '(F20.10)', advance='no') b_j(j,i)
-    !        write(62, '(A)', advance='no')";"
-    !        write(63, '(F20.10)', advance='no') sv_j(j,i)
-    !        write(63, '(A)', advance='no')";"
-    !    enddo
-    !    write(59, '(F20.10)') u_j(j,bigT)
-    !    write(60, '(F20.10)') l_j(j,bigT)
-    !    write(61, '(F20.10)') c_j(j,bigT)
-    !    write(62, '(F20.10)') b_j(j,bigT)
-    !    write(63, '(F20.10)') sv_j(j,bigT)
-    !enddo
 
     CLOSE(1)
     CLOSE(2)
@@ -197,31 +154,21 @@ if (switch_print_macro == 1) then
     CLOSE(4)
     CLOSE(5)
     CLOSE(6)
-    CLOSE(7)
     CLOSE(8)
     CLOSE(9)
-    CLOSE(10)
     CLOSE(11)
-    CLOSE(12)
     CLOSE(13)
     CLOSE(14)
     CLOSE(15)
     CLOSE(16)
     CLOSE(17)
-    CLOSE(20)
     CLOSE(21)
-    CLOSE(22)
-    CLOSE(59)
     CLOSE(23)
     CLOSE(24)
     CLOSE(25)
     CLOSE(26)
     CLOSE(27)
     CLOSE(28)
-    CLOSE(60)
-    CLOSE(61)
-    CLOSE(62)
-    CLOSE(63)
     CLOSE(64)
     CLOSE(65)
     CLOSE(66)
@@ -246,15 +193,17 @@ if (switch_print_macro == 1) then
      CLOSE(85)
      CLOSE(86)
      CLOSE(87)
+     if (any(rate_adj /= 0.0d0)) then
+     CLOSE(88)
+     CLOSE(89)
+     endif
 
 ! pension system closure
     OPEN (unit=1, FILE ="b_scale_factor.txt")
     OPEN (unit=2, FILE ="t1_additional_contrib.txt")
-    ! upsilon removed - always 0
         do i = 1,n_p+1,1
             write(1, '(F20.10)')  b_scale_factor(i) 
             write(2, '(F20.10)')  t1(1,i) - t1_contrib(1,i)
-            ! write(3, '(F20.10)')  upsilon(i) - removed, always 0 
     enddo
 
     CLOSE(1)
@@ -275,34 +224,32 @@ if (switch_print_macro == 1) then
     CLOSE(202)
     CLOSE(203)
 
+    OPEN (unit=1, FILE ="gini_weight_trans.txt")
+        do i = 1, bigT, 1
+            do j = 1, bigJ, 1
+                do ia = 0, n_a, 1
+                    write(1,*) gini_weight_trans(j,ia,i)
+                enddo
+            enddo
+        enddo
+    close(1)
+
+    open(unit = 106, FILE ="gini_weight_trans.csv")
+    write(106, '(A)') "weight;year;age;assets"
+        do i = 1, bigT, 1
+            do j = 1, bigJ, 1
+                do ia = 0, n_a, 1
+        write(106, '(F20.10,A,I5,A,I5,A,F20.10)') &
+                    gini_weight_trans(j,ia,i), ";", & ! weight
+                    i, ";", & !year
+                    j , ";",  & !age
+                    sv(ia)  !assets
+                enddo
+            enddo
+        enddo
+    close(106)
+
 endif  ! end of switch_print_macro block
-
-
-OPEN (unit=1, FILE ="gini_weight_trans.txt")
-    do i = 1, bigT, 1
-        do j = 1, bigJ, 1
-            do ia = 0, n_a, 1
-                write(1,*) gini_weight_trans(j,ia,i)
-            enddo        
-        enddo
-    enddo
-close(1)
-
-
-open(unit = 106, FILE ="gini_weight_trans.csv")
-write(106, '(A)') "weight;year;age;assets"
-    do i = 1, bigT, 1
-        do j = 1, bigJ, 1
-            do ia = 0, n_a, 1
-    write(106, '(F20.10,A,I5,A,I5,A,F20.10)') &
-                gini_weight_trans(j,ia,i), ";", & ! weight
-                i, ";", & !year
-                j , ";",  & !age
-                sv(ia)  !assets
-            enddo        
-        enddo
-    enddo
-close(106)
 
 
 ! prob_trans.csv - only written if switch_full_csv_write == 1

@@ -6,6 +6,8 @@ keep wprem2_17 year
 merge 1:1 year using $bsource/bone1y
 ipolate wprem2_17 year, generate(wprem2)
 
+global lam = 500
+
 keep if year >= 1935
 tsset year
 tsline wprem2
@@ -13,7 +15,7 @@ tsline wprem2
 replace wprem2= 0.386 if mi(wprem2) & year < 1963
 sum wprem2 if year == 2017
 replace wprem2= `r(mean)' if mi(wprem2) & year > 2017
-tsfilter hp wprem2_cycle = wprem2, smooth($lam) trend(wprem2_trend)
+quietly tsfilter hp wprem2_cycle = wprem2, smooth($lam) trend(wprem2_trend)
 tsline wprem2_trend
 periods
 
@@ -25,7 +27,6 @@ tsline skill_premium
 gen skill_premium_model = skill_premium
 sum skill_premium if year == 1955
 replace skill_premium_model = `r(mean)' if year>=1955
-replace skill_premium_model = . if year < 1955
 
 ////// DRAWING ////////
 global var_frozen skill_premium_model
@@ -37,6 +38,6 @@ special_drawing
 ////// EXPORTING ///////
 gen ones = 1.00
 
-stack $var ones, into(v)
+stack $var ones, into(v) clear
 drop _stack
-export delimited v using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited v using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace

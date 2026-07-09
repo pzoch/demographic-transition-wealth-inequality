@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This is a Stata 19.0 generated SVG file (http://www.stata.com) -->
+
+<svg version="1.1" width="4.800in" height="3.200in" viewBox="0 0 3456 2304" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>Stata Graph - Graph</desc>
+	<rect x="0" y="0" width="3456" height="2304" style="fill:#FFFFFF;stroke:none"/>
+	<rect x="0.00" y="0.00" width="3456.00" height="2304.00" style="fill:#FFFFFF"/>
+	<rect x="1.73" y="1.73" width="3452.54" height="2300.54" style="fill:none;stroke:#FFFFFF;stroke-width:3.46"/>
+	<rect x="376.60" y="80.68" width="2998.73" height="1855.36" style="fill:#FFFFFF"/>
+	<rect x="378.32" y="82.41" width="2995.27" height="1851.91" style="fill:none;stroke:#FFFFFF;stroke-opacity:0.00;stroke-width:3.46"/>
+	<line x1="376.60" y1="1885.39" x2="3375.32" y2="1885.39" style="stroke:#E0E0E0;stroke-width:3.46"/>
+	<line x1="376.60" y1="1446.90" x2="3375.32" y2="1446.90" style="stroke:#E0E0E0;stroke-width:3.46"/>
+	<line x1="376.60" y1="1008.30" x2="3375.32" y2="1008.30" style="stroke:#E0E0E0;stroke-width:3.46"/>
+	<line x1="376.60" y1="569.82" x2="3375.32" y2="569.82" style="stroke:#E0E0E0;stroke-width:3.46"/>
+	<line x1="376.60" y1="131.33" x2="3375.32" y2="131.33" style="stroke:#E0E0E0;stroke-width:3.46"/>
+	<path d=" M427.25 1666.14 L572.08 1556.52 L717.01 1556.52 L861.84 1227.66 L1006.67 1118.03 L1151.60 789.17 L1296.43 569.92 L1441.26 350.68 L1586.20 131.33 L1731.02 131.33 L1875.85 131.33 L2020.79 131.33 L2165.62 131.33 L2310.44 131.33 L2455.38 131.33 L2600.21 131.33 L2745.14 131.33 L2889.97 131.33 L3034.80 131.33 L3179.74 131.33 L3324.56 131.33" stroke-linejoin="round" style="fill:none;stroke:#1A476F;stroke-width:10.37"/>
+	<line x1="376.60" y1="1936.04" x2="376.60" y2="80.68" style="stroke:#000000;stroke-width:3.46"/>
+	<text x="328.64" y="1913.42" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="end">.4</text>
+	<text x="328.64" y="1474.94" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="end">.6</text>
+	<text x="328.64" y="1036.34" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="end">.8</text>
+	<text x="328.64" y="597.85" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="end">1</text>
+	<text x="328.64" y="159.37" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="end">1.2</text>
+	<text x="180.27" y="1008.30" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" transform="rotate(-90 180.27,1008.30)" text-anchor="middle">replacement rate scale parameter</text>
+	<line x1="376.60" y1="1936.04" x2="3375.32" y2="1936.04" style="stroke:#000000;stroke-width:3.46"/>
+	<text x="427.25" y="2040.07" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">1935</text>
+	<text x="1151.60" y="2040.07" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">1960</text>
+	<text x="1875.96" y="2040.07" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">1985</text>
+	<text x="2600.32" y="2040.07" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">2010</text>
+	<text x="3324.67" y="2040.07" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">2035</text>
+	<text x="1875.96" y="2155.63" style="font-family:'Helvetica';font-size:80.03px;fill:#000000" text-anchor="middle">year</text>
+</svg>

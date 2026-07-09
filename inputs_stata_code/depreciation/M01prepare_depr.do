@@ -2,18 +2,21 @@
 * the logic is that the rate at which capital depreciates between 1955 and 1960 is
 * depr_1960 = 1 - (1-d_1960)*(1-d_1959)*(1-d_1958)*(1-d_1957)*(1-d_1956);
 
-/*capture dbnomics import , provider(GGDC) dataset(penn10/delta.USA) clear
+if $download_data == 1 {
+	capture dbnomics import , provider(GGDC) dataset(penn10/delta.USA) clear
 	ren period year
 	ren value delta
 	keep year delta
 	destring _all, replace
-
-save depreciation/depreciation.dta, replace */	
+	save depreciation/depreciation.dta, replace
+}
 
 use depreciation/depreciation.dta, clear
 periods
 
-tsfilter hp delta_cycle = delta, smooth($lam) trend(delta_trend)
+global lam = 500
+
+quietly tsfilter hp delta_cycle = delta, smooth($lam) trend(delta_trend)
 gen l_retain = log(1 - delta_trend)
 
 collapse (mean) l_retain (first) year, by(fiveyear)  // means, because the last period had only 4 observations 
@@ -55,5 +58,5 @@ special_drawing
 
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+export delimited $var using "../fortran_code/Data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
 

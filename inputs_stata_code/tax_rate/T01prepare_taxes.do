@@ -2,9 +2,8 @@
 
 foreach tax in  tK tL tC{
 
-* load McDaniel's data 
-* data downaloaded from from https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia 
-local tax tK
+* load McDaniel's data
+* data downaloaded from from https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia
 import delimited tax_rate/updateorig`tax'.csv, clear
 
 rename v1 year
@@ -37,9 +36,9 @@ restore
 merge 1:1 year using `model'
 
 ///// FROZEN /////////
+gen `tax'_frozen = `tax'
 sum `tax' if year == 1955
-gen `tax'_frozen = `r(mean)'
-replace `tax'_frozen = . if year < 1955
+replace `tax'_frozen = `r(mean)' if year>=1955
 
 ////// DRAWING ////////
 global var_frozen `tax'_frozen
@@ -49,5 +48,6 @@ global ye 2015
 special_drawing
 
 ////// EXPORTING ///////
-export delimited $var using "../fortran_code/data/_data_$var.txt", delimiter(tab) novarnames nolabel replace
+local taxletter = substr("`tax'", 2, .)
+export delimited $var using "../fortran_code/Data/_data_tau`taxletter'.txt", delimiter(tab) novarnames nolabel replace
 }

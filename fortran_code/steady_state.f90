@@ -2,65 +2,12 @@
 ! FILE: steady_state.f90
 !
 ! DESCRIPTION:
-!   Module for computing steady state general equilibrium of the overlapping
-!   generations (OLG) model with heterogeneous agents and PAYG pension system.
-!   Solves for equilibrium where households optimize, markets clear, and the
-!   government budget balances.
+!   Solves for steady-state general equilibrium of the OLG model via damped
+!   fixed-point iteration on (k_ss, r_ss, w_ss). Supports both initial
+!   (param_ss=0) and final (param_ss=1) steady states.
 !
 ! MODULE: steady_state
-!   Contains steady state computation routine
-!
-! KEY SUBROUTINE:
-!   - steady: Main iterative solver for steady state equilibrium
-!
-! EQUILIBRIUM DEFINITION:
-!   A steady state equilibrium consists of:
-!   1. Household policy functions: c(j,a,aime,ε), l(j,a,aime,ε), s(j,a,aime,ε)
-!   2. Prices: interest rate r, wages w(m) by education type
-!   3. Government policy: taxes (tauL, tauK, tauC), pension contribution t1,
-!      replacement rate rho, debt level, government spending g
-!   4. Distribution: prob(j,a,aime,ε) across states
-!   Such that:
-!   - Households maximize lifetime utility given prices and policy
-!   - Firms maximize profits: r = FK(K,L), w = FL(K,L)
-!   - Asset market clears: K + Debt = aggregate savings
-!   - Labor market clears: L = aggregate labor supply
-!   - Government budget balances (via closure rule)
-!   - Pension system balances (PAYG or funded)
-!
-! ITERATIVE ALGORITHM:
-!   1. Guess capital stock k_ss
-!   2. Compute factor prices from production: r_bar_ss = FK, w_bar_ss = FL
-!   3. Calculate pension benefits using replacement rate rho
-!   4. Solve household problem via policy function iteration (backward induction)
-!   5. Compute stationary distribution (forward simulation)
-!   6. Aggregate individual decisions: consumption, savings, labor
-!   7. Calculate bequests from mortality
-!   8. Apply government budget closure (g adjusts residually)
-!   9. Update k_ss = (aggregate savings - debt) / (gam*nu)
-!   10. Check convergence: err_ss = |k_new - k_old|
-!   11. If err_ss < tol, exit; else damp update and repeat
-!
-! DEPENDENCIES:
-!   - global_vars: Parameter and variable declarations
-!   - pfi_trans: Policy function iteration routines
-!   - sorting: For wealth distribution calculations
-!   - gini_calc: For inequality measures (Gini coefficients)
-!
-! INCLUDES (via include statements):
-!   - ces_production_ss.f90: CES production function for heterogeneous labor
-!   - pension_system_ss.f90: Pension benefit calculation
-!   - closure_ss.f90: Government budget closure (g residual)
-!   - Print_steady_DB.f90: Diagnostic output
-!
-! NOTES:
-!   - Supports both PAYG (switch_type=0) and fully-funded (switch_type=1) pensions
-!   - Can solve for "old" (param_ss=0) or "new" (param_ss=1) steady state
-!   - Multiple education types (bigM) with CES aggregation (rho_subst)
-!   - Heterogeneous agents: income shocks (n_sp), return shocks (n_sr),
-!     discount shocks (n_sd), AIME history (n_aime)
-!   - Accidental bequests distributed via switch_unequal_bequest rule
-!   - Convergence tolerance: err_ss_tol (typically 1e-7 to 1e-8)
+!   Subroutine: steady
 !===============================================================================
 
 MODULE steady_state
@@ -173,7 +120,7 @@ CONTAINS
 !   - Stores transition path endpoints when called from main routine
 !   - If switch_exog_rate=1, uses exogenous interest rate (skips iteration)
 !-------------------------------------------------------------------------------
-subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j)
+subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_type, k_ss_o, r_ss, r_bar_ss, w_bar_ss,  l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, t1_ss, g_per_capita_ss, b1_ss_j, b2_ss_j,  pillarI_ss_j, pillarII_ss_j, bequest_ss_j, bequest_ss, lab_ss_j, r_low_ss, asset_income_ss_j, asset_base_ss_j)
     real(dp) :: k_ss, k_ss_new,  k_total_ss, k_star_ss, i_star_ss, err_ss, u_ss, debt_share_ss, &
                 jbar_ss, gam_ss, N_ss, nu_ss, bigl_ss, subsidy_ss, y_ss,  consumption_ss_gross,  &
                 savings_ss, average_l_ss, average_w_ss, average_lab_ss, income_ss, &
@@ -183,7 +130,7 @@ subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_ty
     real(dp), dimension(3) :: desired_pctiles
     real(dp), dimension(3) :: share_sav, share_tot_pretax, share_tot, share_lab_pretax_inc
     real(dp), dimension(bigM) :: bequest_ss, bigl_type_ss, type_multiplier_ss, type_share_ss, type_share_eff_ss, sum_b_weight_vec_ss
-    real(dp), dimension((bigJ*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav, vec_tot_pretax, vec_tot, vec_lab_inc,vec_lab_pretax_inc,vec_help_sav,vec_help_tot_pretax,vec_help_tot,vec_help_lab_pretax_inc,vec_help_lab_inc
+    real(dp), dimension(((bigJ+n_beq-1)*bigM*(n_a+1)*(n_aime+1)*n_sp*n_sr*n_sd)) :: vec_prob, vec_sav, vec_tot_pretax, vec_tot, vec_lab_inc,vec_lab_pretax_inc,vec_help_sav,vec_help_tot_pretax,vec_help_tot,vec_help_lab_pretax_inc,vec_help_lab_inc
     integer,  allocatable :: iorder_sav(:), iorder_tot_pretax(:),iorder_tot(:),iorder_lab_pretax_inc(:),iorder_lab_inc(:)
     
     
@@ -196,11 +143,13 @@ subroutine steady(switch_tauK_gross, switch_unequal_bequest, param_ss, switch_ty
     real*8, dimension(0:n_a) :: prob_ss_marg	
     integer, intent(in)   :: param_ss
     integer, intent(in)   :: switch_type, switch_tauK_gross, switch_unequal_bequest
-    integer :: counter, n, remember
+    integer :: counter, n, remember, ibeq
     real(dp), intent(out) :: k_ss_o, r_ss, r_bar_ss, t1_ss, g_per_capita_ss
     real(dp), dimension(bigM), intent(out)  :: w_bar_ss
     real(dp), dimension(bigj,bigM), intent(out) :: l_ss_j, w_ss_j, s_ss_j, c_ss_j, b_ss_j, lab_ss_j
-    ! pension system 
+    real(dp), intent(out) :: r_low_ss
+    real(dp), dimension(bigj,bigM), intent(out) :: asset_income_ss_j, asset_base_ss_j
+    ! pension system
      real(dp), dimension(bigj,bigM) :: b1_ss_j, b2_ss_j, w_pom_ss_implicit
      real(dp), dimension(bigj) :: pillarI_ss_j, pillarII_ss_j, &
                                  contributionI_ss_j, contributionII_ss_j
@@ -294,15 +243,8 @@ do j = 1,bigJ,1
         endif
     enddo
 enddo  
-!write(*,*) "life  exp is equal to ", life_exp(10)*5d0 
-! ret/work force line removed - was showing NaN
-
 b_scale_factor_ss = 1d0
 avg_ef_l_supply = 0.33 
-!type_multiplier_ss = 1.0d0
-
-
-! valor_share removed - was always 1.0 (full indexation)
 valor_mult_ss = (1 + 1.0d0*(nu_ss*gam_ss - 1))/gam_ss 
     rI_ss = gam_ss*nu_ss - 1
     N_ss = sum(N_big_ss_j(1:bigJ,1:bigM))       
@@ -370,7 +312,7 @@ do iter = 1,n_iter_ss,1
 
 
 ! no interest is added when switch_unequal_bequest == 1
-if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then  ! this part is also weird! need to check!!!! 
+if ((switch_run_1 == 1).AND.(switch_steady_demo == 0)) then
 
         if (switch_unequal_bequest==0) then
             
@@ -702,13 +644,20 @@ do j = 1, bigJ, 1
                 do ip = 1, n_sp, 1
                     do ir = 1, n_sr, 1
                         do id = 1, n_sd, 1
-                        vec_prob(counter) = (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) ! mass
-                        vec_sav(counter)  = svplus_ss_big(j, ia, i_aime, ip, ir, id,m) !sav
-                        !vec_tot_pretax(counter)  = tot_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc pretax
-                        !vec_tot(counter)  = tot_income_ss_big(j, ia, i_aime, ip, ir, id,m) !tot inc
-                        !vec_lab_inc(counter)  = lab_income_ss_big(j, ia, i_aime, ip, ir, id,m) !lab income
-                        vec_lab_pretax_inc(counter)  = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m)  !lab income pretax
-                        counter = counter+1
+                        ! bequest-aware Gini: at beq_age, expand into n_beq sub-groups
+                        if (j == beq_age .and. switch_unequal_bequest == 2) then
+                            do ibeq = 1, n_beq
+                                vec_prob(counter) = p_beq(ibeq) * prob_ss_big(j, ia, i_aime, ip, ir, id,m) * N_big_ss_j(j,m) / sum(N_big_ss_j(:,:))
+                                vec_sav(counter)  = svplus_beq_ss_big(ibeq, ia, i_aime, ip, ir, id,m)
+                                vec_lab_pretax_inc(counter) = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m)
+                                counter = counter + 1
+                            enddo
+                        else
+                            vec_prob(counter) = prob_ss_big(j, ia, i_aime, ip, ir, id,m) * N_big_ss_j(j,m) / sum(N_big_ss_j(:,:))
+                            vec_sav(counter)  = svplus_ss_big(j, ia, i_aime, ip, ir, id,m)
+                            vec_lab_pretax_inc(counter) = lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m)
+                            counter = counter + 1
+                        endif
                         if (ip > n_sp_risk - n_superstar) then
                             if (j < jbar_ss) then
                         labinc_superstar =  lab_income_pretax_ss_big(j, ia, i_aime, ip, ir, id,m) * (prob_ss_big(j, ia, i_aime, ip, ir, id,m)*N_big_ss_j(j,m)/sum(N_big_ss_j(:,:))) + labinc_superstar
@@ -729,8 +678,8 @@ enddo
 superstar_labinc_share = labinc_superstar / labinc_aggregate
 superstar_pop_share = pop_superstar / sum(N_big_ss_j(1:(jbar_ss-1),:))
 superstar_totinc_share = totinc_superstar / totinc_aggregate
-gini_val_sav            = gini(vec_sav,vec_prob)
-gini_val_lab_pret       = gini(vec_lab_pretax_inc,vec_prob)
+gini_val_sav            = gini(vec_sav(1:counter-1),vec_prob(1:counter-1))
+gini_val_lab_pret       = gini(vec_lab_pretax_inc(1:counter-1),vec_prob(1:counter-1))
 
     
     if (switch_run_1 == 1) then    
@@ -881,6 +830,9 @@ endif
     endif
     
 
+    r_low_ss = 0.0d0
+    asset_income_ss_j = 0.0d0
+    asset_base_ss_j = 0.0d0
     k_ss_o = k_ss
     
 

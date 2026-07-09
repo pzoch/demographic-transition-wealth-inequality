@@ -44,3 +44,10 @@ inputs_stata_code/skill_premium/ACS_college/ACS_college.dta
 
 # UN World Population Prospects mortality table (180 MB)
 inputs_stata_code/demography/mortality/WPP2022_MORT_F07_1_ABRIDGED_LIFE_TABLE_BOTH_SEXES.xlsx
+
+# Raw PSID extract at its current pipeline location (~93 MB, PSID Conditions of Use)
+inputs_stata_code/income_process/PSID/psid.dta
+
+# Journal replication report and deposit archives
+Tyrowicz-*.pdf
+*.zip

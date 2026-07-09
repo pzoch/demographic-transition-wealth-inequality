@@ -1,3 +1,9 @@
+capture graph drop _all
+
+capture which lorenz
+if _rc != 0 {
+    ssc install lorenz
+}
 
 	use ..\data\model_$scenario, clear
 	ren labinc_pretax hhslabinc
@@ -30,7 +36,7 @@ foreach yr in `yrs' {
 	keep if !mi(hhslabinc) & !mi(weight)  
 
 	lorenz estimate hhslabinc  [pw=weight] ,  over(sourcen)  gini
-	lorenz graph,  title("`yr'")  overlay  ci(nor)  legend(bplacement(nw) ring(0) cols(1)) ysize(1) xsize(1)
+		lorenz graph,  title("`yr'")  overlay  ci(nor)  legend(bplacement(nw) ring(0) cols(1)) ysize(1) xsize(1)
 		graph export $graphspath\\Lorenz_`yr'.png, replace	
 		graph export $graphspath\\Lorenz_`yr'.eps, replace		
 		graph export $graphspath\\Lorenz_`yr'.svg, replace	

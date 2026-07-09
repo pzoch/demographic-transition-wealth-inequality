@@ -54,7 +54,7 @@ nstr_ ndm_ govt__
 gcbo_ all_ govt__
 gcbo_ ndm_ govt__
 
-# --- Appendix F.6: Exogenous interest rate ---
+# --- Appendix F.6: Exogenous interest rate (open economy) ---
 exor_ all_ govt__
 
 # --- Appendix F.7: Unequal bequests ---
@@ -62,13 +62,6 @@ beqs_ all_ govt__
 beqs_ ndm_ govt__
 
 # --- Appendix F.2: Heterogeneous returns ---
-# IMPORTANT: These require 5Gtrans_het.exe (Release_HetRate build),
-# NOT the standard 5Gtrans.exe. run_scenarios_from_list.bat will attempt
-# them with the standard binary and will produce incorrect results — run
-# them manually via:
-#     x64\Release_HetRate\5Gtrans_het.exe hrat_ all_ govt__
-#     x64\Release_HetRate\5Gtrans_het.exe hrat_ ndm_ govt__
-# Kept uncommented below so the scenario set is complete; comment them
-# out again if you want run_scenarios_from_list.bat to skip them.
-hrat_ all_ govt__
-hrat_ ndm_ govt__
+# Run separately via run_scenarios_het.bat (uses 5Gtrans_het.exe built from
+# the Release_HetRate|x64 VS configuration). Intentionally NOT listed here so
+# run_scenarios_from_list.bat uses the standard binary.

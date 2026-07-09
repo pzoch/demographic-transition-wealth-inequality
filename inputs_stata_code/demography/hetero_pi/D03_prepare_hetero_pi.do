@@ -1,5 +1,4 @@
 capture mkdir demography\hetero_pi\processed
-capture mkdir demography\hetero_pi\output
 
 *****************Merging pi data with college proportion*********************************
 //Use data generated in D01_life_tables.do
@@ -103,17 +102,8 @@ stack syn_pr3 syn_pr1, into (prob) clear
 replace prob = round(prob, .00001)
 replace prob= 0.9999 if prob >= 1
 
-
 keep prob
-export delimited "demography\hetero_pi\output\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace 
-
-
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_no_col.txt", replace 
-restore
-
-preserve 
-keep syn_pr3 
-export delimited "demography\hetero_pi\output\_data_pi_US_since1935_col.txt", replace 
+export delimited "..\fortran_code\Data\_data_het_pi_US_since1935_all.txt", delimiter(tab) novarnames nolabel replace
 restore
 
 ******************************Calculating LE50 for heterogenous pi*************************************
@@ -188,7 +178,6 @@ append using `all'
 
 seperate LE50, by(college)
 
-di 2015 - (95-50) 
 gen fixed_col 	= LE501 if year<=1955
 sum fixed_col if year==1955
 replace fixed_col = `r(mean)'  if year>1955
@@ -196,7 +185,7 @@ gen fixed_ncol	= LE500 if year<=1955
 sum fixed_ncol if year==1955
 replace fixed_ncol = `r(mean)'  if year>1955
 
-//THIS IS THE MAIN VISUALISATION:	
+//THIS IS THE MAIN VISUALISATION:
 twoway 	(line LE501 year if inrange(year,1935,1970), lcolor(blue) lwidth(thick) ) ///
 		(line LE501 year if year>=1970 , lcolor(blue)  lwidth(medium) lpattern(dash)) ///
 		(line LE500 year if inrange(year,1935,1970) , sort lcolor(black) lwidth(thick)) ///
@@ -204,9 +193,9 @@ twoway 	(line LE501 year if inrange(year,1935,1970), lcolor(blue) lwidth(thick) 
 		xlabel(1935[15]2050, labsize(*1.2)) ylabel(24[5]40, labsize(*1.2)) ///
 		legend(cols(2) order(-  "Data"  - "Demographic forecast" 1 "college"  2 "college"  3 "less than college"  4 "less than college") ///
 		size(*1.2)) xtitle("year", size(*1.2)) xsize(2) ysize(1) ytitle("Life expectancy at 50")
-/*
-graph save 	 "graphs\inputs\LE50year.gph", replace
-graph export "graphs\inputs\LE50year.png", replace
-graph export "graphs\inputs\LE50year.svg", replace
-graph export "graphs\inputs\LE50year.eps", replace
-graph export "graphs\inputs\LE50year.pdf", replace
+
+graph save   "../graphs/inputs/LE50year.gph", replace
+graph export "../graphs/inputs/LE50year.png", replace
+graph export "../graphs/inputs/LE50year.eps", replace
+graph export "../graphs/inputs/LE50year.svg", replace
+graph export "../graphs/inputs/LE50year.pdf", replace
