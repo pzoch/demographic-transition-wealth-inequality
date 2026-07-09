@@ -70,9 +70,10 @@ variants. The packaged `data/PSID/psid_ready.dta` is generated from `mostdrop_hh
 dropping households whose five-year business-income share exceeds 25 percent and whose labor income
 is above the year-specific first quartile.
 
-The PSID Data Center documentation used for this package does not list a dataset DOI. Cite PSID as
-the provider, specify the waves used, and cite the PSID Data Center and documentation pages:
+The PSID Data Center documentation does not list a dataset DOI for the collection itself. Cite PSID
+as the provider, specify the waves used, and cite the PSID Data Center and documentation pages:
 https://psidonline.isr.umich.edu/ and https://psidonline.isr.umich.edu/Guide/documents.aspx.
+The authors' exact extract has its own DOI via the PSID Public Data Extract Repository (see below).
 
 ## Complete variable inventory of the authors' extract
 
@@ -90,6 +91,7 @@ these 74 harmonized variables (produced by `psid_read.R` via `psidR`):
   `be_*`, `hd_own_*`, `wife_own_*`, `hd_working_in_*`, `w_working_in_*`, `net_inc_*`,
   `profits_*`, `loss_*`, `unincorporated_*`, plus `bus_at_all`
 
-The exact extract (identical file) is being archived in the PSID Public Data Extract Repository
-(https://www.openicpsr.org/openicpsr/psid), PSID's sanctioned channel for sharing publication
-extracts; the deposit DOI will be added here once issued.
+The exact extract (identical file) is archived in the PSID Public Data Extract Repository,
+PSID's sanctioned channel for sharing publication extracts: ICPSR ID 307887, published
+July 9, 2026, https://doi.org/10.3886/E307887V1. Replicators can obtain the byte-identical
+`psid.dta` there instead of rebuilding it from the PSID Data Center.
