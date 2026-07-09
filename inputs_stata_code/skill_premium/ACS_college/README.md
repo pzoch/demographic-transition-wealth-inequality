@@ -1,6 +1,11 @@
 # ACS/IPUMS input for the college-share pipeline
 
 `ACS_college.dta` is the IPUMS USA extract used by `inputs_stata_code/skill_premium/D02_prepare_college.do`.
+Despite the file name, it is **raw data**: the extract exactly as delivered by the IPUMS USA extract
+system, with only the file name changed - no observations or variables were modified. It covers every
+census/ACS year available at the authors' extraction time (decennial censuses 1940-2000, then ACS
+2006, 2011, 2016, and 2021). IPUMS extracts are user-generated, so a re-download with the same
+samples and variables is equivalent in content but not byte-identical.
 It is large and subject to IPUMS terms of use, so it may be omitted from a public journal deposit
 unless redistribution permission has been arranged. The processed files needed by the model are:
 
