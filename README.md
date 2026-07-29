@@ -10,21 +10,23 @@ Krzysztof Makarski, Joanna Tyrowicz, and Piotr Zoch. (forthcoming). "Demographic
 
 ## Start Here: Replication Routes and Run Order
 
-Most replicators do not need to run every stage. Choose one route first; the detailed steps later in this README use the same numbering and list inputs, outputs, commands, and details separately.
+Most replicators do not need to run every stage. Choose one route first. The detailed instructions later in this README use the same step numbers.
 
 ### Scope of the Economic Journal Reproducibility Check
 
 The Economic Journal reproducibility team re-downloaded the raw PSID extract from the cited provider-approved repository and verified the baseline `psid_all_govt__` route. The resulting intermediate model outputs agreed with the authors' supplied outputs up to numerical precision (approximately `1e-06`). The team did not independently re-extract the raw ACS/IPUMS data and did not re-solve the remaining 29 model scenarios. For those results, it used the intermediate scenario outputs included in `fortran_code/Results/` and rebuilt the paper figures.
 
-Accordingly, the journal's Data Availability statement will explain that, given the highly demanding algorithms, checks were performed on a subset of results. In this README, Route 3 identifies the fully computationally demanding route, while Route 1 reproduces all figures from the included intermediate outputs.
+Accordingly, the journal's Data Availability statement will explain that, given the highly demanding algorithms, checks were performed on a subset of results. Route 1 reproduces the figures from the included intermediate outputs; Route 2 rebuilds unrestricted calibration inputs; Route 3 is the full, computationally demanding rebuild from raw data.
 
 | Route | Goal | Raw restricted data needed? | Run order |
 |---|---|---|---|
 | **1. Figure-only check** | Recreate the paper figures from included model output. | No raw PSID or ACS/IPUMS. Requires `data/SCF/SCF_plus.dta`, `data/PSID/psid_ready.dta`, and the included `fortran_code/Results/` folders. | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
-| **2. Rebuild processed calibration inputs** | Re-run Stata/MATLAB preprocessing from packaged snapshots, without restricted raw microdata. | No raw PSID or ACS/IPUMS. Packaged processed PSID and ACS-derived files are reused when raw extracts are absent. | Step 1, Step 2A, optional Step 2B (set `N_REPS.txt` to `0` first for the fast run), then Steps 3-7 only if you also want to re-solve the model. |
+| **2. Rebuild unrestricted calibration inputs** | Re-run the Stata calibration stage from packaged source snapshots and re-estimate the MATLAB point parameters from included covariance files. | No. The driver retains packaged PSID- and ACS-derived products when the restricted raw extracts are absent. | Step 1, Step 2A, and Step 2B with `N_REPS.txt` set to `0`. Stop after Step 2 unless you also want to re-solve the model. |
 | **3. Full raw-data rebuild** | Recreate the processed PSID and ACS-derived inputs, re-solve the Fortran model, and regenerate figures. | Yes: `inputs_stata_code/income_process/PSID/psid.dta` and `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`. | Step 1, Step 2A, Step 2B, Step 3, Step 4, Step 6, Step 7. |
 
-**Route 1: minimal reviewer checklist**
+### Route 1: Rebuild Figures from Included Results
+
+Use this route to reproduce the paper figures without rebuilding calibration inputs or solving the model.
 
 1. Confirm `fortran_code/Results/<scenario>/` folders are present, especially `psid_all_govt__` and `psid_ndm_govt__`.
 2. Confirm `data/SCF/SCF_plus.dta` and `data/PSID/psid_ready.dta` are present.
@@ -32,10 +34,26 @@ Accordingly, the journal's Data Availability statement will explain that, given 
 4. Run `outputs_stata_code/__main.do`.
 5. Check regenerated figures in `graphs/outputs/` and Appendix-B input figures in `graphs/inputs/`.
 
-**Route 3: complete rebuild checklist**
+For Appendix Figure B.5, also run the MATLAB plot-only command in Step 2B. No Fortran compiler is needed.
 
-1. Place raw PSID at `inputs_stata_code/income_process/PSID/psid.dta` if rebuilding the PSID income-process inputs.
-2. Place raw ACS/IPUMS at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` if rebuilding the college-share input.
+### Route 2: Rebuild Unrestricted Calibration Inputs
+
+Use this route to check the preprocessing that does not require the omitted raw PSID or ACS/IPUMS extracts. It rebuilds the macro, demographic, fiscal, tax, and other unrestricted calibration inputs from the packaged snapshots. It also re-estimates the two MATLAB point-parameter variants from the included point-estimate covariance files. The packaged PSID- and ACS-derived products remain in place.
+
+1. Confirm that `global download_data` remains `0` in `inputs_stata_code/__main_data_prepare.do`.
+2. Set `inputs_stata_code/income_process/N_REPS.txt` to `0`; the package does not include the more than 110 GB of bootstrap covariance files required for `N_REPS=1000`.
+3. Open `inputs_stata_code/main.stpr` in Stata and run `__main_data_prepare.do`.
+4. From the repository root, run `inputs_matlab_code\income_process\run_income_process_matlab.bat`.
+5. Check the refreshed `_data_*.txt` files in `fortran_code/Data/` and the calibration figures in `graphs/inputs/`.
+
+Stop here if the goal is only to verify the unrestricted preprocessing. To solve the model with the refreshed inputs, continue with Steps 3-7. Restore `N_REPS.txt` to `1000` before archiving or distributing the package so that the documented paper-reproduction default is retained.
+
+### Route 3: Complete Rebuild from Raw Data
+
+Use this route to rebuild the restricted-data inputs, all model scenarios, and all figures. It is the multi-day, high-storage route.
+
+1. Place raw PSID at `inputs_stata_code/income_process/PSID/psid.dta`.
+2. Place raw ACS/IPUMS at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`.
 3. Decide whether to keep `global download_data 0` in the Stata drivers or change it to `1` to refresh supported online data sources.
 4. Decide the bootstrap setting in `inputs_stata_code/income_process/N_REPS.txt`: the shipped default `1000` reproduces the full paper bootstrap (about 12 hours across Stata and MATLAB); set it to `0` for a fast point-estimate run that reuses the archived paper confidence bands.
 5. Run `inputs_stata_code/__main_data_prepare.do` from `inputs_stata_code/main.stpr`. When `psid.dta` is present, this driver runs `I01_run_psid_income_inputs.do` once; do not run it a second time.
@@ -261,38 +279,23 @@ All sources above are either public-domain, free for academic use under the prov
 
 ### Required Software
 
-1. **Intel Fortran Compiler**
-   - Version: Intel oneAPI Fortran Compiler `ifx` 2025.1.1, build 20250418 (the version used to build the shipped `bin/5Gtrans.exe` and `bin/5Gtrans_het.exe`)
-   - Download: https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html
-   - Note: The vfproj uses `ifxCompiler` for the x64 configurations (Release, Release_HetRate, Debug). The Win32 configurations declare `ifortCompiler` but are not used for the shipped binaries.
-   - License: Free download available (may require registration)
+The software needed depends on the selected route:
 
-2. **Microsoft Visual Studio**
-   - Version: Visual Studio Community 2019, 16.11.55 (`16.11.37206.5`)
-   - Components required:
-     - C++ build tools (required by Fortran compiler)
-     - Windows SDK
-   - Download: https://visualstudio.microsoft.com/downloads/
-   - License: Community Edition (free) is sufficient
+| Route | Required software |
+|---|---|
+| Route 1: figures from included results | Stata; MATLAB only for Appendix Figure B.5 |
+| Route 2: unrestricted calibration inputs | Stata and MATLAB; add Intel Fortran and Visual Studio only if continuing to model solution |
+| Route 3: full rebuild | Stata, MATLAB, Intel Fortran, and Visual Studio |
 
-3. **Stata** (for calibration inputs and paper figures)
-   - Version: Stata/SE 16.0
-   - Required packages: `mat2txt` (used by the income-process pipeline), `ineqdeco` (used by the Gini prep), and `lorenz` (used by Appendix Figure D.4). These are auto-installed on first run by the scripts that need them.
-   - Used by: `inputs_stata_code/` (Step 2, calibration inputs) and `outputs_stata_code/` (Step 7, paper figures)
-   - License: Commercial (StataCorp)
+| Tool | Tested version | Purpose and notes |
+|---|---|---|
+| **Stata** | Stata/SE 16.0 | Runs the calibration scripts in Step 2A and the figure scripts in Step 7. The scripts automatically install `mat2txt`, `ineqdeco`, and `lorenz` when needed. Commercial license required. |
+| **MATLAB** | MATLAB 9.5.0.944444, R2018b | Runs the income-process estimation in Step 2B and produces Appendix Figure B.5. Commercial license required. |
+| **Intel Fortran Compiler** | Intel oneAPI `ifx` 2025.1.1, build 20250418 | Builds the model executables. The supplied x64 project configurations use `ifxCompiler`; the unused Win32 configurations declare `ifortCompiler`. Intel provides the compiler at https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html. |
+| **Microsoft Visual Studio** | Community 2019, 16.11.55 (`16.11.37206.5`) | Provides the supported build route for the Fortran model. Install the C++ build tools and Windows SDK. Community Edition is sufficient; see https://visualstudio.microsoft.com/downloads/. |
+| **Operating system** | Windows 10 or 11, 64-bit | The shipped executables, batch files, and Visual Studio projects are Windows-specific. |
 
-4. **MATLAB**
-   - Version: MATLAB 9.5.0.944444, R2018b
-   - Used by: `inputs_matlab_code/income_process/` (Step 2B - income-process parameter estimation)
-   - License: Commercial (MathWorks)
-
-5. **Operating System**
-   - Windows 10 (64-bit) or Windows 11 (64-bit)
-   - Note: The batch scripts (.bat) and Visual Studio project files are Windows-specific
-   - **Linux/macOS compatibility**: The Fortran code itself is cross-platform compatible, but would require:
-     - GNU Make or equivalent build system
-     - Modification of the system() calls in main.f90 (mkdir/copy commands)
-     - Shell scripts to replace .bat files
+The Fortran source is portable in principle, but Linux or macOS users must provide a build system, replace the Windows `system()` calls in `main.f90`, and replace the `.bat` launchers. That port is not supplied or tested in this package.
 
 ---
 
@@ -376,152 +379,152 @@ This replication package contains a **computational general equilibrium model** 
 ### Main Program Files
 
 - **`main.f90`**: Entry point for the model
-  - Parses command-line arguments for scenario selection
-  - Sets up file paths and creates output directories
-  - Validates configuration files
-  - Allocates memory for large arrays
-  - Includes `main_base_transition.f90` for main computation
+    - Parses command-line arguments for scenario selection
+    - Sets up file paths and creates output directories
+    - Validates configuration files
+    - Allocates memory for large arrays
+    - Includes `main_base_transition.f90` for main computation
 
 - **`main_base_transition.f90`**: Main computational logic (included in main.f90)
-  - Computes initial steady state (pre-reform)
-  - Computes final steady state (post-reform)
-  - Computes transition path between steady states
+    - Computes initial steady state (pre-reform)
+    - Computes final steady state (post-reform)
+    - Computes transition path between steady states
 
 ### Core Computational Modules
 
 - **`steady_state.f90`**: Steady state equilibrium solver
-  - Iterates over capital stock to find market-clearing equilibrium
-  - Calls household problem solver and aggregation routines
-  - Computes government budget balance and pension system balance
-  - **Key subroutine**: `steady()`
+    - Iterates over capital stock to find market-clearing equilibrium
+    - Calls household problem solver and aggregation routines
+    - Computes government budget balance and pension system balance
+    - **Key subroutine**: `steady()`
 
 - **`transition.f90`**: Transition path solver
-  - Solves for perfect foresight transition between two steady states
-  - Handles cohort structure and time-varying parameters
-  - Iterates to convergence on price paths
-  - **Key subroutine**: `transition_path_DB()`
+    - Solves for perfect foresight transition between two steady states
+    - Handles cohort structure and time-varying parameters
+    - Iterates to convergence on price paths
+    - **Key subroutine**: `transition_path_DB()`
 
 ### Household Problem Solvers
 
 - **`pfi_household_problem.f90`**: Policy function iteration for household optimization
-  - Solves household Bellman equation via backward induction
-  - Handles 6-dimensional state space: age, assets, AIME, income shocks, return shocks, discount shocks
-  - Computes optimal consumption, labor supply, and savings
-  - **Contains**: `agent_vf()` and related optimization routines
+    - Solves household Bellman equation via backward induction
+    - Handles 6-dimensional state space: age, assets, AIME, income shocks, return shocks, discount shocks
+    - Computes optimal consumption, labor supply, and savings
+    - **Contains**: `agent_vf()` and related optimization routines
 
 - **`pfi_agregation.f90`**: Aggregation across heterogeneous households
-  - Computes aggregate capital, labor, consumption
-  - Calculates distributional statistics (Gini coefficients, wealth shares)
-  - Aggregates by age, type, and across population
-  - **Key subroutine**: `get_aggregates()`
+    - Computes aggregate capital, labor, consumption
+    - Calculates distributional statistics (Gini coefficients, wealth shares)
+    - Aggregates by age, type, and across population
+    - **Key subroutine**: `get_aggregates()`
 
 - **`pfi_distribution.f90`**: Distribution dynamics
-  - Computes stationary distribution of agents across states
-  - Forward simulation using policy functions
-  - Handles initial distribution and bequest receipts
-  - **Key subroutine**: `get_distribution()`
+    - Computes stationary distribution of agents across states
+    - Forward simulation using policy functions
+    - Handles initial distribution and bequest receipts
+    - **Key subroutine**: `get_distribution()`
 
 - **`pfi.f90`**: Master PFI module interface
-  - Defines state space grids and interpolation methods
-  - Sets up shock processes (income, return, discount)
-  - Provides utility functions and helper routines
-  - The file header documents the complete household problem formulation
+    - Defines state space grids and interpolation methods
+    - Sets up shock processes (income, return, discount)
+    - Provides utility functions and helper routines
+    - The file header documents the complete household problem formulation
 
 - **`pfi_het.f90`**, **`pfi_household_problem_het.f90`**, **`steady_state_het.f90`**: heterogeneous-return variants of `pfi.f90`, `pfi_household_problem.f90`, and `steady_state.f90`; compiled only into `5Gtrans_het.exe` via the `Release_HetRate` configuration
 
 ### Economic Model Components
 
 - **`pension_system.f90`** and **`pension_system_ss.f90`**: PAYG pension system
-  - Calculates Social Security benefits using AIME formula
-  - Handles valorization and indexation of benefits
-  - Computes pension budget balance and subsidies
-  - Supports both defined benefit (PAYG) and defined contribution (funded) systems
+    - Calculates Social Security benefits using AIME formula
+    - Handles valorization and indexation of benefits
+    - Computes pension budget balance and subsidies
+    - Supports both defined benefit (PAYG) and defined contribution (funded) systems
 
 - **`ces_production.f90`** and **`ces_production_ss.f90`**: Production function
-  - CES aggregation of heterogeneous labor types (college vs. non-college)
-  - Computes factor prices (wages, interest rates)
-  - Handles skill premium and substitution elasticity
+    - CES aggregation of heterogeneous labor types (college vs. non-college)
+    - Computes factor prices (wages, interest rates)
+    - Handles skill premium and substitution elasticity
 
 - **`closures.f90`** and **`closure_ss.f90`**: Government budget
-  - Computes government revenues (taxes on labor, capital, consumption)
-  - Handles government debt dynamics
-  - Implements closure rule (government spending adjusts residually)
+    - Computes government revenues (taxes on labor, capital, consumption)
+    - Handles government debt dynamics
+    - Implements closure rule (government spending adjusts residually)
 
 - **`bequest.f90`**: Bequest distribution
-  - Calculates accidental bequests from mortality
-  - Distributes bequests to surviving cohorts
-  - Supports equal distribution, pooling, or Zipf distribution
+    - Calculates accidental bequests from mortality
+    - Distributes bequests to surviving cohorts
+    - Supports equal distribution, pooling, or Zipf distribution
 
 ### Data and Configuration
 
 - **`data.f90`**: Data loading and processing
-  - Reads all external data files from `fortran_code/Data/` folder
-  - Processes demographics, taxes, productivity, mortality
-  - Extends time series to full transition horizon
-  - The file header lists all data files it reads
+    - Reads all external data files from `fortran_code/Data/` folder
+    - Processes demographics, taxes, productivity, mortality
+    - Extends time series to full transition horizon
+    - The file header lists all data files it reads
 
 - **`set_globals.f90`**: Parameter initialization
-  - Reads configuration from `fortran_code/Instructions/` and `fortran_code/Parameters/` files
-  - Sets up model parameters, switches, and arrays
-  - Discretizes stochastic processes (AR(1) for shocks)
-  - The file header documents the initialization sequence
+    - Reads configuration from `fortran_code/Instructions/` and `fortran_code/Parameters/` files
+    - Sets up model parameters, switches, and arrays
+    - Discretizes stochastic processes (AR(1) for shocks)
+    - The file header documents the initialization sequence
 
 - **`globals.f90`**: Global variable declarations
-  - Defines all model parameters, arrays, and constants
-  - Dimensions: bigJ (ages), bigM (types), bigT (time periods)
-  - State space: n_a (assets), n_aime (AIME), n_sp (income), n_sr (return), n_sd (discount)
+    - Defines all model parameters, arrays, and constants
+    - Dimensions: bigJ (ages), bigM (types), bigT (time periods)
+    - State space: n_a (assets), n_aime (AIME), n_sp (income), n_sr (return), n_sd (discount)
 
 ### Utility Modules
 
 - **`AR_discrete.f90`**: AR(1) process discretization
-  - Rouwenhorst method for discretizing autoregressive processes
-  - Used for income shocks, return shocks, discount factor heterogeneity
+    - Rouwenhorst method for discretizing autoregressive processes
+    - Used for income shocks, return shocks, discount factor heterogeneity
 
 - **`normalProb.f90`**: Normal distribution utilities
-  - CDF and PDF calculations for normal distribution
-  - Used in shock process calibration
+    - CDF and PDF calculations for normal distribution
+    - Used in shock process calibration
 
 - **`linint.f90`**, **`splines.f90`**, **`polynomial.f90`**: Interpolation methods
-  - Linear, cubic spline, and polynomial interpolation
-  - Used for off-grid evaluation of value and policy functions
+    - Linear, cubic spline, and polynomial interpolation
+    - Used for off-grid evaluation of value and policy functions
 
 - **`rootfinding.f90`**, **`minimization.f90`**: Numerical optimization
-  - Root-finding for Euler equations
-  - Minimization for household optimization with constraints
+    - Root-finding for Euler equations
+    - Minimization for household optimization with constraints
 
 - **`matrixtools.f90`**: Matrix operations
-  - Linear algebra routines
-  - Utilities for array manipulation
+    - Linear algebra routines
+    - Utilities for array manipulation
 
 - **`sort.f90`**: Sorting algorithms
-  - Used for constructing wealth distribution
-  - Needed for Gini coefficient and percentile calculations
+    - Used for constructing wealth distribution
+    - Needed for Gini coefficient and percentile calculations
 
 - **`gini.f90`**: Inequality measures
-  - Computes Gini coefficients
-  - Calculates wealth and income concentration
+    - Computes Gini coefficients
+    - Calculates wealth and income concentration
 
 ### Output and Printing
 
 - **`Print_steady_DB.f90`**: Steady state diagnostic output
-  - Prints equilibrium values, prices, aggregates
-  - Reports convergence diagnostics
-  - Included in `steady_state.f90` when `switch_print=1`
+    - Prints equilibrium values, prices, aggregates
+    - Reports convergence diagnostics
+    - Included in `steady_state.f90` when `switch_print=1`
 
 - **`Print_DB.f90`**: Transition path diagnostic output
-  - Prints time series of aggregate variables
-  - Reports feasibility and error metrics
-  - Included in `transition.f90`
+    - Prints time series of aggregate variables
+    - Reports feasibility and error metrics
+    - Included in `transition.f90`
 
 - **`print_iter.f90`**: Iteration progress output
-  - Reports convergence progress during iterative solution
-  - Shows worst feasibility violations and errors
+    - Reports convergence progress during iterative solution
+    - Shows worst feasibility violations and errors
 
 - **`print_stamp.f90`**: Timestamp utilities
-  - Date/time stamps for output files
+    - Date/time stamps for output files
 
 - **`pfi_print.f90`**: Policy function diagnostics
-  - Prints policy functions for inspection/debugging
+    - Prints policy functions for inspection/debugging
 
 ### Support Files
 
@@ -540,23 +543,23 @@ This replication package contains a **computational general equilibrium model** 
 
 - **`5Gtrans.sln`**: Visual Studio solution file
 - **`5Gtrans.vfproj`**: Intel Fortran project file (contains compiler settings)
-  - Optimization: /O2 (maximize speed)
-  - Precision: /fp:precise
-  - Runtime: multithreaded (/threads)
+    - Optimization: /O2 (maximize speed)
+    - Precision: /fp:precise
+    - Runtime: multithreaded (/threads)
 
 ### Batch Scripts
 
 - **`run_scenarios.bat`**: Runs a predefined set of scenarios
-  - Hardcoded list of common scenarios
-  - Useful for quick testing
+    - Hardcoded list of common scenarios
+    - Useful for quick testing
 
 - **`run_scenarios_from_list.bat`**: Runs scenarios from `scenarios.txt`
-  - Reads scenario list from file (one per line)
-  - Flexible for custom scenario sets
+    - Reads scenario list from file (one per line)
+    - Flexible for custom scenario sets
 
 - **`scenarios.txt`**: List of scenarios to run
-  - Format: `version experiment closure` (space-separated)
-  - Example: `psid_ all_ govt__`
+    - Format: `version experiment closure` (space-separated)
+    - Example: `psid_ all_ govt__`
 
 ---
 
@@ -624,8 +627,8 @@ Aggregate time series, one value per `bigT` period (1935-2100):
 
 - `prob_trans.csv` - State-occupancy probabilities (year x age x asset x aime x income/return/discount shock)
 - One of:
-  - `mass_trans.csv` (if `switch_small_write = 0`) - Full mass distribution with all variables (consumption, hours, income, wealth, savings)
-  - `mass_trans_small.csv` (if `switch_small_write = 1`) - Mass + pretax labor income + savings only (this is what the baseline scenario writes)
+    - `mass_trans.csv` (if `switch_small_write = 0`) - Full mass distribution with all variables (consumption, hours, income, wealth, savings)
+    - `mass_trans_small.csv` (if `switch_small_write = 1`) - Mass + pretax labor income + savings only (this is what the baseline scenario writes)
 - `mass_trans_beq.csv` - Bequest-distribution mass (only if also `switch_unequal_bequest = 2`; it is not produced by the baseline and is not used by any shipped figure)
 
 ### Fresh-Run Output Note
@@ -664,10 +667,11 @@ See `LICENSE.txt` for the full text.
 
 ## Prerequisites
 
-Before beginning a full replication from source, ensure you have:
-1. Installed Intel Fortran Compiler (see Software Requirements)
-2. Installed Visual Studio with C++ build tools (see Software Requirements)
-3. At least 60 GB free disk space for a figure-only check, 80 GB for a baseline rerun, or 200 GB for the full `N_REPS=1000` pipeline (see Hardware Requirements)
+Before beginning, confirm the requirements for the route you selected:
+
+- **Route 1**: Stata, the included scenario results, and at least 60 GB of free disk space after extraction.
+- **Route 2**: Stata and MATLAB. Intel Fortran and Visual Studio are needed only if you continue beyond Step 2 to re-solve the model.
+- **Route 3**: Stata, MATLAB, Intel Fortran, Visual Studio with C++ build tools, the two raw extracts, and at least 200 GB of free disk space for the full `N_REPS=1000` pipeline.
 
 For the plot-only fast path below, the Fortran compiler and Visual Studio are not needed if the precomputed `fortran_code/Results/` folders are already present.
 
@@ -703,37 +707,49 @@ The intermediate Fortran result folders are included inside the main replication
 
 ### Step 2: Generate Calibration Inputs
 
-The Fortran model reads calibration files from `fortran_code/Data/`. Step 2 is split into a Stata stage for macro, demographic, fiscal, ACS, and PSID covariance inputs, and a MATLAB stage for the PSID income-process parameters.
+The Fortran model reads calibration files from `fortran_code/Data/`. Step 2 has two stages: Stata prepares the macro, demographic, fiscal, tax, and data-derived inputs; MATLAB estimates the PSID income-process parameters.
+
+#### What Each Route Does in Step 2
+
+| Route | Step 2A: Stata | Step 2B: MATLAB |
+|---|---|---|
+| **Route 1** | Skip. Use the included calibration inputs. | Skip estimation. Run only the plot-only command below if reproducing Appendix Figure B.5. |
+| **Route 2** | Run with `download_data=0` and without the raw PSID or ACS/IPUMS files. The unrestricted inputs are rebuilt; the packaged PSID- and ACS-derived products are retained. | Set `N_REPS.txt` to `0`, then run. MATLAB re-estimates point parameters from the included covariance files and preserves the archived paper confidence bands. |
+| **Route 3** | Run after placing both raw extracts at the documented paths. This also runs the PSID stage once and rebuilds the ACS college-share inputs. | Run with the same `N_REPS` value used by the Stata PSID stage: `1000` for the full paper bootstrap or `0` for a fast point-estimate run. |
 
 **Inputs**
 
 | Input | Required for | Location / setting |
 |---|---|---|
-| Packaged source snapshots | Routes 1-3 | `inputs_stata_code/`, `data/`, and `fortran_code/Data/` |
+| Packaged source snapshots | Routes 2-3; already prepared for Route 1 | `inputs_stata_code/`, `data/`, and `fortran_code/Data/` |
 | Raw PSID extract | Route 3 PSID rebuild only | `inputs_stata_code/income_process/PSID/psid.dta` |
 | Raw ACS/IPUMS extract | Route 3 ACS rebuild only | `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` |
 | Stata | Step 2A, including the conditional PSID stage | Stata 16+; packages are auto-installed where needed |
 | MATLAB | MATLAB stage of Step 2B and Appendix Figure B.5 | `MATLAB_EXE` can override the default executable path |
 | Bootstrap setting | Step 2B | `inputs_stata_code/income_process/N_REPS.txt` |
 
-**Run**
-
-Step 2A, the general Stata calibration stage:
+#### Step 2A: Stata Calibration Stage
 
 1. Open `inputs_stata_code/main.stpr` in interactive Stata.
 2. Open `__main_data_prepare.do` inside that project.
 3. Run the do-file.
 
-Step 2B, the MATLAB income-process stage, only if re-estimating PSID-derived parameters:
+For Route 2, leave the two raw extracts absent. The driver prints a message for each omitted extract, retains the corresponding packaged products, and continues with the unrestricted preprocessing.
 
-Step 2A has already run `income_process/I01_run_psid_income_inputs.do` when raw `PSID/psid.dta` is present. Do not run that do-file again. From the repository root, run:
+For Route 3, Step 2A automatically runs `income_process/I01_run_psid_income_inputs.do` once when `PSID/psid.dta` is present. Do not run that do-file a second time.
+
+#### Step 2B: MATLAB Income-Process Stage
+
+Route 2 must first set `inputs_stata_code/income_process/N_REPS.txt` to `0`. Route 3 must use the same value that was used in Step 2A. Then, from the repository root, run:
 
 ```bat
 set "MATLAB_EXE=C:\Program Files\MATLAB\R2018b\bin\matlab.exe"
 inputs_matlab_code\income_process\run_income_process_matlab.bat
 ```
 
-For Appendix Figure B.5 only, without re-estimating parameters, run:
+The `MATLAB_EXE` line is needed only when MATLAB is installed somewhere other than the default R2018b path encoded in the batch file.
+
+For Route 1, reproduce Appendix Figure B.5 without re-estimating parameters:
 
 ```bat
 "C:\Program Files\MATLAB\R2018b\bin\matlab.exe" -batch "run('outputs_matlab_code/income_process/plot_estimates.m')"
@@ -978,46 +994,48 @@ Bit-for-bit reproduction is not guaranteed across compilers and hardware. As a r
 
 ### Compilation Errors
 
-**Error**: "Cannot open module file" or "Error opening compiled module"
-- **Solution**: Clean the solution (Build > Clean) and rebuild
-- Delete all .mod and .obj files in x64/Release/
-- Rebuild from scratch
+#### Cannot Open a Module File
 
-**Error**: "Link error: unresolved external"
-- **Solution**: Ensure all .f90 files are included in the project
-- Right-click project > Add > Existing Item > Select missing .f90 files
+1. Select **Build > Clean** in Visual Studio.
+2. Delete the `.mod` and `.obj` files in `fortran_code/x64/Release/`.
+3. Rebuild the solution.
+
+#### Unresolved External Link Error
+
+Confirm that the required `.f90` files are included in the selected project configuration. In Visual Studio, use **Project > Add Existing Item** for any missing source file, then rebuild.
 
 ### Runtime Errors
 
-**Error**: "Configuration file not found"
-- **Solution**: Check that `fortran_code/Instructions/` and `fortran_code/Parameters/` folders contain the required files
-- Verify file names exactly match: `{version}{experiment}{closure}instructions.txt`
+#### Configuration File Not Found
 
-**Error**: "Stack overflow" or "Access violation"
-- **Solution**: Increase stack size in project properties
-- Project Properties > Fortran > Optimization > Stack Size > Set to "unlimited" or large value (e.g., 500000000)
+Check that `fortran_code/Instructions/` and `fortran_code/Parameters/` contain the required files. Their names must exactly match `{version}{experiment}{closure}instructions.txt` and `{version}{experiment}{closure}parameters.txt`.
 
-**Error**: Program hangs (no progress for hours)
-- **Solution**: May be stuck in convergence loop
-- Check parameters file: ensure tolerance (`err_ss_tol`) is not too small (e.g., use 1e-7, not 1e-12)
-- Check damping parameter (`up_ss`) is between 0.3-0.8 (too high causes oscillation, too low is slow)
+#### Stack Overflow or Access Violation
+
+Increase the stack size under **Project Properties > Fortran > Optimization > Stack Size**. Use `unlimited` or a large value such as `500000000`.
+
+#### No Progress for Hours
+
+The model may be stuck in a convergence loop. Confirm that `err_ss_tol` is not unnecessarily small (for example, `1e-7` rather than `1e-12`) and that `up_ss` is between `0.3` and `0.8`. A high damping value can cause oscillation; a low one can make convergence very slow.
 
 ### Incorrect Results
 
-**Issue**: Results differ significantly from paper
-1. Verify scenario name is correct
-2. Check that instructions and parameters files haven't been modified
-3. Ensure Release mode (not Debug) was used
-4. Verify compiler optimization is enabled (/O2)
-5. Check data files haven't been corrupted (compare checksums if provided)
+If results differ significantly from the paper, check:
+
+- The scenario name.
+- Whether the instruction or parameter files were modified.
+- Whether the executable was built in Release rather than Debug mode.
+- Whether `/O2` compiler optimization is enabled.
+- Whether the input data files are present and unchanged.
 
 ### Performance Issues
 
-**Issue**: Runs much slower than expected runtime
-- Check that Release mode is used (Debug is 10-50x slower)
-- Verify CPU is not throttling (check temperatures, power settings)
-- Close other applications (browser, etc.) to free RAM
-- Check that antivirus isn't scanning the output folder during run
+If a run is much slower than expected, confirm that:
+
+- Release mode is used; Debug builds can be 10-50 times slower.
+- The CPU is not thermally or power throttled.
+- Other memory-intensive applications are closed.
+- Antivirus or cloud-sync software is not scanning the output folder during the run.
 
 
 ---
