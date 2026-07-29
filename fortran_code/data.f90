@@ -894,7 +894,7 @@ close(1)
 
 
 !!! here output aggregate pi from our model
-        OPEN (unit=111, FILE = "implied_pi.txt")
+        OPEN (unit=111, FILE = "implied_pi.txt", STATUS="REPLACE", ACTION="WRITE")
         do i = 1, bigT,1
         pi_implied_d(1,i) = 1.0d0
         write(111,'(F20.10)'), pi_implied_d(1,i)

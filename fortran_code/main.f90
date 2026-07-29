@@ -66,6 +66,16 @@ program olg2
     ! Create directory (Windows-style mkdir works on Windows, will fail silently with 2>nul on error)
     call system('mkdir "'//trim(cwd_scenario)//'" 2>nul')
 
+    ! Remove files produced by obsolete output routines so an in-place rerun
+    ! cannot leave legacy artifacts beside the current scenario outputs.
+    call delete_if_exists(trim(cwd_scenario)//'/b_j_trans.csv')
+    call delete_if_exists(trim(cwd_scenario)//'/c_j_trans.csv')
+    call delete_if_exists(trim(cwd_scenario)//'/fort.30')
+    call delete_if_exists(trim(cwd_scenario)//'/l_j_trans.csv')
+    call delete_if_exists(trim(cwd_scenario)//'/mass_trans_beq.csv')
+    call delete_if_exists(trim(cwd_scenario)//'/sv_j_trans.csv')
+    call delete_if_exists(trim(cwd_scenario)//'/u_j_trans.csv')
+
     ! Copy instructions and parameters files to results folder for reproducibility
     call system('copy "'//trim(cwd_i)//'/'//trim(version)//trim(experiment)//trim(closure)//'instructions.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
     call system('copy "'//trim(cwd_p)//'/'//trim(version)//trim(experiment)//trim(closure)//'parameters.txt" "'//trim(cwd_scenario)//'/" >nul 2>&1')
@@ -115,6 +125,24 @@ deallocate(svplus_trans, l_trans, labor_tax_trans, c_trans, RHS_trans,  tot_inco
 
 
 contains
+
+subroutine delete_if_exists(file_path)
+    implicit none
+
+    character(len=*), intent(in) :: file_path
+    integer :: delete_unit, ios
+    logical :: file_exists
+
+    inquire(file=trim(file_path), exist=file_exists)
+    if (.not. file_exists) return
+
+    open(newunit=delete_unit, file=trim(file_path), status='old', action='readwrite', iostat=ios)
+    if (ios == 0) then
+        close(delete_unit, status='delete')
+    else
+        print *, 'WARNING: Could not remove obsolete output: ', trim(file_path)
+    endif
+end subroutine delete_if_exists
 
 !===============================================================================
 ! SUBROUTINE: validate_config_files

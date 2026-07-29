@@ -12,9 +12,15 @@ Krzysztof Makarski, Joanna Tyrowicz, and Piotr Zoch. (forthcoming). "Demographic
 
 Most replicators do not need to run every stage. Choose one route first; the detailed steps later in this README use the same numbering and list inputs, outputs, commands, and details separately.
 
+### Scope of the Economic Journal Reproducibility Check
+
+The Economic Journal reproducibility team re-downloaded the raw PSID extract from the cited provider-approved repository and verified the baseline `psid_all_govt__` route. The resulting intermediate model outputs agreed with the authors' supplied outputs up to numerical precision (approximately `1e-06`). The team did not independently re-extract the raw ACS/IPUMS data and did not re-solve the remaining 29 model scenarios. For those results, it used the intermediate scenario outputs included in `fortran_code/Results/` and rebuilt the paper figures.
+
+Accordingly, the journal's Data Availability statement will explain that, given the highly demanding algorithms, checks were performed on a subset of results. In this README, Route 3 identifies the fully computationally demanding route, while Route 1 reproduces all figures from the included intermediate outputs.
+
 | Route | Goal | Raw restricted data needed? | Run order |
 |---|---|---|---|
-| **1. Figure-only check** | Recreate the paper figures from shipped model output. | No raw PSID or ACS/IPUMS. Requires shipped/obtained `data/SCF/SCF_plus.dta`, packaged `data/PSID/psid_ready.dta`, and populated `fortran_code/Results/` (extract the companion results archive there; see Step 1). | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
+| **1. Figure-only check** | Recreate the paper figures from included model output. | No raw PSID or ACS/IPUMS. Requires `data/SCF/SCF_plus.dta`, `data/PSID/psid_ready.dta`, and the included `fortran_code/Results/` folders. | Step 1, then Step 7. Run the MATLAB plot-only command in Step 2B for Appendix Figure B.5 if needed. |
 | **2. Rebuild processed calibration inputs** | Re-run Stata/MATLAB preprocessing from packaged snapshots, without restricted raw microdata. | No raw PSID or ACS/IPUMS. Packaged processed PSID and ACS-derived files are reused when raw extracts are absent. | Step 1, Step 2A, optional Step 2B (set `N_REPS.txt` to `0` first for the fast run), then Steps 3-7 only if you also want to re-solve the model. |
 | **3. Full raw-data rebuild** | Recreate the processed PSID and ACS-derived inputs, re-solve the Fortran model, and regenerate figures. | Yes: `inputs_stata_code/income_process/PSID/psid.dta` and `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`. | Step 1, Step 2A, Step 2B, Step 3, Step 4, Step 6, Step 7. |
 
@@ -32,8 +38,8 @@ Most replicators do not need to run every stage. Choose one route first; the det
 2. Place raw ACS/IPUMS at `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` if rebuilding the college-share input.
 3. Decide whether to keep `global download_data 0` in the Stata drivers or change it to `1` to refresh supported online data sources.
 4. Decide the bootstrap setting in `inputs_stata_code/income_process/N_REPS.txt`: the shipped default `1000` reproduces the full paper bootstrap (about 12 hours across Stata and MATLAB); set it to `0` for a fast point-estimate run that reuses the archived paper confidence bands.
-5. Run `inputs_stata_code/__main_data_prepare.do` from `inputs_stata_code/main.stpr`.
-6. Run `inputs_stata_code/income_process/I01_run_psid_income_inputs.do` from the same Stata project if rebuilding PSID inputs, then run `inputs_matlab_code/income_process/run_income_process_matlab.bat`.
+5. Run `inputs_stata_code/__main_data_prepare.do` from `inputs_stata_code/main.stpr`. When `psid.dta` is present, this driver runs `I01_run_psid_income_inputs.do` once; do not run it a second time.
+6. Run `inputs_matlab_code/income_process/run_income_process_matlab.bat` to estimate the income-process parameters from the Stata outputs.
 7. Use the shipped Fortran binaries or rebuild them in Visual Studio, then run the scenarios listed in `fortran_code/scenarios.txt` and the heterogeneous-rate scenarios with `run_scenarios_het.bat`.
 8. Run `outputs_stata_code/__main.do` from `outputs_stata_code/__replication_graphs.stpr`.
 
@@ -65,7 +71,7 @@ demographic-transition-wealth-inequality/
 |   |-- Data/                    Calibration inputs consumed by the model
 |   |-- Instructions/            Per-scenario switch files
 |   |-- Parameters/              Per-scenario parameter files
-|   |-- Results/                 Per-scenario output (regenerated or supplied separately)
+|   |-- Results/                 Included per-scenario intermediate model output
 |   |-- scenarios.txt            Scenario list for batch runs
 |   +-- run_scenarios*.bat       Batch drivers
 |
@@ -122,9 +128,9 @@ demographic-transition-wealth-inequality/
 
 ## License
 
-The code in this repository is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
+The code in this repository is licensed under the MIT License.
 
-See [LICENSE.txt](LICENSE.txt) for full license text.
+See `LICENSE.txt` for the full license text.
 
 Data licensing information is provided in the Data Availability section below.
 
@@ -142,7 +148,7 @@ The author(s) have documented permission to redistribute or publish the data con
 
 This paper uses public data, authors' estimates derived from restricted-use or terms-governed public-use microdata, and precomputed model inputs. The code in this repository is distributable under the MIT license; each data file remains subject to the license or terms of the original data provider.
 
-All unrestricted processed inputs needed to run the Fortran scenarios are included. The PSID-derived income-process inputs used by the Fortran model (`_data_omega_*.txt` and `_data_sigma2eps_*.txt`) are included in `fortran_code/Data/`; their Stata-side components are refreshed by `__main_data_prepare.do` or Step 2B when the replicator supplies the raw PSID extract.
+All unrestricted processed inputs needed to run the Fortran scenarios are included. The PSID-derived income-process inputs used by the Fortran model (`_data_omega_*.txt` and `_data_sigma2eps_*.txt`) are included in `fortran_code/Data/`. When the replicator supplies the raw PSID extract, Step 2A refreshes the Stata-side components and Step 2B refreshes the MATLAB estimates.
 
 The package includes the SCF+ file `data/SCF/SCF_plus.dta` (about 99 MB), which is used by the model-vs-data wealth-Gini and decomposition scripts. If it is missing from your copy, obtain SCF+ from the Kuhn-Schularick-Steins data archive listed below and place it at that path.
 
@@ -152,21 +158,53 @@ The ACS/IPUMS extract is large (about 1.8 GB locally) and may be omitted from a 
 
 ## What Is Included vs. What Must Be Rebuilt
 
-The package is organized so replicators can either run the model from shipped processed inputs or rebuild the processed inputs from raw data where licensing permits. The table below is the shortest route through the data provenance:
+The package is organized so replicators can run the model from included processed inputs or rebuild those inputs from raw data where licensing permits. The information is presented as short records rather than a wide table so it remains readable in the PDF version.
 
-| Data class | Included processed file(s) | Raw input needed only for full rebuild | Transformation script(s) | Notes on rights and exact rebuild |
-|---|---|---|---|---|
-| PSID income process | `fortran_code/Data/_data_omega_*.txt`, `fortran_code/Data/_data_sigma2eps_*.txt`, `data/PSID/psid_ready.dta`, `data/PSID/ageeffects_*.dta` | `inputs_stata_code/income_process/PSID/psid.dta` | `inputs_stata_code/income_process/I01_run_psid_income_inputs.do`, then `inputs_matlab_code/income_process/estimate_parameters.m` | Raw PSID is governed by PSID Conditions of Use. Obtain the authors' exact extract from the PSID Public Data Extract Repository (https://doi.org/10.3886/ICPSR307887.V1) or rebuild it from the PSID Data Center, and place it at the path shown. The exact extraction route is documented in `inputs_stata_code/income_process/PSID/psid_read.R` and `inputs_stata_code/income_process/PSID/README.md`. |
-| ACS/IPUMS college share | `fortran_code/Data/_data_college_share.txt`, `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs*.dta` | `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` | `inputs_stata_code/skill_premium/D02_prepare_college.do` | The shipped raw extract is unmodified IPUMS USA output (only the file name was changed). A rebuild extract should use `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT` for the years listed below. The IPUMS USA collection DOI is `10.18128/C010`; cite the version DOI matching your extract date (Version 16.0, `10.18128/D010.V16.0`, as of July 2026). |
-| SCF+ wealth data | `data/SCF/SCF_plus.dta` | same file, if omitted | `outputs_stata_code/_prep_Gini_data.do`, `outputs_stata_code/MvD_3_GE_decomposition.do` | SCF+ comes from Kuhn, Schularick, and Steins (2020). The file is used for model-vs-data wealth comparisons and is not produced by this package. |
-| Macro, fiscal, tax, and aggregate calibration inputs | `fortran_code/Data/_data_depr.txt`, `_data_gamma.txt`, `_data_labsh.txt`, `_data_tau*.txt`, `_data_lambda.txt`, `_data_contrib_to_gdp.txt`, `_data_skill_premium.txt` | packaged `.dta`, `.csv`, or `.xlsx` snapshots; optional dbnomics refresh for selected series | `inputs_stata_code/__main_data_prepare.do` and component scripts | With `global download_data 0`, scripts use packaged snapshots. Setting `download_data 1` refreshes supported dbnomics/OECD/GGDC series and overwrites local snapshots. |
-| Mortality, population, and pension replacement inputs | `fortran_code/Data/_data_pi_cond_US_since1935.txt`, `_data_het_pi_US_since1935_all.txt`, `_data_Nn_US_*.txt`, `_data_rho_1935.txt` | packaged HMD/UN/Case-Deaton/CDC/SSA source snapshots or hand-curated source files under `inputs_stata_code/` | `demography/mortality/D01_life_tables.do`, `demography/hetero_pi/D03_prepare_hetero_pi.do`, `external/copy_to_fortran.do` | The three files under `inputs_stata_code/external/` are hand-curated external inputs copied into `fortran_code/Data/`; the mortality scripts document the HMD, UN, and Case-Deaton transformations. |
+### PSID Income Process
+
+**Included**: `fortran_code/Data/_data_omega_*.txt`, `fortran_code/Data/_data_sigma2eps_*.txt`, `data/PSID/psid_ready.dta`, and `data/PSID/ageeffects_*.dta`.
+
+**Raw input for a full rebuild**: `inputs_stata_code/income_process/PSID/psid.dta`.
+
+**Transformation**: Step 2A runs `inputs_stata_code/income_process/I01_run_psid_income_inputs.do` when the raw file is present. Step 2B then runs `inputs_matlab_code/income_process/estimate_parameters.m`.
+
+**Access and rights**: Raw PSID is governed by the PSID Conditions of Use. Obtain the authors' exact extract from the PSID Public Data Extract Repository (https://doi.org/10.3886/ICPSR307887.V1) or rebuild it from the PSID Data Center. The exact extraction route is documented in `inputs_stata_code/income_process/PSID/psid_read.R` and the README in that directory.
+
+### ACS/IPUMS College Share
+
+**Included**: `fortran_code/Data/_data_college_share.txt` and `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs*.dta`.
+
+**Raw input for a full rebuild**: `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta`.
+
+**Transformation**: `inputs_stata_code/skill_premium/D02_prepare_college.do`.
+
+**Access and rights**: A rebuild extract should use `YEAR`, `AGE`, `HIGRADE`, `EDUCD`, and `PERWT` for the years listed below. The IPUMS USA collection DOI is `10.18128/C010`; cite the version DOI matching the extract date (Version 16.0, `10.18128/D010.V16.0`, as of July 2026).
+
+### SCF+ Wealth Data
+
+**Included**: `data/SCF/SCF_plus.dta`.
+
+**Transformation**: The provider file is consumed directly by `outputs_stata_code/_prep_Gini_data.do` and `outputs_stata_code/MvD_3_GE_decomposition.do`; it is not produced by this package.
+
+**Source**: Kuhn, Schularick, and Steins (2020).
+
+### Macro, Fiscal, Tax, and Aggregate Calibration
+
+**Included**: The model-ready files in `fortran_code/Data/`, including `_data_depr.txt`, `_data_gamma.txt`, `_data_labsh.txt`, `_data_tau*.txt`, `_data_lambda.txt`, `_data_contrib_to_gdp.txt`, and `_data_skill_premium.txt`, plus the source snapshots used to create them.
+
+**Transformation**: `inputs_stata_code/__main_data_prepare.do` and its component scripts. With `global download_data 0`, the scripts use packaged snapshots. Setting it to `1` refreshes supported dbnomics/OECD/GGDC series and overwrites those snapshots.
+
+### Mortality, Population, and Pension Replacement
+
+**Included**: `fortran_code/Data/_data_pi_cond_US_since1935.txt`, `_data_het_pi_US_since1935_all.txt`, `_data_Nn_US_*.txt`, and `_data_rho_1935.txt`, together with the packaged HMD/UN/Case-Deaton/CDC/SSA source snapshots or hand-curated authority inputs.
+
+**Transformation**: `demography/mortality/D01_life_tables.do`, `demography/hetero_pi/D03_prepare_hetero_pi.do`, and `external/copy_to_fortran.do`. The three files under `inputs_stata_code/external/` are copied into `fortran_code/Data/`; the mortality scripts document the HMD, UN, and Case-Deaton transformations.
 
 No processed file used by the scripts is intended to be a manually edited black box. When a file is not regenerated by a script, it is listed above as either an external data product supplied by the original provider or a hand-curated authority input copied into place by `external/copy_to_fortran.do`.
 
 ## Non-Proprietary Data Copies
 
-Every Stata dataset shipped in this package is accompanied by a `.csv` copy with identical values (exported as stored, without value labels; variable and value labels remain documented in the `.dta` files). This includes the large redistributed files `data/SCF/SCF_plus.csv` and the processed PSID panel `data/PSID/psid_ready.csv`. The only shipped `.dta` without a csv copy is `data/model_psid_all_govt__.dta`, a regenerable intermediate that `outputs_stata_code/__main.do` rebuilds from `fortran_code/Results/`.
+Every Stata dataset shipped in this package is accompanied by a `.csv` copy with identical stored values (exported without value labels; variable and value labels remain documented in the `.dta` files). This includes the large redistributed files `data/SCF/SCF_plus.csv`, the processed PSID panel `data/PSID/psid_ready.csv`, and all ten processed PSID intermediates under `inputs_stata_code/income_process/output/`. The only shipped `.dta` without a CSV copy is `data/model_psid_all_govt__.dta`, a regenerable model-to-Stata bridge that `outputs_stata_code/__main.do` rebuilds from `fortran_code/Results/`.
 
 ## Raw Extract Specifications for Restricted Microdata
 
@@ -193,7 +231,7 @@ Each model input file, its source, and the script that produces it.
 | `_data_gamma_robustness.txt` | Same as above (alternative scenario path) | `tfp/M02robustness_prepare_gamma.do` |
 | `_data_tauC.txt`, `_data_tauK.txt`, `_data_tauL.txt` | McDaniel (2007) updated tax series (https://drive.google.com/drive/folders/1O5ccfP2KN815y-OSp2hRMnHneW4lAkia) | `tax_rate/T01prepare_taxes.do` |
 | `_data_lambda.txt` | Piketty-based progressivity via Bayer-Born-Luetticke replication data (`tax_rate/progressivity_measures_all.xlsx`) | `tax_rate/T03prepare_tax_lambda.do` |
-| `_data_contrib_to_gdp.txt` | OECD Revenue Statistics (https://data.oecd.org/) | `social_security/T02prepare_contributions.do` |
+| `_data_contrib_to_gdp.txt` | OECD Revenue Statistics (https://data-explorer.oecd.org/) | `social_security/T02prepare_contributions.do` |
 | `_data_depr.txt` | Penn World Table 10.0 `delta` | `depreciation/M01prepare_depr.do` |
 | `_data_labsh.txt` | Penn World Table 10.0 `labsh` | `labor_share/M03prepare_labor_share.do` |
 | `_data_skill_premium.txt` | Autor-Goldin-Katz (2020 AEA P&P), openICPSR 120694 | `skill_premium/H01prepare_skill_premium.do` |
@@ -202,7 +240,7 @@ Each model input file, its source, and the script that produces it.
 
 ### Auxiliary data consumed outside the Fortran input chain
 
-- `data/SCF/SCF_plus.dta` - SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*), about 99 MB, included in the package. If missing, download it from https://www.moritz-schularick.com/data and place it at this path. Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's wealth-Gini and decomposition figures.
+- `data/SCF/SCF_plus.dta` - SCF+ harmonized wealth panel, Kuhn-Schularick-Steins (2020, *JPE*), about 99 MB, included in the package. If missing, obtain it from the supplementary material of Kuhn, Schularick, and Steins (2020) at https://doi.org/10.1086/708815 and place it at this path. Consumed by `outputs_stata_code/_prep_Gini_data.do` and `MvD_3_GE_decomposition.do` to produce the paper's wealth-Gini and decomposition figures.
 - `data/PSID/psid_ready.dta` - processed PSID panel generated from the mostdrop income-process sample and used by `outputs_stata_code/MvD_2_Gini_income.do` for Appendix Figure D.4. The Stata PSID stage refreshes this file when raw PSID is available.
 - `inputs_stata_code/income_process/PSID/psid.dta` - raw PSID public-use extract. Obtain the authors' exact extract from the PSID Public Data Extract Repository (ICPSR ID 307887, https://doi.org/10.3886/ICPSR307887.V1) or rebuild from https://psidonline.isr.umich.edu/. Consumed only if replicators re-estimate the income process from scratch or regenerate `data/PSID/psid_ready.dta`. Otherwise the pre-computed `_data_omega_*.txt` and `_data_sigma2eps_*.txt` files suffice for running the Fortran model.
 - `inputs_stata_code/skill_premium/ACS_college/processed/col_share_acs.dta` and `col_share_acs_ext.dta` - processed ACS/IPUMS college-share inputs. The raw `ACS_college.dta` extract is needed only to rebuild these processed files. `fortran_code/Data/_data_college_share.txt` is already included for the Fortran model; see `inputs_stata_code/skill_premium/ACS_college/README.md` for exact IPUMS years and variables.
@@ -256,10 +294,6 @@ All sources above are either public-domain, free for academic use under the prov
      - Modification of the system() calls in main.f90 (mkdir/copy commands)
      - Shell scripts to replace .bat files
 
-### Optional Software
-
-- **Text editor** for viewing results (any plain text editor)
-
 ---
 
 ## Hardware Requirements
@@ -270,14 +304,14 @@ The Fortran solver allocates large arrays at startup, so memory is the binding c
 
 - **Processor**: AMD Ryzen 7 5800X, 8 cores / 16 logical processors
 - **RAM**: 96 GB
-- **Storage**: 50 GB or more free space. A complete set of paper-scenario result folders is about 27 GiB; 50 GB leaves headroom for reruns, logs, and temporary files. The baseline `psid_all_govt__` output alone includes multi-GB transition files (`mass_trans_small.csv` and `prob_trans.csv`).
+- **Storage**: 200 GB or more free space for the full `N_REPS=1000` rebuild. The Stata PSID bootstrap creates more than 110 GB of covariance files (roughly 55 MB per repetition for each of two variants), and the included Fortran result folders occupy about 27 GiB. A fast `N_REPS=0` or figure-only run needs substantially less space; allow at least 60 GB while extracting and working with the package.
 - **Operating System**: Windows 11 (64-bit)
 
 ### Notes for Smaller Machines
 
-- The Stata and MATLAB preprocessing stages (Steps 2 and 7) are light and run comfortably on an ordinary 16 GB machine; only the Fortran scenario runs (Steps 4 and 6) are memory-hungry.
+- The Stata and MATLAB preprocessing stages run on an ordinary 16 GB machine, but the full Stata bootstrap is disk-intensive: `inputs_stata_code/income_process/output/` can exceed 110 GB before MATLAB starts.
 - We have not established a minimum RAM figure for the Fortran runs. On machines with 16 GB or less, let Windows manage the page file automatically (or set a large one) before attempting Step 4; a virtual-memory error at startup indicates the configuration is insufficient.
-- Route 1 (figures from the shipped results archive) does not run the Fortran solver at all and works on an ordinary machine.
+- Route 1 (figures from the included intermediate results) does not run the Fortran solver and works on an ordinary machine with enough disk space to extract the package.
 
 ### Reference Hardware Environment
 
@@ -308,6 +342,12 @@ The shipped Fortran binaries are Windows x64 builds. Rebuilding from source shou
 The Stata and MATLAB preprocessing stages are relatively short compared with the Fortran transition computations. The full set of paper scenarios is a multi-day job on a typical workstation, and individual scenarios can take hours depending on convergence speed and hardware.
 
 The largest practical resource constraint is disk space, not the code itself. In the authors' complete results copy, `fortran_code/Results/` is about 27 GiB across 30 scenario folders. Most of this comes from `psid_all_govt__` (about 19.8 GiB) and `psid_ndm_govt__` (about 6.7 GiB).
+
+| Workload | Free disk space to allow |
+|---|---:|
+| Figure-only check from the included intermediate results | 60 GB |
+| Baseline Fortran rerun without the full PSID bootstrap | 80 GB |
+| Full PSID bootstrap (`N_REPS=1000`) plus all included model results | 200 GB minimum; 250 GB recommended |
 
 ### Scenario Runtime Guidance
 
@@ -353,13 +393,13 @@ This replication package contains a **computational general equilibrium model** 
   - Iterates over capital stock to find market-clearing equilibrium
   - Calls household problem solver and aggregation routines
   - Computes government budget balance and pension system balance
-  - **Key subroutine**: `steady()` (145-line documented header)
+  - **Key subroutine**: `steady()`
 
 - **`transition.f90`**: Transition path solver
   - Solves for perfect foresight transition between two steady states
   - Handles cohort structure and time-varying parameters
   - Iterates to convergence on price paths
-  - **Key subroutine**: `transition_path_DB()` (320+ line documented header)
+  - **Key subroutine**: `transition_path_DB()`
 
 ### Household Problem Solvers
 
@@ -367,25 +407,27 @@ This replication package contains a **computational general equilibrium model** 
   - Solves household Bellman equation via backward induction
   - Handles 6-dimensional state space: age, assets, AIME, income shocks, return shocks, discount shocks
   - Computes optimal consumption, labor supply, and savings
-  - **Contains**: `agent_vf()` and related optimization routines (130+ line documented header)
+  - **Contains**: `agent_vf()` and related optimization routines
 
 - **`pfi_agregation.f90`**: Aggregation across heterogeneous households
   - Computes aggregate capital, labor, consumption
   - Calculates distributional statistics (Gini coefficients, wealth shares)
   - Aggregates by age, type, and across population
-  - **Key subroutine**: `get_aggregates()` (108-line documented header)
+  - **Key subroutine**: `get_aggregates()`
 
 - **`pfi_distribution.f90`**: Distribution dynamics
   - Computes stationary distribution of agents across states
   - Forward simulation using policy functions
   - Handles initial distribution and bequest receipts
-  - **Key subroutine**: `get_distribution()` (123-line documented header)
+  - **Key subroutine**: `get_distribution()`
 
 - **`pfi.f90`**: Master PFI module interface
   - Defines state space grids and interpolation methods
   - Sets up shock processes (income, return, discount)
   - Provides utility functions and helper routines
-  - **234-line documented header** with complete problem formulation
+  - The file header documents the complete household problem formulation
+
+- **`pfi_het.f90`**, **`pfi_household_problem_het.f90`**, **`steady_state_het.f90`**: heterogeneous-return variants of `pfi.f90`, `pfi_household_problem.f90`, and `steady_state.f90`; compiled only into `5Gtrans_het.exe` via the `Release_HetRate` configuration
 
 ### Economic Model Components
 
@@ -399,19 +441,16 @@ This replication package contains a **computational general equilibrium model** 
   - CES aggregation of heterogeneous labor types (college vs. non-college)
   - Computes factor prices (wages, interest rates)
   - Handles skill premium and substitution elasticity
-  - **90+ line documented header**
 
 - **`closures.f90`** and **`closure_ss.f90`**: Government budget
   - Computes government revenues (taxes on labor, capital, consumption)
   - Handles government debt dynamics
   - Implements closure rule (government spending adjusts residually)
-  - **140+ line documented header** for transition path version
 
 - **`bequest.f90`**: Bequest distribution
   - Calculates accidental bequests from mortality
   - Distributes bequests to surviving cohorts
   - Supports equal distribution, pooling, or Zipf distribution
-  - **95-line documented header**
 
 ### Data and Configuration
 
@@ -419,13 +458,13 @@ This replication package contains a **computational general equilibrium model** 
   - Reads all external data files from `fortran_code/Data/` folder
   - Processes demographics, taxes, productivity, mortality
   - Extends time series to full transition horizon
-  - **140-line documented header** listing all data files
+  - The file header lists all data files it reads
 
 - **`set_globals.f90`**: Parameter initialization
   - Reads configuration from `fortran_code/Instructions/` and `fortran_code/Parameters/` files
   - Sets up model parameters, switches, and arrays
   - Discretizes stochastic processes (AR(1) for shocks)
-  - **160-line documented header** with 7-step initialization sequence
+  - The file header documents the initialization sequence
 
 - **`globals.f90`**: Global variable declarations
   - Defines all model parameters, arrays, and constants
@@ -454,7 +493,7 @@ This replication package contains a **computational general equilibrium model** 
   - Linear algebra routines
   - Utilities for array manipulation
 
-- **`sorting.f90`**: Sorting algorithms
+- **`sort.f90`**: Sorting algorithms
   - Used for constructing wealth distribution
   - Needed for Gini coefficient and percentile calculations
 
@@ -486,6 +525,10 @@ This replication package contains a **computational general equilibrium model** 
 
 ### Support Files
 
+- **`Initial_values_DB.f90`**: Initializes the transition-path arrays from the two steady states
+- **`get_profile_steady.f90`**: Steady-state life-cycle profile computation (module `prof_steady`)
+- **`shocks_parameters.f90`**: Shock-process parameter setup, included by `set_globals.f90`
+- **`transition_iterations.f90`**: Household-problem step of the transition solver, included by `transition.f90`
 - **`clock.f90`**: Timing utilities for performance measurement
 - **`assertions.f90`**: Runtime assertion checking
 - **`errwarn.f90`**: Error and warning message handling
@@ -523,7 +566,7 @@ This replication package contains a **computational general equilibrium model** 
 
 Files named: `{version}{experiment}{closure}instructions.txt`
 
-Format: 35 lines, each containing an integer switch value followed by comment
+Format: 37 lines, each containing an integer switch value followed by comment
 - Controls model features (mortality, taxes, pension rules, etc.)
 - Order of lines is CRITICAL and must match `set_globals.f90` read order
 
@@ -533,7 +576,7 @@ Example: `psid_all_govt__instructions.txt`
 
 Files named: `{version}{experiment}{closure}parameters.txt`
 
-Format: 51 lines containing numerical parameters
+Format: 49 lines containing numerical parameters (the two `hrat_` heterogeneous-return scenarios have 51: two extra lines at the end with the type-specific `rate_adj` values)
 - Tolerance levels, damping factors, structural parameters
 - Order of lines is CRITICAL and must match `set_globals.f90` read order
 
@@ -553,16 +596,19 @@ Results are written to scenario-specific subfolders: `fortran_code/Results/{vers
 | `switch_full_csv_write` (line 35) | `1` | `0` |
 | `switch_small_write` (line 33) | `1` | `1` |
 
-The baseline emits the full output set; every other scenario writes only the minimum needed to reproduce the paper figures (gini series + steady-state summaries + run metadata). Older runs may have left additional `*_j_trans.csv` / `mass_trans_minimal.csv` files in non-baseline result folders - those are stale artifacts of earlier code and are **not** produced by the current build.
+The baseline emits the full output set; every other scenario writes only the minimum needed to reproduce the paper figures (Gini series + steady-state summaries + run metadata). Older runs may have left additional `*_j_trans.csv` / `mass_trans_minimal.csv` files in non-baseline result folders - those are stale artifacts of earlier code and are **not** produced by the current build.
 
-### Always written (every scenario)
+### Current executable: always written by every fresh scenario run
 
-- `gini_trans.csv` - Gini coefficient of savings by year (consumed by [outputs_stata_code/_prep_Gini_data.do](outputs_stata_code/_prep_Gini_data.do))
+- `gini_trans.csv` - Gini coefficient of savings by year (consumed by `outputs_stata_code/_prep_Gini_data.do`)
 - `steadys_old_information_run.txt` - Initial steady-state summary (gated by `switch_ss_write=1`, true for all shipped scenarios)
 - `steadys_new_information_run.txt` - Final steady-state summary (same gating)
-- `information.txt` - Run configuration and parameter summary. Written inside the scenario folder by the current build; shipped result folders produced with earlier builds may lack it, as older code wrote it at the repository top level.
+- `information.txt` - Run configuration and parameter summary, written inside the scenario folder.
+- `implied_pi.txt` - Mortality-transition diagnostic written inside the scenario folder.
 - `feasibility` - Per-period feasibility check from the transition iterations
 - `{version}{experiment}{closure}instructions.txt`, `{version}{experiment}{closure}parameters.txt` - Copies of the inputs used (auto-copied for reproducibility)
+
+These statements define the output contract for a **fresh run with the current executable**. The 30 scenario folders supplied in `fortran_code/Results/` are historical intermediate outputs generated before the current provenance-file placement and input-copy safeguards were introduced. Among those supplied folders, 7 contain `information.txt`, none contains `implied_pi.txt`, and none contains the copied instruction or parameter files. Their absence from a supplied historical folder does not indicate a failed run and does not prevent the figure-only route: the downstream Stata scripts use the included `gini_trans.csv` and other numerical model outputs. A fresh run should create all files in the list above inside its scenario folder.
 
 ### Written only when `switch_print_macro = 1` (baseline only)
 
@@ -580,7 +626,17 @@ Aggregate time series, one value per `bigT` period (1935-2100):
 - One of:
   - `mass_trans.csv` (if `switch_small_write = 0`) - Full mass distribution with all variables (consumption, hours, income, wealth, savings)
   - `mass_trans_small.csv` (if `switch_small_write = 1`) - Mass + pretax labor income + savings only (this is what the baseline scenario writes)
-- `mass_trans_beq.csv` - Bequest-distribution mass (only if also `switch_unequal_bequest = 2`; not used by any shipped scenario)
+- `mass_trans_beq.csv` - Bequest-distribution mass (only if also `switch_unequal_bequest = 2`; it is not produced by the baseline and is not used by any shipped figure)
+
+### Fresh-Run Output Note
+
+The R2 reproducibility check found two files in a fresh baseline run that were absent from the authors' older intermediate folder, and seven files in that older folder that a fresh run did not produce. This is expected after the output cleanup in the current build:
+
+- `implied_pi.txt` and `information.txt` are current provenance outputs. Older builds could write them outside the scenario folder; the current build writes and replaces both inside `fortran_code/Results/<scenario>/`.
+- `b_j_trans.csv`, `c_j_trans.csv`, `l_j_trans.csv`, `sv_j_trans.csv`, and the baseline `mass_trans_beq.csv` were empty legacy placeholders.
+- `fort.30` was an implicit-unit legacy output, and `u_j_trans.csv` was an obsolete diagnostic.
+
+None of these seven historical files is read by a downstream Stata, MATLAB, or Fortran stage. Six names (`b_j_trans.csv`, `c_j_trans.csv`, `l_j_trans.csv`, `sv_j_trans.csv`, `fort.30`, and `u_j_trans.csv`) are no longer written by the current source. `mass_trans_beq.csv` is the exception: it remains a valid conditional output when `switch_full_csv_write = 1` and `switch_unequal_bequest = 2`, but the baseline does not satisfy that condition. The zero-byte historical placeholders have been removed from the included results. A scenario run clears all seven names at startup so stale artifacts cannot survive an in-place rerun; when the bequest-output condition is met, the current code subsequently recreates `mass_trans_beq.csv`.
 
 ### `switch_full_csv_write = 2` (compact mode, not used by any shipped scenario)
 
@@ -600,7 +656,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-See [LICENSE.txt](LICENSE.txt) for full text.
+See `LICENSE.txt` for the full text.
 
 ---
 
@@ -611,7 +667,7 @@ See [LICENSE.txt](LICENSE.txt) for full text.
 Before beginning a full replication from source, ensure you have:
 1. Installed Intel Fortran Compiler (see Software Requirements)
 2. Installed Visual Studio with C++ build tools (see Software Requirements)
-3. At least 8 GB RAM and 30 GB free disk space for a baseline run (see Hardware Requirements)
+3. At least 60 GB free disk space for a figure-only check, 80 GB for a baseline rerun, or 200 GB for the full `N_REPS=1000` pipeline (see Hardware Requirements)
 
 For the plot-only fast path below, the Fortran compiler and Visual Studio are not needed if the precomputed `fortran_code/Results/` folders are already present.
 
@@ -639,11 +695,11 @@ dir fortran_code\Results
 
 **Outputs**
 
-- A local working copy with this README, source code, shipped inputs, and, if included in the deposit, `fortran_code/Results/<scenario>/` folders.
+- A local working copy with this README, source code, shipped inputs, and the included `fortran_code/Results/<scenario>/` folders.
 
 **Details**
 
-For Route 1, the result folders must already be present. Because of their size (about 20 GB uncompressed), the Fortran result folders are distributed as a companion archive (`3-replication-package-results.zip`) alongside this package; extract its contents into `fortran_code/Results/` so that one folder per scenario appears there. At minimum, the figures use the scenario families listed in Step 6; the two largest folders are `psid_all_govt__` and `psid_ndm_govt__`. The baseline folder contains the large `mass_trans_small.csv` and `prob_trans.csv` files used by the Stata figure pipeline.
+The intermediate Fortran result folders are included inside the main replication package at `fortran_code/Results/`; there is no separate companion results archive. After extraction, one folder per scenario should appear there. The two largest folders are `psid_all_govt__` and `psid_ndm_govt__`. The baseline folder contains the large `mass_trans_small.csv` and `prob_trans.csv` files used by the Stata figure pipeline.
 
 ### Step 2: Generate Calibration Inputs
 
@@ -656,7 +712,7 @@ The Fortran model reads calibration files from `fortran_code/Data/`. Step 2 is s
 | Packaged source snapshots | Routes 1-3 | `inputs_stata_code/`, `data/`, and `fortran_code/Data/` |
 | Raw PSID extract | Route 3 PSID rebuild only | `inputs_stata_code/income_process/PSID/psid.dta` |
 | Raw ACS/IPUMS extract | Route 3 ACS rebuild only | `inputs_stata_code/skill_premium/ACS_college/ACS_college.dta` |
-| Stata | Step 2A and PSID stage of Step 2B | Stata 16+; packages are auto-installed where needed |
+| Stata | Step 2A, including the conditional PSID stage | Stata 16+; packages are auto-installed where needed |
 | MATLAB | MATLAB stage of Step 2B and Appendix Figure B.5 | `MATLAB_EXE` can override the default executable path |
 | Bootstrap setting | Step 2B | `inputs_stata_code/income_process/N_REPS.txt` |
 
@@ -668,10 +724,9 @@ Step 2A, the general Stata calibration stage:
 2. Open `__main_data_prepare.do` inside that project.
 3. Run the do-file.
 
-Step 2B, the PSID income-process stage, only if rebuilding PSID-derived inputs:
+Step 2B, the MATLAB income-process stage, only if re-estimating PSID-derived parameters:
 
-1. From the same Stata project, run `income_process/I01_run_psid_income_inputs.do`.
-2. From the repository root, run:
+Step 2A has already run `income_process/I01_run_psid_income_inputs.do` when raw `PSID/psid.dta` is present. Do not run that do-file again. From the repository root, run:
 
 ```bat
 set "MATLAB_EXE=C:\Program Files\MATLAB\R2018b\bin\matlab.exe"
@@ -700,7 +755,7 @@ The Stata drivers use project-relative paths. Open them from `inputs_stata_code/
 
 The `global download_data` switch is set to `0` at the top of the relevant Stata drivers. With the default value, scripts use packaged source snapshots and do not require network access. Setting it to `1` refreshes supported dbnomics/OECD/GGDC series and overwrites the local snapshots.
 
-Raw ACS/IPUMS and raw PSID are conditional. If `ACS_college.dta` is absent, Step 2A keeps the packaged college-share inputs. If `psid.dta` is absent, Step 2A keeps the packaged PSID-derived Fortran inputs and processed `psid_ready.dta`. The exact raw-data specifications are in the Data Availability section and the local README files under `inputs_stata_code/income_process/PSID/` and `inputs_stata_code/skill_premium/ACS_college/`.
+Raw ACS/IPUMS and raw PSID are conditional. If `ACS_college.dta` is absent, Step 2A keeps the packaged college-share inputs. If `psid.dta` is present, Step 2A runs `I01_run_psid_income_inputs.do` exactly once; if it is absent, Step 2A keeps the packaged PSID-derived Fortran inputs and processed `psid_ready.dta`. Run the PSID do-file directly only as a standalone alternative when deliberately skipping the rest of Step 2A. The exact raw-data specifications are in the Data Availability section and the local README files under `inputs_stata_code/income_process/PSID/` and `inputs_stata_code/skill_premium/ACS_college/`.
 
 The full catalogue of `_data_*.txt` inputs and their producing scripts is in the Model Input Catalogue above. Three Fortran inputs have no Stata producer and are copied from `inputs_stata_code/external/` by `external/copy_to_fortran.do`: `_data_Nn_US_1935_2100.txt`, `_data_Nn_US_1935_init_old.txt`, and `_data_rho_1935.txt`.
 
@@ -737,7 +792,7 @@ Option 0, use shipped binaries:
 dir fortran_code\bin
 ```
 
-Option A, Visual Studio rebuild:
+Rebuild with the supplied Visual Studio solution:
 
 1. Open `fortran_code/5Gtrans.sln`.
 2. Select `Release` and `x64`.
@@ -745,12 +800,7 @@ Option A, Visual Studio rebuild:
 4. Select `Release_HetRate` and `x64`.
 5. Build > Rebuild Solution again for the heterogeneous-return executable.
 
-Option B, command-line rebuild from an Intel Fortran prompt:
-
-```bat
-cd fortran_code
-ifx /O2 /Qipo /exe:5Gtrans.exe *.f90
-```
+The two configurations deliberately select mutually exclusive implementations: `Release` uses `pfi.f90` and `steady_state.f90`, while `Release_HetRate` uses `pfi_het.f90` and `steady_state_het.f90`. Do not compile with a wildcard such as `ifx *.f90`; that selects both implementations of the same modules and does not preserve the project dependency order. The supplied solution and project files are the supported source-rebuild route.
 
 **Outputs**
 
@@ -794,7 +844,7 @@ x64\Release\5Gtrans.exe psid_ all_ govt__
 
 This is a long run; expect hours for the baseline scenario on a typical workstation. The program prints the scenario name, then initial steady-state progress, final steady-state progress, and transition-path progress. Convergence is reached when the model's error criterion falls below the tolerance in the parameter file.
 
-### Step 5: Verify a Scenario Output Folder
+### Step 5: Verify Scenario Output Folders
 
 **Inputs**
 
@@ -806,16 +856,20 @@ This is a long run; expect hours for the baseline scenario on a typical workstat
 dir fortran_code\Results\psid_all_govt__
 ```
 
-**Outputs to confirm**
+**Outputs to confirm after the fresh Step 4 run**
 
 - `steadys_old_information_run.txt` and `steadys_new_information_run.txt`.
+- `information.txt` and `implied_pi.txt`.
 - `gini_trans.csv`, consumed by downstream Stata scripts.
 - Baseline aggregate series such as `gdp_trans.txt`, `r_trans.txt`, `bigK_trans.txt`, and `bigY_trans.txt`.
 - Baseline full-output files `mass_trans_small.csv` and `prob_trans.csv`.
+- Copied `psid_all_govt__instructions.txt` and `psid_all_govt__parameters.txt`.
 
 **Details**
 
 The baseline scenario writes the large output set because it sets `switch_print_macro=1` and `switch_full_csv_write=1`. Most non-baseline scenarios write a smaller set, primarily `gini_trans.csv`, steady-state summaries, and run metadata. The full switch-by-switch output list is in the Output Files section.
+
+For the **supplied historical folders**, confirm the numerical files needed by the downstream route, especially `gini_trans.csv`, the two steady-state summaries, and the baseline aggregate and distribution files listed above. Do not require `information.txt`, `implied_pi.txt`, or copied instruction/parameter files in those supplied folders: they predate the current provenance safeguards. The Economic Journal reproducibility team confirmed the tested baseline scenario starting from raw data and then rebuilt all paper results from the intermediate outputs supplied in this package.
 
 ### Step 6: Run All Model Scenarios
 
@@ -839,13 +893,13 @@ run_scenarios_het.bat
 **Outputs**
 
 - One folder per completed scenario under `fortran_code/Results/`.
-- The result folders consumed by Step 7 and listed in [SCENARIOS.md](SCENARIOS.md).
+- The result folders consumed by Step 7 and listed in `SCENARIOS.md`.
 
 **Details**
 
 `run_scenarios_from_list.bat` reads every uncommented scenario in `scenarios.txt` and runs them sequentially with `5Gtrans.exe`. It searches the current folder, `x64\Release\`, `x64\Debug\`, `Release\`, `Debug\`, and then `bin\` as a shipped-binary fallback.
 
-The `hrat_` scenarios are not in `scenarios.txt`; run them with `run_scenarios_het.bat`, which invokes `5Gtrans_het.exe`. The full paper mapping from scenario family to figure is in [SCENARIOS.md](SCENARIOS.md). The complete scenario set is a multi-day workload.
+The `hrat_` scenarios are not in `scenarios.txt`; run them with `run_scenarios_het.bat`, which invokes `5Gtrans_het.exe`. The full paper mapping from scenario family to figure is in `SCENARIOS.md`. The complete scenario set is a multi-day workload.
 
 To save a console log:
 
@@ -904,12 +958,9 @@ Use the replication crosswalk near the end of this README to map each paper tabl
 
 ### Numerical Precision
 
-Results should match the paper within numerical precision:
-- **Steady state values**: Should match to 4-6 significant digits
-- **Transition paths**: Should match to 3-5 significant digits
-- **Welfare calculations**: Should match to 2-4 significant digits
+Bit-for-bit reproduction is not guaranteed across compilers and hardware. As a reference point, the Economic Journal reproducibility team's independent rerun of the baseline scenario `psid_all_govt__` matched the supplied intermediate outputs to approximately `1e-06`.
 
-**Small differences** (< 0.01%) may occur due to:
+**Small differences** may occur due to:
 - Different compiler versions (Intel Fortran Classic vs. oneAPI)
 - Different optimization flags
 - Different operating system versions
@@ -973,14 +1024,7 @@ Results should match the paper within numerical precision:
 
 ## Getting Help
 
-### Documentation
-
-- **`SCENARIOS.md`**: Full per-scenario catalogue, including which paper figure each scenario supports.
-- **This README**: Replication instructions for users.
-
-### Contact
-
-For questions about replication, use the author contact information above.
+`SCENARIOS.md` contains the full per-scenario catalogue, including which paper figure each scenario supports. For questions about replication, contact the package maintainer listed at the top of this README.
 
 ---
 
@@ -1096,7 +1140,7 @@ The paper's main text contains no tables.
 
 - U.S. Census Bureau. *American Community Survey* and decennial census microdata, accessed via IPUMS USA. IPUMS USA collection DOI: https://doi.org/10.18128/C010. The current IPUMS USA version at package revision is Version 16.0, https://doi.org/10.18128/D010.V16.0; use the version DOI corresponding to the extract date if rebuilding from IPUMS.
 
-- Kuhn, Moritz, Moritz Schularick, and Ulrike I. Steins. 2020. "Income and Wealth Inequality in America, 1949-2016." *Journal of Political Economy* 128(9): 3469-3519 (SCF+ harmonized wealth panel). https://www.moritz-schularick.com/data
+- Kuhn, Moritz, Moritz Schularick, and Ulrike I. Steins. 2020. "Income and Wealth Inequality in America, 1949-2016." *Journal of Political Economy* 128(9): 3469-3519 (SCF+ harmonized wealth panel). Data in the article's supplementary material: https://doi.org/10.1086/708815
 
 ### Tax Parameters
 
@@ -1112,7 +1156,7 @@ The paper's main text contains no tables.
 
 - U.S. Social Security Administration. *Primary Insurance Amount benefit formula*. Office of the Chief Actuary, https://www.ssa.gov/oact/ (used to compute age-specific replacement rates offline).
 
-- OECD. *Revenue Statistics*, accessed via dbnomics (series `OECD/REV/NES.*.TAXGDP.USA`). https://data.oecd.org/
+- OECD. *Revenue Statistics*, accessed via dbnomics (series `OECD/REV/NES.*.TAXGDP.USA`). https://data-explorer.oecd.org/
 
 ## Software and Tools
 

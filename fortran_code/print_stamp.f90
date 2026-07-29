@@ -11,7 +11,7 @@
 !===============================================================================
 
     
-    OPEN (unit=666, FILE = "information.txt")
+    OPEN (unit=666, FILE = "information.txt", STATUS="REPLACE", ACTION="WRITE")
     
     
         write(666, '(A)') '******* INFORMATION *******'

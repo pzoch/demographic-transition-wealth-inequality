@@ -8,6 +8,9 @@ Results/
 
 # Compiled binaries and build artifacts
 *.exe
+!bin/
+!bin/5Gtrans.exe
+!bin/5Gtrans_het.exe
 *.obj
 *.mod
 *.o
@@ -32,6 +35,7 @@ Release/
 
 # Intel Fortran specific
 *.log
+*.u2d
 __pycache__/
 
 # Visual Studio profiler results
